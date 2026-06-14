@@ -1,5 +1,5 @@
 param(
-    [string]$Source = "examples/games/mario64_style.fuji",
+    [string]$Source = "examples/games/mario64_style.koda",
     [string]$Output = "mario64_style.exe"
 )
 
@@ -8,7 +8,7 @@ Set-Location $repoRoot
 
 . (Join-Path $PSScriptRoot "use-raylib-env.ps1") -RepoRoot $repoRoot
 
-& ".\fuji.exe" build --no-opt $Source -o $Output
+& ".\koda.exe" build --no-opt $Source -o $Output
 if ($LASTEXITCODE -ne 0) {
     throw "Build failed for $Source"
 }

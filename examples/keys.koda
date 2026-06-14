@@ -1,0 +1,15 @@
+// Raylib key codes (common keys) — #include "examples/keys.koda"
+
+let KEY_W = 87;
+let KEY_A = 65;
+let KEY_S = 83;
+let KEY_D = 68;
+let KEY_Q = 81;
+let KEY_E = 69;
+let KEY_SPACE = 32;
+let KEY_ESCAPE = 256;
+
+let COLOR_WHITE = 4294967295;
+let COLOR_BLACK = 255;
+let COLOR_RED = 4278190335;
+let COLOR_SKY = 4278190319;

@@ -1,12 +1,12 @@
-# Fuji language reference
+# Koda language reference
 
-Fuji is a dynamically-typed scripting language with JavaScript-like syntax. It compiles to native machine code through LLVM IR and the C runtime (`fuji build`, `fuji run`).
+Koda is a dynamically-typed scripting language with JavaScript-like syntax. It compiles to native machine code through LLVM IR and the C runtime (`koda build`, `koda run`).
 
 ---
 
 ## Variables
 
-```fuji
+```koda
 let x = 42;
 let name = "Player";
 let active = true;
@@ -16,7 +16,7 @@ let score;           // declared, value is null
 
 Assignment:
 
-```fuji
+```koda
 x = x + 1;
 x += 1;
 x -= 1;
@@ -42,7 +42,7 @@ x /= 2;
 
 ## Operators
 
-```fuji
+```koda
 // Arithmetic
 a + b    a - b    a * b    a / b    a % b
 
@@ -63,7 +63,7 @@ x += 1   x -= 1   x *= 2   x /= 2
 
 ## Functions
 
-```fuji
+```koda
 func add(a, b) {
     return a + b;
 }
@@ -73,7 +73,7 @@ let result = add(3, 4);   // 7
 
 Anonymous function expression:
 
-```fuji
+```koda
 let square = func(n) {
     return n * n;
 };
@@ -81,7 +81,7 @@ let square = func(n) {
 
 Closures:
 
-```fuji
+```koda
 func makeCounter() {
     let count = 0;
     return func() {
@@ -103,7 +103,7 @@ Braces `{}` are **always** required around `if` / `else` bodies, loops, and `swi
 
 You may still write a **compact single line** when the body is tiny, or spread it across **multiple lines**:
 
-```fuji
+```koda
 if (x > 0) { print("positive"); }
 
 if (x > 0) {
@@ -127,7 +127,7 @@ for (let i = 0; i < 10; i += 1) {
 
 Counted loops use `init`, `condition`, and `step`; any part may be omitted (`for (;;)` is valid with `break`).
 
-```fuji
+```koda
 for (let i = 0; i < n; i += 1) {
     print(i);
 }
@@ -139,7 +139,7 @@ You can mix this with `while`, `do-while`, `for-in`, and `for-of` in the same co
 
 Single binding: each **value** in **insertion order** (arrays by index, tables by stored slot order).
 
-```fuji
+```koda
 let items = ["sword", "shield", "potion"];
 
 for (let item of items) {
@@ -149,7 +149,7 @@ for (let item of items) {
 
 Destructuring **`[indexOrKey, value]`**:
 
-```fuji
+```koda
 let tbl = { a: 1, b: 2 };
 
 for (let [k, v] of tbl) {
@@ -165,7 +165,7 @@ for (let [i, ch] of xs) {
 
 For keys only on objects, **`for-in`** is enough:
 
-```fuji
+```koda
 for (let key in tbl) {
     print(key, tbl[key]);
 }
@@ -175,7 +175,7 @@ for (let key in tbl) {
 
 ## Arrays
 
-```fuji
+```koda
 let arr = [10, 20, 30];
 
 print(arr[0]);          // 10
@@ -188,7 +188,7 @@ arr[1] = 99;
 
 ## Objects
 
-```fuji
+```koda
 let player = {
     name: "Hero",
     hp: 100,
@@ -204,7 +204,7 @@ player.hp = 75;
 
 ## Switch
 
-```fuji
+```koda
 switch (state) {
     case "menu":
         renderMenu();
@@ -221,12 +221,12 @@ switch (state) {
 
 ## Modules
 
-```fuji
-#include "math.fuji"
-#include "wrappers/raylib/raylib.fuji"
+```koda
+#include "math.koda"
+#include "wrappers/raylib/raylib.koda"
 ```
 
-Resolution order: local path, `FUJI_PATH` directories, `FUJI_WRAPPERS` directories.
+Resolution order: local path, `KODA_PATH` directories, `KODA_WRAPPERS` directories.
 
 ---
 

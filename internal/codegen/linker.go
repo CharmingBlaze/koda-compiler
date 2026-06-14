@@ -7,15 +7,15 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"fuji/internal/fujihome"
+	"koda/internal/kodahome"
 
 	"github.com/llir/llvm/ir"
 )
 
 // Linker handles linking LLVM IR text to executables via llc + a system linker.
-// Prefer [fuji/internal/nativebuild.Build], which lowers IR with llc then links with
-// runtime/libfuji_runtime.a via Clang.
-// and matches `fuji build`; Linker remains for toolchains that compile IR to .o first.
+// Prefer [koda/internal/nativebuild.Build], which lowers IR with llc then links with
+// runtime/libkoda_runtime.a via Clang.
+// and matches `koda build`; Linker remains for toolchains that compile IR to .o first.
 type Linker struct {
 	runtimeLib string
 }
@@ -39,7 +39,7 @@ func (l *Linker) LinkModule(mod *ir.Module, irFile, output string) error {
 func (l *Linker) LinkExecutable(irFile, output string) error {
 	objFile := output + ".o"
 
-	llcPath := fujihome.LLC()
+	llcPath := kodahome.LLC()
 	llcCmd := exec.Command(llcPath, "-filetype=obj", irFile, "-o", objFile)
 	llcCmd.Stderr = os.Stderr
 	llcCmd.Stdout = os.Stdout
@@ -62,8 +62,8 @@ func (l *Linker) LinkExecutable(irFile, output string) error {
 		)
 
 	case "windows":
-		// Default matches MinGW-w64 cross prefix; set FUJI_MINGW_GCC=gcc on MSYS2/LLVM-only installs.
-		cc := os.Getenv("FUJI_MINGW_GCC")
+		// Default matches MinGW-w64 cross prefix; set KODA_MINGW_GCC=gcc on MSYS2/LLVM-only installs.
+		cc := os.Getenv("KODA_MINGW_GCC")
 		if cc == "" {
 			cc = "x86_64-w64-mingw32-gcc"
 		}
@@ -108,7 +108,7 @@ func (l *Linker) LinkExecutableInDir(irFile, output, workDir string) error {
 	base := filepath.Base(output)
 	objFile := filepath.Join(workDir, base+".o")
 
-	llcPath := fujihome.LLC()
+	llcPath := kodahome.LLC()
 	llcCmd := exec.Command(llcPath, "-filetype=obj", irFile, "-o", objFile)
 	llcCmd.Dir = workDir
 	llcCmd.Stderr = os.Stderr
@@ -122,7 +122,7 @@ func (l *Linker) LinkExecutableInDir(irFile, output, workDir string) error {
 	case "linux":
 		linkCmd = exec.Command("gcc", "-static", "-O3", "-s", objFile, l.runtimeLib, "-lm", "-o", output)
 	case "windows":
-		cc := os.Getenv("FUJI_MINGW_GCC")
+		cc := os.Getenv("KODA_MINGW_GCC")
 		if cc == "" {
 			cc = "x86_64-w64-mingw32-gcc"
 		}

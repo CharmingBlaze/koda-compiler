@@ -24,7 +24,7 @@ var (
 // Extract unpacks the embedded toolchain to a temp directory the first time it is called.
 func Extract() (string, error) {
 	once.Do(func() {
-		dir, err := os.MkdirTemp("", "fuji-*")
+		dir, err := os.MkdirTemp("", "koda-*")
 		if err != nil {
 			cacheErr = err
 			return
@@ -69,9 +69,9 @@ func platformKey() string {
 func platformFiles() []string {
 	switch runtime.GOOS {
 	case "windows":
-		return []string{"clang.exe", "llc.exe", "lld.exe", "libfuji_runtime.a"}
+		return []string{"clang.exe", "llc.exe", "lld.exe", "libkoda_runtime.a"}
 	default:
-		return []string{"clang", "llc", "libfuji_runtime.a"}
+		return []string{"clang", "llc", "libkoda_runtime.a"}
 	}
 }
 
@@ -107,7 +107,7 @@ func RuntimeLibPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "libfuji_runtime.a"), nil
+	return filepath.Join(dir, "libkoda_runtime.a"), nil
 }
 
 // LLDPathWindows returns the path to embedded lld.exe (Windows release builds only).

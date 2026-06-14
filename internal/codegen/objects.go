@@ -9,8 +9,8 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
-	"fuji/internal/lexer"
-	"fuji/internal/parser"
+	"koda/internal/lexer"
+	"koda/internal/parser"
 )
 
 // storeNaNBoxedToAssignTarget writes boxed (i64) rhs to an identifier or index assign target.
@@ -46,7 +46,7 @@ func (g *Generator) storeNaNBoxedToAssignTarget(left parser.Expr, boxed value.Va
 				if err != nil {
 					return err
 				}
-				g.block.NewCall(g.runtimeStructSet, g.emitAsFujiI64(obj), constant.NewInt(types.I64, int64(slot)), boxed)
+				g.block.NewCall(g.runtimeStructSet, g.emitAsKodaI64(obj), constant.NewInt(types.I64, int64(slot)), boxed)
 				return nil
 			}
 		}
@@ -58,7 +58,7 @@ func (g *Generator) storeNaNBoxedToAssignTarget(left parser.Expr, boxed value.Va
 		if err != nil {
 			return err
 		}
-		g.block.NewCall(g.runtimeSet, g.emitAsFujiI64(obj), g.emitAsFujiI64(key), boxed)
+		g.block.NewCall(g.runtimeSet, g.emitAsKodaI64(obj), g.emitAsKodaI64(key), boxed)
 		return nil
 	default:
 		return fmt.Errorf("??= unsupported assignment target: %T", left)
@@ -71,13 +71,13 @@ func (g *Generator) emitNullishAssign(e *parser.AssignExpr) (value.Value, error)
 	if err != nil {
 		return nil, err
 	}
-	rhsI := g.emitAsFujiI64(rhs)
+	rhsI := g.emitAsKodaI64(rhs)
 
 	cur, err := g.emitExpr(e.Left)
 	if err != nil {
 		return nil, err
 	}
-	curI := g.emitAsFujiI64(cur)
+	curI := g.emitAsKodaI64(cur)
 
 	nilTag := constant.NewInt(types.I64, llvmNilTagged)
 	isNil := g.block.NewICmp(enum.IPredEQ, curI, nilTag)
@@ -135,7 +135,7 @@ func (g *Generator) emitStructObject(e *parser.ObjectExpr) (value.Value, error) 
 		}
 		objLive := g.block.NewLoad(types.I64, objSlot)
 		idx := constant.NewInt(types.I64, int64(i))
-		g.block.NewCall(g.runtimeStructSet, objLive, idx, g.emitAsFujiI64(vv))
+		g.block.NewCall(g.runtimeStructSet, objLive, idx, g.emitAsKodaI64(vv))
 	}
 	return g.block.NewLoad(types.I64, objSlot), nil
 }
@@ -161,14 +161,14 @@ func (g *Generator) emitObject(e *parser.ObjectExpr) (value.Value, error) {
 		keyVal := g.emitStringLiteral(key.Lexeme)
 		keySlot := g.entryAlloca(types.I64)
 		g.shadowStoreTemp(keySlot)
-		g.block.NewStore(g.emitAsFujiI64(keyVal), keySlot)
+		g.block.NewStore(g.emitAsKodaI64(keyVal), keySlot)
 		val, err := g.emitExpr(e.Values[i])
 		if err != nil {
 			return nil, err
 		}
 		objLive := g.block.NewLoad(types.I64, objSlot)
 		keyLive := g.block.NewLoad(types.I64, keySlot)
-		g.block.NewCall(g.runtimeObjSet, objLive, keyLive, g.emitAsFujiI64(val))
+		g.block.NewCall(g.runtimeObjSet, objLive, keyLive, g.emitAsKodaI64(val))
 	}
 
 	// Set computed keys (if any)
@@ -179,7 +179,7 @@ func (g *Generator) emitObject(e *parser.ObjectExpr) (value.Value, error) {
 		}
 		keySlot := g.entryAlloca(types.I64)
 		g.shadowStoreTemp(keySlot)
-		g.block.NewStore(g.emitAsFujiI64(keyVal), keySlot)
+		g.block.NewStore(g.emitAsKodaI64(keyVal), keySlot)
 		valIdx := len(e.Keys) + i
 		val, err := g.emitExpr(e.Values[valIdx])
 		if err != nil {
@@ -187,7 +187,7 @@ func (g *Generator) emitObject(e *parser.ObjectExpr) (value.Value, error) {
 		}
 		objLive := g.block.NewLoad(types.I64, objSlot)
 		keyLive := g.block.NewLoad(types.I64, keySlot)
-		g.block.NewCall(g.runtimeObjSet, objLive, keyLive, g.emitAsFujiI64(val))
+		g.block.NewCall(g.runtimeObjSet, objLive, keyLive, g.emitAsKodaI64(val))
 	}
 
 	return g.block.NewLoad(types.I64, objSlot), nil
@@ -206,7 +206,7 @@ func (g *Generator) emitIndex(e *parser.IndexExpr) (value.Value, error) {
 			}
 			objSlot := g.entryAlloca(types.I64)
 			g.shadowStoreTemp(objSlot)
-			g.block.NewStore(g.emitAsFujiI64(obj), objSlot)
+			g.block.NewStore(g.emitAsKodaI64(obj), objSlot)
 			idx := constant.NewInt(types.I64, int64(slot))
 			if !e.Optional {
 				objLive := g.block.NewLoad(types.I64, objSlot)
@@ -240,7 +240,7 @@ func (g *Generator) emitIndex(e *parser.IndexExpr) (value.Value, error) {
 	}
 	objSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(objSlot)
-	g.block.NewStore(g.emitAsFujiI64(obj), objSlot)
+	g.block.NewStore(g.emitAsKodaI64(obj), objSlot)
 
 	if !e.Optional {
 		key, err := g.emitExpr(e.Index)
@@ -248,7 +248,7 @@ func (g *Generator) emitIndex(e *parser.IndexExpr) (value.Value, error) {
 			return nil, err
 		}
 		objLive := g.block.NewLoad(types.I64, objSlot)
-		return g.block.NewCall(g.runtimeArrayGet, objLive, g.emitAsFujiI64(key)), nil
+		return g.block.NewCall(g.runtimeArrayGet, objLive, g.emitAsKodaI64(key)), nil
 	}
 
 	nilTag := constant.NewInt(types.I64, llvmNilTagged)
@@ -270,7 +270,7 @@ func (g *Generator) emitIndex(e *parser.IndexExpr) (value.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	got := g.block.NewCall(g.runtimeArrayGet, objI, g.emitAsFujiI64(key))
+	got := g.block.NewCall(g.runtimeArrayGet, objI, g.emitAsKodaI64(key))
 	cont.NewBr(merge)
 
 	g.block = merge
@@ -298,7 +298,7 @@ func (g *Generator) emitAssign(e *parser.AssignExpr) (value.Value, error) {
 	case *parser.IdentifierExpr:
 		name := left.Name.Lexeme
 		if slot, ok := g.locals[name]; ok {
-			boxed := g.emitAsFujiI64(val)
+			boxed := g.emitAsKodaI64(val)
 			if g.localIsCell != nil && g.localIsCell[name] {
 				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
 			} else {
@@ -307,7 +307,7 @@ func (g *Generator) emitAssign(e *parser.AssignExpr) (value.Value, error) {
 			return val, nil
 		}
 		if slot, ok := g.moduleGlobals[name]; ok {
-			boxed := g.emitAsFujiI64(val)
+			boxed := g.emitAsKodaI64(val)
 			if g.moduleGlobalIsCell != nil && g.moduleGlobalIsCell[name] {
 				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
 			} else {
@@ -316,7 +316,7 @@ func (g *Generator) emitAssign(e *parser.AssignExpr) (value.Value, error) {
 			return val, nil
 		}
 		if global, ok := g.globals[name]; ok {
-			g.block.NewStore(g.emitAsFujiI64(val), global)
+			g.block.NewStore(g.emitAsKodaI64(val), global)
 			return val, nil
 		}
 		return nil, g.undefinedVarError(name, left.Name.File, left.Name.Line, left.Name.Col)
@@ -328,8 +328,8 @@ func (g *Generator) emitAssign(e *parser.AssignExpr) (value.Value, error) {
 					return nil, err
 				}
 				idx := constant.NewInt(types.I64, int64(slot))
-				boxed := g.emitAsFujiI64(val)
-				return g.block.NewCall(g.runtimeStructSet, g.emitAsFujiI64(obj), idx, boxed), nil
+				boxed := g.emitAsKodaI64(val)
+				return g.block.NewCall(g.runtimeStructSet, g.emitAsKodaI64(obj), idx, boxed), nil
 			}
 		}
 		// Property or array assignment
@@ -345,7 +345,7 @@ func (g *Generator) emitAssign(e *parser.AssignExpr) (value.Value, error) {
 		if val.Type().String() == "double" {
 			val = g.block.NewBitCast(val, types.I64)
 		}
-		return g.block.NewCall(g.runtimeSet, g.emitAsFujiI64(obj), g.emitAsFujiI64(key), g.emitAsFujiI64(val)), nil
+		return g.block.NewCall(g.runtimeSet, g.emitAsKodaI64(obj), g.emitAsKodaI64(key), g.emitAsKodaI64(val)), nil
 	default:
 		return nil, fmt.Errorf("unsupported assignment target: %T", left)
 	}
@@ -366,8 +366,8 @@ func (g *Generator) emitCompoundAssign(e *parser.AssignExpr, op string) (value.V
 	}
 
 	// Perform operation on unboxed numbers, then re-box (same semantics as emitInfix for + - * /).
-	leftI := g.emitAsFujiI64(current)
-	rightI := g.emitAsFujiI64(newVal)
+	leftI := g.emitAsKodaI64(current)
+	rightI := g.emitAsKodaI64(newVal)
 	ld := g.block.NewCall(g.runtimeUnboxNumber, leftI)
 	rd := g.block.NewCall(g.runtimeUnboxNumber, rightI)
 	var result value.Value
@@ -391,7 +391,7 @@ func (g *Generator) emitCompoundAssign(e *parser.AssignExpr, op string) (value.V
 	case *parser.IdentifierExpr:
 		name := left.Name.Lexeme
 		if slot, ok := g.locals[name]; ok {
-			boxed := g.emitAsFujiI64(result)
+			boxed := g.emitAsKodaI64(result)
 			if g.localIsCell != nil && g.localIsCell[name] {
 				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
 			} else {
@@ -400,7 +400,7 @@ func (g *Generator) emitCompoundAssign(e *parser.AssignExpr, op string) (value.V
 			return result, nil
 		}
 		if slot, ok := g.moduleGlobals[name]; ok {
-			boxed := g.emitAsFujiI64(result)
+			boxed := g.emitAsKodaI64(result)
 			if g.moduleGlobalIsCell != nil && g.moduleGlobalIsCell[name] {
 				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
 			} else {
@@ -409,7 +409,7 @@ func (g *Generator) emitCompoundAssign(e *parser.AssignExpr, op string) (value.V
 			return result, nil
 		}
 		if global, ok := g.globals[name]; ok {
-			g.block.NewStore(g.emitAsFujiI64(result), global)
+			g.block.NewStore(g.emitAsKodaI64(result), global)
 			return result, nil
 		}
 		return nil, g.undefinedVarError(name, left.Name.File, left.Name.Line, left.Name.Col)
@@ -421,7 +421,7 @@ func (g *Generator) emitCompoundAssign(e *parser.AssignExpr, op string) (value.V
 					return nil, err
 				}
 				idx := constant.NewInt(types.I64, int64(slot))
-				return g.block.NewCall(g.runtimeStructSet, g.emitAsFujiI64(obj), idx, g.emitAsFujiI64(result)), nil
+				return g.block.NewCall(g.runtimeStructSet, g.emitAsKodaI64(obj), idx, g.emitAsKodaI64(result)), nil
 			}
 		}
 		obj, err := g.emitExpr(left.Object)
@@ -432,7 +432,7 @@ func (g *Generator) emitCompoundAssign(e *parser.AssignExpr, op string) (value.V
 		if err != nil {
 			return nil, err
 		}
-		g.block.NewCall(g.runtimeSet, g.emitAsFujiI64(obj), g.emitAsFujiI64(key), g.emitAsFujiI64(result))
+		g.block.NewCall(g.runtimeSet, g.emitAsKodaI64(obj), g.emitAsKodaI64(key), g.emitAsKodaI64(result))
 		return result, nil
 	default:
 		return nil, fmt.Errorf("unsupported assignment target: %T", left)

@@ -1,8 +1,8 @@
 package sema
 
 import (
-	"fuji/internal/parser"
-	"fuji/internal/lexer"
+	"koda/internal/parser"
+	"koda/internal/lexer"
 	"math"
 )
 

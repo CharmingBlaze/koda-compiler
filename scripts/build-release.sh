@@ -8,7 +8,7 @@ ARCH=$(uname -m)
 if [ "$ARCH" = "x86_64" ]; then ARCH="amd64"; fi
 if [ "$ARCH" = "aarch64" ]; then ARCH="arm64"; fi
 
-echo "Building Fuji release binary for $OS/$ARCH..."
+echo "Building Koda release binary for $OS/$ARCH..."
 
 echo "Building C runtime..."
 mkdir -p runtime/obj_release
@@ -25,7 +25,7 @@ fi
 "$CLANG" -c runtime/src/value.c        -O2 -std=c11 -Iruntime/src -o runtime/obj_release/value.o
 "$CLANG" -c runtime/src/object.c       -O2 -std=c11 -Iruntime/src -o runtime/obj_release/object.o
 "$CLANG" -c runtime/src/gc.c           -O2 -std=c11 -Iruntime/src -o runtime/obj_release/gc.o
-"$CLANG" -c runtime/src/fuji_runtime.c -O2 -std=c11 -Iruntime/src -o runtime/obj_release/fuji_runtime.o
+"$CLANG" -c runtime/src/koda_runtime.c -O2 -std=c11 -Iruntime/src -o runtime/obj_release/koda_runtime.o
 
 if AR=$(command -v llvm-ar-18 2>/dev/null); then
   :
@@ -38,17 +38,17 @@ else
   exit 1
 fi
 
-"$AR" rcs runtime/libfuji_runtime.a runtime/obj_release/*.o
+"$AR" rcs runtime/libkoda_runtime.a runtime/obj_release/*.o
 
 echo "Populating embed directory..."
 mkdir -p "internal/embed/$OS/$ARCH"
 cp "$CLANG"                    "internal/embed/$OS/$ARCH/clang"
-cp runtime/libfuji_runtime.a "internal/embed/$OS/$ARCH/"
+cp runtime/libkoda_runtime.a "internal/embed/$OS/$ARCH/"
 
-echo "Building fuji..."
-go build -trimpath -tags release -ldflags="-s -w" -o fuji-release ./cmd/fuji
+echo "Building koda..."
+go build -trimpath -tags release -ldflags="-s -w" -o koda-release ./cmd/koda
 
 echo ""
 echo "Done. Test with:"
-echo "  ./fuji-release build tests/hello.fuji -o hello"
+echo "  ./koda-release build tests/hello.koda -o hello"
 echo "  ./hello"

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"fuji/internal/diagnostic"
-	"fuji/internal/lexer"
-	"fuji/internal/parser"
+	"koda/internal/diagnostic"
+	"koda/internal/lexer"
+	"koda/internal/parser"
 )
 
 func parseForTest(t *testing.T, source string) *parser.Program {
@@ -201,8 +201,8 @@ func TestSemaCollectsMultipleErrorsInFunctionBody(t *testing.T) {
 
 func TestPrepareNativeBundleSemaFileFromIncludedModule(t *testing.T) {
 	tmp := t.TempDir()
-	mainPath := filepath.Join(tmp, "main.fuji")
-	libPath := filepath.Join(tmp, "lib.fuji")
+	mainPath := filepath.Join(tmp, "main.koda")
+	libPath := filepath.Join(tmp, "lib.koda")
 	mainAbs, err := filepath.Abs(mainPath)
 	if err != nil {
 		t.Fatal(err)
@@ -212,7 +212,7 @@ func TestPrepareNativeBundleSemaFileFromIncludedModule(t *testing.T) {
 		t.Fatal(err)
 	}
 	overlays := map[string]string{
-		mainAbs: "#include \"lib.fuji\"\n",
+		mainAbs: "#include \"lib.koda\"\n",
 		libAbs:  "typoName + 1;\n",
 	}
 	bundle, err := parser.LoadProgramWithOverlays(mainPath, overlays)

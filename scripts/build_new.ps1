@@ -1,21 +1,21 @@
-# Build script for Fuji using the new codegen and runtime
+# Build script for Koda using the new codegen and runtime
 
 param(
     [Parameter(Mandatory=$true)]
-    [string]$KujiFile,
+    [string]$KodaFile,
     [string]$Output = "output.exe"
 )
 
-Write-Host "Building $KujiFile..."
+Write-Host "Building $KodaFile..."
 
 # Parse and generate LLVM IR
-go run cmd/kuji/main.go check $KujiFile
+go run cmd/koda/main.go check $KodaFile
 if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
 # Generate LLVM IR
-go run cmd/kuji/main.go disasm $KujiFile | Out-File -Encoding ASCII output.ll
+go run cmd/koda/main.go disasm $KodaFile | Out-File -Encoding ASCII output.ll
 if ($LASTEXITCODE -ne 0) {
     exit 1
 }
@@ -27,7 +27,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Link with new runtime library
-gcc -static -O3 -s output.o runtime/libfuji_runtime.a -lm -o $Output
+gcc -static -O3 -s output.o runtime/libkoda_runtime.a -lm -o $Output
 if ($LASTEXITCODE -ne 0) {
     exit 1
 }

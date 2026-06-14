@@ -22,7 +22,7 @@ func parseAllCLI(args []string) (*WrapGenConfig, error) {
 		os.Exit(0)
 	}
 	for _, a := range args {
-		if a == "-name" {
+		if a == "-headers" {
 			return parseLegacyCLI(args)
 		}
 	}
@@ -34,7 +34,8 @@ func parseModernCLI(args []string) (*WrapGenConfig, error) {
 		Version:     WrapgenVersion,
 		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
 		OutputDir:   ".",
-		Language:    "fuji",
+		Language:    "koda",
+		UseClang:    true,
 	}
 	var headers []string
 	for i := 0; i < len(args); i++ {
@@ -43,14 +44,28 @@ func parseModernCLI(args []string) (*WrapGenConfig, error) {
 		case (a == "-o" || a == "-out") && i+1 < len(args):
 			cfg.OutputDir = args[i+1]
 			i++
+		case (a == "-name" || a == "--name") && i+1 < len(args):
+			cfg.LibraryName = args[i+1]
+			i++
 		case a == "-I" && i+1 < len(args):
 			cfg.IncludePaths = append(cfg.IncludePaths, args[i+1])
+			i++
+		case a == "-L" && i+1 < len(args):
+			cfg.LinkFlags = append(cfg.LinkFlags, "-L"+args[i+1])
+			i++
+		case a == "-l" && i+1 < len(args):
+			cfg.LinkFlags = append(cfg.LinkFlags, "-l"+args[i+1])
+			i++
+		case a == "--linkflags" && i+1 < len(args):
+			cfg.LinkFlags = append(cfg.LinkFlags, strings.Fields(args[i+1])...)
 			i++
 		case a == "--no-docs":
 			cfg.NoDocsMarkdown = true
 			cfg.NoHTML = true
 		case a == "--no-html":
 			cfg.NoHTML = true
+		case a == "--no-clang":
+			cfg.UseClang = false
 		case a == "-v" || a == "--verbose":
 			cfg.Verbose = true
 		case strings.HasPrefix(a, "-"):
@@ -73,13 +88,13 @@ func parseModernCLI(args []string) (*WrapGenConfig, error) {
 }
 
 func parseLegacyCLI(args []string) (*WrapGenConfig, error) {
-	fs := flag.NewFlagSet("fujiwrap", flag.ContinueOnError)
+	fs := flag.NewFlagSet("kodawrap", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	cfg := &WrapGenConfig{
 		Version:        WrapgenVersion,
 		GeneratedAt:    time.Now().UTC().Format(time.RFC3339),
 		OutputDir:      "./wrapper",
-		Language:       "fuji",
+		Language:       "koda",
 		ComplexCPP:     true,
 		Documentation:  true,
 		BuildSystem:    false,
@@ -92,7 +107,7 @@ func parseLegacyCLI(args []string) (*WrapGenConfig, error) {
 	fs.StringVar(&cfg.OutputDir, "out", "./wrapper", "output directory (-out or -o)")
 	var outShort string
 	fs.StringVar(&outShort, "o", "", "alias for -out (same value)")
-	fs.StringVar(&cfg.Language, "lang", "fuji", "target language (fuji only)")
+	fs.StringVar(&cfg.Language, "lang", "koda", "target language (koda only)")
 	fs.BoolVar(&cfg.Documentation, "docs", true, "generate README + api_reference (+ HTML unless --no-html in modern mode)")
 	fs.BoolVar(&cfg.BuildSystem, "build", false, "deprecated; ignored")
 	fs.BoolVar(&cfg.IncludeTests, "tests", false, "deprecated; ignored")
@@ -131,16 +146,21 @@ func parseLegacyCLI(args []string) (*WrapGenConfig, error) {
 
 func printModernUsage() {
 	me := toolDisplayName()
-	fmt.Fprintf(os.Stderr, `%s — Fuji C/C++ header → .fuji, wrapper.c, and docs
+	fmt.Fprintf(os.Stderr, `%s — Koda C/C++ header → .koda, wrapper.c, and docs
 
 USAGE (preferred)
   %s [options] <header.h> [<more.h> ...]
 
 OPTIONS
+  -name <lib>   library name (default: header basename)
   -o <dir>      output directory (default: .)
-  -I <dir>      extra include path for the toolchain (repeatable; reserved for clang)
-  --no-docs     skip README.md and api_reference.md
-  --no-html     skip index.html only
+  -I <dir>      extra include path for clang (repeatable)
+  -L <libdir>   linker search path (recorded in koda.json)
+  -l <lib>      link library name (recorded in koda.json)
+  --linkflags   extra linker flags as one string
+  --no-clang    regex-only parsing (no clang AST)
+  --no-docs     skip README.md, api_reference.md, examples.md
+  --no-html     skip docs/index.html only
   -v            verbose
   --version     print version and exit
   -h, --help    this help
@@ -148,8 +168,10 @@ OPTIONS
 LEGACY (still supported)
   %s -name <lib> -headers <a.h>[,b.h] -out <dir> [-docs=false] [-v]
 
-OUTPUT (five files)
-  <name>.fuji   api_reference.md   README.md   index.html   wrapper.c
+OUTPUT (organized package)
+  <name>.koda       wrapper.c       README.md
+  api_reference.md  examples.md     koda.json       META.json
+  docs/index.html
 
 `, me, me, me)
 }

@@ -1,4 +1,4 @@
-﻿# scripts/push-release-tag.ps1
+# scripts/push-release-tag.ps1
 # After CHANGELOG + version bumps land on main, create an annotated tag and push it so
 # .github/workflows/release.yml publishes binaries (tag must be v*).
 #
@@ -19,10 +19,10 @@ if ($Tag -notmatch '^v\d') {
 }
 
 $ver = $Tag.TrimStart('v')
-$fujiMain = Join-Path $RepoRoot "cmd\fuji\main.go"
-$mainText = Get-Content -Raw $fujiMain
+$kodaMain = Join-Path $RepoRoot "cmd\koda\main.go"
+$mainText = Get-Content -Raw $kodaMain
 if ($mainText -notmatch "var version = `"$([regex]::Escape($ver))`"") {
-    throw "cmd/fuji/main.go var version must be `"$ver`" before tagging $Tag (see docs/releasing.md)"
+    throw "cmd/koda/main.go var version must be `"$ver`" before tagging $Tag (see docs/releasing.md)"
 }
 $wrap = Join-Path $RepoRoot "cmd\wrapgen\wrapgen_version.go"
 $wrapText = Get-Content -Raw $wrap
@@ -32,7 +32,7 @@ if ($wrapText -notmatch "WrapgenVersion = `"$([regex]::Escape($ver))`"") {
 
 git rev-parse --is-inside-work-tree 2>$null | Out-Null
 if ($LASTEXITCODE -ne 0) {
-    throw "Not a git repository. Clone https://github.com/CharmingBlaze/fuji.git, apply your commits, then run this script from the clone root."
+    throw "Not a git repository. Clone https://github.com/CharmingBlaze/koda-compiler.git, apply your commits, then run this script from the clone root."
 }
 
 Write-Host "Running go vet ./..."
@@ -51,4 +51,4 @@ Write-Host "Tag created locally. Publish the release by pushing:"
 Write-Host "  git push origin main"
 Write-Host "  git push origin $Tag"
 Write-Host ""
-Write-Host "GitHub Actions (release.yml) will attach fuji/fujiwrap per OS and SDK zips."
+Write-Host "GitHub Actions (release.yml) will attach koda/kodawrap per OS and SDK zips."

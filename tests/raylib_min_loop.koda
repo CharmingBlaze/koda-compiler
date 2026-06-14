@@ -1,0 +1,17 @@
+#include "../wrappers/raylib_shim/raylib.koda"
+
+let black = 0xFF000000;
+
+let white = 0xFFFFFFFF;
+
+initwindow(640, 360, "Koda Raylib Min Loop");
+settargetfps(60);
+
+while (!windowshouldclose()) {
+    begindrawing();
+    clearbackground(black);
+    drawtext("Koda min loop running", 140, 160, 24, white);
+    enddrawing();
+}
+
+closewindow();

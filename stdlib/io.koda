@@ -1,0 +1,19 @@
+// @io — file helpers (builtins + native I/O). Use import "@io".
+
+let read = readfile;
+
+let write = writefile;
+
+let append = appendfile;
+
+let exists = fileexists;
+
+let remove = deletefile;
+
+let isfile = isfile;
+
+let isdir = isdir;
+
+let size = filesize;
+
+let list = listdir;

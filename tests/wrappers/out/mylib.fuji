@@ -1,5 +1,0 @@
-// fuji:extern add_ints fuji_wrap_mylib_add_ints 2
-let add_ints = 0;
-
-// fuji:extern triple_int fuji_wrap_mylib_triple_int 1
-let triple_int = 0;

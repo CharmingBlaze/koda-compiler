@@ -15,9 +15,9 @@
 int add(int a, int b)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = add(a, b);
 ```
 
@@ -34,9 +34,9 @@ let result = add(a, b);
 double multiply(double a, double b)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = multiply(a, b);
 ```
 
@@ -53,9 +53,9 @@ let result = multiply(a, b);
 void print_hello(const char* message)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 print_hello(message);
 ```
 

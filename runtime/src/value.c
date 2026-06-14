@@ -25,7 +25,7 @@ bool values_equal(Value a, Value b) {
     return a == b;
 }
 
-int64_t fuji_values_equal(Value a, Value b) {
+int64_t koda_values_equal(Value a, Value b) {
     return values_equal(a, b) ? 1 : 0;
 }
 

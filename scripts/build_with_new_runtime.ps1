@@ -2,14 +2,14 @@
 
 param(
     [Parameter(Mandatory=$true)]
-    [string]$KujiFile,
+    [string]$KodaFile,
     [string]$Output = "output.exe"
 )
 
-Write-Host "Building $KujiFile with new runtime..."
+Write-Host "Building $KodaFile with new runtime..."
 
 # Generate LLVM IR using the genir command
-go run cmd/genir/main.go $KujiFile output.ll
+go run cmd/genir/main.go $KodaFile output.ll
 if ($LASTEXITCODE -ne 0) {
     exit 1
 }
@@ -21,7 +21,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Link with new runtime library
-gcc -static -O3 -s output.o runtime/libfuji_runtime.a -lm -o $Output
+gcc -static -O3 -s output.o runtime/libkoda_runtime.a -lm -o $Output
 if ($LASTEXITCODE -ne 0) {
     exit 1
 }

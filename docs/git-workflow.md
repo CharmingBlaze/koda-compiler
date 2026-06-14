@@ -1,6 +1,6 @@
 # Git workflow (contributors)
 
-This repository uses **`main`** as the default branch. The remote is conventionally named **`origin`** (for example `https://github.com/CharmingBlaze/fuji.git`).
+This repository uses **`main`** as the default branch. The remote is conventionally named **`origin`** (for example `https://github.com/CharmingBlaze/koda-compiler.git`).
 
 ## Committing changes
 
@@ -12,7 +12,7 @@ git add -A
 git commit -m "Short imperative summary (optional body)"
 ```
 
-Use complete sentences in the commit body when the change needs context. Follow **[CONTRIBUTING.md](../CONTRIBUTING.md)** (`go vet`, `go test`, `fuji fmt --check` where relevant).
+Use complete sentences in the commit body when the change needs context. Follow **[CONTRIBUTING.md](../CONTRIBUTING.md)** (`go vet`, `go test`, `koda fmt --check` where relevant).
 
 ## Pushing to `main`
 
@@ -30,7 +30,7 @@ Pushing requires Git authentication for **`origin`** (SSH key, HTTPS credential 
 
 ## Large or generated paths
 
-See **`.gitignore`** (e.g. **`.FUJI_build/`**, **`dist/`**). After **`scripts/build-runtime.sh`** / **`build-runtime.ps1`**, **`runtime/libfuji_runtime.a`** and **`runtime/obj/*.o`** may change; include them in commits when **C/runtime sources** changed so codegen link tests and local builds stay consistent.
+See **`.gitignore`** (e.g. **`.KODA_build/`**, **`dist/`**). After **`scripts/build-runtime.sh`** / **`build-runtime.ps1`**, **`runtime/libkoda_runtime.a`** and **`runtime/obj/*.o`** may change; include them in commits when **C/runtime sources** changed so codegen link tests and local builds stay consistent.
 
 ## Releases
 

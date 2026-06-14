@@ -1,0 +1,163 @@
+@import 'tailwindcss';
+
+/* Catppuccin Macchiato + Void tokens */
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+
+  --color-crust: #181926;
+  --color-mantle: #1e2030;
+  --color-base: #24273a;
+  --color-surface0: #363a4f;
+  --color-surface1: #494d64;
+  --color-overlay0: #6e738d;
+  --color-text: #cad3f5;
+  --color-subtext: #a5adcb;
+  --color-blue: #8aadf4;
+  --color-green: #a6da95;
+  --color-red: #ed8796;
+  --color-yellow: #eed49f;
+  --color-mauve: #c6a0f6;
+  --color-peach: #f5a97f;
+
+  --color-accent: #c6a0f6;
+  --color-diag-error: #ed8796;
+  --color-diag-warning: #eed49f;
+  --color-diag-info: #8aadf4;
+
+  --glass-bg: color-mix(in srgb, var(--color-mantle) 72%, transparent);
+  --glass-blur: 14px;
+  --glass-border: color-mix(in srgb, var(--color-surface1) 35%, transparent);
+}
+
+@keyframes kodaPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--color-base);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+#app {
+  height: 100%;
+}
+
+/* Void shell grid */
+.void-app {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  grid-template-columns: 44px 1fr;
+  grid-template-rows: 32px 1fr 22px;
+  grid-template-areas:
+    'voidHdr voidHdr'
+    'voidRail voidMain'
+    'voidSt voidSt';
+}
+
+.void-app.void-app--preview {
+  grid-template-columns: 44px 1fr min(440px, 40vw);
+  grid-template-areas:
+    'voidHdr voidHdr voidHdr'
+    'voidRail voidMain voidPrev'
+    'voidSt voidSt voidSt';
+}
+
+.void-app.void-app--zen {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  grid-template-areas: 'voidMain';
+}
+
+.void-app--zen .void-header,
+.void-app--zen .void-rail,
+.void-app--zen .void-status,
+.void-app--zen .void-preview {
+  display: none !important;
+}
+
+.void-header {
+  grid-area: voidHdr;
+}
+.void-rail {
+  grid-area: voidRail;
+}
+.void-main {
+  grid-area: voidMain;
+  min-width: 0;
+  min-height: 0;
+}
+.void-preview {
+  grid-area: voidPrev;
+  min-width: 0;
+  min-height: 0;
+}
+.void-status {
+  grid-area: voidSt;
+}
+
+/* CodeMirror */
+.cm-editor {
+  height: 100%;
+  font-size: 13px;
+  font-family: var(--font-mono);
+  font-feature-settings: 'calt' 1, 'liga' 1;
+}
+.cm-editor.cm-focused {
+  outline: none;
+}
+/* Cursor + lint squiggles: primary styling in CodeEditor voidCmTheme; keep pulse keyframes here */
+.cm-gutters {
+  background: var(--color-mantle) !important;
+  border-right: 1px solid var(--color-surface0) !important;
+  color: var(--color-overlay0) !important;
+}
+.cm-activeLineGutter {
+  background: var(--color-surface0) !important;
+}
+
+.cm-koda-breadcrumbs {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--color-subtext);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border-bottom: 1px solid var(--glass-border);
+  border-left: none;
+  border-right: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* xterm */
+.xterm {
+  padding: 8px;
+}
+
+.glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+.palette-match {
+  font-weight: 600;
+  color: var(--color-accent);
+}

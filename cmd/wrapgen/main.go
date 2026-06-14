@@ -1,4 +1,4 @@
-﻿package main
+package main
 
 import (
 	"fmt"
@@ -17,9 +17,11 @@ type WrapGenConfig struct {
 	GeneratedAt    string
 	PrimaryHeader  string
 	IncludePaths   []string
+	LinkFlags      []string // -L, -l, --linkflags tokens for koda.json / README
 	NoDocsMarkdown bool
 	NoHTML         bool
 	Verbose        bool
+	UseClang       bool // try clang AST first (default true)
 	// Legacy flags (still accepted when -name is used):
 	Documentation bool
 	BuildSystem     bool
@@ -60,6 +62,10 @@ func main() {
 		log.Fatalf("error: failed to generate wrapper: %v", err)
 	}
 
+	if err := generator.emitPackageArtifacts(api); err != nil {
+		log.Fatalf("error: failed to write package files: %v", err)
+	}
+
 	if err := generator.emitProfessionalDocs(api); err != nil {
 		log.Fatalf("error: failed to write documentation: %v", err)
 	}
@@ -73,14 +79,17 @@ func printSuccess(config *WrapGenConfig, api *API) {
 
 	fmt.Printf("Generated bindings for %s\n\n", lib)
 	fmt.Printf("  Output folder : %s\n", out)
-	fmt.Printf("  %s/%s.fuji\n", out, lib)
+	fmt.Printf("  %s/%s.koda\n", out, lib)
 	fmt.Printf("  %s/wrapper.c\n", out)
 	if !config.NoDocsMarkdown {
 		fmt.Printf("  %s/README.md\n", out)
 		fmt.Printf("  %s/api_reference.md\n", out)
+		fmt.Printf("  %s/examples.md\n", out)
+		fmt.Printf("  %s/koda.json\n", out)
+		fmt.Printf("  %s/META.json\n", out)
 	}
 	if !config.NoHTML {
-		fmt.Printf("  %s/index.html\n", out)
+		fmt.Printf("  %s/docs/index.html\n", out)
 	}
 	fmt.Printf("\n")
 	fmt.Printf("  Functions : %d\n", len(api.Functions))
@@ -88,14 +97,15 @@ func printSuccess(config *WrapGenConfig, api *API) {
 	fmt.Printf("  Enums     : %d\n", len(api.Enums))
 	fmt.Printf("  Constants : %d\n", len(api.Constants))
 
-	fmt.Fprintf(os.Stdout, "\nTo use in your Fuji program:\n\n  #include \"@%s\"\n\n", lib)
-	fmt.Fprintf(os.Stdout, "Build (set FUJI_LINKFLAGS for your SDK):\n\n")
-	fmt.Fprintf(os.Stdout, "  set FUJI_NATIVE_SOURCES=%s\\\\wrapper.c\n", out)
-	fmt.Fprintf(os.Stdout, "  set FUJI_LINKFLAGS=-I<include-dir> -L<lib-dir> -l%s\n", lib)
-	fmt.Fprintf(os.Stdout, "  fuji build mygame.fuji -o mygame.exe\n")
+	fmt.Fprintf(os.Stdout, "\nTo use in your Koda program:\n\n  #include \"@%s\"\n\n", lib)
+	fmt.Fprintf(os.Stdout, "Or set KODA_WRAPPERS to this folder and: import \"@%s\"\n\n", lib)
+	fmt.Fprintf(os.Stdout, "Build (merge koda.json native section or set env):\n\n")
+	fmt.Fprintf(os.Stdout, "  set KODA_NATIVE_SOURCES=%s\\\\wrapper.c\n", out)
+	fmt.Fprintf(os.Stdout, "  set KODA_LINKFLAGS=-I<include-dir> -L<lib-dir> -l%s\n", lib)
+	fmt.Fprintf(os.Stdout, "  koda build mygame.koda -o mygame.exe\n")
 	if !config.NoDocsMarkdown {
-		fmt.Fprintf(os.Stdout, "\nSee %s/README.md and %s/api_reference.md for details.\n", out, out)
+		fmt.Fprintf(os.Stdout, "\nSee %s/README.md, %s/examples.md, and %s/docs/index.html\n", out, out, out)
 	} else if !config.NoHTML {
-		fmt.Fprintf(os.Stdout, "\nSee %s/index.html for a browsable API.\n", out)
+		fmt.Fprintf(os.Stdout, "\nSee %s/docs/index.html for browsable API.\n", out)
 	}
 }

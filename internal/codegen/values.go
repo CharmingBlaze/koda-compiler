@@ -10,7 +10,7 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
-	"fuji/internal/parser"
+	"koda/internal/parser"
 )
 
 // emitLiteral emits LLVM IR for literal expressions.
@@ -212,8 +212,8 @@ func (g *Generator) emitInfix(e *parser.InfixExpr) (value.Value, error) {
 		return nil, err
 	}
 
-	leftI := g.emitAsFujiI64(left)
-	rightI := g.emitAsFujiI64(right)
+	leftI := g.emitAsKodaI64(left)
+	rightI := g.emitAsKodaI64(right)
 
 	switch e.Operator {
 	case "+":
@@ -316,7 +316,7 @@ func (g *Generator) emitLogicalAnd(e *parser.InfixExpr) (value.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	g.block.NewStore(g.emitAsFujiI64(leftVal), resultSlot)
+	g.block.NewStore(g.emitAsKodaI64(leftVal), resultSlot)
 
 	g.tempN++
 	rhsBlock := g.currentFn.NewBlock(fmt.Sprintf("land.rhs.%d", g.tempN))
@@ -328,7 +328,7 @@ func (g *Generator) emitLogicalAnd(e *parser.InfixExpr) (value.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	g.block.NewStore(g.emitAsFujiI64(rightVal), resultSlot)
+	g.block.NewStore(g.emitAsKodaI64(rightVal), resultSlot)
 	g.block.NewBr(mergeBlock)
 
 	g.block = mergeBlock
@@ -343,7 +343,7 @@ func (g *Generator) emitNullishCoalesce(e *parser.InfixExpr) (value.Value, error
 	if err != nil {
 		return nil, err
 	}
-	leftI := g.emitAsFujiI64(leftVal)
+	leftI := g.emitAsKodaI64(leftVal)
 	g.block.NewStore(leftI, resultSlot)
 
 	nilTag := constant.NewInt(types.I64, llvmNilTagged)
@@ -359,7 +359,7 @@ func (g *Generator) emitNullishCoalesce(e *parser.InfixExpr) (value.Value, error
 	if err != nil {
 		return nil, err
 	}
-	g.block.NewStore(g.emitAsFujiI64(rightVal), resultSlot)
+	g.block.NewStore(g.emitAsKodaI64(rightVal), resultSlot)
 	g.block.NewBr(mergeBlock)
 
 	g.block = mergeBlock
@@ -373,7 +373,7 @@ func (g *Generator) emitLogicalOr(e *parser.InfixExpr) (value.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	g.block.NewStore(g.emitAsFujiI64(leftVal), resultSlot)
+	g.block.NewStore(g.emitAsKodaI64(leftVal), resultSlot)
 
 	g.tempN++
 	rhsBlock := g.currentFn.NewBlock(fmt.Sprintf("lor.rhs.%d", g.tempN))
@@ -385,7 +385,7 @@ func (g *Generator) emitLogicalOr(e *parser.InfixExpr) (value.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	g.block.NewStore(g.emitAsFujiI64(rightVal), resultSlot)
+	g.block.NewStore(g.emitAsKodaI64(rightVal), resultSlot)
 	g.block.NewBr(mergeBlock)
 
 	g.block = mergeBlock
@@ -411,11 +411,11 @@ func (g *Generator) emitArray(e *parser.ArrayExpr) (value.Value, error) {
 			}
 			if out == nil {
 				out = part
-				g.block.NewStore(g.emitAsFujiI64(out), outSlot)
+				g.block.NewStore(g.emitAsKodaI64(out), outSlot)
 			} else {
 				prevOut := g.block.NewLoad(types.I64, outSlot)
 				out = g.emitArgvRuntime(g.runtimeArrayConcat, []value.Value{prevOut, part})
-				g.block.NewStore(g.emitAsFujiI64(out), outSlot)
+				g.block.NewStore(g.emitAsKodaI64(out), outSlot)
 			}
 			continue
 		}
@@ -424,14 +424,14 @@ func (g *Generator) emitArray(e *parser.ArrayExpr) (value.Value, error) {
 			return nil, err
 		}
 		singleton := g.block.NewCall(g.runtimeAllocArray, constant.NewInt(types.I32, 1))
-		g.block.NewCall(g.runtimeArraySet, singleton, constant.NewInt(types.I64, 0), g.emitAsFujiI64(elemVal))
+		g.block.NewCall(g.runtimeArraySet, singleton, constant.NewInt(types.I64, 0), g.emitAsKodaI64(elemVal))
 		if out == nil {
 			out = singleton
-			g.block.NewStore(g.emitAsFujiI64(out), outSlot)
+			g.block.NewStore(g.emitAsKodaI64(out), outSlot)
 		} else {
 			prevOut := g.block.NewLoad(types.I64, outSlot)
 			out = g.emitArgvRuntime(g.runtimeArrayConcat, []value.Value{prevOut, singleton})
-			g.block.NewStore(g.emitAsFujiI64(out), outSlot)
+			g.block.NewStore(g.emitAsKodaI64(out), outSlot)
 		}
 	}
 	if out == nil {
@@ -457,7 +457,7 @@ func (g *Generator) emitSlice(e *parser.SliceExpr) (value.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	objI := g.emitAsFujiI64(obj)
+	objI := g.emitAsKodaI64(obj)
 
 	var startV value.Value
 	if e.Start != nil {
@@ -468,7 +468,7 @@ func (g *Generator) emitSlice(e *parser.SliceExpr) (value.Value, error) {
 	} else {
 		startV = constant.NewFloat(types.Double, 0)
 	}
-	startI := g.emitAsFujiI64(startV)
+	startI := g.emitAsKodaI64(startV)
 
 	var endV value.Value
 	if e.End != nil {
@@ -479,7 +479,7 @@ func (g *Generator) emitSlice(e *parser.SliceExpr) (value.Value, error) {
 	} else {
 		endV = g.block.NewCall(g.runtimeArrayLen, objI)
 	}
-	endI := g.emitAsFujiI64(endV)
+	endI := g.emitAsKodaI64(endV)
 
 	zero := constant.NewInt(types.I32, 0)
 	arrTy := types.NewArray(3, types.I64)
@@ -492,7 +492,7 @@ func (g *Generator) emitSlice(e *parser.SliceExpr) (value.Value, error) {
 }
 
 // emitTemplate emits LLVM IR for template expressions.
-// Static text and holes are lowered to fuji_format(fmt, ...values) using "{}" placeholders.
+// Static text and holes are lowered to koda_format(fmt, ...values) using "{}" placeholders.
 func (g *Generator) emitTemplate(e *parser.TemplateExpr) (value.Value, error) {
 	if len(e.Parts) == 0 {
 		return g.emitStringLiteral(""), nil
@@ -513,7 +513,7 @@ func (g *Generator) emitTemplate(e *parser.TemplateExpr) (value.Value, error) {
 	fmtVal := g.emitStringLiteral(fmtBuilder.String())
 	fmtSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(fmtSlot)
-	g.block.NewStore(g.emitAsFujiI64(fmtVal), fmtSlot)
+	g.block.NewStore(g.emitAsKodaI64(fmtVal), fmtSlot)
 	argv := []value.Value{g.block.NewLoad(types.I64, fmtSlot)}
 	for _, ex := range holeExprs {
 		v, err := g.emitExpr(ex)
@@ -526,7 +526,7 @@ func (g *Generator) emitTemplate(e *parser.TemplateExpr) (value.Value, error) {
 }
 
 // emitRange emits LLVM IR for range expressions.
-// Semantics match fuji_range: half-open integer range [from, to) of numbers.
+// Semantics match koda_range: half-open integer range [from, to) of numbers.
 func (g *Generator) emitRange(e *parser.RangeExpr) (value.Value, error) {
 	fromVal, err := g.emitExpr(e.From)
 	if err != nil {
@@ -541,8 +541,8 @@ func (g *Generator) emitRange(e *parser.RangeExpr) (value.Value, error) {
 	zero := constant.NewInt(types.I32, 0)
 	arrTy := types.NewArray(2, types.I64)
 	slot := g.entryAlloca(arrTy)
-	g.block.NewStore(g.emitAsFujiI64(fromVal), g.block.NewGetElementPtr(arrTy, slot, zero, constant.NewInt(types.I32, 0)))
-	g.block.NewStore(g.emitAsFujiI64(toVal), g.block.NewGetElementPtr(arrTy, slot, zero, constant.NewInt(types.I32, 1)))
+	g.block.NewStore(g.emitAsKodaI64(fromVal), g.block.NewGetElementPtr(arrTy, slot, zero, constant.NewInt(types.I32, 0)))
+	g.block.NewStore(g.emitAsKodaI64(toVal), g.block.NewGetElementPtr(arrTy, slot, zero, constant.NewInt(types.I32, 1)))
 	argvPtr := g.block.NewGetElementPtr(arrTy, slot, zero, zero)
 	return g.block.NewCall(g.runtimeRange, constant.NewInt(types.I32, 2), argvPtr), nil
 }
@@ -553,11 +553,6 @@ func (g *Generator) emitTuple(e *parser.TupleExpr) (value.Value, error) {
 		return nil, fmt.Errorf("native codegen: empty tuple is not supported")
 	}
 	return nil, fmt.Errorf("native codegen: tuple expressions are not supported yet")
-}
-
-// emitImport emits LLVM IR for import expressions.
-func (g *Generator) emitImport(_ *parser.ImportExpr) (value.Value, error) {
-	return nil, fmt.Errorf("native codegen: dynamic import() is not supported; use static @path imports at file scope")
 }
 
 // emitSwitchExpr emits LLVM IR for switch expressions (expression-level switch).
@@ -571,7 +566,7 @@ func (g *Generator) emitSwitchExpr(e *parser.SwitchExpr) (value.Value, error) {
 	}
 	subjSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(subjSlot)
-	g.block.NewStore(g.emitAsFujiI64(subj), subjSlot)
+	g.block.NewStore(g.emitAsKodaI64(subj), subjSlot)
 
 	mergeB := g.block.Parent.NewBlock("swexpr.merge")
 
@@ -584,7 +579,7 @@ func (g *Generator) emitSwitchExpr(e *parser.SwitchExpr) (value.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		cmp := g.block.NewICmp(enum.IPredEQ, subjL, g.emitAsFujiI64(cv))
+		cmp := g.block.NewICmp(enum.IPredEQ, subjL, g.emitAsKodaI64(cv))
 		g.block.NewCondBr(cmp, bodyB, missB)
 
 		g.block = bodyB
@@ -592,7 +587,7 @@ func (g *Generator) emitSwitchExpr(e *parser.SwitchExpr) (value.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		g.block.NewStore(g.emitAsFujiI64(bodyVal), resultSlot)
+		g.block.NewStore(g.emitAsKodaI64(bodyVal), resultSlot)
 		g.block.NewBr(mergeB)
 
 		g.block = missB
@@ -602,7 +597,7 @@ func (g *Generator) emitSwitchExpr(e *parser.SwitchExpr) (value.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	g.block.NewStore(g.emitAsFujiI64(defVal), resultSlot)
+	g.block.NewStore(g.emitAsKodaI64(defVal), resultSlot)
 	g.block.NewBr(mergeB)
 
 	g.block = mergeB
@@ -620,7 +615,7 @@ func (g *Generator) emitUpdate(e *parser.UpdateExpr) (value.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	curI := g.emitAsFujiI64(current)
+	curI := g.emitAsKodaI64(current)
 	ld := g.block.NewCall(g.runtimeUnboxNumber, curI)
 	var rd value.Value
 	switch e.Operator.Lexeme {
@@ -636,7 +631,7 @@ func (g *Generator) emitUpdate(e *parser.UpdateExpr) (value.Value, error) {
 	if ident, ok := e.Operand.(*parser.IdentifierExpr); ok {
 		name := ident.Name.Lexeme
 		if slot, ok := g.locals[name]; ok {
-			boxed := g.emitAsFujiI64(result)
+			boxed := g.emitAsKodaI64(result)
 			if g.localIsCell != nil && g.localIsCell[name] {
 				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
 			} else {

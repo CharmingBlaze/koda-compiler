@@ -1,13 +1,13 @@
-#ifndef FUJI_VALUE_H
-#define FUJI_VALUE_H
+#ifndef KODA_VALUE_H
+#define KODA_VALUE_H
 
 #include <stdint.h>
 #include <stdbool.h>
 
 /*
- * Fuji Value System - NaN Boxing
+ * Koda Value System - NaN Boxing
  * 
- * Uses NaN-boxing to represent all Fuji values in a single 64-bit integer.
+ * Uses NaN-boxing to represent all Koda values in a single 64-bit integer.
  * This allows efficient storage and passing of values without boxing overhead.
  * 
  * Bit layout:
@@ -71,9 +71,9 @@ static inline Value OBJ_VAL(Obj* obj) {
 // Value equality
 bool values_equal(Value a, Value b);
 /** Same as values_equal, exposed for native codegen (returns 1 or 0). */
-int64_t fuji_values_equal(Value a, Value b);
+int64_t koda_values_equal(Value a, Value b);
 
 // Value printing
 void print_value(Value v);
 
-#endif // FUJI_VALUE_H
+#endif // KODA_VALUE_H

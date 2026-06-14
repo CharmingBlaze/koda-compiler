@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"fuji/internal/lexer"
+	"koda/internal/lexer"
 )
 
 func (p *Parser) parseDeclaration() ([]Decl, error) {
 	if p.match(lexer.TokenComment) {
 		comment := p.previous().Lexeme
-		if strings.HasPrefix(strings.ToLower(comment), "fuji:") {
-			body := strings.TrimSpace(comment[len("fuji:"):])
+		if strings.HasPrefix(strings.ToLower(comment), "koda:") {
+			body := strings.TrimSpace(comment[len("koda:"):])
 			parts := strings.Fields(body)
 			if len(parts) >= 3 && strings.EqualFold(parts[0], "extern") {
 				arity := 0
@@ -127,7 +127,7 @@ func (p *Parser) parseLetDeclarations() ([]Decl, error) {
 		if _, err := p.consume(lexer.TokenSemicolon, "expected ';' after variable declaration"); err != nil {
 			return nil, err
 		}
-		tmpLexeme := fmt.Sprintf("__fuji_destruct_%d", p.destructTmp)
+		tmpLexeme := fmt.Sprintf("__koda_destruct_%d", p.destructTmp)
 		p.destructTmp++
 		tmpTok := lexer.Token{Type: lexer.TokenIdentifier, Lexeme: tmpLexeme, Line: token.Line, Col: token.Col, File: token.File}
 

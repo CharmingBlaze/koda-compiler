@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"fuji/internal/diagnostic"
-	"fuji/internal/parser"
+	"koda/internal/diagnostic"
+	"koda/internal/parser"
 )
 
 // arityBoundsFromParams returns the minimum required argument count, maximum

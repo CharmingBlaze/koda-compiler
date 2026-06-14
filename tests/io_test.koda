@@ -1,0 +1,34 @@
+let io = import "@io";
+let json = import "@json";
+
+let tmp = "tests/hello.koda";
+let junk = "tests/_io_scratch.txt";
+
+assert(fileexists(tmp) == true, "fileexists builtin");
+assert(io.exists(tmp) == true, "io.exists");
+
+let wrote = io.write(junk, "koda io test");
+assert(wrote.ok == true, "io.write");
+
+assert(io.isfile(junk) == true, "io.isfile");
+assert(io.size(junk) > 0, "io.size");
+
+let appended = io.append(junk, "\nmore");
+assert(appended == true, "io.append");
+
+let entries = io.list("tests");
+assert(len(entries) > 0, "io.list");
+
+assert(io.remove(junk) == true, "io.remove");
+assert(fileexists(junk) == false, "deleted");
+
+let bad = json.try_parse("{not json}");
+assert(bad.ok == false, "try_parse err");
+
+let good = json.try_parse("{\"x\":1}");
+assert(good.ok == true, "try_parse ok");
+assert(good.value.x == 1, "try_parse value");
+
+warn("io_test warnings work");
+
+print("PASS io_test");

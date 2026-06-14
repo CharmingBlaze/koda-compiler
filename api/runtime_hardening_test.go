@@ -34,7 +34,7 @@ func chdirRepoRoot(t *testing.T) string {
 
 func TestRunArrayGetOutOfBoundsPanics(t *testing.T) {
 	root := chdirRepoRoot(t)
-	p := filepath.Join(root, "tests", "array_oob_get.fuji")
+	p := filepath.Join(root, "tests", "array_oob_get.koda")
 	var out, errBuf bytes.Buffer
 	err := RunWithWritersOpts(p, "", &out, &errBuf, BuildOptions{NoOpt: true})
 	if err == nil {
@@ -48,7 +48,7 @@ func TestRunArrayGetOutOfBoundsPanics(t *testing.T) {
 
 func TestRunArraySetOutOfBoundsPanics(t *testing.T) {
 	root := chdirRepoRoot(t)
-	p := filepath.Join(root, "tests", "array_oob_set.fuji")
+	p := filepath.Join(root, "tests", "array_oob_set.koda")
 	var out, errBuf bytes.Buffer
 	err := RunWithWritersOpts(p, "", &out, &errBuf, BuildOptions{NoOpt: true})
 	if err == nil {

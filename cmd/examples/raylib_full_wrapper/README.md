@@ -4,7 +4,7 @@ Auto-generated documentation for raylib library.
 
 ## Overview
 
-This wrapper provides Fuji bindings for the raylib library.
+This wrapper provides Koda bindings for the raylib library.
 
 ## API Statistics
 
@@ -18,12 +18,12 @@ This wrapper provides Fuji bindings for the raylib library.
 ## Installation
 
 ```bash
-kuji install raylib
+koda install raylib
 ```
 
 ## Quick Start
 
-```fuji
+```koda
 import "raylib"
 
 // Example usage

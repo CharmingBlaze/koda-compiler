@@ -1,0 +1,23 @@
+{
+  "name": "raylib",
+  "generator": "kodawrap",
+  "version": "0.4.0-dev",
+  "primary_header": "raylib.h",
+  "headers": [
+    "raylib.h"
+  ],
+  "counts": {
+    "functions": 554,
+    "structs": 35,
+    "enums": 22,
+    "constants": 0
+  },
+  "import": "@raylib",
+  "linkflags": "Vendored SDK: automatic via third_party/raylib_static/stage. Otherwise: -I<raylib-include> -L<raylib-lib> -lraylib",
+  "docs": {
+    "readme": "README.md",
+    "api_reference": "api_reference.md",
+    "examples": "examples.md",
+    "html": "docs/index.html"
+  }
+}

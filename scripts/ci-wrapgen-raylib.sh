@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PR CI: Raylib header + wrapgen + fuji link smoke (Linux, macOS, Windows Git Bash / MSYS).
+# PR CI: Raylib header + wrapgen + koda link smoke (Linux, macOS, Windows Git Bash / MSYS).
 # Vendored stdlib/sys-include/raylib.h supplies the header; a matching native Raylib is
 # required to link the smoke binary (apt / brew / official MinGW prebuild zip on Windows).
 set -euo pipefail
@@ -7,8 +7,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-if [[ ! -f "runtime/libfuji_runtime.a" ]]; then
-  echo "runtime/libfuji_runtime.a missing; run scripts/build-runtime.sh first"
+if [[ ! -f "runtime/libkoda_runtime.a" ]]; then
+  echo "runtime/libkoda_runtime.a missing; run scripts/build-runtime.sh first"
   exit 1
 fi
 
@@ -77,7 +77,7 @@ ensure_raylib_for_link() {
       echo "==> Windows MSYS: stage official raylib MinGW prebuild for link"
       RAYLIB_VER="5.0"
       RAYLIB_URL="https://github.com/raysan5/raylib/releases/download/${RAYLIB_VER}"
-      st="${RUNNER_TEMP:-${TMP:-/tmp}}/fuji-raylib-stage-$$"
+      st="${RUNNER_TEMP:-${TMP:-/tmp}}/koda-raylib-stage-$$"
       mkdir -p "$st"
       curl -fsSL "${RAYLIB_URL}/raylib-${RAYLIB_VER}_win64_mingw-w64.zip" -o "$st/dl.zip"
       unzip -q "$st/dl.zip" -d "$st/out"
@@ -104,25 +104,33 @@ OUT="${WRAP_OUT:-$ROOT/wrappers/raylib_ci_generated}"
 rm -rf "$OUT"
 mkdir -p "$OUT"
 
-echo "==> fujiwrap / wrapgen (this may take a minute)"
+echo "==> kodawrap / wrapgen (this may take a minute)"
 go run ./cmd/wrapgen -name raylib -headers "$HDR" -out "$OUT" -docs=false -build=false -v
 
-if [[ ! -s "$OUT/raylib.fuji" ]] || [[ ! -s "$OUT/wrapper.c" ]]; then
-  echo "wrapgen did not produce raylib.fuji / wrapper.c"
+if [[ ! -s "$OUT/raylib.koda" ]] || [[ ! -s "$OUT/wrapper.c" ]]; then
+  echo "wrapgen did not produce raylib.koda / wrapper.c"
   exit 1
 fi
 
-echo "==> Link smoke: fuji build tests/raylib_wrapgen_smoke.fuji"
-export FUJI_WRAPPERS="$OUT"
-export FUJI_NATIVE_SOURCES="$OUT/wrapper.c"
+for artifact in koda.json META.json docs/index.html; do
+  if [[ ! -s "$OUT/$artifact" ]]; then
+    echo "wrapgen missing package artifact: $OUT/$artifact"
+    exit 1
+  fi
+done
+echo "==> package artifacts ok (koda.json, META.json, docs/index.html)"
+
+echo "==> Link smoke: koda build tests/raylib_wrapgen_smoke.koda"
+export KODA_WRAPPERS="$OUT"
+export KODA_NATIVE_SOURCES="$OUT/wrapper.c"
 if pkg-config --exists raylib 2>/dev/null; then
-  export FUJI_LINKFLAGS
-  FUJI_LINKFLAGS="$(pkg-config --libs --cflags raylib)"
+  export KODA_LINKFLAGS
+  KODA_LINKFLAGS="$(pkg-config --libs --cflags raylib)"
 else
   case "$uname_s" in
     Darwin)
       _rb="$(brew --prefix raylib)"
-      export FUJI_LINKFLAGS="-I${_rb}/include -L${_rb}/lib -lraylib"
+      export KODA_LINKFLAGS="-I${_rb}/include -L${_rb}/lib -lraylib"
       ;;
     MINGW* | MSYS* | CYGWIN*)
       if [[ -z "$RAYLIB_STAGE_WIN" ]]; then
@@ -131,18 +139,18 @@ else
       fi
       inc="$RAYLIB_STAGE_WIN/include"
       lib="$RAYLIB_STAGE_WIN/lib"
-      export FUJI_LINKFLAGS="-I${inc} -L${lib} -lraylib -lopengl32 -lgdi32 -lwinmm"
+      export KODA_LINKFLAGS="-I${inc} -L${lib} -lraylib -lopengl32 -lgdi32 -lwinmm"
       ;;
     *)
-      export FUJI_LINKFLAGS="-I/usr/include -lraylib"
+      export KODA_LINKFLAGS="-I/usr/include -lraylib"
       ;;
   esac
 fi
 
-FUJI_BIN="${FUJI_BIN:-}"
-if [[ -z "$FUJI_BIN" || ! -x "$FUJI_BIN" ]]; then
-  FUJI_BIN="$ROOT/.ci_fuji"
-  go build -trimpath -o "$FUJI_BIN" ./cmd/fuji
+KODA_BIN="${KODA_BIN:-}"
+if [[ -z "$KODA_BIN" || ! -x "$KODA_BIN" ]]; then
+  KODA_BIN="$ROOT/.ci_koda"
+  go build -trimpath -o "$KODA_BIN" ./cmd/koda
 fi
 
 SMOKE_BASE="${WRAPGEN_SMOKE_OUT:-/tmp/raylib_wrapgen_smoke}"
@@ -153,6 +161,6 @@ if [[ "$is_windows_msys" -eq 1 ]]; then
 fi
 OUT_BIN="${SMOKE_BASE}${EXE}"
 
-"$FUJI_BIN" build "$ROOT/tests/raylib_wrapgen_smoke.fuji" -o "$OUT_BIN"
+"$KODA_BIN" build "$ROOT/tests/raylib_wrapgen_smoke.koda" -o "$OUT_BIN"
 test -x "$OUT_BIN"
 echo "==> OK: linked $OUT_BIN"

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"fuji/internal/diagnostic"
-	"fuji/internal/parser"
-	"fuji/internal/sema"
+	"koda/internal/diagnostic"
+	"koda/internal/parser"
+	"koda/internal/sema"
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
@@ -80,6 +80,7 @@ type Generator struct {
 	runtimePrint            *ir.Func
 	runtimePrintArgv        *ir.Func
 	runtimePrintNewline     *ir.Func
+	runtimeWarn             *ir.Func
 	runtimeRandom           *ir.Func
 	runtimeRandomInt        *ir.Func
 	runtimeRandomChoice     *ir.Func
@@ -102,6 +103,7 @@ type Generator struct {
 	runtimeExp              *ir.Func
 	runtimeLog              *ir.Func
 	runtimeLog10            *ir.Func
+	runtimeLog2             *ir.Func
 	runtimeFloor            *ir.Func
 	runtimeCeil             *ir.Func
 	runtimeRound            *ir.Func
@@ -159,9 +161,16 @@ type Generator struct {
 	runtimeAppendFile   *ir.Func
 	runtimeFileExists   *ir.Func
 	runtimeDeleteFile   *ir.Func
+	runtimeIsFile       *ir.Func
+	runtimeIsDir        *ir.Func
+	runtimeFileSize     *ir.Func
+	runtimeListDir      *ir.Func
+	runtimeKeys         *ir.Func
 	runtimeAssert       *ir.Func
 	runtimeTrace        *ir.Func
 	runtimeParseJSON    *ir.Func
+	runtimeJsonParse    *ir.Func
+	runtimeJsonTryParse *ir.Func
 	runtimeToJSON       *ir.Func
 	runtimeAllocObj     *ir.Func
 	runtimeAllocStruct  *ir.Func
@@ -187,6 +196,7 @@ type Generator struct {
 	runtimeLen          *ir.Func
 	runtimeAbs          *ir.Func
 	runtimeSqrt         *ir.Func
+	runtimeCbrt         *ir.Func
 	runtimeNumber       *ir.Func
 	runtimeString       *ir.Func
 	runtimeStringConcat *ir.Func
@@ -222,8 +232,11 @@ type Generator struct {
 	shadowPushed     bool
 	shadowTempNext   int
 
-	// deferLayers: per active Fuji function (and user_main), deferred expressions in source order (LIFO at exit).
+	// deferLayers: per active Koda function (and user_main), deferred expressions in source order (LIFO at exit).
 	deferLayers [][]parser.Expr
+
+	moduleEmitPath string
+	importSlots    map[string]value.Value
 }
 
 // loopContext tracks information about the current loop for break/continue.
@@ -247,148 +260,159 @@ func NewGenerator(ctx *sema.NativeEmitContext) *Generator {
 		locals:                  make(map[string]value.Value),
 		moduleGlobals:           make(map[string]value.Value),
 		moduleGlobalIsCell:      make(map[string]bool),
+		importSlots:             make(map[string]value.Value),
 		globals:                 make(map[string]*ir.Global),
-		runtimeInit:             runtimeFuncs["FUJI_runtime_init"],
-		runtimeInitEx:           runtimeFuncs["FUJI_runtime_init_ex"],
-		runtimeShutdown:         runtimeFuncs["FUJI_runtime_shutdown"],
-		runtimeRegisterGlobal:   runtimeFuncs["FUJI_register_global_slot"],
-		runtimeSetStackBase:     runtimeFuncs["FUJI_runtime_set_stack_base"],
-		runtimeDeltaTime:        runtimeFuncs["FUJI_delta_time"],
-		runtimeProgramTime:      runtimeFuncs["FUJI_program_time"],
-		runtimeTimestamp:        runtimeFuncs["FUJI_timestamp"],
-		runtimeTime:             runtimeFuncs["FUJI_time"],
-		runtimeClock:            runtimeFuncs["FUJI_clock"],
-		runtimeSleep:            runtimeFuncs["FUJI_sleep"],
-		runtimePrint:            runtimeFuncs["FUJI_print"],
-		runtimePrintArgv:        runtimeFuncs["FUJI_print_argv"],
-		runtimePrintNewline:     runtimeFuncs["FUJI_print_newline"],
-		runtimeRandom:           runtimeFuncs["FUJI_random"],
-		runtimeRandomInt:        runtimeFuncs["FUJI_randomInt"],
-		runtimeRandomChoice:     runtimeFuncs["FUJI_randomChoice"],
-		runtimeRandomSeed:       runtimeFuncs["FUJI_randomSeed"],
-		runtimeLerp:             runtimeFuncs["FUJI_lerp"],
-		runtimeClamp:            runtimeFuncs["FUJI_clamp"],
-		runtimeDistance:         runtimeFuncs["FUJI_distance"],
-		runtimeAngleBetween:     runtimeFuncs["FUJI_angleBetween"],
-		runtimeMap:              runtimeFuncs["FUJI_map"],
-		runtimePI:               runtimeFuncs["FUJI_pi"],
-		runtimeE:                runtimeFuncs["FUJI_e"],
-		runtimeSin:              runtimeFuncs["FUJI_sin"],
-		runtimeCos:              runtimeFuncs["FUJI_cos"],
-		runtimeTan:              runtimeFuncs["FUJI_tan"],
-		runtimeAsin:             runtimeFuncs["FUJI_asin"],
-		runtimeAcos:             runtimeFuncs["FUJI_acos"],
-		runtimeAtan:             runtimeFuncs["FUJI_atan"],
-		runtimeAtan2:            runtimeFuncs["FUJI_atan2"],
-		runtimePow:              runtimeFuncs["FUJI_pow"],
-		runtimeExp:              runtimeFuncs["FUJI_exp"],
-		runtimeLog:              runtimeFuncs["FUJI_log"],
-		runtimeLog10:            runtimeFuncs["FUJI_log10"],
-		runtimeFloor:            runtimeFuncs["FUJI_floor"],
-		runtimeCeil:             runtimeFuncs["FUJI_ceil"],
-		runtimeRound:            runtimeFuncs["FUJI_round"],
-		runtimeTrunc:            runtimeFuncs["FUJI_trunc"],
-		runtimeSign:             runtimeFuncs["FUJI_sign"],
-		runtimeMin:              runtimeFuncs["FUJI_min"],
-		runtimeMax:              runtimeFuncs["FUJI_max"],
-		runtimeSmoothstep:       runtimeFuncs["FUJI_smoothstep"],
-		runtimeDistanceSq:       runtimeFuncs["FUJI_distanceSq"],
-		runtimeNormalize:        runtimeFuncs["FUJI_normalize"],
-		runtimeHypot:            runtimeFuncs["FUJI_hypot"],
-		runtimeFmod:             runtimeFuncs["FUJI_fmod"],
-		runtimeDegrees:          runtimeFuncs["FUJI_degrees"],
-		runtimeRadians:          runtimeFuncs["FUJI_radians"],
-		runtimeWrap:             runtimeFuncs["FUJI_wrap"],
-		runtimeApproach:         runtimeFuncs["FUJI_approach"],
-		runtimeSmoothdamp:       runtimeFuncs["FUJI_smoothdamp"],
-		runtimeIsNumber:         runtimeFuncs["FUJI_isNumber"],
-		runtimeIsString:         runtimeFuncs["FUJI_isString"],
-		runtimeIsBool:           runtimeFuncs["FUJI_isBool"],
-		runtimeIsNull:           runtimeFuncs["FUJI_isNull"],
-		runtimeIsArray:          runtimeFuncs["FUJI_isArray"],
-		runtimeIsObject:         runtimeFuncs["FUJI_isObject"],
-		runtimeIsFunction:       runtimeFuncs["FUJI_isFunction"],
-		runtimeBool:             runtimeFuncs["FUJI_bool"],
-		runtimeFormat:           runtimeFuncs["FUJI_format"],
-		runtimeArrayMap:         runtimeFuncs["FUJI_array_map"],
-		runtimeArrayFilter:      runtimeFuncs["FUJI_array_filter"],
-		runtimeArrayForEach:     runtimeFuncs["FUJI_array_forEach"],
-		runtimeArrayFind:        runtimeFuncs["FUJI_array_find"],
-		runtimeArrayFindIndex:   runtimeFuncs["FUJI_array_findIndex"],
-		runtimeArraySome:        runtimeFuncs["FUJI_array_some"],
-		runtimeArrayEvery:       runtimeFuncs["FUJI_array_every"],
-		runtimeArrayReduce:      runtimeFuncs["FUJI_array_reduce"],
-		runtimeArraySort:        runtimeFuncs["FUJI_array_sort"],
-		runtimeArrayReverse:     runtimeFuncs["FUJI_array_reverse"],
-		runtimeArrayIndexOf:     runtimeFuncs["FUJI_array_indexOf"],
-		runtimeArrayIncludes:    runtimeFuncs["FUJI_array_includes"],
-		runtimeArraySlice:       runtimeFuncs["FUJI_array_slice"],
-		runtimeArrayConcat:      runtimeFuncs["FUJI_array_concat"],
-		runtimeArrayJoin:        runtimeFuncs["FUJI_array_join"],
-		runtimeStringSplit:      runtimeFuncs["FUJI_string_split"],
-		runtimeStringTrim:       runtimeFuncs["FUJI_string_trim"],
-		runtimeStringUpper:      runtimeFuncs["FUJI_string_upper"],
-		runtimeStringLower:      runtimeFuncs["FUJI_string_lower"],
-		runtimeStringStartsWith: runtimeFuncs["FUJI_string_startsWith"],
-		runtimeStringEndsWith:   runtimeFuncs["FUJI_string_endsWith"],
-		runtimeStringIndexOf:    runtimeFuncs["FUJI_string_indexOf"],
-		runtimeStringSlice:      runtimeFuncs["FUJI_string_slice"],
-		runtimeStringReplace:    runtimeFuncs["FUJI_string_replace"],
-		runtimeStringReplaceAll: runtimeFuncs["FUJI_string_replaceAll"],
-		runtimeReadFile:         runtimeFuncs["FUJI_readFile"],
-		runtimeWriteFile:        runtimeFuncs["FUJI_writeFile"],
-		runtimeAppendFile:       runtimeFuncs["FUJI_appendFile"],
-		runtimeFileExists:       runtimeFuncs["FUJI_fileExists"],
-		runtimeDeleteFile:       runtimeFuncs["FUJI_deleteFile"],
-		runtimeAssert:           runtimeFuncs["FUJI_assert"],
-		runtimeTrace:            runtimeFuncs["FUJI_trace"],
-		runtimeParseJSON:        runtimeFuncs["FUJI_parseJSON"],
-		runtimeToJSON:           runtimeFuncs["FUJI_toJSON"],
-		runtimeAllocObj:         runtimeFuncs["FUJI_allocate_object"],
-		runtimeAllocStruct:      runtimeFuncs["FUJI_allocate_struct"],
-		runtimeStructGet:        runtimeFuncs["FUJI_struct_get"],
-		runtimeStructSet:        runtimeFuncs["FUJI_struct_set"],
-		runtimeObjGet:           runtimeFuncs["FUJI_object_get"],
-		runtimeObjSet:           runtimeFuncs["FUJI_object_set"],
-		runtimeObjRemove:        runtimeFuncs["FUJI_object_remove"],
-		runtimeUnboxNumber:      runtimeFuncs["FUJI_unbox_number"],
-		runtimeBoxNumber:        runtimeFuncs["FUJI_box_number"],
-		runtimeSet:              runtimeFuncs["FUJI_set"],
-		runtimeAllocStr:         runtimeFuncs["FUJI_allocate_string"],
-		runtimeAllocArray:       runtimeFuncs["FUJI_allocate_array"],
-		runtimeArrayGet:         runtimeFuncs["FUJI_array_get"],
-		runtimeArraySet:         runtimeFuncs["FUJI_array_set"],
-		runtimeArrayPush:        runtimeFuncs["FUJI_array_push"],
-		runtimeArrayPop:         runtimeFuncs["FUJI_array_pop"],
-		runtimeArrayLen:         runtimeFuncs["FUJI_array_length"], // distinct symbol from FUJI_len
-		runtimeForOfLength:      runtimeFuncs["FUJI_forof_length"],
-		runtimeForOfKeyAt:       runtimeFuncs["FUJI_forof_key_at"],
-		runtimeForOfValueAt:     runtimeFuncs["FUJI_forof_value_at"],
-		runtimeType:             runtimeFuncs["FUJI_type"],
-		runtimeLen:              runtimeFuncs["FUJI_len"],
-		runtimeAbs:              runtimeFuncs["FUJI_abs"],
-		runtimeSqrt:             runtimeFuncs["FUJI_sqrt"],
-		runtimeNumber:           runtimeFuncs["FUJI_number"],
-		runtimeString:           runtimeFuncs["FUJI_string"],
-		runtimeStringConcat:     runtimeFuncs["FUJI_string_concat"],
-		runtimeRange:            runtimeFuncs["FUJI_range"],
-		runtimeAllocCell:        runtimeFuncs["FUJI_alloc_cell"],
-		runtimeCellRead:         runtimeFuncs["FUJI_cell_read"],
-		runtimeCellWrite:        runtimeFuncs["FUJI_cell_write"],
-		runtimeGcCollect:        runtimeFuncs["FUJI_gc_collect"],
-		runtimeGcDisable:        runtimeFuncs["FUJI_gc_disable"],
-		runtimeGcEnable:         runtimeFuncs["FUJI_gc_enable"],
-		runtimeGcFrameStep:      runtimeFuncs["FUJI_gc_frame_step"],
-		runtimeGcStats:          runtimeFuncs["FUJI_gc_stats"],
-		runtimePushFrame:        runtimeFuncs["FUJI_push_frame"],
-		runtimePopFrame:         runtimeFuncs["FUJI_pop_frame"],
-		runtimeOk:               runtimeFuncs["FUJI_ok"],
-		runtimeErr:              runtimeFuncs["FUJI_err"],
-		runtimeValuesEqual:      runtimeFuncs["FUJI_values_equal"],
-		runtimePanic:            runtimeFuncs["FUJI_panic"],
-		runtimeMatches:          runtimeFuncs["FUJI_matches"],
-		runtimePushCall:         runtimeFuncs["FUJI_push_call"],
-		runtimePopCall:          runtimeFuncs["FUJI_pop_call"],
+		runtimeInit:             runtimeFuncs["KODA_runtime_init"],
+		runtimeInitEx:           runtimeFuncs["KODA_runtime_init_ex"],
+		runtimeShutdown:         runtimeFuncs["KODA_runtime_shutdown"],
+		runtimeRegisterGlobal:   runtimeFuncs["KODA_register_global_slot"],
+		runtimeSetStackBase:     runtimeFuncs["KODA_runtime_set_stack_base"],
+		runtimeDeltaTime:        runtimeFuncs["KODA_delta_time"],
+		runtimeProgramTime:      runtimeFuncs["KODA_program_time"],
+		runtimeTimestamp:        runtimeFuncs["KODA_timestamp"],
+		runtimeTime:             runtimeFuncs["KODA_time"],
+		runtimeClock:            runtimeFuncs["KODA_clock"],
+		runtimeSleep:            runtimeFuncs["KODA_sleep"],
+		runtimePrint:            runtimeFuncs["KODA_print"],
+		runtimePrintArgv:        runtimeFuncs["KODA_print_argv"],
+		runtimePrintNewline:     runtimeFuncs["KODA_print_newline"],
+		runtimeWarn:             runtimeFuncs["KODA_warn"],
+		runtimeRandom:           runtimeFuncs["KODA_random"],
+		runtimeRandomInt:        runtimeFuncs["KODA_randomInt"],
+		runtimeRandomChoice:     runtimeFuncs["KODA_randomChoice"],
+		runtimeRandomSeed:       runtimeFuncs["KODA_randomSeed"],
+		runtimeLerp:             runtimeFuncs["KODA_lerp"],
+		runtimeClamp:            runtimeFuncs["KODA_clamp"],
+		runtimeDistance:         runtimeFuncs["KODA_distance"],
+		runtimeAngleBetween:     runtimeFuncs["KODA_angleBetween"],
+		runtimeMap:              runtimeFuncs["KODA_map"],
+		runtimePI:               runtimeFuncs["KODA_pi"],
+		runtimeE:                runtimeFuncs["KODA_e"],
+		runtimeSin:              runtimeFuncs["KODA_sin"],
+		runtimeCos:              runtimeFuncs["KODA_cos"],
+		runtimeTan:              runtimeFuncs["KODA_tan"],
+		runtimeAsin:             runtimeFuncs["KODA_asin"],
+		runtimeAcos:             runtimeFuncs["KODA_acos"],
+		runtimeAtan:             runtimeFuncs["KODA_atan"],
+		runtimeAtan2:            runtimeFuncs["KODA_atan2"],
+		runtimePow:              runtimeFuncs["KODA_pow"],
+		runtimeExp:              runtimeFuncs["KODA_exp"],
+		runtimeLog:              runtimeFuncs["KODA_log"],
+		runtimeLog10:            runtimeFuncs["KODA_log10"],
+		runtimeLog2:             runtimeFuncs["KODA_log2"],
+		runtimeFloor:            runtimeFuncs["KODA_floor"],
+		runtimeCeil:             runtimeFuncs["KODA_ceil"],
+		runtimeRound:            runtimeFuncs["KODA_round"],
+		runtimeTrunc:            runtimeFuncs["KODA_trunc"],
+		runtimeSign:             runtimeFuncs["KODA_sign"],
+		runtimeMin:              runtimeFuncs["KODA_min"],
+		runtimeMax:              runtimeFuncs["KODA_max"],
+		runtimeSmoothstep:       runtimeFuncs["KODA_smoothstep"],
+		runtimeDistanceSq:       runtimeFuncs["KODA_distanceSq"],
+		runtimeNormalize:        runtimeFuncs["KODA_normalize"],
+		runtimeHypot:            runtimeFuncs["KODA_hypot"],
+		runtimeFmod:             runtimeFuncs["KODA_fmod"],
+		runtimeDegrees:          runtimeFuncs["KODA_degrees"],
+		runtimeRadians:          runtimeFuncs["KODA_radians"],
+		runtimeWrap:             runtimeFuncs["KODA_wrap"],
+		runtimeApproach:         runtimeFuncs["KODA_approach"],
+		runtimeSmoothdamp:       runtimeFuncs["KODA_smoothdamp"],
+		runtimeIsNumber:         runtimeFuncs["KODA_isNumber"],
+		runtimeIsString:         runtimeFuncs["KODA_isString"],
+		runtimeIsBool:           runtimeFuncs["KODA_isBool"],
+		runtimeIsNull:           runtimeFuncs["KODA_isNull"],
+		runtimeIsArray:          runtimeFuncs["KODA_isArray"],
+		runtimeIsObject:         runtimeFuncs["KODA_isObject"],
+		runtimeIsFunction:       runtimeFuncs["KODA_isFunction"],
+		runtimeBool:             runtimeFuncs["KODA_bool"],
+		runtimeFormat:           runtimeFuncs["KODA_format"],
+		runtimeArrayMap:         runtimeFuncs["KODA_array_map"],
+		runtimeArrayFilter:      runtimeFuncs["KODA_array_filter"],
+		runtimeArrayForEach:     runtimeFuncs["KODA_array_forEach"],
+		runtimeArrayFind:        runtimeFuncs["KODA_array_find"],
+		runtimeArrayFindIndex:   runtimeFuncs["KODA_array_findIndex"],
+		runtimeArraySome:        runtimeFuncs["KODA_array_some"],
+		runtimeArrayEvery:       runtimeFuncs["KODA_array_every"],
+		runtimeArrayReduce:      runtimeFuncs["KODA_array_reduce"],
+		runtimeArraySort:        runtimeFuncs["KODA_array_sort"],
+		runtimeArrayReverse:     runtimeFuncs["KODA_array_reverse"],
+		runtimeArrayIndexOf:     runtimeFuncs["KODA_array_indexOf"],
+		runtimeArrayIncludes:    runtimeFuncs["KODA_array_includes"],
+		runtimeArraySlice:       runtimeFuncs["KODA_array_slice"],
+		runtimeArrayConcat:      runtimeFuncs["KODA_array_concat"],
+		runtimeArrayJoin:        runtimeFuncs["KODA_array_join"],
+		runtimeStringSplit:      runtimeFuncs["KODA_string_split"],
+		runtimeStringTrim:       runtimeFuncs["KODA_string_trim"],
+		runtimeStringUpper:      runtimeFuncs["KODA_string_upper"],
+		runtimeStringLower:      runtimeFuncs["KODA_string_lower"],
+		runtimeStringStartsWith: runtimeFuncs["KODA_string_startsWith"],
+		runtimeStringEndsWith:   runtimeFuncs["KODA_string_endsWith"],
+		runtimeStringIndexOf:    runtimeFuncs["KODA_string_indexOf"],
+		runtimeStringSlice:      runtimeFuncs["KODA_string_slice"],
+		runtimeStringReplace:    runtimeFuncs["KODA_string_replace"],
+		runtimeStringReplaceAll: runtimeFuncs["KODA_string_replaceAll"],
+		runtimeReadFile:         runtimeFuncs["KODA_readFile"],
+		runtimeWriteFile:        runtimeFuncs["KODA_writeFile"],
+		runtimeAppendFile:       runtimeFuncs["KODA_appendFile"],
+		runtimeFileExists:       runtimeFuncs["KODA_fileExists"],
+		runtimeDeleteFile:       runtimeFuncs["KODA_deleteFile"],
+		runtimeIsFile:           runtimeFuncs["KODA_isFile"],
+		runtimeIsDir:            runtimeFuncs["KODA_isDir"],
+		runtimeFileSize:         runtimeFuncs["KODA_fileSize"],
+		runtimeListDir:          runtimeFuncs["KODA_listDir"],
+		runtimeKeys:             runtimeFuncs["KODA_keys"],
+		runtimeAssert:           runtimeFuncs["KODA_assert"],
+		runtimeTrace:            runtimeFuncs["KODA_trace"],
+		runtimeParseJSON:        runtimeFuncs["KODA_parseJSON"],
+		runtimeJsonParse:        runtimeFuncs["KODA_jsonParse"],
+		runtimeJsonTryParse:     runtimeFuncs["KODA_jsonTryParse"],
+		runtimeToJSON:           runtimeFuncs["KODA_toJSON"],
+		runtimeAllocObj:         runtimeFuncs["KODA_allocate_object"],
+		runtimeAllocStruct:      runtimeFuncs["KODA_allocate_struct"],
+		runtimeStructGet:        runtimeFuncs["KODA_struct_get"],
+		runtimeStructSet:        runtimeFuncs["KODA_struct_set"],
+		runtimeObjGet:           runtimeFuncs["KODA_object_get"],
+		runtimeObjSet:           runtimeFuncs["KODA_object_set"],
+		runtimeObjRemove:        runtimeFuncs["KODA_object_remove"],
+		runtimeUnboxNumber:      runtimeFuncs["KODA_unbox_number"],
+		runtimeBoxNumber:        runtimeFuncs["KODA_box_number"],
+		runtimeSet:              runtimeFuncs["KODA_set"],
+		runtimeAllocStr:         runtimeFuncs["KODA_allocate_string"],
+		runtimeAllocArray:       runtimeFuncs["KODA_allocate_array"],
+		runtimeArrayGet:         runtimeFuncs["KODA_array_get"],
+		runtimeArraySet:         runtimeFuncs["KODA_array_set"],
+		runtimeArrayPush:        runtimeFuncs["KODA_array_push"],
+		runtimeArrayPop:         runtimeFuncs["KODA_array_pop"],
+		runtimeArrayLen:         runtimeFuncs["KODA_array_length"], // distinct symbol from KODA_len
+		runtimeForOfLength:      runtimeFuncs["KODA_forof_length"],
+		runtimeForOfKeyAt:       runtimeFuncs["KODA_forof_key_at"],
+		runtimeForOfValueAt:     runtimeFuncs["KODA_forof_value_at"],
+		runtimeType:             runtimeFuncs["KODA_type"],
+		runtimeLen:              runtimeFuncs["KODA_len"],
+		runtimeAbs:              runtimeFuncs["KODA_abs"],
+		runtimeSqrt:             runtimeFuncs["KODA_sqrt"],
+		runtimeCbrt:             runtimeFuncs["KODA_cbrt"],
+		runtimeNumber:           runtimeFuncs["KODA_number"],
+		runtimeString:           runtimeFuncs["KODA_string"],
+		runtimeStringConcat:     runtimeFuncs["KODA_string_concat"],
+		runtimeRange:            runtimeFuncs["KODA_range"],
+		runtimeAllocCell:        runtimeFuncs["KODA_alloc_cell"],
+		runtimeCellRead:         runtimeFuncs["KODA_cell_read"],
+		runtimeCellWrite:        runtimeFuncs["KODA_cell_write"],
+		runtimeGcCollect:        runtimeFuncs["KODA_gc_collect"],
+		runtimeGcDisable:        runtimeFuncs["KODA_gc_disable"],
+		runtimeGcEnable:         runtimeFuncs["KODA_gc_enable"],
+		runtimeGcFrameStep:      runtimeFuncs["KODA_gc_frame_step"],
+		runtimeGcStats:          runtimeFuncs["KODA_gc_stats"],
+		runtimePushFrame:        runtimeFuncs["KODA_push_frame"],
+		runtimePopFrame:         runtimeFuncs["KODA_pop_frame"],
+		runtimeOk:               runtimeFuncs["KODA_ok"],
+		runtimeErr:              runtimeFuncs["KODA_err"],
+		runtimeValuesEqual:      runtimeFuncs["KODA_values_equal"],
+		runtimePanic:            runtimeFuncs["KODA_panic"],
+		runtimeMatches:          runtimeFuncs["KODA_matches"],
+		runtimePushCall:         runtimeFuncs["KODA_push_call"],
+		runtimePopCall:          runtimeFuncs["KODA_pop_call"],
 		runtimeMalloc:           runtimeFuncs["malloc"],
 		tempN:                   0,
 	}
@@ -444,7 +468,7 @@ func (g *Generator) Generate(bundle *parser.ProgramBundle) (*ir.Module, error) {
 		}
 	}
 
-	// User-defined `function main()` is emitted as LLVM symbol `fuji_user_main`; invoke after top-level runs.
+	// User-defined `function main()` is emitted as LLVM symbol `koda_user_main`; invoke after top-level runs.
 	if mainFn := g.funcs["main"]; mainFn != nil {
 		g.block.NewCall(mainFn, constant.NewInt(types.I64, 0))
 	}
@@ -517,7 +541,7 @@ func (g *Generator) emitLetDecl(d *parser.LetDecl) error {
 	}
 
 	if g.currentFn == g.funcs["user_main"] {
-		global := g.mod.NewGlobalDef("fuji_global_"+name, constant.NewInt(types.I64, llvmNilTagged))
+		global := g.mod.NewGlobalDef("koda_global_"+name, constant.NewInt(types.I64, llvmNilTagged))
 		g.globals[name] = global
 		g.locals[name] = global
 		g.localIsCell[name] = false
@@ -529,7 +553,7 @@ func (g *Generator) emitLetDecl(d *parser.LetDecl) error {
 			if err != nil {
 				return err
 			}
-			g.block.NewStore(g.emitAsFujiI64(initVal), global)
+			g.block.NewStore(g.emitAsKodaI64(initVal), global)
 		}
 		return nil
 	}
@@ -595,7 +619,7 @@ func (g *Generator) emitLetDecl(d *parser.LetDecl) error {
 		if err != nil {
 			return err
 		}
-		boxed := g.emitAsFujiI64(initVal)
+		boxed := g.emitAsKodaI64(initVal)
 		if useStack {
 			g.block.NewStore(boxed, storageSlot)
 		} else {
@@ -606,8 +630,8 @@ func (g *Generator) emitLetDecl(d *parser.LetDecl) error {
 	return nil
 }
 
-// emitNativeExternLet binds a Fuji name to an LLVM declaration for a C symbol
-// implementing FujiValue (*)(int argCount, FujiValue* args) (i64, i32, i64* in IR).
+// emitNativeExternLet binds a Koda name to an LLVM declaration for a C symbol
+// implementing KodaValue (*)(int argCount, KodaValue* args) (i64, i32, i64* in IR).
 func (g *Generator) emitNativeExternLet(d *parser.LetDecl) error {
 	sym := strings.TrimSpace(d.Native.Symbol)
 	if sym == "" {
@@ -684,7 +708,7 @@ func (g *Generator) emitPrefix(e *parser.PrefixExpr) (value.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		return g.block.NewCall(g.runtimeType, g.emitAsFujiI64(rv)), nil
+		return g.block.NewCall(g.runtimeType, g.emitAsKodaI64(rv)), nil
 	case "!":
 		right, err := g.emitExpr(e.Right)
 		if err != nil {
@@ -706,7 +730,7 @@ func (g *Generator) emitPrefix(e *parser.PrefixExpr) (value.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		ri := g.emitAsFujiI64(right)
+		ri := g.emitAsKodaI64(right)
 		rd := g.block.NewCall(g.runtimeUnboxNumber, ri)
 		neg := g.block.NewFNeg(rd)
 		return g.block.NewCall(g.runtimeBoxNumber, neg), nil
@@ -715,7 +739,7 @@ func (g *Generator) emitPrefix(e *parser.PrefixExpr) (value.Value, error) {
 	}
 }
 
-// emitBoxBoolNaN maps i1 (predicate result) to Fuji true/false NaN-boxed values.
+// emitBoxBoolNaN maps i1 (predicate result) to Koda true/false NaN-boxed values.
 func (g *Generator) emitBoxBoolNaN(cmp value.Value) value.Value {
 	falseVal := constant.NewInt(types.I64, 0x7ffc000000000002)
 	trueVal := constant.NewInt(types.I64, 0x7ffc000000000003)
@@ -727,7 +751,7 @@ func (g *Generator) emitTruthy(v value.Value) value.Value {
 		return v
 	}
 	if !v.Type().Equal(types.I64) {
-		v = g.emitAsFujiI64(v)
+		v = g.emitAsKodaI64(v)
 	}
 	isZero := g.block.NewICmp(enum.IPredEQ, v, constant.NewInt(types.I64, 0))
 	isNil := g.block.NewICmp(enum.IPredEQ, v, constant.NewInt(types.I64, 0x7ffc000000000001))
@@ -738,7 +762,7 @@ func (g *Generator) emitTruthy(v value.Value) value.Value {
 }
 
 // isNativeArgvCallee reports whether fn uses the embedded runtime convention
-// FujiValue fn(int argCount, FujiValue* args) (FujiValue as i64).
+// KodaValue fn(int argCount, KodaValue* args) (KodaValue as i64).
 func isNativeArgvCallee(fn *ir.Func) bool {
 	if fn == nil || len(fn.Params) != 2 {
 		return false
@@ -749,7 +773,7 @@ func isNativeArgvCallee(fn *ir.Func) bool {
 	return fn.Params[1].Typ.Equal(types.NewPointer(types.I64))
 }
 
-func (g *Generator) emitAsFujiI64(v value.Value) value.Value {
+func (g *Generator) emitAsKodaI64(v value.Value) value.Value {
 	if fn, ok := v.(*ir.Func); ok {
 		return g.block.NewPtrToInt(fn, types.I64)
 	}
@@ -777,7 +801,7 @@ func (g *Generator) emitArgvRuntime(fn *ir.Func, args []value.Value) value.Value
 	arrTy := types.NewArray(uint64(n), types.I64)
 	slot := g.entryAlloca(arrTy)
 	for i, arg := range args {
-		argI64 := g.emitAsFujiI64(arg)
+		argI64 := g.emitAsKodaI64(arg)
 		elemPtr := g.block.NewGetElementPtr(arrTy, slot, zero, constant.NewInt(types.I32, int64(i)))
 		g.block.NewStore(argI64, elemPtr)
 	}
@@ -785,8 +809,8 @@ func (g *Generator) emitArgvRuntime(fn *ir.Func, args []value.Value) value.Value
 	return g.block.NewCall(fn, constant.NewInt(types.I32, int64(n)), argvPtr)
 }
 
-// indirectFujiFuncPtrType is i64 (i64 this, i64 × argCount)* — matches every user/closure function in this backend.
-func indirectFujiFuncPtrType(argCount int) *types.PointerType {
+// indirectKodaFuncPtrType is i64 (i64 this, i64 × argCount)* — matches every user/closure function in this backend.
+func indirectKodaFuncPtrType(argCount int) *types.PointerType {
 	paramTys := make([]types.Type, 0, 1+argCount)
 	for i := 0; i < 1+argCount; i++ {
 		paramTys = append(paramTys, types.I64)
@@ -812,13 +836,13 @@ func indirectClosureFuncPtrType(nCells, nArgs int) *types.PointerType {
 	return types.NewPointer(types.NewFunc(types.I64, paramTys...))
 }
 
-// emitIndirectI64Callee calls a Fuji "function value" stored as i64: either a tagged raw function
+// emitIndirectI64Callee calls a Koda "function value" stored as i64: either a tagged raw function
 // pointer (LSB set) with ABI (this, args...), or an untagged heap pointer to { fn, n, cell0..n-1 }.
 func (g *Generator) emitIndirectI64Callee(fnVal, thisVal value.Value, args []value.Value) (value.Value, error) {
 	g.tempN++
 	suf := fmt.Sprintf(".ic%d", g.tempN)
 
-	v := g.emitAsFujiI64(fnVal)
+	v := g.emitAsKodaI64(fnVal)
 	one := constant.NewInt(types.I64, 1)
 	isRaw := g.block.NewICmp(enum.IPredEQ, g.block.NewAnd(v, one), one)
 
@@ -831,7 +855,7 @@ func (g *Generator) emitIndirectI64Callee(fnVal, thisVal value.Value, args []val
 	// --- Raw (zero-capture) function pointer: (ptr | 1) ---
 	g.block = rawB
 	maskedFn := g.block.NewAnd(v, constant.NewInt(types.I64, -2))
-	rawFnPtr := g.block.NewIntToPtr(maskedFn, indirectFujiFuncPtrType(len(args)))
+	rawFnPtr := g.block.NewIntToPtr(maskedFn, indirectKodaFuncPtrType(len(args)))
 	rawArgs := append([]value.Value{thisVal}, args...)
 	rawOut := g.block.NewCall(rawFnPtr, rawArgs...)
 	g.block.NewBr(mergeB)
@@ -910,7 +934,7 @@ func (g *Generator) emitCall(e *parser.CallExpr) (value.Value, error) {
 	}
 	fnSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(fnSlot)
-	g.block.NewStore(g.emitAsFujiI64(fnVal), fnSlot)
+	g.block.NewStore(g.emitAsKodaI64(fnVal), fnSlot)
 
 	// Set this for this call (JavaScript-like behavior)
 	var thisVal value.Value
@@ -922,7 +946,7 @@ func (g *Generator) emitCall(e *parser.CallExpr) (value.Value, error) {
 	}
 	thisSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(thisSlot)
-	g.block.NewStore(g.emitAsFujiI64(thisVal), thisSlot)
+	g.block.NewStore(g.emitAsKodaI64(thisVal), thisSlot)
 
 	var args []value.Value
 	for _, arg := range e.Arguments {
@@ -942,9 +966,16 @@ func (g *Generator) emitCall(e *parser.CallExpr) (value.Value, error) {
 			return zero, nil
 		}
 		if len(args) == 1 {
-			return g.block.NewCall(g.runtimePrint, g.emitAsFujiI64(args[0])), nil
+			return g.block.NewCall(g.runtimePrint, g.emitAsKodaI64(args[0])), nil
 		}
 		return g.emitArgvRuntime(g.runtimePrintArgv, args), nil
+	}
+
+	if fn, ok := fnVal.(*ir.Func); ok && fn == g.runtimeWarn {
+		if len(args) == 0 {
+			return constant.NewInt(types.I64, 0), nil
+		}
+		return g.emitArgvRuntime(g.runtimeWarn, args), nil
 	}
 
 	if fn, ok := fnVal.(*ir.Func); ok && fn == g.runtimeGcFrameStep {
@@ -952,7 +983,7 @@ func (g *Generator) emitCall(e *parser.CallExpr) (value.Value, error) {
 		if len(args) == 0 {
 			budget = constant.NewFloat(types.Double, 0)
 		} else {
-			budget = g.block.NewCall(g.runtimeUnboxNumber, g.emitAsFujiI64(args[0]))
+			budget = g.block.NewCall(g.runtimeUnboxNumber, g.emitAsKodaI64(args[0]))
 		}
 		g.block.NewCall(g.runtimeGcFrameStep, budget)
 		return constant.NewInt(types.I64, 0), nil
@@ -968,7 +999,7 @@ func (g *Generator) emitCall(e *parser.CallExpr) (value.Value, error) {
 			arrTy := types.NewArray(uint64(argCount), types.I64)
 			slot := g.entryAlloca(arrTy)
 			for i, arg := range args {
-				argI64 := g.emitAsFujiI64(arg)
+				argI64 := g.emitAsKodaI64(arg)
 				elemPtr := g.block.NewGetElementPtr(arrTy, slot, zero, constant.NewInt(types.I32, int64(i)))
 				g.block.NewStore(argI64, elemPtr)
 			}

@@ -1,7 +1,7 @@
 package sema
 
 import (
-	"fuji/internal/parser"
+	"koda/internal/parser"
 )
 
 type paramInfo struct {

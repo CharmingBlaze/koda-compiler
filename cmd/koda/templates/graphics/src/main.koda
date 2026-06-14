@@ -1,0 +1,52 @@
+#include "../wrappers/raylib_shim/raylib.koda"
+
+func main() {
+    let width = 640;
+    let height = 480;
+    let sky = 4278190319;
+    let white = 4294967295;
+    let paddle = 4283215696;
+
+    initwindow(width, height, "{{name}}");
+    settargetfps(60);
+
+    let ballx = 320.0;
+    let bally = 240.0;
+    let velx = 140.0;
+    let vely = 100.0;
+    let radius = 20.0;
+
+    while (!windowshouldclose()) {
+        let dt = deltatime();
+
+        ballx = ballx + velx * dt;
+        bally = bally + vely * dt;
+
+        if (ballx < radius) {
+            ballx = radius;
+            velx = -velx;
+        }
+        if (ballx > width - radius) {
+            ballx = width - radius;
+            velx = -velx;
+        }
+        if (bally < radius) {
+            bally = radius;
+            vely = -vely;
+        }
+        if (bally > height - radius) {
+            bally = height - radius;
+            vely = -vely;
+        }
+
+        begindrawing();
+        clearbackground(sky);
+        drawrectangle(0, height - 40, width, 40, paddle);
+        drawcircle(ballx, bally, radius, white);
+        drawtext("{{name}} — bouncing ball", 12, 12, 20, white);
+        enddrawing();
+        gcframestep();
+    }
+
+    closewindow();
+}

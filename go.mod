@@ -1,4 +1,4 @@
-module fuji
+module koda
 
 go 1.22
 

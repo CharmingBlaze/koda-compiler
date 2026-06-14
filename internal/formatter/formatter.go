@@ -6,11 +6,11 @@ import (
 	"strings"
 	"unicode"
 
-	"fuji/internal/lexer"
-	"fuji/internal/parser"
+	"koda/internal/lexer"
+	"koda/internal/parser"
 )
 
-// Format parses Fuji source and returns canonical spaced formatting.
+// Format parses Koda source and returns canonical spaced formatting.
 func Format(src string) (string, error) {
 	l := lexer.NewLexer(src, "")
 	tokens, err := l.Tokenize()
@@ -110,7 +110,7 @@ func (e *emitter) emitDeclCore(d parser.Decl) error {
 		return nil
 	case *parser.LetDecl:
 		if n.Native != nil {
-			e.write("// fuji:extern ")
+			e.write("// koda:extern ")
 			e.write(n.Native.BindingName)
 			e.write(" ")
 			e.write(n.Native.Symbol)
@@ -131,7 +131,7 @@ func (e *emitter) emitDeclCore(d parser.Decl) error {
 		return nil
 	case *parser.FuncDecl:
 		if n.Native != nil {
-			e.write("// fuji:extern ")
+			e.write("// koda:extern ")
 			e.write(n.Native.BindingName)
 			e.write(" ")
 			e.write(n.Native.Symbol)

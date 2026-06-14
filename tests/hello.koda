@@ -1,0 +1,5 @@
+print("Hello, Koda!");
+print("Type of 42:", type(42));
+print("Type of 'hi':", type("hi"));
+print("Type of true:", type(true));
+print("Type of null:", type(null));

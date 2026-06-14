@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Download official raylib 5.0 prebuilt SDKs and normalize to third_party/raylib_static/stage layout
-# (include/, lib/) for Fuji [vendoredRaylibStatic] + offline zips. Run from repo root in CI before SDK packaging.
+# (include/, lib/) for Koda [vendoredRaylibStatic] + offline zips. Run from repo root in CI before SDK packaging.
 #
 # Usage: vendor-raylib-stage.sh <OUT_BASE>
 #   OUT_BASE/windows-amd64/third_party/raylib_static/stage/...
@@ -18,7 +18,7 @@ RAYLIB_URL="https://github.com/raysan5/raylib/releases/download/${RAYLIB_VER}"
 mkdir -p "$OUT_BASE"
 
 tmpdir_root() {
-  mktemp -d "${TMPDIR:-/tmp}/fuji-raylib-XXXXXX"
+  mktemp -d "${TMPDIR:-/tmp}/koda-raylib-XXXXXX"
 }
 
 fetch_zip() {
@@ -98,15 +98,15 @@ write_stage() {
       ;;
     linux-arm64)
       mkdir -p "$dest"
-      cat >"$dest/README-Fuji.txt" <<'EOF'
+      cat >"$dest/README-Koda.txt" <<'EOF'
 Raylib 5.0 prebuilt binaries are not published by upstream for Linux ARM64.
 
 Options:
-  • Install system raylib (e.g. Debian/Ubuntu: libraylib-dev) and set FUJI_LINKFLAGS to your
-    -I and -l flags, plus FUJI_NATIVE_SOURCES to wrappers/raylib/wrapper.c
-  • Build from source and point FUJI_RAYLIB_STAGE at a local stage/ tree with include/ + lib/
+  • Install system raylib (e.g. Debian/Ubuntu: libraylib-dev) and set KODA_LINKFLAGS to your
+    -I and -l flags, plus KODA_NATIVE_SOURCES to wrappers/raylib/wrapper.c
+  • Build from source and point KODA_RAYLIB_STAGE at a local stage/ tree with include/ + lib/
 
-The full Fuji wrapper and headers remain in this SDK under wrappers/raylib/ and docs/guides/raylib.md.
+The full Koda wrapper and headers remain in this SDK under wrappers/raylib/ and docs/guides/raylib.md.
 EOF
       ;;
     darwin-amd64|darwin-arm64)
@@ -133,7 +133,7 @@ for slug in windows-amd64 linux-amd64 linux-arm64 darwin-amd64 darwin-arm64; do
       [[ -f "$stage/lib/libraylib.a" ]] || { echo "missing libraylib.a for $slug" >&2; exit 1; }
       ;;
     linux-arm64)
-      [[ -f "$stage/README-Fuji.txt" ]] || { echo "missing README-Fuji.txt for $slug" >&2; exit 1; }
+      [[ -f "$stage/README-Koda.txt" ]] || { echo "missing README-Koda.txt for $slug" >&2; exit 1; }
       ;;
   esac
   echo "ok: $slug -> $OUT_BASE/$slug/third_party/raylib_static/stage"

@@ -12,7 +12,7 @@ Create these (or merge with existing issues) so no capability disappears without
 
 ## LLVM path missing: user-callable `gc()` builtin
 
-**Body (draft):** If the language exposes `gc()` to scripts, wire it to the C runtime’s collector (or document that manual GC is not exposed). Verify against standard tests such as `tests/gc_test.fuji` if present.
+**Body (draft):** If the language exposes `gc()` to scripts, wire it to the C runtime’s collector (or document that manual GC is not exposed). Verify against standard tests such as `tests/gc_test.koda` if present.
 
 ---
 
@@ -36,4 +36,4 @@ Create these (or merge with existing issues) so no capability disappears without
 
 ## Documentation cleanup: dual-path references
 
-**Body (draft):** Search docs for “bytecode VM”, “fuji run (VM)”, and `internal/kuji` paths; align with single pipeline (lexer → parser → sema → codegen → `.ll` → clang).
+**Body (draft):** Search docs for “bytecode VM”, “koda run (VM)”, and `internal/parser` paths; align with single pipeline (lexer → parser → sema → codegen → `.ll` → clang).

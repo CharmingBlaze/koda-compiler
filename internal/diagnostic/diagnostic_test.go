@@ -39,9 +39,9 @@ func TestSnippetCaret(t *testing.T) {
 func TestSourceContextError(t *testing.T) {
 	src := "let x = ;\n"
 	cause := fmt.Errorf("[line 1:9] error at ';': boom")
-	e := WrapParse("/tmp/a.fuji", src, cause)
+	e := WrapParse("/tmp/a.koda", src, cause)
 	s := e.Error()
-	if !strings.Contains(s, "/tmp/a.fuji") || !strings.Contains(s, "^") {
+	if !strings.Contains(s, "/tmp/a.koda") || !strings.Contains(s, "^") {
 		t.Fatal(s)
 	}
 }
@@ -56,8 +56,8 @@ func TestIdentifierSpanAt(t *testing.T) {
 }
 
 func TestFormatErrorMultiErrorRendersChildren(t *testing.T) {
-	p1 := filepath.Join(t.TempDir(), "a.fuji")
-	p2 := filepath.Join(t.TempDir(), "b.fuji")
+	p1 := filepath.Join(t.TempDir(), "a.koda")
+	p2 := filepath.Join(t.TempDir(), "b.koda")
 	if err := os.WriteFile(p1, []byte("x\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +65,7 @@ func TestFormatErrorMultiErrorRendersChildren(t *testing.T) {
 		t.Fatal(err)
 	}
 	m := &MultiError{
-		Label: "prog.fuji",
+		Label: "prog.koda",
 		List: []error{
 			&DiagnosticError{File: p1, Line: 1, Col: 1, Message: "first"},
 			&DiagnosticError{File: p2, Line: 1, Col: 1, Message: "second"},
@@ -78,7 +78,7 @@ func TestFormatErrorMultiErrorRendersChildren(t *testing.T) {
 }
 
 func TestFormatErrorDiagnosticSnippet(t *testing.T) {
-	path := t.TempDir() + "/t.fuji"
+	path := t.TempDir() + "/t.koda"
 	src := "let a = 1;\nlet b = mistyped + 2;\n"
 	if err := os.WriteFile(path, []byte(src), 0o644); err != nil {
 		t.Fatal(err)

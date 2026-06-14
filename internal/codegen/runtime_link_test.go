@@ -24,7 +24,7 @@ func llvmRuntimeSymbols(t *testing.T) []string {
 		if name == "llvm.dbg.value" {
 			continue
 		}
-		if !strings.HasPrefix(name, "fuji_") {
+		if !strings.HasPrefix(name, "koda_") {
 			continue
 		}
 		if _, ok := seen[name]; ok {
@@ -42,9 +42,9 @@ func TestRuntimeLLVMSymbolsDefinedInArchive(t *testing.T) {
 		t.Fatal("runtime.Caller failed")
 	}
 	root := filepath.Clean(filepath.Join(filepath.Dir(thisFile), "..", ".."))
-	lib := filepath.Join(root, "runtime", "libfuji_runtime.a")
+	lib := filepath.Join(root, "runtime", "libkoda_runtime.a")
 	if _, err := os.Stat(lib); err != nil {
-		t.Skip("runtime/libfuji_runtime.a not present; run `make -C runtime` or scripts/build-runtime.ps1")
+		t.Skip("runtime/libkoda_runtime.a not present; run `make -C runtime` or scripts/build-runtime.ps1")
 	}
 	nm, err := exec.LookPath("llvm-nm")
 	if err != nil {
@@ -68,7 +68,7 @@ func TestRuntimeLLVMSymbolsDefinedInArchive(t *testing.T) {
 			continue
 		}
 		sym := fields[len(fields)-1]
-		if strings.HasPrefix(sym, "fuji_") {
+		if strings.HasPrefix(sym, "koda_") {
 			defined[sym] = true
 		}
 	}
@@ -105,7 +105,7 @@ func TestRuntimeLLVMSymbolsMentionedInSources(t *testing.T) {
 	for _, sym := range llvmRuntimeSymbols(t) {
 		re := regexp.MustCompile(`\b` + regexp.QuoteMeta(sym) + `\s*\(`)
 		if !re.MatchString(combined) {
-			t.Errorf("LLVM runtime symbol %q has no definition-like occurrence in runtime/src/*.c (update fuji_runtime.c or runtime.go)", sym)
+			t.Errorf("LLVM runtime symbol %q has no definition-like occurrence in runtime/src/*.c (update koda_runtime.c or runtime.go)", sym)
 		}
 	}
 }

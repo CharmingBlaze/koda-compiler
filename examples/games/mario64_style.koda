@@ -1,0 +1,284 @@
+#include "../../wrappers/raylib_shim/raylib.koda"
+
+let sky = 0xFFFFD8A8;
+
+let ground = 0xFF2F7F2F;
+
+let white = 0xFFFFFFFF;
+
+let black = 0xFF000000;
+
+let red = 0xFF0000FF;
+
+let yellow = 0xFF00FFFF;
+
+let blue = 0xFFFF7F00;
+
+let green = 0xFF00FF00;
+
+let sw = 1280;
+
+let sh = 720;
+
+let key_w = 87;
+
+let key_s = 83;
+
+let key_a = 65;
+
+let key_d = 68;
+
+let key_space = 32;
+
+let playerx = 0.0;
+
+let playery = 1.0;
+
+let playerz = 0.0;
+
+let player_radius = 0.6;
+
+let player_speed = 7.0;
+
+let vel_y = 0.0;
+
+let gravity = -18.0;
+
+let jump_speed = 8.5;
+
+let grounded = true;
+
+let score = 0;
+
+let lives = 3;
+
+let goal_score = 5;
+
+let coin1x = 6.0;
+
+let coin1z = 6.0;
+
+let coin1_on = true;
+
+let coin2x = -6.0;
+
+let coin2z = 7.0;
+
+let coin2_on = true;
+
+let coin3x = -9.0;
+
+let coin3z = -5.0;
+
+let coin3_on = true;
+
+let coin4x = 8.0;
+
+let coin4z = -8.0;
+
+let coin4_on = true;
+
+let coin5x = 0.0;
+
+let coin5z = 10.0;
+
+let coin5_on = true;
+
+let hazardx = 2.0;
+
+let hazardz = -2.0;
+
+let hazard_half = 1.5;
+
+let hazard_dir = 1.0;
+
+let txt_title = "KODA 64 PROTOTYPE";
+
+let txt_help = "WASD MOVE  SPACE JUMP";
+
+let txt_win = "STAR GET! PRESS R TO RESTART";
+
+let txt_lose = "GAME OVER  PRESS R TO RESTART";
+
+func dist2(x1, z1, x2, z2) {
+    let dx = x1 - x2;
+    let dz = z1 - z2;
+    return dx * dx + dz * dz;
+}
+
+func reset_game() {
+    playerx = 0.0;
+    playery = 1.0;
+    playerz = 0.0;
+    vel_y = 0.0;
+    grounded = true;
+    score = 0;
+    lives = 3;
+    coin1_on = true;
+    coin2_on = true;
+    coin3_on = true;
+    coin4_on = true;
+    coin5_on = true;
+}
+
+initwindow(sw, sh, "Koda + raylib Mario 64 style");
+settargetfps(60);
+
+while (!windowshouldclose()) {
+    let dt = deltatime();
+    gcframestep(0.25);
+    if (iskeypressed(82)) {
+        reset_game();
+    }
+    if (score < goal_score && lives > 0) {
+        let movex = 0.0;
+        let movez = 0.0;
+        if (iskeydown(key_w)) {
+            movez -= 1.0;
+        }
+        if (iskeydown(key_s)) {
+            movez += 1.0;
+        }
+        if (iskeydown(key_a)) {
+            movex -= 1.0;
+        }
+        if (iskeydown(key_d)) {
+            movex += 1.0;
+        }
+        playerx += movex * player_speed * dt;
+        playerz += movez * player_speed * dt;
+        if (grounded && iskeypressed(key_space)) {
+            vel_y = jump_speed;
+            grounded = false;
+        }
+        vel_y += gravity * dt;
+        playery += vel_y * dt;
+        if (playery <= 1.0) {
+            playery = 1.0;
+            vel_y = 0.0;
+            grounded = true;
+        }
+        if (playerx < -14.0) {
+            playerx = -14.0;
+        }
+        if (playerx > 14.0) {
+            playerx = 14.0;
+        }
+        if (playerz < -14.0) {
+            playerz = -14.0;
+        }
+        if (playerz > 14.0) {
+            playerz = 14.0;
+        }
+        if (coin1_on && dist2(playerx, playerz, coin1x, coin1z) < 1.6) {
+            coin1_on = false;
+            score += 1;
+        }
+        if (coin2_on && dist2(playerx, playerz, coin2x, coin2z) < 1.6) {
+            coin2_on = false;
+            score += 1;
+        }
+        if (coin3_on && dist2(playerx, playerz, coin3x, coin3z) < 1.6) {
+            coin3_on = false;
+            score += 1;
+        }
+        if (coin4_on && dist2(playerx, playerz, coin4x, coin4z) < 1.6) {
+            coin4_on = false;
+            score += 1;
+        }
+        if (coin5_on && dist2(playerx, playerz, coin5x, coin5z) < 1.6) {
+            coin5_on = false;
+            score += 1;
+        }
+        hazardx += hazard_dir * 5.0 * dt;
+        if (hazardx > 8.0) {
+            hazardx = 8.0;
+            hazard_dir = -1.0;
+        } else
+            if (hazardx < -4.0) {
+                hazardx = -4.0;
+                hazard_dir = 1.0;
+            }
+        if (dist2(playerx, playerz, hazardx, hazardz) < hazard_half * hazard_half) {
+            lives -= 1;
+            playerx = 0.0;
+            playerz = 0.0;
+            playery = 1.0;
+            vel_y = 0.0;
+            grounded = true;
+        }
+    }
+    let camx = playerx - 8.0;
+    let camy = playery + 7.0;
+    let camz = playerz + 8.0;
+    begindrawing();
+    clearbackground(sky);
+    beginmode3d(camx, camy, camz, playerx, playery, playerz, 0.0, 1.0, 0.0, 45.0);
+    drawcube(0.0, -0.6, 0.0, 30.0, 1.0, 30.0, ground);
+    drawgrid(30, 1.0);
+    drawcube(playerx, playery, playerz, player_radius, 1.2, player_radius, red);
+    drawcubewires(playerx, playery, playerz, player_radius, 1.2, player_radius, black);
+    if (coin1_on) {
+        drawcube(coin1x, 1.4, coin1z, 0.5, 0.5, 0.5, yellow);
+    }
+    if (coin2_on) {
+        drawcube(coin2x, 1.4, coin2z, 0.5, 0.5, 0.5, yellow);
+    }
+    if (coin3_on) {
+        drawcube(coin3x, 1.4, coin3z, 0.5, 0.5, 0.5, yellow);
+    }
+    if (coin4_on) {
+        drawcube(coin4x, 1.4, coin4z, 0.5, 0.5, 0.5, yellow);
+    }
+    if (coin5_on) {
+        drawcube(coin5x, 1.4, coin5z, 0.5, 0.5, 0.5, yellow);
+    }
+    drawcube(hazardx, 0.6, hazardz, hazard_half * 2.0, 1.2, hazard_half * 2.0, blue);
+    drawcubewires(hazardx, 0.6, hazardz, hazard_half * 2.0, 1.2, hazard_half * 2.0, black);
+    endmode3d();
+    drawtext(txt_title, 20, 20, 30, white);
+    drawtext(txt_help, 20, 60, 22, white);
+    drawtext("COINS", 20, 95, 26, yellow);
+    drawrectangle(120, 102, 24, 24, black);
+    drawrectangle(148, 102, 24, 24, black);
+    drawrectangle(176, 102, 24, 24, black);
+    drawrectangle(204, 102, 24, 24, black);
+    drawrectangle(232, 102, 24, 24, black);
+    if (score >= 1) {
+        drawrectangle(120, 102, 24, 24, yellow);
+    }
+    if (score >= 2) {
+        drawrectangle(148, 102, 24, 24, yellow);
+    }
+    if (score >= 3) {
+        drawrectangle(176, 102, 24, 24, yellow);
+    }
+    if (score >= 4) {
+        drawrectangle(204, 102, 24, 24, yellow);
+    }
+    if (score >= 5) {
+        drawrectangle(232, 102, 24, 24, yellow);
+    }
+    drawtext("LIVES", 20, 135, 26, white);
+    drawrectangle(120, 142, 24, 24, black);
+    drawrectangle(148, 142, 24, 24, black);
+    drawrectangle(176, 142, 24, 24, black);
+    if (lives >= 1) {
+        drawrectangle(120, 142, 24, 24, red);
+    }
+    if (lives >= 2) {
+        drawrectangle(148, 142, 24, 24, red);
+    }
+    if (lives >= 3) {
+        drawrectangle(176, 142, 24, 24, red);
+    }
+    if (score >= goal_score) {
+        drawtext(txt_win, 310, 340, 30, green);
+    } else
+        if (lives <= 0) {
+            drawtext(txt_lose, 340, 340, 30, red);
+        }
+    enddrawing();
+}
+
+closewindow();

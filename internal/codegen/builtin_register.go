@@ -6,7 +6,7 @@ import (
 	"github.com/llir/llvm/ir"
 )
 
-// registerBuiltinFuncs binds Fuji global names to runtime LLVM symbols for native emission.
+// registerBuiltinFuncs binds Koda global names to runtime LLVM symbols for native emission.
 func (g *Generator) registerBuiltinFuncs() {
 	pairs := []struct {
 		name string
@@ -18,7 +18,9 @@ func (g *Generator) registerBuiltinFuncs() {
 		{"assert", g.runtimeAssert},
 		{"deltaTime", g.runtimeDeltaTime},
 		{"print", g.runtimePrint},
+		{"warn", g.runtimeWarn},
 		{"len", g.runtimeLen},
+		{"keys", g.runtimeKeys},
 		{"type", g.runtimeType},
 		{"typeof", g.runtimeType},
 		{"matches", g.runtimeMatches},
@@ -49,6 +51,7 @@ func (g *Generator) registerBuiltinFuncs() {
 		{"exp", g.runtimeExp},
 		{"log", g.runtimeLog},
 		{"log10", g.runtimeLog10},
+		{"log2", g.runtimeLog2},
 		{"floor", g.runtimeFloor},
 		{"ceil", g.runtimeCeil},
 		{"round", g.runtimeRound},
@@ -80,11 +83,16 @@ func (g *Generator) registerBuiltinFuncs() {
 		{"appendFile", g.runtimeAppendFile},
 		{"fileExists", g.runtimeFileExists},
 		{"deleteFile", g.runtimeDeleteFile},
+		{"isFile", g.runtimeIsFile},
+		{"isDir", g.runtimeIsDir},
+		{"fileSize", g.runtimeFileSize},
+		{"listDir", g.runtimeListDir},
 		{"trace", g.runtimeTrace},
 		{"parseJSON", g.runtimeParseJSON},
 		{"toJSON", g.runtimeToJSON},
 		{"abs", g.runtimeAbs},
 		{"sqrt", g.runtimeSqrt},
+		{"cbrt", g.runtimeCbrt},
 		{"number", g.runtimeNumber},
 		{"string", g.runtimeString},
 		{"gc", g.runtimeGcCollect},

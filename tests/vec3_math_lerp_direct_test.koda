@@ -1,0 +1,9 @@
+#include "../stdlib/vec3.koda"
+
+func main() {
+    let a = create(0, 0, 0);
+    let b = create(10, 0, 0);
+    let x = math.lerp(a.x, b.x, 0.5);
+    assert(x == 5.0, "x");
+    print("PASS vec3_math_lerp_direct");
+}

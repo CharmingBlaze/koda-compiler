@@ -2,7 +2,7 @@ package parser
 
 import (
 	"fmt"
-	"fuji/internal/lexer"
+	"koda/internal/lexer"
 	"strings"
 )
 
@@ -50,7 +50,7 @@ func (p *Program) String() string {
 }
 
 type NativeDirective struct {
-	BindingName string // Fuji/Fuji binding name in source (first token after // fuji:extern)
+	BindingName string // Koda/Koda binding name in source (first token after // koda:extern)
 	Symbol      string // C symbol to link
 	Arity       int
 }
@@ -59,7 +59,7 @@ type LetDecl struct {
 	Token  lexer.Token
 	Name   lexer.Token
 	Init   Expr             // optional
-	Native *NativeDirective // from // fuji:extern (legacy extern directive still accepted)
+	Native *NativeDirective // from // koda:extern (legacy extern directive still accepted)
 }
 
 func (d *LetDecl) declNode() {}
@@ -67,7 +67,7 @@ func (d *LetDecl) stmtNode() {}
 func (d *LetDecl) String() string {
 	prefix := ""
 	if d.Native != nil {
-		prefix = fmt.Sprintf("// fuji:extern %s %s %d\n", d.Native.BindingName, d.Native.Symbol, d.Native.Arity)
+		prefix = fmt.Sprintf("// koda:extern %s %s %d\n", d.Native.BindingName, d.Native.Symbol, d.Native.Arity)
 	}
 	if d.Init == nil {
 		return prefix + fmt.Sprintf("let %s;", d.Name.Lexeme)
@@ -118,7 +118,7 @@ func (d *FuncDecl) String() string {
 	}
 	prefix := ""
 	if d.Native != nil {
-		prefix = fmt.Sprintf("// fuji:extern %s %s %d\n", d.Native.BindingName, d.Native.Symbol, d.Native.Arity)
+		prefix = fmt.Sprintf("// koda:extern %s %s %d\n", d.Native.BindingName, d.Native.Symbol, d.Native.Arity)
 	}
 	return prefix + fmt.Sprintf("func %s(%s) %s", d.Name.Lexeme, strings.Join(params, ", "), d.Body.String())
 }

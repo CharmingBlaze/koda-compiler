@@ -2,7 +2,7 @@ package parser
 
 import (
 	"fmt"
-	"fuji/internal/lexer"
+	"koda/internal/lexer"
 )
 
 type Parser struct {

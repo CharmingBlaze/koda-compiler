@@ -1,13 +1,13 @@
 # mylib - Examples
 
-Copy any snippet into your Fuji program and adjust the arguments.
+Copy any snippet into your Koda program and adjust the arguments.
 
 ---
 
 ## Include the library
 
-```fuji
-#include "mylib.fuji"
+```koda
+#include "mylib.koda"
 ```
 
 ---
@@ -16,14 +16,14 @@ Copy any snippet into your Fuji program and adjust the arguments.
 
 ### add_ints
 
-```fuji
+```koda
 let result = add_ints(a, b);
 print(result);
 ```
 
 ### triple_int
 
-```fuji
+```koda
 let result = triple_int(value);
 print(result);
 ```

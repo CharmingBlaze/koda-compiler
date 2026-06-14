@@ -1,0 +1,37 @@
+// RNG + timer helpers smoke test
+
+randomseed(42);
+let a = random();
+let b = random();
+assert(a >= 0.0 && a < 1.0, "random unit range");
+assert(b >= 0.0 && b < 1.0, "random unit range");
+
+randomseed(42);
+let a2 = random();
+assert(a == a2, "randomseed reproducibility");
+
+let n = randomint(10, 20);
+assert(n >= 10 && n < 20, "randomint range");
+
+let pick = randomchoice(["a", "b", "c"]);
+assert(pick == "a" || pick == "b" || pick == "c", "randomchoice");
+
+let math = import "@math";
+assert(math.abs(math.cbrt(27) - 3.0) < 0.001, "math.cbrt");
+assert(type(math.randomrange(1.0, 2.0)) == "number", "math.randomrange");
+
+#include "../stdlib/timer.koda"
+
+let cd = cooldown(0.05);
+assert(cooldown_try(cd) == true, "cooldown first fire");
+assert(cooldown_try(cd) == false, "cooldown blocked");
+cooldown_reset(cd);
+assert(cooldown_try(cd) == true, "cooldown reset");
+
+let t = create(1.0);
+t = update(t, 0.5);
+assert(!done(t), "timer not done");
+t = update(t, 0.6);
+assert(done(t), "timer done");
+
+print("PASS random_test");

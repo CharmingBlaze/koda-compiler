@@ -1,4 +1,4 @@
-# Fuji Implementation Roadmap
+# Koda Implementation Roadmap
 
 **Execution model:** this repository targets **one pipeline** — LLVM IR emission (`internal/codegen`) plus the C runtime (`runtime/src`). There is no bytecode interpreter in-tree.
 
@@ -8,7 +8,7 @@
 ```
 Runtime (C) → Codegen (LLVM) → Linking → Executables
      ↓
-   KujiWrap (depends on working compiler)
+   Kodawrap (depends on working compiler)
      ↓
 Distribution
 ```
@@ -17,7 +17,7 @@ Distribution
 - **High Risk**: C runtime implementation (GC correctness, performance)
 - **High Risk**: LLVM codegen (function calls, closures, object model)
 - **Medium Risk**: Cross-platform linking (musl, MinGW, lipo)
-- **Low Risk**: KujiWrap (can iterate independently)
+- **Low Risk**: Kodawrap (can iterate independently)
 
 ## Week-by-Week Plan
 
@@ -82,12 +82,12 @@ Distribution
 - Test: object file links to executable
 
 **Day 5: CLI Integration**
-- Implement `fuji build` command
-- Implement `fuji run` command (native temp binary)
-- Implement `fuji version` command
-- Test: `fuji build hello.fuji -o hello` produces working executable
+- Implement `koda build` command
+- Implement `koda run` command (native temp binary)
+- Implement `koda version` command
+- Test: `koda build hello.koda -o hello` produces working executable
 
-**Deliverable**: Can compile and run Fuji programs
+**Deliverable**: Can compile and run Koda programs
 
 ### Week 4: GC Optimization
 **Goal**: GC pauses <5ms for 99% of collections
@@ -131,7 +131,7 @@ Distribution
 
 **Deliverable**: Complete standard library
 
-### Week 6: KujiWrap Implementation
+### Week 6: Kodawrap Implementation
 **Goal**: Generate professional C/C++ bindings
 
 **Day 1-2: libclang Integration**
@@ -140,9 +140,9 @@ Distribution
 - Test: can parse C headers
 
 **Day 3-4: Code Generation**
-- Generate .fuji wrapper files
+- Generate .koda wrapper files
 - Generate .md documentation
-- Implement type mapping (C → Fuji)
+- Implement type mapping (C → Koda)
 - Test: generates working wrapper
 
 **Day 5: Examples**
@@ -150,7 +150,7 @@ Distribution
 - Generate SDL2 bindings
 - Test: bindings compile and work
 
-**Deliverable**: KujiWrap generates working bindings
+**Deliverable**: Kodawrap generates working bindings
 
 ### Week 7: Distribution & Release
 **Goal**: Ship cross-platform binaries
@@ -223,7 +223,7 @@ Distribution
 - ⏳ Can build standalone executables
 - ⏳ GC pauses <5ms (99th percentile)
 - ⏳ Standard library complete
-- ⏳ KujiWrap generates bindings
+- ⏳ Kodawrap generates bindings
 - ⏳ Cross-platform distribution
 - ⏳ Comprehensive documentation
 

@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"fuji/internal/fujihome"
+	"koda/internal/kodahome"
 )
 
 // ClangParser uses clang to extract accurate C/C++ API information
@@ -39,8 +39,8 @@ func (cp *ClangParser) ParseWithClang(headers []string) (*API, error) {
 	if cp.config.Verbose {
 		extractLog = func(s string) { fmt.Print(s) }
 	}
-	if err := fujihome.EnsureEnvironment(extractLog); err != nil {
-		return nil, fmt.Errorf("fujiwrap needs the same bundled Clang as fuji: %w", err)
+	if err := kodahome.EnsureEnvironment(extractLog); err != nil {
+		return nil, fmt.Errorf("kodawrap needs the same bundled Clang as koda: %w", err)
 	}
 
 	api := &API{
@@ -87,8 +87,8 @@ func (cp *ClangParser) parseHeaderWithClang(headerPath string) (*API, error) {
 			inc = append(inc, "-I", d)
 		}
 	}
-	args := fujihome.ClangWrappedArgs(append(inc, "-Xclang", "-ast-dump", "-fsyntax-only", headerPath)...)
-	cmd := exec.Command(fujihome.Clang(), args...)
+	args := kodahome.ClangWrappedArgs(append(inc, "-Xclang", "-ast-dump", "-fsyntax-only", headerPath)...)
+	cmd := exec.Command(kodahome.Clang(), args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("clang failed: %v, output: %s", err, string(output))

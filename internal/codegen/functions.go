@@ -9,15 +9,15 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
-	"fuji/internal/parser"
-	"fuji/internal/sema"
+	"koda/internal/parser"
+	"koda/internal/sema"
 )
 
 // emitFuncDecl emits LLVM IR for function declarations.
 func (g *Generator) emitFuncDecl(d *parser.FuncDecl) error {
 	name := d.Name.Lexeme
 
-	// Handle native function declarations from // fuji:extern (legacy extern directive)
+	// Handle native function declarations from // koda:extern (legacy extern directive)
 	if d.Native != nil {
 		// Native functions use the VM ABI: Value fn(int argCount, Value* args)
 		// which maps to: i64 fn(i32, i64*)
@@ -27,8 +27,10 @@ func (g *Generator) emitFuncDecl(d *parser.FuncDecl) error {
 	}
 
 	llvmName := name
-	if strings.EqualFold(name, "main") {
-		llvmName = "fuji_user_main"
+	if g.moduleEmitPath != "" && !strings.EqualFold(name, "main") {
+		llvmName = moduleFuncLLVMName(g.moduleEmitPath, name)
+	} else if strings.EqualFold(name, "main") {
+		llvmName = "koda_user_main"
 	}
 
 	// Create function parameters, always starting with 'this'
@@ -76,7 +78,7 @@ func (g *Generator) emitFuncDecl(d *parser.FuncDecl) error {
 		key := sema.NewParamCellKey(d, i)
 		if g.ctx.ParamIsCell[key] {
 			cell := g.block.NewCall(g.runtimeAllocCell)
-			g.block.NewCall(g.runtimeCellWrite, cell, g.emitAsFujiI64(fn.Params[i+1]))
+			g.block.NewCall(g.runtimeCellWrite, cell, g.emitAsKodaI64(fn.Params[i+1]))
 			g.locals[param.Name] = cell
 			g.localIsCell[param.Name] = true
 		} else {
@@ -177,7 +179,7 @@ func (g *Generator) emitFuncExpr(e *parser.FuncExpr) (value.Value, error) {
 		key := sema.NewParamCellKey(e, i)
 		if g.ctx.ParamIsCell[key] {
 			cell := g.block.NewCall(g.runtimeAllocCell)
-			g.block.NewCall(g.runtimeCellWrite, cell, g.emitAsFujiI64(fn.Params[paramOffset+i]))
+			g.block.NewCall(g.runtimeCellWrite, cell, g.emitAsKodaI64(fn.Params[paramOffset+i]))
 			g.locals[param.Name] = cell
 			g.localIsCell[param.Name] = true
 		} else {

@@ -1,6 +1,6 @@
-# Raylib + Fuji — Complete Guide
+# Raylib + Koda — Complete Guide
 
-Raylib is Fuji's built-in graphics library for making games and apps with windows, drawing, input, audio, and more. Fuji ships with a ready-to-use wrapper — you don't have to write any C to make a game.
+Raylib is Koda's built-in graphics library for making games and apps with windows, drawing, input, audio, and more. Koda ships with a ready-to-use wrapper — you don't have to write any C to make a game.
 
 This guide covers:
 1. [How the wrapper system works](#1-how-the-wrapper-system-works)
@@ -17,19 +17,19 @@ This guide covers:
 
 ## 1. How the wrapper system works
 
-Fuji can call C libraries by linking them into your binary. The wrapper has two parts:
+Koda can call C libraries by linking them into your binary. The wrapper has two parts:
 
 | File | What it is |
 |------|------------|
-| `wrappers/raylib_shim/raylib.fuji` | Fuji-side declarations — binds Fuji names to C symbols |
-| `wrappers/raylib_min/raylib_bridge.c` | C glue — converts Fuji values to C types and calls raylib |
+| `wrappers/raylib_shim/raylib.koda` | Koda-side declarations — binds Koda names to C symbols |
+| `wrappers/raylib_min/raylib_bridge.c` | C glue — converts Koda values to C types and calls raylib |
 
-When you run `fuji build`, you point it at the C glue file with the `FUJI_NATIVE_SOURCES` environment variable. The compiler includes it in the same clang link step as your program — no separate compilation needed.
+When you run `koda build`, you point it at the C glue file with the `KODA_NATIVE_SOURCES` environment variable. The compiler includes it in the same clang link step as your program — no separate compilation needed.
 
-The Fuji side uses `// fuji:extern` directives. Each line wires a Fuji name to a C function and declares the argument count:
+The Koda side uses `// koda:extern` directives. Each line wires a Koda name to a C function and declares the argument count:
 
-```fuji
-// fuji:extern initwindow fuji_shim_InitWindow 3
+```koda
+// koda:extern initwindow koda_shim_InitWindow 3
 let initwindow = 0;
 ```
 
@@ -41,57 +41,57 @@ After the `#include`, `initwindow(800, 600, "My Game")` calls straight into the 
 
 ### Step 1 — Include the wrapper
 
-At the top of your `.fuji` file:
+At the top of your `.koda` file:
 
-```fuji
-#include "../../wrappers/raylib_shim/raylib.fuji"
+```koda
+#include "../../wrappers/raylib_shim/raylib.koda"
 ```
 
 Adjust the path to be relative to your file. If your game is in the project root, it's just:
 
-```fuji
-#include "wrappers/raylib_shim/raylib.fuji"
+```koda
+#include "wrappers/raylib_shim/raylib.koda"
 ```
 
 ### Step 2 — Set the bridge file
 
-Before running, tell Fuji where the C glue is. Do this once in your terminal session:
+Before running, tell Koda where the C glue is. Do this once in your terminal session:
 
 **Windows (PowerShell):**
 ```powershell
-$env:FUJI_NATIVE_SOURCES = "wrappers\raylib_min\raylib_bridge.c"
+$env:KODA_NATIVE_SOURCES = "wrappers\raylib_min\raylib_bridge.c"
 ```
 
 **Windows (cmd):**
 ```cmd
-set FUJI_NATIVE_SOURCES=wrappers\raylib_min\raylib_bridge.c
+set KODA_NATIVE_SOURCES=wrappers\raylib_min\raylib_bridge.c
 ```
 
 **Linux / macOS:**
 ```bash
-export FUJI_NATIVE_SOURCES=wrappers/raylib_min/raylib_bridge.c
+export KODA_NATIVE_SOURCES=wrappers/raylib_min/raylib_bridge.c
 ```
 
 ### Step 3 — Run or build
 
 ```
-fuji run mygame.fuji
-fuji build mygame.fuji -o mygame.exe
+koda run mygame.koda
+koda build mygame.koda -o mygame.exe
 ```
 
 ### Minimal working program
 
-```fuji
-#include "wrappers/raylib_shim/raylib.fuji"
+```koda
+#include "wrappers/raylib_shim/raylib.koda"
 
 func main() {
-    InitWindow(800, 450, "Hello from Fuji!");
+    InitWindow(800, 450, "Hello from Koda!");
     SetTargetFPS(60);
 
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(0x181818FF);
-        DrawText("Hello, Fuji!", 300, 200, 30, 0xFFFFFFFF);
+        DrawText("Hello, Koda!", 300, 200, 30, 0xFFFFFFFF);
         EndDrawing();
     }
 
@@ -103,7 +103,7 @@ func main() {
 
 ## 3. Available raylib functions
 
-All names are **case-insensitive** when called from Fuji.
+All names are **case-insensitive** when called from Koda.
 
 ### Window
 
@@ -151,7 +151,7 @@ Call these **between** `BeginDrawing()` and `EndDrawing()` every frame.
 
 Colors are passed as a single **hex integer** in `0xRRGGBBAA` format (red, green, blue, alpha — all 0–255).
 
-```fuji
+```koda
 let black   = 0x000000FF;
 let white   = 0xFFFFFFFF;
 let red     = 0xFF0000FF;
@@ -166,7 +166,7 @@ let darkgray = 0x303030FF;
 
 Build a color from individual components (0–255 each):
 
-```fuji
+```koda
 func rgba(r, g, b, a) {
     return ((r & 255) << 24) | ((g & 255) << 16) | ((b & 255) << 8) | (a & 255);
 }
@@ -180,7 +180,7 @@ let myColor = rgba(100, 200, 50, 255);
 
 The easiest way to use key codes is to define constants at the top of your file, the same way the examples do:
 
-```fuji
+```koda
 let KEY_LEFT  = 263;
 let KEY_RIGHT = 262;
 let KEY_UP    = 265;
@@ -217,26 +217,26 @@ let KEY_P = 80;
 The raylib shim doesn't currently expose mouse functions. If you need mouse position, add them to `wrappers/raylib_min/raylib_bridge.c` using the same pattern as the existing functions:
 
 ```c
-FujiValue rl_get_mouse_x(int argCount, FujiValue* args) {
+KodaValue rl_get_mouse_x(int argCount, KodaValue* args) {
     return NUMBER_VAL(GetMouseX());
 }
-FujiValue rl_get_mouse_y(int argCount, FujiValue* args) {
+KodaValue rl_get_mouse_y(int argCount, KodaValue* args) {
     return NUMBER_VAL(GetMouseY());
 }
-FujiValue rl_is_mouse_button_down(int argCount, FujiValue* args) {
+KodaValue rl_is_mouse_button_down(int argCount, KodaValue* args) {
     if (argCount < 1) return BOOL_VAL(false);
     return BOOL_VAL(IsMouseButtonDown(knum(args[0])));
 }
 ```
 
-Then declare them in your `.fuji` file:
+Then declare them in your `.koda` file:
 
-```fuji
-// fuji:extern getmousex rl_get_mouse_x 0
+```koda
+// koda:extern getmousex rl_get_mouse_x 0
 let getmousex = 0;
-// fuji:extern getmousey rl_get_mouse_y 0
+// koda:extern getmousey rl_get_mouse_y 0
 let getmousey = 0;
-// fuji:extern ismousebuttondown rl_is_mouse_button_down 1
+// koda:extern ismousebuttondown rl_is_mouse_button_down 1
 let ismousebuttondown = 0;
 ```
 
@@ -250,18 +250,18 @@ We'll build a **Pong** game from scratch. Two paddles, a ball, score tracking, a
 
 ```
 mygame/
-  pong.fuji
+  pong.koda
 ```
 
 Run from the project root (where `wrappers/` lives):
 ```
-fuji run mygame/pong.fuji
+koda run mygame/pong.koda
 ```
 
 ### The complete game
 
-```fuji
-#include "wrappers/raylib_shim/raylib.fuji"
+```koda
+#include "wrappers/raylib_shim/raylib.koda"
 
 // ── Screen ────────────────────────────────────────────────────
 let SW = 800;
@@ -326,7 +326,7 @@ func ballHitsPaddle(b, p) {
 
 // ── Main ──────────────────────────────────────────────────────
 func main() {
-    InitWindow(SW, SH, "Pong — Fuji");
+    InitWindow(SW, SH, "Pong — Koda");
     SetTargetFPS(60);
 
     let p1    = makePaddle(20);
@@ -449,41 +449,41 @@ func main() {
 Set the bridge (once per terminal session):
 
 ```powershell
-$env:FUJI_NATIVE_SOURCES = "wrappers\raylib_min\raylib_bridge.c"
-fuji run mygame\pong.fuji
+$env:KODA_NATIVE_SOURCES = "wrappers\raylib_min\raylib_bridge.c"
+koda run mygame\pong.koda
 ```
 
 ```bash
-export FUJI_NATIVE_SOURCES=wrappers/raylib_min/raylib_bridge.c
-fuji run mygame/pong.fuji
+export KODA_NATIVE_SOURCES=wrappers/raylib_min/raylib_bridge.c
+koda run mygame/pong.koda
 ```
 
 ### Building a distributable binary
 
 ```powershell
-$env:FUJI_NATIVE_SOURCES = "wrappers\raylib_min\raylib_bridge.c"
-fuji build mygame\pong.fuji -o dist\pong.exe
+$env:KODA_NATIVE_SOURCES = "wrappers\raylib_min\raylib_bridge.c"
+koda build mygame\pong.koda -o dist\pong.exe
 ```
 
-Copy `raylib.dll` next to `pong.exe` if using a dynamic-link build, or use `fuji bundle` to pack everything:
+Copy `raylib.dll` next to `pong.exe` if using a dynamic-link build, or use `koda bundle` to pack everything:
 
 ```powershell
-$env:FUJI_BUNDLE_FILES = "raylib.dll"
-fuji bundle mygame\pong.fuji -o dist\pong
+$env:KODA_BUNDLE_FILES = "raylib.dll"
+koda bundle mygame\pong.koda -o dist\pong
 ```
 
 ---
 
 ## 8. Generating a fresh wrapper
 
-If you want access to more raylib functions than the shim provides, use `fujiwrap` to generate bindings from the full `raylib.h` header:
+If you want access to more raylib functions than the shim provides, use `kodawrap` to generate bindings from the full `raylib.h` header:
 
 ```powershell
 # Build the wrapper generator first
-go build -o bin\fujiwrap.exe .\cmd\wrapgen
+go build -o bin\kodawrap.exe .\cmd\wrapgen
 
 # Generate bindings from the header
-.\bin\fujiwrap.exe `
+.\bin\kodawrap.exe `
   -name raylib `
   -headers .\raylib_lib\raylib-5.0_win64_mingw-w64\include\raylib.h `
   -out .\wrappers\raylib_generated
@@ -492,23 +492,23 @@ go build -o bin\fujiwrap.exe .\cmd\wrapgen
 This creates:
 ```
 wrappers/raylib_generated/
-  raylib.fuji        — all functions declared with fuji:extern
+  raylib.koda        — all functions declared with koda:extern
   wrapper.c          — full C glue for every function
   api_reference.md   — auto-generated function reference
 ```
 
 Then use the generated wrapper instead of the shim:
 
-```fuji
-#include "wrappers/raylib_generated/raylib.fuji"
+```koda
+#include "wrappers/raylib_generated/raylib.koda"
 ```
 
 And set:
 ```powershell
-$env:FUJI_NATIVE_SOURCES = "wrappers\raylib_generated\wrapper.c"
+$env:KODA_NATIVE_SOURCES = "wrappers\raylib_generated\wrapper.c"
 ```
 
-The full generated wrapper (`wrappers/raylib/raylib.fuji`) is already included in the repo — it covers hundreds of raylib functions.
+The full generated wrapper (`wrappers/raylib/raylib.koda`) is already included in the repo — it covers hundreds of raylib functions.
 
 ---
 
@@ -516,21 +516,21 @@ The full generated wrapper (`wrappers/raylib/raylib.fuji`) is already included i
 
 | Variable | What it does |
 |----------|-------------|
-| `FUJI_NATIVE_SOURCES` | Path to the C bridge file to compile and link. Set to `wrappers\raylib_min\raylib_bridge.c` for the shim, or `wrappers\raylib\wrapper.c` for the full wrapper. |
-| `FUJI_LINKFLAGS` | Extra flags passed to clang when linking. Use for custom raylib installs: `-L/path/to/lib -lraylib` |
-| `FUJI_RAYLIB_STAGE` | Override path to a prebuilt raylib `stage/` directory (`include/` + `lib/`). |
-| `FUJI_USE_VENDORED_RAYLIB` | Set to `0` to skip auto-detected vendored raylib (useful on Linux ARM64 or custom builds). |
-| `FUJI_BUNDLE_FILES` | Extra files to copy when running `fuji bundle` (e.g. `raylib.dll`). |
-| `FUJI_PATH` | Extra search roots for `#include` and `import()`. |
-| `FUJI_WRAPPERS` | Extra search roots specifically for wrapper modules. |
+| `KODA_NATIVE_SOURCES` | Path to the C bridge file to compile and link. Set to `wrappers\raylib_min\raylib_bridge.c` for the shim, or `wrappers\raylib\wrapper.c` for the full wrapper. |
+| `KODA_LINKFLAGS` | Extra flags passed to clang when linking. Use for custom raylib installs: `-L/path/to/lib -lraylib` |
+| `KODA_RAYLIB_STAGE` | Override path to a prebuilt raylib `stage/` directory (`include/` + `lib/`). |
+| `KODA_USE_VENDORED_RAYLIB` | Set to `0` to skip auto-detected vendored raylib (useful on Linux ARM64 or custom builds). |
+| `KODA_BUNDLE_FILES` | Extra files to copy when running `koda bundle` (e.g. `raylib.dll`). |
+| `KODA_PATH` | Extra search roots for `#include` and `import()`. |
+| `KODA_WRAPPERS` | Extra search roots specifically for wrapper modules. |
 
 ---
 
 ## See also
 
-- **`wrappers/raylib_shim/raylib.fuji`** — the shim declarations used by all examples
+- **`wrappers/raylib_shim/raylib.koda`** — the shim declarations used by all examples
 - **`wrappers/raylib_min/raylib_bridge.c`** — the C bridge source you can extend
-- **`wrappers/raylib/raylib.fuji`** — the full auto-generated wrapper
-- **`examples/games/brick_breaker.fuji`** — a complete brick breaker game using this system
-- **`docs/wrappers.md`** — wrapper system internals and `FUJI_LINKFLAGS` details
-- **`docs/commands.md`** — all `fuji` CLI commands
+- **`wrappers/raylib/raylib.koda`** — the full auto-generated wrapper
+- **`examples/games/brick_breaker.koda`** — a complete brick breaker game using this system
+- **`docs/wrappers.md`** — wrapper system internals and `KODA_LINKFLAGS` details
+- **`docs/commands.md`** — all `koda` CLI commands

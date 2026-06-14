@@ -7,9 +7,9 @@ import (
 	"strings"
 	"sync"
 
-	"fuji/internal/diagnostic"
-	"fuji/internal/fujihome"
-	"fuji/internal/lexer"
+	"koda/internal/diagnostic"
+	"koda/internal/kodahome"
+	"koda/internal/lexer"
 )
 
 // Parsed AST cache: absolute path → last seen mtime (nanos) + parsed program.
@@ -417,9 +417,9 @@ func tryResolveModuleUnderRoots(moduleID string, roots []string) (string, bool) 
 			continue
 		}
 		candidates := []string{
-			filepath.Join(root, safe+".fuji"),
-			filepath.Join(root, safe, "index.fuji"),
-			filepath.Join(root, safe, base+".fuji"),
+			filepath.Join(root, safe+".koda"),
+			filepath.Join(root, safe, "index.koda"),
+			filepath.Join(root, safe, base+".koda"),
 		}
 		for _, p := range candidates {
 			fi, err := os.Stat(p)
@@ -442,21 +442,31 @@ func ResolveImportPath(importerPath, relPath string) (string, error) {
 		name := strings.ToLower(relPath[1:])
 
 		// 1) Explicit search paths (override)
-		if p, ok := tryResolveModuleUnderRoots(name, pathListEnv("FUJI_WRAPPERS")); ok {
+		if p, ok := tryResolveModuleUnderRoots(name, pathListEnv("KODA_WRAPPERS")); ok {
 			return p, nil
 		}
-		if p, ok := tryResolveModuleUnderRoots(name, pathListEnv("FUJI_PATH")); ok {
+		if p, ok := tryResolveModuleUnderRoots(name, pathListEnv("KODA_PATH")); ok {
 			return p, nil
 		}
 
-		// 2) Shipped layout next to fuji / stdlib/, wrappers/
-		if inst, err := fujihome.InstallDir(); err == nil {
+		// 2) Shipped layout next to koda / stdlib/, wrappers/
+		if inst, err := kodahome.InstallDir(); err == nil {
 			bundled := []string{
 				filepath.Join(inst, "stdlib"),
 				filepath.Join(inst, "wrappers"),
 				filepath.Join(inst, "lib"),
 			}
 			if p, ok := tryResolveModuleUnderRoots(name, bundled); ok {
+				return p, nil
+			}
+			// Developer repo layout: <repo>/bin/koda with stdlib at <repo>/stdlib
+			parent := filepath.Dir(inst)
+			devRoots := []string{
+				filepath.Join(parent, "stdlib"),
+				filepath.Join(parent, "wrappers"),
+				parent,
+			}
+			if p, ok := tryResolveModuleUnderRoots(name, devRoots); ok {
 				return p, nil
 			}
 		}
@@ -494,7 +504,7 @@ func resolvePlainIncludePath(importerPath, relPath string) (string, error) {
 		return p, nil
 	}
 
-	for _, r := range pathListEnv("FUJI_PATH") {
+	for _, r := range pathListEnv("KODA_PATH") {
 		r = strings.TrimSpace(r)
 		if r == "" {
 			continue
@@ -504,7 +514,7 @@ func resolvePlainIncludePath(importerPath, relPath string) (string, error) {
 		}
 	}
 
-	if inst, err := fujihome.InstallDir(); err == nil {
+	if inst, err := kodahome.InstallDir(); err == nil {
 		for _, base := range []string{
 			filepath.Join(inst, "wrappers"),
 			filepath.Join(inst, "stdlib"),

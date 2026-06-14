@@ -1,26 +1,26 @@
-# Fuji Reorganization Plan
+# Koda Reorganization Plan
 
 ## Current Structure
 ```
-kuji/
+koda/
 ├── api/                    # Old API layer
 ├── cmd/
 │   ├── build-release/      # Release scripts
 │   ├── dist/               # Distribution artifacts
 │   ├── examples/          # Example programs
-│   ├── kuji/               # Main compiler CLI
+│   ├── koda/               # Main compiler CLI
 │   └── wrapgen/           # Wrapper generator (minimal)
 ├── internal/
 │   ├── ast/               # AST definitions
 │   ├── codegen/           # Minimal LLVM codegen
-│   ├── kuji/              # (empty)
+│   ├── koda/              # (empty)
 │   ├── lexer/             # Lexer implementation
 │   ├── parser/            # Parser implementation
 │   ├── runtime/           # (empty - needs C runtime)
 │   ├── sema/              # Semantic analysis
 │   └── vm/                # Quarantined old VM (.wip files)
-├── kuji-ide/              # IDE (React frontend)
-├── kujiwrap/              # (empty)
+├── koda-ide/              # IDE (React frontend)
+├── kodawrap/              # (empty)
 ├── runtime/               # (empty)
 ├── stdlib/                # Standard library
 ├── tests/                 # Tests
@@ -29,7 +29,7 @@ kuji/
 
 ## Proposed Production Structure
 ```
-kuji/
+koda/
 ├── README.md
 ├── LICENSE
 ├── CHANGELOG.md
@@ -38,8 +38,8 @@ kuji/
 ├── go.sum
 │
 ├── cmd/
-│   └── kuji/
-│       └── main.go        # CLI: fuji build/run/version
+│   └── koda/
+│       └── main.go        # CLI: koda build/run/version
 │
 ├── internal/
 │   ├── lexer/
@@ -81,8 +81,8 @@ kuji/
 │       └── version.go
 │
 ├── runtime/               # NEW: C runtime
-│   ├── fuji_runtime.c
-│   ├── fuji_runtime.h
+│   ├── koda_runtime.c
+│   ├── koda_runtime.h
 │   ├── gc.c
 │   ├── gc.h
 │   ├── value.c
@@ -96,9 +96,9 @@ kuji/
 │   ├── natives.h
 │   └── Makefile
 │
-├── kujiwrap/              # NEW: Wrapper generator
+├── kodawrap/              # NEW: Wrapper generator
 │   ├── cmd/
-│   │   └── kujiwrap/
+│   │   └── kodawrap/
 │   │       └── main.go
 │   ├── internal/
 │   │   ├── parser/
@@ -110,16 +110,16 @@ kuji/
 │   └── examples/
 │
 ├── stdlib/
-│   ├── prelude.fuji
-│   ├── array.fuji
-│   ├── string.fuji
-│   ├── math.fuji
-│   ├── time.fuji
-│   └── random.fuji
+│   ├── prelude.koda
+│   ├── array.koda
+│   ├── string.koda
+│   ├── math.koda
+│   ├── time.koda
+│   └── random.koda
 │
 ├── examples/
-│   ├── hello.fuji
-│   ├── fibonacci.fuji
+│   ├── hello.koda
+│   ├── fibonacci.koda
 │   └── breakout/
 │
 ├── tests/
@@ -200,12 +200,12 @@ kuji/
    - Static linking for Windows (MinGW)
 
 2. **Add CLI commands**
-   - `fuji build file.fuji -o output`
-   - `fuji run file.fuji`
-   - `kuji version`
+   - `koda build file.koda -o output`
+   - `koda run file.koda`
+   - `koda version`
 
-### Phase 5: KujiWrap (Week 4-5)
-1. **Move cmd/wrapgen to kujiwrap/**
+### Phase 5: Kodawrap (Week 4-5)
+1. **Move cmd/wrapgen to kodawrap/**
 2. **Implement libclang integration**
 3. **Generate professional wrappers**
 4. **Add documentation generation**
@@ -218,4 +218,4 @@ kuji/
 ## Breaking Changes
 - AST import path changes (`internal/ast` → `internal/parser`)
 - Codegen API changes (split into modules)
-- CLI interface changes (unified `fuji` command)
+- CLI interface changes (unified `koda` command)

@@ -6,24 +6,24 @@ import (
 	"path/filepath"
 	"strings"
 
-	"fuji/internal/codegen"
-	"fuji/internal/fujihome"
-	"fuji/internal/parser"
+	"koda/internal/codegen"
+	"koda/internal/kodahome"
+	"koda/internal/parser"
 )
 
 // Build compiles a loaded program bundle to a native executable using the same
-// pipeline as `fuji build`: LLVM IR -> object file, linked with the Fuji runtime library.
+// pipeline as `koda build`: LLVM IR -> object file, linked with the Koda runtime library.
 // sourceDisplay is a short label for logs (e.g. base name of the entry file); may be empty.
 func Build(bundle *parser.ProgramBundle, output, sourceDisplay string, log func(string)) error {
 	return BuildWithOptions(bundle, output, sourceDisplay, log, BuildOptions{})
 }
 
-// BuildWithOptions is like [Build] but accepts optimisation flags (e.g. from `fuji build --no-opt`).
+// BuildWithOptions is like [Build] but accepts optimisation flags (e.g. from `koda build --no-opt`).
 func BuildWithOptions(bundle *parser.ProgramBundle, output, sourceDisplay string, log func(string), opts BuildOptions) error {
 	if log == nil {
 		log = func(string) {}
 	}
-	if err := fujihome.EnsureEnvironment(log); err != nil {
+	if err := kodahome.EnsureEnvironment(log); err != nil {
 		return err
 	}
 	ctx, err := codegen.PrepareNativeBundle(bundle)
@@ -47,7 +47,7 @@ func BuildWithOptions(bundle *parser.ProgramBundle, output, sourceDisplay string
 		}
 	}
 
-	tmpDir := ".FUJI_build"
+	tmpDir := ".KODA_build"
 	if err := os.MkdirAll(tmpDir, 0755); err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func BuildWithOptions(bundle *parser.ProgramBundle, output, sourceDisplay string
 		return fmt.Errorf("project root: %w", err)
 	}
 
-	tc, err := fujihome.FindToolchain()
+	tc, err := kodahome.FindToolchain()
 	if err != nil {
 		return fmt.Errorf("toolchain: %w", err)
 	}
@@ -79,7 +79,7 @@ func BuildWithOptions(bundle *parser.ProgramBundle, output, sourceDisplay string
 	log(fmt.Sprintf("  compiling  %s\n", label))
 	log(fmt.Sprintf("  output     %s\n", outAbs))
 	driverLabel := tc.LLC
-	if tc.LinkMode == fujihome.LinkClang {
+	if tc.LinkMode == kodahome.LinkClang {
 		if strings.TrimSpace(tc.Clang) != "" {
 			driverLabel = tc.Clang
 		} else {
@@ -90,18 +90,18 @@ func BuildWithOptions(bundle *parser.ProgramBundle, output, sourceDisplay string
 	}
 	log(fmt.Sprintf("  driver     %s\n\n", driverLabel))
 
-	if tc.LinkMode == fujihome.LinkLLDGNU || tc.LinkMode == fujihome.LinkLLDDarwin {
+	if tc.LinkMode == kodahome.LinkLLDGNU || tc.LinkMode == kodahome.LinkLLDDarwin {
 		if err := runLLC(tc.LLC, irPath, objPath, opts.llcOptFlag(), opts.Debug); err != nil {
 			return fmt.Errorf("llc failed: %w", err)
 		}
 	}
 
 	switch tc.LinkMode {
-	case fujihome.LinkLLDGNU:
+	case kodahome.LinkLLDGNU:
 		if err := linkWithLLDGNU(tc, objPath, outAbs); err != nil {
 			return fmt.Errorf("lld gnu link: %w", err)
 		}
-	case fujihome.LinkLLDDarwin:
+	case kodahome.LinkLLDDarwin:
 		if err := linkWithLLDDarwin(tc, objPath, outAbs); err != nil {
 			return fmt.Errorf("lld darwin link: %w", err)
 		}

@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"fuji/internal/lexer"
+	"koda/internal/lexer"
 	"testing"
 )
 

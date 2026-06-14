@@ -1,5 +1,5 @@
-#ifndef FUJI_GC_H
-#define FUJI_GC_H
+#ifndef KODA_GC_H
+#define KODA_GC_H
 
 #include "object.h"
 #include <stdbool.h>

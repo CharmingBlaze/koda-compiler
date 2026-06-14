@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build self-contained Fuji SDK archives for GitHub Releases.
+# Build self-contained Koda SDK archives for GitHub Releases.
 # Requires: unzip's companion `zip`, bash, repo checkout at stdlib/, docs/, repo-root *.md docs.
 #
 # Usage: package-release-sdk.sh <VERSION> <ARTIFACTS_DIR> [OUT_DIR]
@@ -46,7 +46,7 @@ require_raylib_stage() {
       require_file "$stage_dir/lib/libraylib.a"
       ;;
     linux-arm64)
-      require_file "$stage_dir/README-Fuji.txt"
+      require_file "$stage_dir/README-Koda.txt"
       ;;
     *)
       echo "package-release-sdk: unknown slug in raylib stage check: $slug" >&2
@@ -58,16 +58,16 @@ require_raylib_stage() {
 zip_sdk() {
   local slug="$1"          # windows-amd64
   local fj_src="$2"        # source path to compiler binary
-  local fw_src="$3"        # source path to fujiwrap binary
-  local fj_out="$4"        # basename inside archive (fuji or fuji.exe)
-  local fw_out="$5"        # fujiwrap or fujiwrap.exe
+  local fw_src="$3"        # source path to kodawrap binary
+  local fj_out="$4"        # basename inside archive (koda or koda.exe)
+  local fw_out="$5"        # kodawrap or kodawrap.exe
 
   require_file "$fj_src"
   require_file "$fw_src"
   require_dir "$REPO_ROOT/stdlib"
   require_dir "$REPO_ROOT/docs"
 
-  local root_name="fuji-${VERSION}-${slug}"
+  local root_name="koda-${VERSION}-${slug}"
   local stage
   stage="$(mktemp -d)"
 
@@ -111,45 +111,45 @@ zip_sdk() {
   fi
 
   cat >"$stage/$root_name/SDK_README.txt" <<EOF
-Fuji SDK ${VERSION} (${slug})
+Koda SDK ${VERSION} (${slug})
 ==============================
 
 Platforms: Windows, Linux, and macOS each have dedicated release zips (this archive is ${slug}).
-Everything offline: compiler, fujiwrap, stdlib, docs, examples — no Go or LLVM install required to compile .fuji.
+Everything offline: compiler, kodawrap, stdlib, docs, examples — no Go or LLVM install required to compile .koda.
 
-The compiler never fetches LLVM, Raylib, or other dependencies from the network. Release builds embed Clang + llc + the Fuji runtime; they unpack to a local temp directory on first use only. Raylib (where included in this zip) lives under third_party/raylib_static/stage/.
+The compiler never fetches LLVM, Raylib, or other dependencies from the network. Release builds embed Clang + llc + the Koda runtime; they unpack to a local temp directory on first use only. Raylib (where included in this zip) lives under third_party/raylib_static/stage/.
 
 Layout
 ------
-  $(printf '%s' "$fj_out")     — Fuji compiler (${slug})
-  $(printf '%s' "$fw_out")     — fujiwrap (C header → .fuji + wrapper.c)
-  stdlib/         — shipped .fuji modules (@ imports, #includes)
+  $(printf '%s' "$fj_out")     — Koda compiler (${slug})
+  $(printf '%s' "$fw_out")     — kodawrap (C header → .koda + wrapper.c)
+  stdlib/         — shipped .koda modules (@ imports, #includes)
   docs/           — full documentation tree (guides, commands, language notes, …)
   *.md (root)     — all repo-root markdown (language ref, README, CHANGELOG, …)
-  wrappers/       — full raylib wrapper (raylib.fuji + wrapper.c + docs/HTML)
+  wrappers/       — full raylib wrapper (raylib.koda + wrapper.c + docs/HTML)
   third_party/raylib_static/stage/ — raylib 5.0 headers + libs (+ raylib.dll on Windows) when vendored
 
 Use
 ---
-  Keep this folder together so stdlib/ sits next to fuji (or run from this directory):
+  Keep this folder together so stdlib/ sits next to koda (or run from this directory):
 
   • Windows:
-      .\fuji.exe version
-      .\fuji.exe run examples\hello.fuji
+      .\koda.exe version
+      .\koda.exe run examples\hello.koda
 
   • Linux / macOS:
-      chmod +x fuji fujiwrap
-      ./fuji version
-      ./fuji run examples/hello.fuji
+      chmod +x koda kodawrap
+      ./koda version
+      ./koda run examples/hello.koda
 
 Wrapper tool
 ------------
-  ./fuji wrap --help          (same as ./fujiwrap … when both sit here)
-  fujiwrap uses the same bundled C toolchain as fuji after unpack — no system LLVM/Clang required.
+  ./koda wrap --help          (same as ./kodawrap … when both sit here)
+  kodawrap uses the same bundled C toolchain as koda after unpack — no system LLVM/Clang required.
 
-Embedded toolchain (release builds): Clang + llc + runtime are bundled inside $(printf '%s' "$fj_out") — no separate LLVM download for Fuji itself.
+Embedded toolchain (release builds): Clang + llc + runtime are bundled inside $(printf '%s' "$fj_out") — no separate LLVM download for Koda itself.
 Raylib games: see docs/guides/raylib.md — vendored static lib is used automatically when
-third_party/raylib_static/stage exists next to this SDK (or set FUJI_RAYLIB_STAGE).
+third_party/raylib_static/stage exists next to this SDK (or set KODA_RAYLIB_STAGE).
 Copy raylib.dll next to your .exe on Windows when using the dynamic build from lib/.
 
 Other native libs: see docs/wrappers.md.
@@ -158,7 +158,7 @@ EOF
 
   mkdir -p "$OUT_DIR"
   local out_zip
-  out_zip="$(cd "$OUT_DIR" && pwd)/fuji-${VERSION}-sdk-${slug}.zip"
+  out_zip="$(cd "$OUT_DIR" && pwd)/koda-${VERSION}-sdk-${slug}.zip"
   rm -f "$out_zip"
   if [[ "$fj_out" != *.exe ]]; then
     chmod +x "$stage/$root_name/$fj_out" "$stage/$root_name/$fw_out"
@@ -179,33 +179,33 @@ require_dir() {
 ART_ROOT_ABS="$(cd "$ART_ROOT" && pwd)"
 
 zip_sdk "windows-amd64" \
-  "$ART_ROOT_ABS/windows/fuji-windows-amd64.exe" \
-  "$ART_ROOT_ABS/windows/fujiwrap-windows-amd64.exe" \
-  "fuji.exe" \
-  "fujiwrap.exe"
+  "$ART_ROOT_ABS/windows/koda-windows-amd64.exe" \
+  "$ART_ROOT_ABS/windows/kodawrap-windows-amd64.exe" \
+  "koda.exe" \
+  "kodawrap.exe"
 
 zip_sdk "linux-amd64" \
-  "$ART_ROOT_ABS/linux-amd64/fuji-linux-amd64" \
-  "$ART_ROOT_ABS/linux-amd64/fujiwrap-linux-amd64" \
-  "fuji" \
-  "fujiwrap"
+  "$ART_ROOT_ABS/linux-amd64/koda-linux-amd64" \
+  "$ART_ROOT_ABS/linux-amd64/kodawrap-linux-amd64" \
+  "koda" \
+  "kodawrap"
 
 zip_sdk "linux-arm64" \
-  "$ART_ROOT_ABS/linux-arm64/fuji-linux-arm64" \
-  "$ART_ROOT_ABS/linux-arm64/fujiwrap-linux-arm64" \
-  "fuji" \
-  "fujiwrap"
+  "$ART_ROOT_ABS/linux-arm64/koda-linux-arm64" \
+  "$ART_ROOT_ABS/linux-arm64/kodawrap-linux-arm64" \
+  "koda" \
+  "kodawrap"
 
 zip_sdk "darwin-amd64" \
-  "$ART_ROOT_ABS/macos/fuji-darwin-amd64" \
-  "$ART_ROOT_ABS/macos/fujiwrap-darwin-amd64" \
-  "fuji" \
-  "fujiwrap"
+  "$ART_ROOT_ABS/macos/koda-darwin-amd64" \
+  "$ART_ROOT_ABS/macos/kodawrap-darwin-amd64" \
+  "koda" \
+  "kodawrap"
 
 zip_sdk "darwin-arm64" \
-  "$ART_ROOT_ABS/macos/fuji-darwin-arm64" \
-  "$ART_ROOT_ABS/macos/fujiwrap-darwin-arm64" \
-  "fuji" \
-  "fujiwrap"
+  "$ART_ROOT_ABS/macos/koda-darwin-arm64" \
+  "$ART_ROOT_ABS/macos/kodawrap-darwin-arm64" \
+  "koda" \
+  "kodawrap"
 
 echo "All SDK zips OK under $OUT_DIR"

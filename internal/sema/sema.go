@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"fuji/internal/diagnostic"
-	"fuji/internal/parser"
+	"koda/internal/diagnostic"
+	"koda/internal/parser"
 )
 
 // Analyzer performs semantic analysis on the AST.

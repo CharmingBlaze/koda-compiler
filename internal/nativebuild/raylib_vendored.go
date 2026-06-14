@@ -5,26 +5,26 @@ import (
 	"path/filepath"
 	"strings"
 
-	"fuji/internal/fujihome"
+	"koda/internal/kodahome"
 )
 
 // vendoredRaylibStatic returns include dir and a static (or import) library path when a
 // third_party/raylib_static/stage tree exists. Resolution order:
-//  1) FUJI_RAYLIB_STAGE — explicit path to a stage directory with include/ + lib/
+//  1) KODA_RAYLIB_STAGE — explicit path to a stage directory with include/ + lib/
 //  2) <cwd>/third_party/raylib_static/stage (current project root)
-//  3) <dir of fuji.exe>/third_party/raylib_static/stage (offline SDK layout)
+//  3) <dir of koda.exe>/third_party/raylib_static/stage (offline SDK layout)
 //
-// Set FUJI_USE_VENDORED_RAYLIB=0 to disable even when a stage exists.
+// Set KODA_USE_VENDORED_RAYLIB=0 to disable even when a stage exists.
 func vendoredRaylibStatic(rootDir string) (includeDir, archive string, ok bool) {
-	v := strings.TrimSpace(strings.ToLower(os.Getenv("FUJI_USE_VENDORED_RAYLIB")))
+	v := strings.TrimSpace(strings.ToLower(os.Getenv("KODA_USE_VENDORED_RAYLIB")))
 	if v == "0" || v == "false" || v == "no" {
 		return "", "", false
 	}
-	if s := strings.TrimSpace(os.Getenv("FUJI_RAYLIB_STAGE")); s != "" {
+	if s := strings.TrimSpace(os.Getenv("KODA_RAYLIB_STAGE")); s != "" {
 		return raylibStageAt(filepath.Clean(s))
 	}
 	tries := []string{filepath.Join(rootDir, "third_party", "raylib_static", "stage")}
-	if inst, err := fujihome.InstallDir(); err == nil {
+	if inst, err := kodahome.InstallDir(); err == nil {
 		tries = append(tries, filepath.Join(inst, "third_party", "raylib_static", "stage"))
 	}
 	for _, stage := range tries {

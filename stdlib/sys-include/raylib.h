@@ -44,7 +44,7 @@
 *       [rtext] stb_truetype (Sean Barrett) for ttf fonts loading
 *       [rtext] stb_rect_pack (Sean Barrett) for rectangles packing
 *       [rmodels] par_shapes (Philip Rideout) for parametric 3d shapes generation
-*       [rmodels] tinyobj_loader_c (Syoyo Fujita) for models loading (OBJ, MTL)
+*       [rmodels] tinyobj_loader_c (Syoyo Kodata) for models loading (OBJ, MTL)
 *       [rmodels] cgltf (Johannes Kuhlmann) for models loading (glTF)
 *       [rmodels] m3d (bzt) for models loading (M3D, https://bztsrc.gitlab.io/model3d)
 *       [rmodels] vox_loader (Johann Nadalutti) for models loading (VOX)

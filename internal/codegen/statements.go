@@ -9,7 +9,7 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
-	"fuji/internal/parser"
+	"koda/internal/parser"
 )
 
 // emitStmt emits LLVM IR for statements.
@@ -68,7 +68,7 @@ func (g *Generator) emitReturnStmt(s *parser.ReturnStmt) error {
 			return err
 		}
 		retSlot := g.entryAlloca(types.I64)
-		g.block.NewStore(g.emitAsFujiI64(val), retSlot)
+		g.block.NewStore(g.emitAsKodaI64(val), retSlot)
 		if err := g.emitDefersForCurrentLayer(); err != nil {
 			return err
 		}
@@ -251,13 +251,13 @@ func (g *Generator) emitForOfStmt(s *parser.ForOfStmt) error {
 	if err != nil {
 		return err
 	}
-	iterI := g.emitAsFujiI64(iterable)
+	iterI := g.emitAsKodaI64(iterable)
 	g.shadowRewindTemps()
 
 	lenVal := g.block.NewCall(g.runtimeForOfLength, iterI)
 
 	idxSlot := g.entryAlloca(types.I64)
-	zeroNum := g.emitAsFujiI64(constant.NewFloat(types.Double, 0))
+	zeroNum := g.emitAsKodaI64(constant.NewFloat(types.Double, 0))
 	g.block.NewStore(zeroNum, idxSlot)
 
 	valSlot := g.entryAlloca(types.I64)
@@ -388,7 +388,7 @@ func (g *Generator) emitForOfConstRange(s *parser.ForOfStmt, from int64, to int6
 }
 
 // emitForOfDynamicRange lowers `for (let i of from..to)` when bounds are not both numeric literals,
-// using a counted i64 loop and no FUJI_range allocation (half-open [from, to) like emitRange).
+// using a counted i64 loop and no KODA_range allocation (half-open [from, to) like emitRange).
 func (g *Generator) emitForOfDynamicRange(s *parser.ForOfStmt, r *parser.RangeExpr) error {
 	fromVal, err := g.emitExpr(r.From)
 	if err != nil {
@@ -398,9 +398,9 @@ func (g *Generator) emitForOfDynamicRange(s *parser.ForOfStmt, r *parser.RangeEx
 	if err != nil {
 		return err
 	}
-	// Bounds are Fuji values (NaN-boxed); the loop counter uses plain i64 like emitForOfConstRange.
-	fromBoxed := g.emitAsFujiI64(fromVal)
-	toBoxed := g.emitAsFujiI64(toVal)
+	// Bounds are Koda values (NaN-boxed); the loop counter uses plain i64 like emitForOfConstRange.
+	fromBoxed := g.emitAsKodaI64(fromVal)
+	toBoxed := g.emitAsKodaI64(toVal)
 	fromInt := g.block.NewFPToSI(g.block.NewCall(g.runtimeUnboxNumber, fromBoxed), types.I64)
 	toInt := g.block.NewFPToSI(g.block.NewCall(g.runtimeUnboxNumber, toBoxed), types.I64)
 
@@ -529,13 +529,13 @@ func (g *Generator) emitForInStmt(s *parser.ForInStmt) error {
 	if err != nil {
 		return err
 	}
-	iterI := g.emitAsFujiI64(iterable)
+	iterI := g.emitAsKodaI64(iterable)
 	g.shadowRewindTemps()
 
 	lenVal := g.block.NewCall(g.runtimeForOfLength, iterI)
 
 	idxSlot := g.entryAlloca(types.I64)
-	zeroNum := g.emitAsFujiI64(constant.NewFloat(types.Double, 0))
+	zeroNum := g.emitAsKodaI64(constant.NewFloat(types.Double, 0))
 	g.block.NewStore(zeroNum, idxSlot)
 
 	keySlot := g.entryAlloca(types.I64)
@@ -605,12 +605,12 @@ func (g *Generator) emitContinueStmt(_ *parser.ContinueStmt) error {
 
 // emitSwitchStmt emits LLVM IR for switch statements.
 func (g *Generator) emitSwitchStmt(s *parser.SwitchStmt) error {
-	// Lower switch to compare/branch chain (NaN-boxed Fuji values compared as i64).
+	// Lower switch to compare/branch chain (NaN-boxed Koda values compared as i64).
 	subject, err := g.emitExpr(s.Subject)
 	if err != nil {
 		return err
 	}
-	subjI := g.emitAsFujiI64(subject)
+	subjI := g.emitAsKodaI64(subject)
 	g.shadowRewindTemps()
 
 	// Create merge block
@@ -636,7 +636,7 @@ func (g *Generator) emitSwitchStmt(s *parser.SwitchStmt) error {
 			return err
 		}
 
-		cmp := g.block.NewICmp(enum.IPredEQ, subjI, g.emitAsFujiI64(caseVal))
+		cmp := g.block.NewICmp(enum.IPredEQ, subjI, g.emitAsKodaI64(caseVal))
 		nextBlock := caseBlocks[i+1]
 		if i == len(s.Cases)-1 {
 			nextBlock = caseBlocks[len(s.Cases)]
@@ -693,6 +693,6 @@ func (g *Generator) emitDeleteStmt(s *parser.DeleteStmt) error {
 	if err != nil {
 		return err
 	}
-	g.block.NewCall(g.runtimeObjRemove, g.emitAsFujiI64(obj), g.emitAsFujiI64(key))
+	g.block.NewCall(g.runtimeObjRemove, g.emitAsKodaI64(obj), g.emitAsKodaI64(key))
 	return nil
 }

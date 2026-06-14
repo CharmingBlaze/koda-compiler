@@ -1,46 +1,46 @@
-# Getting Started with Fuji
+# Getting Started with Koda
 
-Fuji is a language for making games and applications. It looks a lot like JavaScript, but it compiles straight to a fast native binary — no VM, no interpreter. This guide walks you from your very first program all the way to writing a game loop.
+Koda is a language for making games and applications. It looks a lot like JavaScript, but it compiles straight to a fast native binary — no VM, no interpreter. This guide walks you from your very first program all the way to writing a game loop.
 
 Keep **[../language.md](../language.md)** open beside this page — it has every feature, every builtin, and every operator with working examples.  
-For CLI commands (`fuji run`, `fuji build`, …) see **[commands.md](commands.md)**.
+For CLI commands (`koda run`, `koda build`, …) see **[commands.md](commands.md)**.
 
 ---
 
 ## 1. Running your code
 
-You write `.fuji` files and use the `fuji` command:
+You write `.koda` files and use the `koda` command:
 
 | What you want | Command |
 |---------------|---------|
-| Run a file | `fuji run main.fuji` |
-| Build a binary to keep | `fuji build main.fuji -o mygame.exe` |
-| Check for mistakes (no build) | `fuji check main.fuji` |
-| Auto-format your code | `fuji fmt main.fuji` |
-| Rebuild whenever you save | `fuji watch main.fuji` |
-| Package everything to ship | `fuji bundle main.fuji -o dist/MyGame` |
+| Run a file | `koda run main.koda` |
+| Build a binary to keep | `koda build main.koda -o mygame.exe` |
+| Check for mistakes (no build) | `koda check main.koda` |
+| Auto-format your code | `koda fmt main.koda` |
+| Rebuild whenever you save | `koda watch main.koda` |
+| Package everything to ship | `koda bundle main.koda -o dist/MyGame` |
 
 ---
 
 ## 2. Your first program
 
-Create `hello.fuji`:
+Create `hello.koda`:
 
-```fuji
-print("Hello, Fuji!");
+```koda
+print("Hello, Koda!");
 ```
 
 Run it:
 
 ```
-fuji run hello.fuji
+koda run hello.koda
 ```
 
-Output: `Hello, Fuji!`
+Output: `Hello, Koda!`
 
 You can also wrap everything in `func main()`:
 
-```fuji
+```koda
 func main() {
     print("Hello from main!");
 }
@@ -52,7 +52,7 @@ Both styles work the same way.
 
 ## 3. Comments
 
-```fuji
+```koda
 // This is a line comment.
 
 /*
@@ -67,7 +67,7 @@ Both styles work the same way.
 
 Use `let` to create a variable. Every statement ends with `;`.
 
-```fuji
+```koda
 let name = "Ada";
 let score = 0;
 let alive = true;
@@ -77,14 +77,14 @@ let later;            // also null until you assign it
 
 Change a variable's value any time:
 
-```fuji
+```koda
 score = score + 10;
 score += 10;   // same thing
 score++;       // add 1
 score--;       // subtract 1
 ```
 
-> **Note:** `var` is not allowed in Fuji. Always use `let`.
+> **Note:** `var` is not allowed in Koda. Always use `let`.
 
 Keywords and names are **case-insensitive** — `Let`, `LET`, and `let` all work.
 
@@ -102,9 +102,9 @@ Keywords and names are **case-insensitive** — `Let`, `LET`, and `let` all work
 | Object | `{ x: 1, y: 2 }` |
 | Function | `func(x) { return x; }` |
 
-You can ask Fuji what type a value is:
+You can ask Koda what type a value is:
 
-```fuji
+```koda
 print(type(42));       // number
 print(type("hello"));  // string
 print(type(true));     // bool
@@ -115,7 +115,7 @@ print(type(null));     // null
 
 ## 6. Operators
 
-```fuji
+```koda
 // Arithmetic
 let a = 10 + 3;   // 13
 let b = 10 - 3;   // 7
@@ -138,14 +138,14 @@ true || false   // true
 
 **Nullish coalescing** — use a default when something is null:
 
-```fuji
+```koda
 let saved = null;
 let score = saved ?? 0;   // 0, because saved is null
 ```
 
 **Optional chaining** — safely read a property that might not exist:
 
-```fuji
+```koda
 let player = null;
 let hp = player?.health;   // null, no crash
 ```
@@ -154,13 +154,13 @@ let hp = player?.health;   // null, no crash
 
 ## 7. Strings
 
-```fuji
+```koda
 let s = "Hello, World!";
 
 print(s.toUpper());               // HELLO, WORLD!
 print(s.toLower());               // hello, world!
 print(s.includes("World"));       // true
-print(s.replace("World", "Fuji")); // Hello, Fuji!
+print(s.replace("World", "Koda")); // Hello, Koda!
 print(s.slice(0, 5));             // Hello
 
 let words = "one two three".split(" ");
@@ -170,7 +170,7 @@ print(len(words)); // 3
 
 **Template strings** — embed expressions directly into a string:
 
-```fuji
+```koda
 let name = "player";
 let lives = 3;
 print(`${name} has ${lives} lives left`);
@@ -183,7 +183,7 @@ print(`${name} has ${lives} lives left`);
 
 An array holds a list of values.
 
-```fuji
+```koda
 let colors = ["red", "green", "blue"];
 
 print(colors[0]);    // red
@@ -196,7 +196,7 @@ colors.pop();           // remove from end
 
 Loop through an array:
 
-```fuji
+```koda
 for (let color of colors) {
     print(color);
 }
@@ -204,7 +204,7 @@ for (let color of colors) {
 
 Useful array methods:
 
-```fuji
+```koda
 let nums = [3, 1, 4, 1, 5];
 
 let big = nums.filter(func(n) { return n > 3; });
@@ -222,7 +222,7 @@ print(nums.sort().join(", "));   // 1, 1, 3, 4, 5
 
 An object holds named values (like a record or dictionary).
 
-```fuji
+```koda
 let player = {
     name: "Ada",
     health: 100,
@@ -239,7 +239,7 @@ player.speed = 5;      // add a new field
 
 **Methods** — functions inside an object can use `this` to refer to the object:
 
-```fuji
+```koda
 let player = {
     x: 0,
     speed: 5,
@@ -260,7 +260,7 @@ All `if`, `while`, `for`, and `switch` bodies **must use `{ }` braces**.
 
 ### `if` / `else`
 
-```fuji
+```koda
 let score = 75;
 
 if (score >= 90) {
@@ -274,7 +274,7 @@ if (score >= 90) {
 
 ### `while` loop
 
-```fuji
+```koda
 let i = 0;
 while (i < 5) {
     print(i);
@@ -285,7 +285,7 @@ while (i < 5) {
 
 ### `for` loop
 
-```fuji
+```koda
 // Count up
 for (let i = 0; i < 5; i += 1) {
     print(i);
@@ -305,7 +305,7 @@ for (let fruit of fruits) {
 
 ### `switch`
 
-```fuji
+```koda
 let day = "Monday";
 
 switch (day) {
@@ -324,7 +324,7 @@ Use `break` to stop at the end of each case. Without `break`, it falls through t
 
 ### `break` and `continue`
 
-```fuji
+```koda
 for (let i of 0..10) {
     if (i == 3) { continue; }   // skip 3
     if (i == 7) { break; }      // stop at 7
@@ -336,7 +336,7 @@ for (let i of 0..10) {
 
 ## 11. Functions
 
-```fuji
+```koda
 func greet(name) {
     print("Hello, " + name + "!");
 }
@@ -346,7 +346,7 @@ greet("World");   // Hello, World!
 
 **Return a value:**
 
-```fuji
+```koda
 func add(a, b) {
     return a + b;
 }
@@ -357,7 +357,7 @@ print(result);   // 7
 
 **Default parameters:**
 
-```fuji
+```koda
 func greet(name = "stranger") {
     print("Hello, " + name);
 }
@@ -368,7 +368,7 @@ greet("Ada");    // Hello, Ada
 
 **Rest parameters** — collect extra arguments into an array:
 
-```fuji
+```koda
 func sum(...numbers) {
     let total = 0;
     for (let n of numbers) { total += n; }
@@ -380,7 +380,7 @@ print(sum(1, 2, 3, 4));   // 10
 
 **Closures** — a function that remembers values from where it was created:
 
-```fuji
+```koda
 func makeCounter() {
     let n = 0;
     return func() {
@@ -401,7 +401,7 @@ print(count());   // 3
 
 A struct is a named type with fixed fields. Easier to read than plain objects.
 
-```fuji
+```koda
 struct Point {
     x,
     y
@@ -414,7 +414,7 @@ p.y = 99;
 print(p.y);   // 99
 ```
 
-```fuji
+```koda
 struct Bullet {
     x,
     y,
@@ -438,7 +438,7 @@ print(b.x, b.y);   // 5 -3
 
 An enum gives names to a set of numbers. Great for game states, directions, etc.
 
-```fuji
+```koda
 enum State {
     Start,    // 0
     Playing,  // 1
@@ -455,7 +455,7 @@ if (current == State.Playing) {
 
 Use them in `switch` statements for clean logic:
 
-```fuji
+```koda
 switch (current) {
     case State.Start:
         print("Press SPACE to begin");
@@ -478,7 +478,7 @@ switch (current) {
 
 The `math` object (or global functions) gives you everything you need:
 
-```fuji
+```koda
 print(math.floor(3.9));          // 3
 print(math.ceil(3.1));           // 4
 print(math.round(3.5));          // 4
@@ -503,7 +503,7 @@ print(math.degrees(angle));     // 90
 
 ## 15. Useful builtins
 
-```fuji
+```koda
 // Output
 print("hello", 42, true);         // space-separated
 let s = format("x={} y={}", x, y); // build a string
@@ -530,10 +530,10 @@ let str = toJSON({ hp: 100, name: "Ada" });
 
 ## 16. Game loop pattern
 
-Here is a minimal game loop using Raylib (Fuji's built-in graphics library):
+Here is a minimal game loop using Raylib (Koda's built-in graphics library):
 
-```fuji
-#include "../wrappers/raylib_shim/raylib.fuji"
+```koda
+#include "../wrappers/raylib_shim/raylib.koda"
 
 let screenW = 800;
 let screenH = 600;
@@ -564,22 +564,22 @@ CloseWindow();
 Run it with:
 
 ```
-fuji run mygame.fuji
+koda run mygame.koda
 ```
 
 ---
 
 ## 17. Splitting code across files
 
-Use `#include` to pull in another `.fuji` file:
+Use `#include` to pull in another `.koda` file:
 
-```fuji
-// main.fuji
-#include "player.fuji"
-#include "enemies.fuji"
+```koda
+// main.koda
+#include "player.koda"
+#include "enemies.koda"
 
 func main() {
-    // player.fuji and enemies.fuji code is available here
+    // player.koda and enemies.koda code is available here
 }
 ```
 
@@ -591,7 +591,7 @@ The included file is merged in as if you typed it directly. Paths are relative t
 
 `defer` schedules a call to run when the function exits. Multiple defers run in **reverse order** (last in, first out):
 
-```fuji
+```koda
 func loadLevel(path) {
     let f = openFile(path);
     defer closeFile(f);   // always runs, even if we return early
@@ -610,9 +610,9 @@ func loadLevel(path) {
 |----------|----------------|
 | **[../language.md](../language.md)** | Complete reference — every feature, every builtin, with examples |
 | **[language.md](language.md)** | Compact syntax cheat sheet |
-| **[commands.md](commands.md)** | All `fuji` CLI commands |
-| **[wrappers.md](wrappers.md)** | Using C/C++ libraries from Fuji |
-| **`tests/*.fuji`** | Small runnable examples for every feature |
+| **[commands.md](commands.md)** | All `koda` CLI commands |
+| **[wrappers.md](wrappers.md)** | Using C/C++ libraries from Koda |
+| **`tests/*.koda`** | Small runnable examples for every feature |
 | **`examples/games/`** | Complete game examples including brick breaker |
 
-When something behaves unexpectedly, run `fuji check yourfile.fuji` — it checks your code without compiling and gives clear error messages.
+When something behaves unexpectedly, run `koda check yourfile.koda` — it checks your code without compiling and gives clear error messages.

@@ -3,12 +3,12 @@ package api
 import (
 	"path/filepath"
 
-	"fuji/internal/nativebuild"
+	"koda/internal/nativebuild"
 )
 
-// BuildNativeHost compiles entryPath to a native executable (same pipeline as fuji build):
+// BuildNativeHost compiles entryPath to a native executable (same pipeline as koda build):
 // Go codegen emits LLVM IR, llc lowers it to an object file, then Clang links that object with
-// runtime/libfuji_runtime.a and headers under runtime/src (plus optional FUJI_NATIVE_SOURCES / FUJI_LINKFLAGS).
+// runtime/libkoda_runtime.a and headers under runtime/src (plus optional KODA_NATIVE_SOURCES / KODA_LINKFLAGS).
 func BuildNativeHost(entryPath, overlay, output string, log func(string)) error {
 	absEntry, err := filepath.Abs(entryPath)
 	if err != nil {
@@ -21,7 +21,7 @@ func BuildNativeHost(entryPath, overlay, output string, log func(string)) error 
 	return nativebuild.BuildWithOverlays(entryPath, overlays, output, log)
 }
 
-// DefaultExeName returns the default native executable name for a .fuji path.
+// DefaultExeName returns the default native executable name for a .koda path.
 func DefaultExeName(source string) string {
 	return nativebuild.DefaultExeName(source)
 }

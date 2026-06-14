@@ -16,8 +16,8 @@
 typedef void()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native void();
 ```
 
@@ -28,8 +28,8 @@ native void();
 typedef bool()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native bool();
 ```
 
@@ -40,8 +40,8 @@ native bool();
 typedef bool()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native bool();
 ```
 
@@ -52,8 +52,8 @@ native bool();
 RLAPI void InitWindow(int width, int height, const char *title)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native InitWindow(width, height, *title);
 ```
 
@@ -64,8 +64,8 @@ native InitWindow(width, height, *title);
 RLAPI void CloseWindow()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CloseWindow();
 ```
 
@@ -76,8 +76,8 @@ native CloseWindow();
 RLAPI bool WindowShouldClose()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native WindowShouldClose();
 ```
 
@@ -88,8 +88,8 @@ native WindowShouldClose();
 RLAPI bool IsWindowReady()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsWindowReady();
 ```
 
@@ -100,8 +100,8 @@ native IsWindowReady();
 RLAPI bool IsWindowFullscreen()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsWindowFullscreen();
 ```
 
@@ -112,8 +112,8 @@ native IsWindowFullscreen();
 RLAPI bool IsWindowHidden()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsWindowHidden();
 ```
 
@@ -124,8 +124,8 @@ native IsWindowHidden();
 RLAPI bool IsWindowMinimized()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsWindowMinimized();
 ```
 
@@ -136,8 +136,8 @@ native IsWindowMinimized();
 RLAPI bool IsWindowMaximized()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsWindowMaximized();
 ```
 
@@ -148,8 +148,8 @@ native IsWindowMaximized();
 RLAPI bool IsWindowFocused()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsWindowFocused();
 ```
 
@@ -160,8 +160,8 @@ native IsWindowFocused();
 RLAPI bool IsWindowResized()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsWindowResized();
 ```
 
@@ -172,8 +172,8 @@ native IsWindowResized();
 RLAPI bool IsWindowState(unsigned int flag)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsWindowState(flag);
 ```
 
@@ -184,8 +184,8 @@ native IsWindowState(flag);
 RLAPI void SetWindowState(unsigned int flags)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetWindowState(flags);
 ```
 
@@ -196,8 +196,8 @@ native SetWindowState(flags);
 RLAPI void ClearWindowState(unsigned int flags)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ClearWindowState(flags);
 ```
 
@@ -208,8 +208,8 @@ native ClearWindowState(flags);
 RLAPI void ToggleFullscreen()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ToggleFullscreen();
 ```
 
@@ -220,8 +220,8 @@ native ToggleFullscreen();
 RLAPI void ToggleBorderlessWindowed()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ToggleBorderlessWindowed();
 ```
 
@@ -232,8 +232,8 @@ native ToggleBorderlessWindowed();
 RLAPI void MaximizeWindow()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native MaximizeWindow();
 ```
 
@@ -244,8 +244,8 @@ native MaximizeWindow();
 RLAPI void MinimizeWindow()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native MinimizeWindow();
 ```
 
@@ -256,8 +256,8 @@ native MinimizeWindow();
 RLAPI void RestoreWindow()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native RestoreWindow();
 ```
 
@@ -268,8 +268,8 @@ native RestoreWindow();
 RLAPI void SetWindowIcon(Image image)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetWindowIcon(image);
 ```
 
@@ -280,8 +280,8 @@ native SetWindowIcon(image);
 RLAPI void SetWindowIcons(Image *images, int count)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetWindowIcons(*images, count);
 ```
 
@@ -292,8 +292,8 @@ native SetWindowIcons(*images, count);
 RLAPI void SetWindowTitle(const char *title)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetWindowTitle(*title);
 ```
 
@@ -304,8 +304,8 @@ native SetWindowTitle(*title);
 RLAPI void SetWindowPosition(int x, int y)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetWindowPosition(x, y);
 ```
 
@@ -316,8 +316,8 @@ native SetWindowPosition(x, y);
 RLAPI void SetWindowMonitor(int monitor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetWindowMonitor(monitor);
 ```
 
@@ -328,8 +328,8 @@ native SetWindowMonitor(monitor);
 RLAPI void SetWindowMinSize(int width, int height)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetWindowMinSize(width, height);
 ```
 
@@ -340,8 +340,8 @@ native SetWindowMinSize(width, height);
 RLAPI void SetWindowMaxSize(int width, int height)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetWindowMaxSize(width, height);
 ```
 
@@ -352,8 +352,8 @@ native SetWindowMaxSize(width, height);
 RLAPI void SetWindowSize(int width, int height)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetWindowSize(width, height);
 ```
 
@@ -364,8 +364,8 @@ native SetWindowSize(width, height);
 RLAPI void SetWindowOpacity(float opacity)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetWindowOpacity(opacity);
 ```
 
@@ -376,8 +376,8 @@ native SetWindowOpacity(opacity);
 RLAPI void SetWindowFocused()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetWindowFocused();
 ```
 
@@ -388,8 +388,8 @@ native SetWindowFocused();
 RLAPI int GetScreenWidth()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetScreenWidth();
 ```
 
@@ -400,8 +400,8 @@ native GetScreenWidth();
 RLAPI int GetScreenHeight()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetScreenHeight();
 ```
 
@@ -412,8 +412,8 @@ native GetScreenHeight();
 RLAPI int GetRenderWidth()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetRenderWidth();
 ```
 
@@ -424,8 +424,8 @@ native GetRenderWidth();
 RLAPI int GetRenderHeight()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetRenderHeight();
 ```
 
@@ -436,8 +436,8 @@ native GetRenderHeight();
 RLAPI int GetMonitorCount()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMonitorCount();
 ```
 
@@ -448,8 +448,8 @@ native GetMonitorCount();
 RLAPI int GetCurrentMonitor()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetCurrentMonitor();
 ```
 
@@ -460,8 +460,8 @@ native GetCurrentMonitor();
 RLAPI Vector2 GetMonitorPosition(int monitor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMonitorPosition(monitor);
 ```
 
@@ -472,8 +472,8 @@ native GetMonitorPosition(monitor);
 RLAPI int GetMonitorWidth(int monitor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMonitorWidth(monitor);
 ```
 
@@ -484,8 +484,8 @@ native GetMonitorWidth(monitor);
 RLAPI int GetMonitorHeight(int monitor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMonitorHeight(monitor);
 ```
 
@@ -496,8 +496,8 @@ native GetMonitorHeight(monitor);
 RLAPI int GetMonitorPhysicalWidth(int monitor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMonitorPhysicalWidth(monitor);
 ```
 
@@ -508,8 +508,8 @@ native GetMonitorPhysicalWidth(monitor);
 RLAPI int GetMonitorPhysicalHeight(int monitor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMonitorPhysicalHeight(monitor);
 ```
 
@@ -520,8 +520,8 @@ native GetMonitorPhysicalHeight(monitor);
 RLAPI int GetMonitorRefreshRate(int monitor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMonitorRefreshRate(monitor);
 ```
 
@@ -532,8 +532,8 @@ native GetMonitorRefreshRate(monitor);
 RLAPI Vector2 GetWindowPosition()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetWindowPosition();
 ```
 
@@ -544,8 +544,8 @@ native GetWindowPosition();
 RLAPI Vector2 GetWindowScaleDPI()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetWindowScaleDPI();
 ```
 
@@ -556,8 +556,8 @@ native GetWindowScaleDPI();
 RLAPI void SetClipboardText(const char *text)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetClipboardText(*text);
 ```
 
@@ -568,8 +568,8 @@ native SetClipboardText(*text);
 RLAPI Image GetClipboardImage()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetClipboardImage();
 ```
 
@@ -580,8 +580,8 @@ native GetClipboardImage();
 RLAPI void EnableEventWaiting()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native EnableEventWaiting();
 ```
 
@@ -592,8 +592,8 @@ native EnableEventWaiting();
 RLAPI void DisableEventWaiting()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DisableEventWaiting();
 ```
 
@@ -604,8 +604,8 @@ native DisableEventWaiting();
 RLAPI void ShowCursor()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ShowCursor();
 ```
 
@@ -616,8 +616,8 @@ native ShowCursor();
 RLAPI void HideCursor()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native HideCursor();
 ```
 
@@ -628,8 +628,8 @@ native HideCursor();
 RLAPI bool IsCursorHidden()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsCursorHidden();
 ```
 
@@ -640,8 +640,8 @@ native IsCursorHidden();
 RLAPI void EnableCursor()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native EnableCursor();
 ```
 
@@ -652,8 +652,8 @@ native EnableCursor();
 RLAPI void DisableCursor()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DisableCursor();
 ```
 
@@ -664,8 +664,8 @@ native DisableCursor();
 RLAPI bool IsCursorOnScreen()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsCursorOnScreen();
 ```
 
@@ -676,8 +676,8 @@ native IsCursorOnScreen();
 RLAPI void ClearBackground(Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ClearBackground(color);
 ```
 
@@ -688,8 +688,8 @@ native ClearBackground(color);
 RLAPI void BeginDrawing()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native BeginDrawing();
 ```
 
@@ -700,8 +700,8 @@ native BeginDrawing();
 RLAPI void EndDrawing()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native EndDrawing();
 ```
 
@@ -712,8 +712,8 @@ native EndDrawing();
 RLAPI void BeginMode2D(Camera2D camera)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native BeginMode2D(camera);
 ```
 
@@ -724,8 +724,8 @@ native BeginMode2D(camera);
 RLAPI void EndMode2D()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native EndMode2D();
 ```
 
@@ -736,8 +736,8 @@ native EndMode2D();
 RLAPI void BeginMode3D(Camera3D camera)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native BeginMode3D(camera);
 ```
 
@@ -748,8 +748,8 @@ native BeginMode3D(camera);
 RLAPI void EndMode3D()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native EndMode3D();
 ```
 
@@ -760,8 +760,8 @@ native EndMode3D();
 RLAPI void BeginTextureMode(RenderTexture2D target)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native BeginTextureMode(target);
 ```
 
@@ -772,8 +772,8 @@ native BeginTextureMode(target);
 RLAPI void EndTextureMode()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native EndTextureMode();
 ```
 
@@ -784,8 +784,8 @@ native EndTextureMode();
 RLAPI void BeginShaderMode(Shader shader)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native BeginShaderMode(shader);
 ```
 
@@ -796,8 +796,8 @@ native BeginShaderMode(shader);
 RLAPI void EndShaderMode()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native EndShaderMode();
 ```
 
@@ -808,8 +808,8 @@ native EndShaderMode();
 RLAPI void BeginBlendMode(int mode)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native BeginBlendMode(mode);
 ```
 
@@ -820,8 +820,8 @@ native BeginBlendMode(mode);
 RLAPI void EndBlendMode()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native EndBlendMode();
 ```
 
@@ -832,8 +832,8 @@ native EndBlendMode();
 RLAPI void BeginScissorMode(int x, int y, int width, int height)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native BeginScissorMode(x, y, width, height);
 ```
 
@@ -844,8 +844,8 @@ native BeginScissorMode(x, y, width, height);
 RLAPI void EndScissorMode()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native EndScissorMode();
 ```
 
@@ -856,8 +856,8 @@ native EndScissorMode();
 RLAPI void BeginVrStereoMode(VrStereoConfig config)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native BeginVrStereoMode(config);
 ```
 
@@ -868,8 +868,8 @@ native BeginVrStereoMode(config);
 RLAPI void EndVrStereoMode()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native EndVrStereoMode();
 ```
 
@@ -880,8 +880,8 @@ native EndVrStereoMode();
 RLAPI VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadVrStereoConfig(device);
 ```
 
@@ -892,8 +892,8 @@ native LoadVrStereoConfig(device);
 RLAPI void UnloadVrStereoConfig(VrStereoConfig config)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadVrStereoConfig(config);
 ```
 
@@ -904,8 +904,8 @@ native UnloadVrStereoConfig(config);
 RLAPI Shader LoadShader(const char *vsFileName, const char *fsFileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadShader(*vsFileName, *fsFileName);
 ```
 
@@ -916,8 +916,8 @@ native LoadShader(*vsFileName, *fsFileName);
 RLAPI Shader LoadShaderFromMemory(const char *vsCode, const char *fsCode)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadShaderFromMemory(*vsCode, *fsCode);
 ```
 
@@ -928,8 +928,8 @@ native LoadShaderFromMemory(*vsCode, *fsCode);
 RLAPI bool IsShaderValid(Shader shader)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsShaderValid(shader);
 ```
 
@@ -940,8 +940,8 @@ native IsShaderValid(shader);
 RLAPI int GetShaderLocation(Shader shader, const char *uniformName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetShaderLocation(shader, *uniformName);
 ```
 
@@ -952,8 +952,8 @@ native GetShaderLocation(shader, *uniformName);
 RLAPI int GetShaderLocationAttrib(Shader shader, const char *attribName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetShaderLocationAttrib(shader, *attribName);
 ```
 
@@ -964,8 +964,8 @@ native GetShaderLocationAttrib(shader, *attribName);
 RLAPI void SetShaderValue(Shader shader, int locIndex, const void *value, int uniformType)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetShaderValue(shader, locIndex, *value, uniformType);
 ```
 
@@ -976,8 +976,8 @@ native SetShaderValue(shader, locIndex, *value, uniformType);
 RLAPI void SetShaderValueV(Shader shader, int locIndex, const void *value, int uniformType, int count)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetShaderValueV(shader, locIndex, *value, uniformType, count);
 ```
 
@@ -988,8 +988,8 @@ native SetShaderValueV(shader, locIndex, *value, uniformType, count);
 RLAPI void SetShaderValueMatrix(Shader shader, int locIndex, Matrix mat)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetShaderValueMatrix(shader, locIndex, mat);
 ```
 
@@ -1000,8 +1000,8 @@ native SetShaderValueMatrix(shader, locIndex, mat);
 RLAPI void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetShaderValueTexture(shader, locIndex, texture);
 ```
 
@@ -1012,8 +1012,8 @@ native SetShaderValueTexture(shader, locIndex, texture);
 RLAPI void UnloadShader(Shader shader)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadShader(shader);
 ```
 
@@ -1024,8 +1024,8 @@ native UnloadShader(shader);
 RLAPI Ray GetScreenToWorldRay(Vector2 position, Camera camera)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetScreenToWorldRay(position, camera);
 ```
 
@@ -1036,8 +1036,8 @@ native GetScreenToWorldRay(position, camera);
 RLAPI Ray GetScreenToWorldRayEx(Vector2 position, Camera camera, int width, int height)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetScreenToWorldRayEx(position, camera, width, height);
 ```
 
@@ -1048,8 +1048,8 @@ native GetScreenToWorldRayEx(position, camera, width, height);
 RLAPI Vector2 GetWorldToScreen(Vector3 position, Camera camera)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetWorldToScreen(position, camera);
 ```
 
@@ -1060,8 +1060,8 @@ native GetWorldToScreen(position, camera);
 RLAPI Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int height)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetWorldToScreenEx(position, camera, width, height);
 ```
 
@@ -1072,8 +1072,8 @@ native GetWorldToScreenEx(position, camera, width, height);
 RLAPI Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetWorldToScreen2D(position, camera);
 ```
 
@@ -1084,8 +1084,8 @@ native GetWorldToScreen2D(position, camera);
 RLAPI Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetScreenToWorld2D(position, camera);
 ```
 
@@ -1096,8 +1096,8 @@ native GetScreenToWorld2D(position, camera);
 RLAPI Matrix GetCameraMatrix(Camera camera)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetCameraMatrix(camera);
 ```
 
@@ -1108,8 +1108,8 @@ native GetCameraMatrix(camera);
 RLAPI Matrix GetCameraMatrix2D(Camera2D camera)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetCameraMatrix2D(camera);
 ```
 
@@ -1120,8 +1120,8 @@ native GetCameraMatrix2D(camera);
 RLAPI void SetTargetFPS(int fps)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetTargetFPS(fps);
 ```
 
@@ -1132,8 +1132,8 @@ native SetTargetFPS(fps);
 RLAPI float GetFrameTime()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetFrameTime();
 ```
 
@@ -1144,8 +1144,8 @@ native GetFrameTime();
 RLAPI double GetTime()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetTime();
 ```
 
@@ -1156,8 +1156,8 @@ native GetTime();
 RLAPI int GetFPS()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetFPS();
 ```
 
@@ -1168,8 +1168,8 @@ native GetFPS();
 RLAPI void SwapScreenBuffer()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SwapScreenBuffer();
 ```
 
@@ -1180,8 +1180,8 @@ native SwapScreenBuffer();
 RLAPI void PollInputEvents()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native PollInputEvents();
 ```
 
@@ -1192,8 +1192,8 @@ native PollInputEvents();
 RLAPI void WaitTime(double seconds)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native WaitTime(seconds);
 ```
 
@@ -1204,8 +1204,8 @@ native WaitTime(seconds);
 RLAPI void SetRandomSeed(unsigned int seed)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetRandomSeed(seed);
 ```
 
@@ -1216,8 +1216,8 @@ native SetRandomSeed(seed);
 RLAPI int GetRandomValue(int min, int max)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetRandomValue(min, max);
 ```
 
@@ -1228,8 +1228,8 @@ native GetRandomValue(min, max);
 RLAPI void UnloadRandomSequence(int *sequence)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadRandomSequence(*sequence);
 ```
 
@@ -1240,8 +1240,8 @@ native UnloadRandomSequence(*sequence);
 RLAPI void TakeScreenshot(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native TakeScreenshot(*fileName);
 ```
 
@@ -1252,8 +1252,8 @@ native TakeScreenshot(*fileName);
 RLAPI void SetConfigFlags(unsigned int flags)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetConfigFlags(flags);
 ```
 
@@ -1264,8 +1264,8 @@ native SetConfigFlags(flags);
 RLAPI void OpenURL(const char *url)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native OpenURL(*url);
 ```
 
@@ -1276,8 +1276,8 @@ native OpenURL(*url);
 RLAPI void SetTraceLogLevel(int logLevel)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetTraceLogLevel(logLevel);
 ```
 
@@ -1288,8 +1288,8 @@ native SetTraceLogLevel(logLevel);
 RLAPI void TraceLog(int logLevel, const char *text)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native TraceLog(logLevel, *text);
 ```
 
@@ -1300,8 +1300,8 @@ native TraceLog(logLevel, *text);
 RLAPI void SetTraceLogCallback(TraceLogCallback callback)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetTraceLogCallback(callback);
 ```
 
@@ -1312,8 +1312,8 @@ native SetTraceLogCallback(callback);
 RLAPI void MemFree(void *ptr)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native MemFree(*ptr);
 ```
 
@@ -1324,8 +1324,8 @@ native MemFree(*ptr);
 RLAPI void UnloadFileData(unsigned char *data)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadFileData(*data);
 ```
 
@@ -1336,8 +1336,8 @@ native UnloadFileData(*data);
 RLAPI bool SaveFileData(const char *fileName, const void *data, int dataSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SaveFileData(*fileName, *data, dataSize);
 ```
 
@@ -1348,8 +1348,8 @@ native SaveFileData(*fileName, *data, dataSize);
 RLAPI bool ExportDataAsCode(const unsigned char *data, int dataSize, const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ExportDataAsCode(*data, dataSize, *fileName);
 ```
 
@@ -1360,8 +1360,8 @@ native ExportDataAsCode(*data, dataSize, *fileName);
 RLAPI void UnloadFileText(char *text)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadFileText(*text);
 ```
 
@@ -1372,8 +1372,8 @@ native UnloadFileText(*text);
 RLAPI bool SaveFileText(const char *fileName, const char *text)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SaveFileText(*fileName, *text);
 ```
 
@@ -1384,8 +1384,8 @@ native SaveFileText(*fileName, *text);
 RLAPI void SetLoadFileDataCallback(LoadFileDataCallback callback)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetLoadFileDataCallback(callback);
 ```
 
@@ -1396,8 +1396,8 @@ native SetLoadFileDataCallback(callback);
 RLAPI void SetSaveFileDataCallback(SaveFileDataCallback callback)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetSaveFileDataCallback(callback);
 ```
 
@@ -1408,8 +1408,8 @@ native SetSaveFileDataCallback(callback);
 RLAPI void SetLoadFileTextCallback(LoadFileTextCallback callback)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetLoadFileTextCallback(callback);
 ```
 
@@ -1420,8 +1420,8 @@ native SetLoadFileTextCallback(callback);
 RLAPI void SetSaveFileTextCallback(SaveFileTextCallback callback)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetSaveFileTextCallback(callback);
 ```
 
@@ -1432,8 +1432,8 @@ native SetSaveFileTextCallback(callback);
 RLAPI int FileRename(const char *fileName, const char *fileRename)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native FileRename(*fileName, *fileRename);
 ```
 
@@ -1444,8 +1444,8 @@ native FileRename(*fileName, *fileRename);
 RLAPI int FileRemove(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native FileRemove(*fileName);
 ```
 
@@ -1456,8 +1456,8 @@ native FileRemove(*fileName);
 RLAPI int FileCopy(const char *srcPath, const char *dstPath)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native FileCopy(*srcPath, *dstPath);
 ```
 
@@ -1468,8 +1468,8 @@ native FileCopy(*srcPath, *dstPath);
 RLAPI int FileMove(const char *srcPath, const char *dstPath)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native FileMove(*srcPath, *dstPath);
 ```
 
@@ -1480,8 +1480,8 @@ native FileMove(*srcPath, *dstPath);
 RLAPI int FileTextReplace(const char *fileName, const char *search, const char *replacement)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native FileTextReplace(*fileName, *search, *replacement);
 ```
 
@@ -1492,8 +1492,8 @@ native FileTextReplace(*fileName, *search, *replacement);
 RLAPI int FileTextFindIndex(const char *fileName, const char *search)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native FileTextFindIndex(*fileName, *search);
 ```
 
@@ -1504,8 +1504,8 @@ native FileTextFindIndex(*fileName, *search);
 RLAPI bool FileExists(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native FileExists(*fileName);
 ```
 
@@ -1516,8 +1516,8 @@ native FileExists(*fileName);
 RLAPI bool DirectoryExists(const char *dirPath)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DirectoryExists(*dirPath);
 ```
 
@@ -1528,8 +1528,8 @@ native DirectoryExists(*dirPath);
 RLAPI bool IsFileExtension(const char *fileName, const char *ext)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsFileExtension(*fileName, *ext);
 ```
 
@@ -1540,8 +1540,8 @@ native IsFileExtension(*fileName, *ext);
 RLAPI int GetFileLength(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetFileLength(*fileName);
 ```
 
@@ -1552,8 +1552,8 @@ native GetFileLength(*fileName);
 RLAPI long GetFileModTime(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetFileModTime(*fileName);
 ```
 
@@ -1564,8 +1564,8 @@ native GetFileModTime(*fileName);
 RLAPI int MakeDirectory(const char *dirPath)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native MakeDirectory(*dirPath);
 ```
 
@@ -1576,8 +1576,8 @@ native MakeDirectory(*dirPath);
 RLAPI bool ChangeDirectory(const char *dirPath)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ChangeDirectory(*dirPath);
 ```
 
@@ -1588,8 +1588,8 @@ native ChangeDirectory(*dirPath);
 RLAPI bool IsPathFile(const char *path)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsPathFile(*path);
 ```
 
@@ -1600,8 +1600,8 @@ native IsPathFile(*path);
 RLAPI bool IsFileNameValid(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsFileNameValid(*fileName);
 ```
 
@@ -1612,8 +1612,8 @@ native IsFileNameValid(*fileName);
 RLAPI FilePathList LoadDirectoryFiles(const char *dirPath)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadDirectoryFiles(*dirPath);
 ```
 
@@ -1624,8 +1624,8 @@ native LoadDirectoryFiles(*dirPath);
 RLAPI FilePathList LoadDirectoryFilesEx(const char *basePath, const char *filter, bool scanSubdirs)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadDirectoryFilesEx(*basePath, *filter, scanSubdirs);
 ```
 
@@ -1636,8 +1636,8 @@ native LoadDirectoryFilesEx(*basePath, *filter, scanSubdirs);
 RLAPI void UnloadDirectoryFiles(FilePathList files)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadDirectoryFiles(files);
 ```
 
@@ -1648,8 +1648,8 @@ native UnloadDirectoryFiles(files);
 RLAPI bool IsFileDropped()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsFileDropped();
 ```
 
@@ -1660,8 +1660,8 @@ native IsFileDropped();
 RLAPI FilePathList LoadDroppedFiles()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadDroppedFiles();
 ```
 
@@ -1672,8 +1672,8 @@ native LoadDroppedFiles();
 RLAPI void UnloadDroppedFiles(FilePathList files)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadDroppedFiles(files);
 ```
 
@@ -1684,8 +1684,8 @@ native UnloadDroppedFiles(files);
 RLAPI unsigned int GetDirectoryFileCount(const char *dirPath)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetDirectoryFileCount(*dirPath);
 ```
 
@@ -1696,8 +1696,8 @@ native GetDirectoryFileCount(*dirPath);
 RLAPI unsigned int GetDirectoryFileCountEx(const char *basePath, const char *filter, bool scanSubdirs)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetDirectoryFileCountEx(*basePath, *filter, scanSubdirs);
 ```
 
@@ -1708,8 +1708,8 @@ native GetDirectoryFileCountEx(*basePath, *filter, scanSubdirs);
 RLAPI unsigned int ComputeCRC32(const unsigned char *data, int dataSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ComputeCRC32(*data, dataSize);
 ```
 
@@ -1720,8 +1720,8 @@ native ComputeCRC32(*data, dataSize);
 RLAPI AutomationEventList LoadAutomationEventList(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadAutomationEventList(*fileName);
 ```
 
@@ -1732,8 +1732,8 @@ native LoadAutomationEventList(*fileName);
 RLAPI void UnloadAutomationEventList(AutomationEventList list)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadAutomationEventList(list);
 ```
 
@@ -1744,8 +1744,8 @@ native UnloadAutomationEventList(list);
 RLAPI bool ExportAutomationEventList(AutomationEventList list, const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ExportAutomationEventList(list, *fileName);
 ```
 
@@ -1756,8 +1756,8 @@ native ExportAutomationEventList(list, *fileName);
 RLAPI void SetAutomationEventList(AutomationEventList *list)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetAutomationEventList(*list);
 ```
 
@@ -1768,8 +1768,8 @@ native SetAutomationEventList(*list);
 RLAPI void SetAutomationEventBaseFrame(int frame)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetAutomationEventBaseFrame(frame);
 ```
 
@@ -1780,8 +1780,8 @@ native SetAutomationEventBaseFrame(frame);
 RLAPI void StartAutomationEventRecording()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native StartAutomationEventRecording();
 ```
 
@@ -1792,8 +1792,8 @@ native StartAutomationEventRecording();
 RLAPI void StopAutomationEventRecording()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native StopAutomationEventRecording();
 ```
 
@@ -1804,8 +1804,8 @@ native StopAutomationEventRecording();
 RLAPI void PlayAutomationEvent(AutomationEvent event)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native PlayAutomationEvent(event);
 ```
 
@@ -1816,8 +1816,8 @@ native PlayAutomationEvent(event);
 RLAPI bool IsKeyPressed(int key)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsKeyPressed(key);
 ```
 
@@ -1828,8 +1828,8 @@ native IsKeyPressed(key);
 RLAPI bool IsKeyPressedRepeat(int key)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsKeyPressedRepeat(key);
 ```
 
@@ -1840,8 +1840,8 @@ native IsKeyPressedRepeat(key);
 RLAPI bool IsKeyDown(int key)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsKeyDown(key);
 ```
 
@@ -1852,8 +1852,8 @@ native IsKeyDown(key);
 RLAPI bool IsKeyReleased(int key)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsKeyReleased(key);
 ```
 
@@ -1864,8 +1864,8 @@ native IsKeyReleased(key);
 RLAPI bool IsKeyUp(int key)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsKeyUp(key);
 ```
 
@@ -1876,8 +1876,8 @@ native IsKeyUp(key);
 RLAPI int GetKeyPressed()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetKeyPressed();
 ```
 
@@ -1888,8 +1888,8 @@ native GetKeyPressed();
 RLAPI int GetCharPressed()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetCharPressed();
 ```
 
@@ -1900,8 +1900,8 @@ native GetCharPressed();
 RLAPI void SetExitKey(int key)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetExitKey(key);
 ```
 
@@ -1912,8 +1912,8 @@ native SetExitKey(key);
 RLAPI bool IsGamepadAvailable(int gamepad)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsGamepadAvailable(gamepad);
 ```
 
@@ -1924,8 +1924,8 @@ native IsGamepadAvailable(gamepad);
 RLAPI bool IsGamepadButtonPressed(int gamepad, int button)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsGamepadButtonPressed(gamepad, button);
 ```
 
@@ -1936,8 +1936,8 @@ native IsGamepadButtonPressed(gamepad, button);
 RLAPI bool IsGamepadButtonDown(int gamepad, int button)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsGamepadButtonDown(gamepad, button);
 ```
 
@@ -1948,8 +1948,8 @@ native IsGamepadButtonDown(gamepad, button);
 RLAPI bool IsGamepadButtonReleased(int gamepad, int button)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsGamepadButtonReleased(gamepad, button);
 ```
 
@@ -1960,8 +1960,8 @@ native IsGamepadButtonReleased(gamepad, button);
 RLAPI bool IsGamepadButtonUp(int gamepad, int button)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsGamepadButtonUp(gamepad, button);
 ```
 
@@ -1972,8 +1972,8 @@ native IsGamepadButtonUp(gamepad, button);
 RLAPI int GetGamepadButtonPressed()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetGamepadButtonPressed();
 ```
 
@@ -1984,8 +1984,8 @@ native GetGamepadButtonPressed();
 RLAPI int GetGamepadAxisCount(int gamepad)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetGamepadAxisCount(gamepad);
 ```
 
@@ -1996,8 +1996,8 @@ native GetGamepadAxisCount(gamepad);
 RLAPI float GetGamepadAxisMovement(int gamepad, int axis)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetGamepadAxisMovement(gamepad, axis);
 ```
 
@@ -2008,8 +2008,8 @@ native GetGamepadAxisMovement(gamepad, axis);
 RLAPI int SetGamepadMappings(const char *mappings)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetGamepadMappings(*mappings);
 ```
 
@@ -2020,8 +2020,8 @@ native SetGamepadMappings(*mappings);
 RLAPI void SetGamepadVibration(int gamepad, float leftMotor, float rightMotor, float duration)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetGamepadVibration(gamepad, leftMotor, rightMotor, duration);
 ```
 
@@ -2032,8 +2032,8 @@ native SetGamepadVibration(gamepad, leftMotor, rightMotor, duration);
 RLAPI bool IsMouseButtonPressed(int button)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsMouseButtonPressed(button);
 ```
 
@@ -2044,8 +2044,8 @@ native IsMouseButtonPressed(button);
 RLAPI bool IsMouseButtonDown(int button)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsMouseButtonDown(button);
 ```
 
@@ -2056,8 +2056,8 @@ native IsMouseButtonDown(button);
 RLAPI bool IsMouseButtonReleased(int button)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsMouseButtonReleased(button);
 ```
 
@@ -2068,8 +2068,8 @@ native IsMouseButtonReleased(button);
 RLAPI bool IsMouseButtonUp(int button)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsMouseButtonUp(button);
 ```
 
@@ -2080,8 +2080,8 @@ native IsMouseButtonUp(button);
 RLAPI int GetMouseX()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMouseX();
 ```
 
@@ -2092,8 +2092,8 @@ native GetMouseX();
 RLAPI int GetMouseY()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMouseY();
 ```
 
@@ -2104,8 +2104,8 @@ native GetMouseY();
 RLAPI Vector2 GetMousePosition()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMousePosition();
 ```
 
@@ -2116,8 +2116,8 @@ native GetMousePosition();
 RLAPI Vector2 GetMouseDelta()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMouseDelta();
 ```
 
@@ -2128,8 +2128,8 @@ native GetMouseDelta();
 RLAPI void SetMousePosition(int x, int y)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetMousePosition(x, y);
 ```
 
@@ -2140,8 +2140,8 @@ native SetMousePosition(x, y);
 RLAPI void SetMouseOffset(int offsetX, int offsetY)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetMouseOffset(offsetX, offsetY);
 ```
 
@@ -2152,8 +2152,8 @@ native SetMouseOffset(offsetX, offsetY);
 RLAPI void SetMouseScale(float scaleX, float scaleY)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetMouseScale(scaleX, scaleY);
 ```
 
@@ -2164,8 +2164,8 @@ native SetMouseScale(scaleX, scaleY);
 RLAPI float GetMouseWheelMove()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMouseWheelMove();
 ```
 
@@ -2176,8 +2176,8 @@ native GetMouseWheelMove();
 RLAPI Vector2 GetMouseWheelMoveV()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMouseWheelMoveV();
 ```
 
@@ -2188,8 +2188,8 @@ native GetMouseWheelMoveV();
 RLAPI void SetMouseCursor(int cursor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetMouseCursor(cursor);
 ```
 
@@ -2200,8 +2200,8 @@ native SetMouseCursor(cursor);
 RLAPI int GetTouchX()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetTouchX();
 ```
 
@@ -2212,8 +2212,8 @@ native GetTouchX();
 RLAPI int GetTouchY()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetTouchY();
 ```
 
@@ -2224,8 +2224,8 @@ native GetTouchY();
 RLAPI Vector2 GetTouchPosition(int index)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetTouchPosition(index);
 ```
 
@@ -2236,8 +2236,8 @@ native GetTouchPosition(index);
 RLAPI int GetTouchPointId(int index)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetTouchPointId(index);
 ```
 
@@ -2248,8 +2248,8 @@ native GetTouchPointId(index);
 RLAPI int GetTouchPointCount()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetTouchPointCount();
 ```
 
@@ -2260,8 +2260,8 @@ native GetTouchPointCount();
 RLAPI void SetGesturesEnabled(unsigned int flags)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetGesturesEnabled(flags);
 ```
 
@@ -2272,8 +2272,8 @@ native SetGesturesEnabled(flags);
 RLAPI bool IsGestureDetected(unsigned int gesture)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsGestureDetected(gesture);
 ```
 
@@ -2284,8 +2284,8 @@ native IsGestureDetected(gesture);
 RLAPI int GetGestureDetected()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetGestureDetected();
 ```
 
@@ -2296,8 +2296,8 @@ native GetGestureDetected();
 RLAPI float GetGestureHoldDuration()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetGestureHoldDuration();
 ```
 
@@ -2308,8 +2308,8 @@ native GetGestureHoldDuration();
 RLAPI Vector2 GetGestureDragVector()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetGestureDragVector();
 ```
 
@@ -2320,8 +2320,8 @@ native GetGestureDragVector();
 RLAPI float GetGestureDragAngle()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetGestureDragAngle();
 ```
 
@@ -2332,8 +2332,8 @@ native GetGestureDragAngle();
 RLAPI Vector2 GetGesturePinchVector()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetGesturePinchVector();
 ```
 
@@ -2344,8 +2344,8 @@ native GetGesturePinchVector();
 RLAPI float GetGesturePinchAngle()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetGesturePinchAngle();
 ```
 
@@ -2356,8 +2356,8 @@ native GetGesturePinchAngle();
 RLAPI void UpdateCamera(Camera *camera, int mode)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UpdateCamera(*camera, mode);
 ```
 
@@ -2368,8 +2368,8 @@ native UpdateCamera(*camera, mode);
 RLAPI void UpdateCameraPro(Camera *camera, Vector3 movement, Vector3 rotation, float zoom)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UpdateCameraPro(*camera, movement, rotation, zoom);
 ```
 
@@ -2380,8 +2380,8 @@ native UpdateCameraPro(*camera, movement, rotation, zoom);
 RLAPI void SetShapesTexture(Texture2D texture, Rectangle source)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetShapesTexture(texture, source);
 ```
 
@@ -2392,8 +2392,8 @@ native SetShapesTexture(texture, source);
 RLAPI Texture2D GetShapesTexture()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetShapesTexture();
 ```
 
@@ -2404,8 +2404,8 @@ native GetShapesTexture();
 RLAPI Rectangle GetShapesTextureRectangle()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetShapesTextureRectangle();
 ```
 
@@ -2416,8 +2416,8 @@ native GetShapesTextureRectangle();
 RLAPI void DrawPixel(int posX, int posY, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawPixel(posX, posY, color);
 ```
 
@@ -2428,8 +2428,8 @@ native DrawPixel(posX, posY, color);
 RLAPI void DrawPixelV(Vector2 position, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawPixelV(position, color);
 ```
 
@@ -2440,8 +2440,8 @@ native DrawPixelV(position, color);
 RLAPI void DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawLine(startPosX, startPosY, endPosX, endPosY, color);
 ```
 
@@ -2452,8 +2452,8 @@ native DrawLine(startPosX, startPosY, endPosX, endPosY, color);
 RLAPI void DrawLineV(Vector2 startPos, Vector2 endPos, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawLineV(startPos, endPos, color);
 ```
 
@@ -2464,8 +2464,8 @@ native DrawLineV(startPos, endPos, color);
 RLAPI void DrawLineEx(Vector2 startPos, Vector2 endPos, float thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawLineEx(startPos, endPos, thick, color);
 ```
 
@@ -2476,8 +2476,8 @@ native DrawLineEx(startPos, endPos, thick, color);
 RLAPI void DrawLineStrip(const Vector2 *points, int pointCount, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawLineStrip(*points, pointCount, color);
 ```
 
@@ -2488,8 +2488,8 @@ native DrawLineStrip(*points, pointCount, color);
 RLAPI void DrawLineBezier(Vector2 startPos, Vector2 endPos, float thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawLineBezier(startPos, endPos, thick, color);
 ```
 
@@ -2500,8 +2500,8 @@ native DrawLineBezier(startPos, endPos, thick, color);
 RLAPI void DrawLineDashed(Vector2 startPos, Vector2 endPos, int dashSize, int spaceSize, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawLineDashed(startPos, endPos, dashSize, spaceSize, color);
 ```
 
@@ -2512,8 +2512,8 @@ native DrawLineDashed(startPos, endPos, dashSize, spaceSize, color);
 RLAPI void DrawCircle(int centerX, int centerY, float radius, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCircle(centerX, centerY, radius, color);
 ```
 
@@ -2524,8 +2524,8 @@ native DrawCircle(centerX, centerY, radius, color);
 RLAPI void DrawCircleV(Vector2 center, float radius, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCircleV(center, radius, color);
 ```
 
@@ -2536,8 +2536,8 @@ native DrawCircleV(center, radius, color);
 RLAPI void DrawCircleGradient(Vector2 center, float radius, Color inner, Color outer)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCircleGradient(center, radius, inner, outer);
 ```
 
@@ -2548,8 +2548,8 @@ native DrawCircleGradient(center, radius, inner, outer);
 RLAPI void DrawCircleSector(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCircleSector(center, radius, startAngle, endAngle, segments, color);
 ```
 
@@ -2560,8 +2560,8 @@ native DrawCircleSector(center, radius, startAngle, endAngle, segments, color);
 RLAPI void DrawCircleSectorLines(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCircleSectorLines(center, radius, startAngle, endAngle, segments, color);
 ```
 
@@ -2572,8 +2572,8 @@ native DrawCircleSectorLines(center, radius, startAngle, endAngle, segments, col
 RLAPI void DrawCircleLines(int centerX, int centerY, float radius, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCircleLines(centerX, centerY, radius, color);
 ```
 
@@ -2584,8 +2584,8 @@ native DrawCircleLines(centerX, centerY, radius, color);
 RLAPI void DrawCircleLinesV(Vector2 center, float radius, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCircleLinesV(center, radius, color);
 ```
 
@@ -2596,8 +2596,8 @@ native DrawCircleLinesV(center, radius, color);
 RLAPI void DrawEllipse(int centerX, int centerY, float radiusH, float radiusV, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawEllipse(centerX, centerY, radiusH, radiusV, color);
 ```
 
@@ -2608,8 +2608,8 @@ native DrawEllipse(centerX, centerY, radiusH, radiusV, color);
 RLAPI void DrawEllipseV(Vector2 center, float radiusH, float radiusV, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawEllipseV(center, radiusH, radiusV, color);
 ```
 
@@ -2620,8 +2620,8 @@ native DrawEllipseV(center, radiusH, radiusV, color);
 RLAPI void DrawEllipseLines(int centerX, int centerY, float radiusH, float radiusV, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawEllipseLines(centerX, centerY, radiusH, radiusV, color);
 ```
 
@@ -2632,8 +2632,8 @@ native DrawEllipseLines(centerX, centerY, radiusH, radiusV, color);
 RLAPI void DrawEllipseLinesV(Vector2 center, float radiusH, float radiusV, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawEllipseLinesV(center, radiusH, radiusV, color);
 ```
 
@@ -2644,8 +2644,8 @@ native DrawEllipseLinesV(center, radiusH, radiusV, color);
 RLAPI void DrawRing(Vector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRing(center, innerRadius, outerRadius, startAngle, endAngle, segments, color);
 ```
 
@@ -2656,8 +2656,8 @@ native DrawRing(center, innerRadius, outerRadius, startAngle, endAngle, segments
 RLAPI void DrawRingLines(Vector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRingLines(center, innerRadius, outerRadius, startAngle, endAngle, segments, color);
 ```
 
@@ -2668,8 +2668,8 @@ native DrawRingLines(center, innerRadius, outerRadius, startAngle, endAngle, seg
 RLAPI void DrawRectangle(int posX, int posY, int width, int height, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRectangle(posX, posY, width, height, color);
 ```
 
@@ -2680,8 +2680,8 @@ native DrawRectangle(posX, posY, width, height, color);
 RLAPI void DrawRectangleV(Vector2 position, Vector2 size, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRectangleV(position, size, color);
 ```
 
@@ -2692,8 +2692,8 @@ native DrawRectangleV(position, size, color);
 RLAPI void DrawRectangleRec(Rectangle rec, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRectangleRec(rec, color);
 ```
 
@@ -2704,8 +2704,8 @@ native DrawRectangleRec(rec, color);
 RLAPI void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRectanglePro(rec, origin, rotation, color);
 ```
 
@@ -2716,8 +2716,8 @@ native DrawRectanglePro(rec, origin, rotation, color);
 RLAPI void DrawRectangleGradientV(int posX, int posY, int width, int height, Color top, Color bottom)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRectangleGradientV(posX, posY, width, height, top, bottom);
 ```
 
@@ -2728,8 +2728,8 @@ native DrawRectangleGradientV(posX, posY, width, height, top, bottom);
 RLAPI void DrawRectangleGradientH(int posX, int posY, int width, int height, Color left, Color right)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRectangleGradientH(posX, posY, width, height, left, right);
 ```
 
@@ -2740,8 +2740,8 @@ native DrawRectangleGradientH(posX, posY, width, height, left, right);
 RLAPI void DrawRectangleGradientEx(Rectangle rec, Color topLeft, Color bottomLeft, Color bottomRight, Color topRight)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRectangleGradientEx(rec, topLeft, bottomLeft, bottomRight, topRight);
 ```
 
@@ -2752,8 +2752,8 @@ native DrawRectangleGradientEx(rec, topLeft, bottomLeft, bottomRight, topRight);
 RLAPI void DrawRectangleLines(int posX, int posY, int width, int height, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRectangleLines(posX, posY, width, height, color);
 ```
 
@@ -2764,8 +2764,8 @@ native DrawRectangleLines(posX, posY, width, height, color);
 RLAPI void DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRectangleLinesEx(rec, lineThick, color);
 ```
 
@@ -2776,8 +2776,8 @@ native DrawRectangleLinesEx(rec, lineThick, color);
 RLAPI void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRectangleRounded(rec, roundness, segments, color);
 ```
 
@@ -2788,8 +2788,8 @@ native DrawRectangleRounded(rec, roundness, segments, color);
 RLAPI void DrawRectangleRoundedLines(Rectangle rec, float roundness, int segments, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRectangleRoundedLines(rec, roundness, segments, color);
 ```
 
@@ -2800,8 +2800,8 @@ native DrawRectangleRoundedLines(rec, roundness, segments, color);
 RLAPI void DrawRectangleRoundedLinesEx(Rectangle rec, float roundness, int segments, float lineThick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRectangleRoundedLinesEx(rec, roundness, segments, lineThick, color);
 ```
 
@@ -2812,8 +2812,8 @@ native DrawRectangleRoundedLinesEx(rec, roundness, segments, lineThick, color);
 RLAPI void DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTriangle(v1, v2, v3, color);
 ```
 
@@ -2824,8 +2824,8 @@ native DrawTriangle(v1, v2, v3, color);
 RLAPI void DrawTriangleGradient(Vector2 v1, Vector2 v2, Vector2 v3, Color c1, Color c2, Color c3)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTriangleGradient(v1, v2, v3, c1, c2, c3);
 ```
 
@@ -2836,8 +2836,8 @@ native DrawTriangleGradient(v1, v2, v3, c1, c2, c3);
 RLAPI void DrawTriangleLines(Vector2 v1, Vector2 v2, Vector2 v3, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTriangleLines(v1, v2, v3, color);
 ```
 
@@ -2848,8 +2848,8 @@ native DrawTriangleLines(v1, v2, v3, color);
 RLAPI void DrawTriangleFan(const Vector2 *points, int pointCount, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTriangleFan(*points, pointCount, color);
 ```
 
@@ -2860,8 +2860,8 @@ native DrawTriangleFan(*points, pointCount, color);
 RLAPI void DrawTriangleStrip(const Vector2 *points, int pointCount, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTriangleStrip(*points, pointCount, color);
 ```
 
@@ -2872,8 +2872,8 @@ native DrawTriangleStrip(*points, pointCount, color);
 RLAPI void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawPoly(center, sides, radius, rotation, color);
 ```
 
@@ -2884,8 +2884,8 @@ native DrawPoly(center, sides, radius, rotation, color);
 RLAPI void DrawPolyLines(Vector2 center, int sides, float radius, float rotation, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawPolyLines(center, sides, radius, rotation, color);
 ```
 
@@ -2896,8 +2896,8 @@ native DrawPolyLines(center, sides, radius, rotation, color);
 RLAPI void DrawPolyLinesEx(Vector2 center, int sides, float radius, float rotation, float lineThick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawPolyLinesEx(center, sides, radius, rotation, lineThick, color);
 ```
 
@@ -2908,8 +2908,8 @@ native DrawPolyLinesEx(center, sides, radius, rotation, lineThick, color);
 RLAPI void DrawSplineLinear(const Vector2 *points, int pointCount, float thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawSplineLinear(*points, pointCount, thick, color);
 ```
 
@@ -2920,8 +2920,8 @@ native DrawSplineLinear(*points, pointCount, thick, color);
 RLAPI void DrawSplineBasis(const Vector2 *points, int pointCount, float thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawSplineBasis(*points, pointCount, thick, color);
 ```
 
@@ -2932,8 +2932,8 @@ native DrawSplineBasis(*points, pointCount, thick, color);
 RLAPI void DrawSplineCatmullRom(const Vector2 *points, int pointCount, float thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawSplineCatmullRom(*points, pointCount, thick, color);
 ```
 
@@ -2944,8 +2944,8 @@ native DrawSplineCatmullRom(*points, pointCount, thick, color);
 RLAPI void DrawSplineBezierQuadratic(const Vector2 *points, int pointCount, float thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawSplineBezierQuadratic(*points, pointCount, thick, color);
 ```
 
@@ -2956,8 +2956,8 @@ native DrawSplineBezierQuadratic(*points, pointCount, thick, color);
 RLAPI void DrawSplineBezierCubic(const Vector2 *points, int pointCount, float thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawSplineBezierCubic(*points, pointCount, thick, color);
 ```
 
@@ -2968,8 +2968,8 @@ native DrawSplineBezierCubic(*points, pointCount, thick, color);
 RLAPI void DrawSplineSegmentLinear(Vector2 p1, Vector2 p2, float thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawSplineSegmentLinear(p1, p2, thick, color);
 ```
 
@@ -2980,8 +2980,8 @@ native DrawSplineSegmentLinear(p1, p2, thick, color);
 RLAPI void DrawSplineSegmentBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawSplineSegmentBasis(p1, p2, p3, p4, thick, color);
 ```
 
@@ -2992,8 +2992,8 @@ native DrawSplineSegmentBasis(p1, p2, p3, p4, thick, color);
 RLAPI void DrawSplineSegmentCatmullRom(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawSplineSegmentCatmullRom(p1, p2, p3, p4, thick, color);
 ```
 
@@ -3004,8 +3004,8 @@ native DrawSplineSegmentCatmullRom(p1, p2, p3, p4, thick, color);
 RLAPI void DrawSplineSegmentBezierQuadratic(Vector2 p1, Vector2 c2, Vector2 p3, float thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawSplineSegmentBezierQuadratic(p1, c2, p3, thick, color);
 ```
 
@@ -3016,8 +3016,8 @@ native DrawSplineSegmentBezierQuadratic(p1, c2, p3, thick, color);
 RLAPI void DrawSplineSegmentBezierCubic(Vector2 p1, Vector2 c2, Vector2 c3, Vector2 p4, float thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawSplineSegmentBezierCubic(p1, c2, c3, p4, thick, color);
 ```
 
@@ -3028,8 +3028,8 @@ native DrawSplineSegmentBezierCubic(p1, c2, c3, p4, thick, color);
 RLAPI Vector2 GetSplinePointLinear(Vector2 startPos, Vector2 endPos, float t)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetSplinePointLinear(startPos, endPos, t);
 ```
 
@@ -3040,8 +3040,8 @@ native GetSplinePointLinear(startPos, endPos, t);
 RLAPI Vector2 GetSplinePointBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float t)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetSplinePointBasis(p1, p2, p3, p4, t);
 ```
 
@@ -3052,8 +3052,8 @@ native GetSplinePointBasis(p1, p2, p3, p4, t);
 RLAPI Vector2 GetSplinePointCatmullRom(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float t)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetSplinePointCatmullRom(p1, p2, p3, p4, t);
 ```
 
@@ -3064,8 +3064,8 @@ native GetSplinePointCatmullRom(p1, p2, p3, p4, t);
 RLAPI Vector2 GetSplinePointBezierQuadratic(Vector2 p1, Vector2 c2, Vector2 p3, float t)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetSplinePointBezierQuadratic(p1, c2, p3, t);
 ```
 
@@ -3076,8 +3076,8 @@ native GetSplinePointBezierQuadratic(p1, c2, p3, t);
 RLAPI Vector2 GetSplinePointBezierCubic(Vector2 p1, Vector2 c2, Vector2 c3, Vector2 p4, float t)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetSplinePointBezierCubic(p1, c2, c3, p4, t);
 ```
 
@@ -3088,8 +3088,8 @@ native GetSplinePointBezierCubic(p1, c2, c3, p4, t);
 RLAPI bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CheckCollisionRecs(rec1, rec2);
 ```
 
@@ -3100,8 +3100,8 @@ native CheckCollisionRecs(rec1, rec2);
 RLAPI bool CheckCollisionCircles(Vector2 center1, float radius1, Vector2 center2, float radius2)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CheckCollisionCircles(center1, radius1, center2, radius2);
 ```
 
@@ -3112,8 +3112,8 @@ native CheckCollisionCircles(center1, radius1, center2, radius2);
 RLAPI bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CheckCollisionCircleRec(center, radius, rec);
 ```
 
@@ -3124,8 +3124,8 @@ native CheckCollisionCircleRec(center, radius, rec);
 RLAPI bool CheckCollisionCircleLine(Vector2 center, float radius, Vector2 p1, Vector2 p2)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CheckCollisionCircleLine(center, radius, p1, p2);
 ```
 
@@ -3136,8 +3136,8 @@ native CheckCollisionCircleLine(center, radius, p1, p2);
 RLAPI bool CheckCollisionPointRec(Vector2 point, Rectangle rec)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CheckCollisionPointRec(point, rec);
 ```
 
@@ -3148,8 +3148,8 @@ native CheckCollisionPointRec(point, rec);
 RLAPI bool CheckCollisionPointCircle(Vector2 point, Vector2 center, float radius)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CheckCollisionPointCircle(point, center, radius);
 ```
 
@@ -3160,8 +3160,8 @@ native CheckCollisionPointCircle(point, center, radius);
 RLAPI bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Vector2 p3)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CheckCollisionPointTriangle(point, p1, p2, p3);
 ```
 
@@ -3172,8 +3172,8 @@ native CheckCollisionPointTriangle(point, p1, p2, p3);
 RLAPI bool CheckCollisionPointLine(Vector2 point, Vector2 p1, Vector2 p2, int threshold)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CheckCollisionPointLine(point, p1, p2, threshold);
 ```
 
@@ -3184,8 +3184,8 @@ native CheckCollisionPointLine(point, p1, p2, threshold);
 RLAPI bool CheckCollisionPointPoly(Vector2 point, const Vector2 *points, int pointCount)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CheckCollisionPointPoly(point, *points, pointCount);
 ```
 
@@ -3196,8 +3196,8 @@ native CheckCollisionPointPoly(point, *points, pointCount);
 RLAPI bool CheckCollisionLines(Vector2 startPos1, Vector2 endPos1, Vector2 startPos2, Vector2 endPos2, Vector2 *collisionPoint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CheckCollisionLines(startPos1, endPos1, startPos2, endPos2, *collisionPoint);
 ```
 
@@ -3208,8 +3208,8 @@ native CheckCollisionLines(startPos1, endPos1, startPos2, endPos2, *collisionPoi
 RLAPI Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetCollisionRec(rec1, rec2);
 ```
 
@@ -3220,8 +3220,8 @@ native GetCollisionRec(rec1, rec2);
 RLAPI Image LoadImage(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadImage(*fileName);
 ```
 
@@ -3232,8 +3232,8 @@ native LoadImage(*fileName);
 RLAPI Image LoadImageRaw(const char *fileName, int width, int height, int format, int headerSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadImageRaw(*fileName, width, height, format, headerSize);
 ```
 
@@ -3244,8 +3244,8 @@ native LoadImageRaw(*fileName, width, height, format, headerSize);
 RLAPI Image LoadImageAnim(const char *fileName, int *frames)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadImageAnim(*fileName, *frames);
 ```
 
@@ -3256,8 +3256,8 @@ native LoadImageAnim(*fileName, *frames);
 RLAPI Image LoadImageAnimFromMemory(const char *fileType, const unsigned char *fileData, int dataSize, int *frames)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadImageAnimFromMemory(*fileType, *fileData, dataSize, *frames);
 ```
 
@@ -3268,8 +3268,8 @@ native LoadImageAnimFromMemory(*fileType, *fileData, dataSize, *frames);
 RLAPI Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, int dataSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadImageFromMemory(*fileType, *fileData, dataSize);
 ```
 
@@ -3280,8 +3280,8 @@ native LoadImageFromMemory(*fileType, *fileData, dataSize);
 RLAPI Image LoadImageFromTexture(Texture2D texture)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadImageFromTexture(texture);
 ```
 
@@ -3292,8 +3292,8 @@ native LoadImageFromTexture(texture);
 RLAPI Image LoadImageFromScreen()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadImageFromScreen();
 ```
 
@@ -3304,8 +3304,8 @@ native LoadImageFromScreen();
 RLAPI bool IsImageValid(Image image)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsImageValid(image);
 ```
 
@@ -3316,8 +3316,8 @@ native IsImageValid(image);
 RLAPI void UnloadImage(Image image)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadImage(image);
 ```
 
@@ -3328,8 +3328,8 @@ native UnloadImage(image);
 RLAPI bool ExportImage(Image image, const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ExportImage(image, *fileName);
 ```
 
@@ -3340,8 +3340,8 @@ native ExportImage(image, *fileName);
 RLAPI bool ExportImageAsCode(Image image, const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ExportImageAsCode(image, *fileName);
 ```
 
@@ -3352,8 +3352,8 @@ native ExportImageAsCode(image, *fileName);
 RLAPI Image GenImageColor(int width, int height, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenImageColor(width, height, color);
 ```
 
@@ -3364,8 +3364,8 @@ native GenImageColor(width, height, color);
 RLAPI Image GenImageGradientLinear(int width, int height, int direction, Color start, Color end)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenImageGradientLinear(width, height, direction, start, end);
 ```
 
@@ -3376,8 +3376,8 @@ native GenImageGradientLinear(width, height, direction, start, end);
 RLAPI Image GenImageGradientRadial(int width, int height, float density, Color inner, Color outer)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenImageGradientRadial(width, height, density, inner, outer);
 ```
 
@@ -3388,8 +3388,8 @@ native GenImageGradientRadial(width, height, density, inner, outer);
 RLAPI Image GenImageGradientSquare(int width, int height, float density, Color inner, Color outer)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenImageGradientSquare(width, height, density, inner, outer);
 ```
 
@@ -3400,8 +3400,8 @@ native GenImageGradientSquare(width, height, density, inner, outer);
 RLAPI Image GenImageChecked(int width, int height, int checksX, int checksY, Color col1, Color col2)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenImageChecked(width, height, checksX, checksY, col1, col2);
 ```
 
@@ -3412,8 +3412,8 @@ native GenImageChecked(width, height, checksX, checksY, col1, col2);
 RLAPI Image GenImageWhiteNoise(int width, int height, float factor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenImageWhiteNoise(width, height, factor);
 ```
 
@@ -3424,8 +3424,8 @@ native GenImageWhiteNoise(width, height, factor);
 RLAPI Image GenImagePerlinNoise(int width, int height, int offsetX, int offsetY, float scale)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenImagePerlinNoise(width, height, offsetX, offsetY, scale);
 ```
 
@@ -3436,8 +3436,8 @@ native GenImagePerlinNoise(width, height, offsetX, offsetY, scale);
 RLAPI Image GenImageCellular(int width, int height, int tileSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenImageCellular(width, height, tileSize);
 ```
 
@@ -3448,8 +3448,8 @@ native GenImageCellular(width, height, tileSize);
 RLAPI Image GenImageText(int width, int height, const char *text)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenImageText(width, height, *text);
 ```
 
@@ -3460,8 +3460,8 @@ native GenImageText(width, height, *text);
 RLAPI Image ImageCopy(Image image)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageCopy(image);
 ```
 
@@ -3472,8 +3472,8 @@ native ImageCopy(image);
 RLAPI Image ImageFromImage(Image image, Rectangle rec)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageFromImage(image, rec);
 ```
 
@@ -3484,8 +3484,8 @@ native ImageFromImage(image, rec);
 RLAPI Image ImageFromChannel(Image image, int selectedChannel)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageFromChannel(image, selectedChannel);
 ```
 
@@ -3496,8 +3496,8 @@ native ImageFromChannel(image, selectedChannel);
 RLAPI Image ImageText(const char *text, int fontSize, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageText(*text, fontSize, color);
 ```
 
@@ -3508,8 +3508,8 @@ native ImageText(*text, fontSize, color);
 RLAPI Image ImageTextEx(Font font, const char *text, float fontSize, float spacing, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageTextEx(font, *text, fontSize, spacing, tint);
 ```
 
@@ -3520,8 +3520,8 @@ native ImageTextEx(font, *text, fontSize, spacing, tint);
 RLAPI void ImageFormat(Image *image, int newFormat)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageFormat(*image, newFormat);
 ```
 
@@ -3532,8 +3532,8 @@ native ImageFormat(*image, newFormat);
 RLAPI void ImageToPOT(Image *image, Color fill)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageToPOT(*image, fill);
 ```
 
@@ -3544,8 +3544,8 @@ native ImageToPOT(*image, fill);
 RLAPI void ImageCrop(Image *image, Rectangle crop)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageCrop(*image, crop);
 ```
 
@@ -3556,8 +3556,8 @@ native ImageCrop(*image, crop);
 RLAPI void ImageAlphaCrop(Image *image, float threshold)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageAlphaCrop(*image, threshold);
 ```
 
@@ -3568,8 +3568,8 @@ native ImageAlphaCrop(*image, threshold);
 RLAPI void ImageAlphaClear(Image *image, Color color, float threshold)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageAlphaClear(*image, color, threshold);
 ```
 
@@ -3580,8 +3580,8 @@ native ImageAlphaClear(*image, color, threshold);
 RLAPI void ImageAlphaMask(Image *image, Image alphaMask)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageAlphaMask(*image, alphaMask);
 ```
 
@@ -3592,8 +3592,8 @@ native ImageAlphaMask(*image, alphaMask);
 RLAPI void ImageAlphaPremultiply(Image *image)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageAlphaPremultiply(*image);
 ```
 
@@ -3604,8 +3604,8 @@ native ImageAlphaPremultiply(*image);
 RLAPI void ImageBlurGaussian(Image *image, int blurSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageBlurGaussian(*image, blurSize);
 ```
 
@@ -3616,8 +3616,8 @@ native ImageBlurGaussian(*image, blurSize);
 RLAPI void ImageKernelConvolution(Image *image, const float *kernel, int kernelSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageKernelConvolution(*image, *kernel, kernelSize);
 ```
 
@@ -3628,8 +3628,8 @@ native ImageKernelConvolution(*image, *kernel, kernelSize);
 RLAPI void ImageResize(Image *image, int newWidth, int newHeight)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageResize(*image, newWidth, newHeight);
 ```
 
@@ -3640,8 +3640,8 @@ native ImageResize(*image, newWidth, newHeight);
 RLAPI void ImageResizeNN(Image *image, int newWidth, int newHeight)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageResizeNN(*image, newWidth, newHeight);
 ```
 
@@ -3652,8 +3652,8 @@ native ImageResizeNN(*image, newWidth, newHeight);
 RLAPI void ImageResizeCanvas(Image *image, int newWidth, int newHeight, int offsetX, int offsetY, Color fill)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageResizeCanvas(*image, newWidth, newHeight, offsetX, offsetY, fill);
 ```
 
@@ -3664,8 +3664,8 @@ native ImageResizeCanvas(*image, newWidth, newHeight, offsetX, offsetY, fill);
 RLAPI void ImageMipmaps(Image *image)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageMipmaps(*image);
 ```
 
@@ -3676,8 +3676,8 @@ native ImageMipmaps(*image);
 RLAPI void ImageDither(Image *image, int rBpp, int gBpp, int bBpp, int aBpp)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDither(*image, rBpp, gBpp, bBpp, aBpp);
 ```
 
@@ -3688,8 +3688,8 @@ native ImageDither(*image, rBpp, gBpp, bBpp, aBpp);
 RLAPI void ImageFlipVertical(Image *image)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageFlipVertical(*image);
 ```
 
@@ -3700,8 +3700,8 @@ native ImageFlipVertical(*image);
 RLAPI void ImageFlipHorizontal(Image *image)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageFlipHorizontal(*image);
 ```
 
@@ -3712,8 +3712,8 @@ native ImageFlipHorizontal(*image);
 RLAPI void ImageRotate(Image *image, int degrees)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageRotate(*image, degrees);
 ```
 
@@ -3724,8 +3724,8 @@ native ImageRotate(*image, degrees);
 RLAPI void ImageRotateCW(Image *image)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageRotateCW(*image);
 ```
 
@@ -3736,8 +3736,8 @@ native ImageRotateCW(*image);
 RLAPI void ImageRotateCCW(Image *image)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageRotateCCW(*image);
 ```
 
@@ -3748,8 +3748,8 @@ native ImageRotateCCW(*image);
 RLAPI void ImageColorTint(Image *image, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageColorTint(*image, color);
 ```
 
@@ -3760,8 +3760,8 @@ native ImageColorTint(*image, color);
 RLAPI void ImageColorInvert(Image *image)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageColorInvert(*image);
 ```
 
@@ -3772,8 +3772,8 @@ native ImageColorInvert(*image);
 RLAPI void ImageColorGrayscale(Image *image)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageColorGrayscale(*image);
 ```
 
@@ -3784,8 +3784,8 @@ native ImageColorGrayscale(*image);
 RLAPI void ImageColorContrast(Image *image, int contrast)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageColorContrast(*image, contrast);
 ```
 
@@ -3796,8 +3796,8 @@ native ImageColorContrast(*image, contrast);
 RLAPI void ImageColorBrightness(Image *image, int brightness)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageColorBrightness(*image, brightness);
 ```
 
@@ -3808,8 +3808,8 @@ native ImageColorBrightness(*image, brightness);
 RLAPI void ImageColorReplace(Image *image, Color color, Color replace)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageColorReplace(*image, color, replace);
 ```
 
@@ -3820,8 +3820,8 @@ native ImageColorReplace(*image, color, replace);
 RLAPI void UnloadImageColors(Color *colors)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadImageColors(*colors);
 ```
 
@@ -3832,8 +3832,8 @@ native UnloadImageColors(*colors);
 RLAPI void UnloadImagePalette(Color *colors)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadImagePalette(*colors);
 ```
 
@@ -3844,8 +3844,8 @@ native UnloadImagePalette(*colors);
 RLAPI Rectangle GetImageAlphaBorder(Image image, float threshold)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetImageAlphaBorder(image, threshold);
 ```
 
@@ -3856,8 +3856,8 @@ native GetImageAlphaBorder(image, threshold);
 RLAPI Color GetImageColor(Image image, int x, int y)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetImageColor(image, x, y);
 ```
 
@@ -3868,8 +3868,8 @@ native GetImageColor(image, x, y);
 RLAPI void ImageClearBackground(Image *dst, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageClearBackground(*dst, color);
 ```
 
@@ -3880,8 +3880,8 @@ native ImageClearBackground(*dst, color);
 RLAPI void ImageDrawPixel(Image *dst, int posX, int posY, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawPixel(*dst, posX, posY, color);
 ```
 
@@ -3892,8 +3892,8 @@ native ImageDrawPixel(*dst, posX, posY, color);
 RLAPI void ImageDrawPixelV(Image *dst, Vector2 position, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawPixelV(*dst, position, color);
 ```
 
@@ -3904,8 +3904,8 @@ native ImageDrawPixelV(*dst, position, color);
 RLAPI void ImageDrawLine(Image *dst, int startPosX, int startPosY, int endPosX, int endPosY, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawLine(*dst, startPosX, startPosY, endPosX, endPosY, color);
 ```
 
@@ -3916,8 +3916,8 @@ native ImageDrawLine(*dst, startPosX, startPosY, endPosX, endPosY, color);
 RLAPI void ImageDrawLineV(Image *dst, Vector2 start, Vector2 end, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawLineV(*dst, start, end, color);
 ```
 
@@ -3928,8 +3928,8 @@ native ImageDrawLineV(*dst, start, end, color);
 RLAPI void ImageDrawLineEx(Image *dst, Vector2 start, Vector2 end, int thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawLineEx(*dst, start, end, thick, color);
 ```
 
@@ -3940,8 +3940,8 @@ native ImageDrawLineEx(*dst, start, end, thick, color);
 RLAPI void ImageDrawCircle(Image *dst, int centerX, int centerY, int radius, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawCircle(*dst, centerX, centerY, radius, color);
 ```
 
@@ -3952,8 +3952,8 @@ native ImageDrawCircle(*dst, centerX, centerY, radius, color);
 RLAPI void ImageDrawCircleV(Image *dst, Vector2 center, int radius, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawCircleV(*dst, center, radius, color);
 ```
 
@@ -3964,8 +3964,8 @@ native ImageDrawCircleV(*dst, center, radius, color);
 RLAPI void ImageDrawCircleLines(Image *dst, int centerX, int centerY, int radius, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawCircleLines(*dst, centerX, centerY, radius, color);
 ```
 
@@ -3976,8 +3976,8 @@ native ImageDrawCircleLines(*dst, centerX, centerY, radius, color);
 RLAPI void ImageDrawCircleLinesV(Image *dst, Vector2 center, int radius, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawCircleLinesV(*dst, center, radius, color);
 ```
 
@@ -3988,8 +3988,8 @@ native ImageDrawCircleLinesV(*dst, center, radius, color);
 RLAPI void ImageDrawRectangle(Image *dst, int posX, int posY, int width, int height, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawRectangle(*dst, posX, posY, width, height, color);
 ```
 
@@ -4000,8 +4000,8 @@ native ImageDrawRectangle(*dst, posX, posY, width, height, color);
 RLAPI void ImageDrawRectangleV(Image *dst, Vector2 position, Vector2 size, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawRectangleV(*dst, position, size, color);
 ```
 
@@ -4012,8 +4012,8 @@ native ImageDrawRectangleV(*dst, position, size, color);
 RLAPI void ImageDrawRectangleRec(Image *dst, Rectangle rec, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawRectangleRec(*dst, rec, color);
 ```
 
@@ -4024,8 +4024,8 @@ native ImageDrawRectangleRec(*dst, rec, color);
 RLAPI void ImageDrawRectangleLines(Image *dst, int posX, int posY, int width, int height, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawRectangleLines(*dst, posX, posY, width, height, color);
 ```
 
@@ -4036,8 +4036,8 @@ native ImageDrawRectangleLines(*dst, posX, posY, width, height, color);
 RLAPI void ImageDrawRectangleLinesEx(Image *dst, Rectangle rec, int thick, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawRectangleLinesEx(*dst, rec, thick, color);
 ```
 
@@ -4048,8 +4048,8 @@ native ImageDrawRectangleLinesEx(*dst, rec, thick, color);
 RLAPI void ImageDrawTriangle(Image *dst, Vector2 v1, Vector2 v2, Vector2 v3, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawTriangle(*dst, v1, v2, v3, color);
 ```
 
@@ -4060,8 +4060,8 @@ native ImageDrawTriangle(*dst, v1, v2, v3, color);
 RLAPI void ImageDrawTriangleGradient(Image *dst, Vector2 v1, Vector2 v2, Vector2 v3, Color c1, Color c2, Color c3)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawTriangleGradient(*dst, v1, v2, v3, c1, c2, c3);
 ```
 
@@ -4072,8 +4072,8 @@ native ImageDrawTriangleGradient(*dst, v1, v2, v3, c1, c2, c3);
 RLAPI void ImageDrawTriangleLines(Image *dst, Vector2 v1, Vector2 v2, Vector2 v3, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawTriangleLines(*dst, v1, v2, v3, color);
 ```
 
@@ -4084,8 +4084,8 @@ native ImageDrawTriangleLines(*dst, v1, v2, v3, color);
 RLAPI void ImageDrawTriangleFan(Image *dst, const Vector2 *points, int pointCount, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawTriangleFan(*dst, *points, pointCount, color);
 ```
 
@@ -4096,8 +4096,8 @@ native ImageDrawTriangleFan(*dst, *points, pointCount, color);
 RLAPI void ImageDrawTriangleStrip(Image *dst, const Vector2 *points, int pointCount, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawTriangleStrip(*dst, *points, pointCount, color);
 ```
 
@@ -4108,8 +4108,8 @@ native ImageDrawTriangleStrip(*dst, *points, pointCount, color);
 RLAPI void ImageDraw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDraw(*dst, src, srcRec, dstRec, tint);
 ```
 
@@ -4120,8 +4120,8 @@ native ImageDraw(*dst, src, srcRec, dstRec, tint);
 RLAPI void ImageDrawText(Image *dst, const char *text, int posX, int posY, int fontSize, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawText(*dst, *text, posX, posY, fontSize, color);
 ```
 
@@ -4132,8 +4132,8 @@ native ImageDrawText(*dst, *text, posX, posY, fontSize, color);
 RLAPI void ImageDrawTextEx(Image *dst, Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ImageDrawTextEx(*dst, font, *text, position, fontSize, spacing, tint);
 ```
 
@@ -4144,8 +4144,8 @@ native ImageDrawTextEx(*dst, font, *text, position, fontSize, spacing, tint);
 RLAPI Texture2D LoadTexture(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadTexture(*fileName);
 ```
 
@@ -4156,8 +4156,8 @@ native LoadTexture(*fileName);
 RLAPI Texture2D LoadTextureFromImage(Image image)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadTextureFromImage(image);
 ```
 
@@ -4168,8 +4168,8 @@ native LoadTextureFromImage(image);
 RLAPI TextureCubemap LoadTextureCubemap(Image image, int layout)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadTextureCubemap(image, layout);
 ```
 
@@ -4180,8 +4180,8 @@ native LoadTextureCubemap(image, layout);
 RLAPI RenderTexture2D LoadRenderTexture(int width, int height)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadRenderTexture(width, height);
 ```
 
@@ -4192,8 +4192,8 @@ native LoadRenderTexture(width, height);
 RLAPI bool IsTextureValid(Texture2D texture)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsTextureValid(texture);
 ```
 
@@ -4204,8 +4204,8 @@ native IsTextureValid(texture);
 RLAPI void UnloadTexture(Texture2D texture)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadTexture(texture);
 ```
 
@@ -4216,8 +4216,8 @@ native UnloadTexture(texture);
 RLAPI bool IsRenderTextureValid(RenderTexture2D target)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsRenderTextureValid(target);
 ```
 
@@ -4228,8 +4228,8 @@ native IsRenderTextureValid(target);
 RLAPI void UnloadRenderTexture(RenderTexture2D target)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadRenderTexture(target);
 ```
 
@@ -4240,8 +4240,8 @@ native UnloadRenderTexture(target);
 RLAPI void UpdateTexture(Texture2D texture, const void *pixels)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UpdateTexture(texture, *pixels);
 ```
 
@@ -4252,8 +4252,8 @@ native UpdateTexture(texture, *pixels);
 RLAPI void UpdateTextureRec(Texture2D texture, Rectangle rec, const void *pixels)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UpdateTextureRec(texture, rec, *pixels);
 ```
 
@@ -4264,8 +4264,8 @@ native UpdateTextureRec(texture, rec, *pixels);
 RLAPI void GenTextureMipmaps(Texture2D *texture)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenTextureMipmaps(*texture);
 ```
 
@@ -4276,8 +4276,8 @@ native GenTextureMipmaps(*texture);
 RLAPI void SetTextureFilter(Texture2D texture, int filter)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetTextureFilter(texture, filter);
 ```
 
@@ -4288,8 +4288,8 @@ native SetTextureFilter(texture, filter);
 RLAPI void SetTextureWrap(Texture2D texture, int wrap)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetTextureWrap(texture, wrap);
 ```
 
@@ -4300,8 +4300,8 @@ native SetTextureWrap(texture, wrap);
 RLAPI void DrawTexture(Texture2D texture, int posX, int posY, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTexture(texture, posX, posY, tint);
 ```
 
@@ -4312,8 +4312,8 @@ native DrawTexture(texture, posX, posY, tint);
 RLAPI void DrawTextureV(Texture2D texture, Vector2 position, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTextureV(texture, position, tint);
 ```
 
@@ -4324,8 +4324,8 @@ native DrawTextureV(texture, position, tint);
 RLAPI void DrawTextureEx(Texture2D texture, Vector2 position, float rotation, float scale, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTextureEx(texture, position, rotation, scale, tint);
 ```
 
@@ -4336,8 +4336,8 @@ native DrawTextureEx(texture, position, rotation, scale, tint);
 RLAPI void DrawTextureRec(Texture2D texture, Rectangle source, Vector2 position, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTextureRec(texture, source, position, tint);
 ```
 
@@ -4348,8 +4348,8 @@ native DrawTextureRec(texture, source, position, tint);
 RLAPI void DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTexturePro(texture, source, dest, origin, rotation, tint);
 ```
 
@@ -4360,8 +4360,8 @@ native DrawTexturePro(texture, source, dest, origin, rotation, tint);
 RLAPI void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest, Vector2 origin, float rotation, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTextureNPatch(texture, nPatchInfo, dest, origin, rotation, tint);
 ```
 
@@ -4372,8 +4372,8 @@ native DrawTextureNPatch(texture, nPatchInfo, dest, origin, rotation, tint);
 RLAPI bool ColorIsEqual(Color col1, Color col2)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ColorIsEqual(col1, col2);
 ```
 
@@ -4384,8 +4384,8 @@ native ColorIsEqual(col1, col2);
 RLAPI Color Fade(Color color, float alpha)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native Fade(color, alpha);
 ```
 
@@ -4396,8 +4396,8 @@ native Fade(color, alpha);
 RLAPI int ColorToInt(Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ColorToInt(color);
 ```
 
@@ -4408,8 +4408,8 @@ native ColorToInt(color);
 RLAPI Vector4 ColorNormalize(Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ColorNormalize(color);
 ```
 
@@ -4420,8 +4420,8 @@ native ColorNormalize(color);
 RLAPI Color ColorFromNormalized(Vector4 normalized)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ColorFromNormalized(normalized);
 ```
 
@@ -4432,8 +4432,8 @@ native ColorFromNormalized(normalized);
 RLAPI Vector3 ColorToHSV(Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ColorToHSV(color);
 ```
 
@@ -4444,8 +4444,8 @@ native ColorToHSV(color);
 RLAPI Color ColorFromHSV(float hue, float saturation, float value)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ColorFromHSV(hue, saturation, value);
 ```
 
@@ -4456,8 +4456,8 @@ native ColorFromHSV(hue, saturation, value);
 RLAPI Color ColorTint(Color color, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ColorTint(color, tint);
 ```
 
@@ -4468,8 +4468,8 @@ native ColorTint(color, tint);
 RLAPI Color ColorBrightness(Color color, float factor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ColorBrightness(color, factor);
 ```
 
@@ -4480,8 +4480,8 @@ native ColorBrightness(color, factor);
 RLAPI Color ColorContrast(Color color, float contrast)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ColorContrast(color, contrast);
 ```
 
@@ -4492,8 +4492,8 @@ native ColorContrast(color, contrast);
 RLAPI Color ColorAlpha(Color color, float alpha)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ColorAlpha(color, alpha);
 ```
 
@@ -4504,8 +4504,8 @@ native ColorAlpha(color, alpha);
 RLAPI Color ColorAlphaBlend(Color dst, Color src, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ColorAlphaBlend(dst, src, tint);
 ```
 
@@ -4516,8 +4516,8 @@ native ColorAlphaBlend(dst, src, tint);
 RLAPI Color ColorLerp(Color color1, Color color2, float factor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ColorLerp(color1, color2, factor);
 ```
 
@@ -4528,8 +4528,8 @@ native ColorLerp(color1, color2, factor);
 RLAPI Color GetColor(unsigned int hexValue)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetColor(hexValue);
 ```
 
@@ -4540,8 +4540,8 @@ native GetColor(hexValue);
 RLAPI Color GetPixelColor(void *srcPtr, int format)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetPixelColor(*srcPtr, format);
 ```
 
@@ -4552,8 +4552,8 @@ native GetPixelColor(*srcPtr, format);
 RLAPI void SetPixelColor(void *dstPtr, Color color, int format)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetPixelColor(*dstPtr, color, format);
 ```
 
@@ -4564,8 +4564,8 @@ native SetPixelColor(*dstPtr, color, format);
 RLAPI int GetPixelDataSize(int width, int height, int format)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetPixelDataSize(width, height, format);
 ```
 
@@ -4576,8 +4576,8 @@ native GetPixelDataSize(width, height, format);
 RLAPI Font GetFontDefault()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetFontDefault();
 ```
 
@@ -4588,8 +4588,8 @@ native GetFontDefault();
 RLAPI Font LoadFont(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadFont(*fileName);
 ```
 
@@ -4600,8 +4600,8 @@ native LoadFont(*fileName);
 RLAPI Font LoadFontEx(const char *fileName, int fontSize, const int *codepoints, int codepointCount)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadFontEx(*fileName, fontSize, *codepoints, codepointCount);
 ```
 
@@ -4612,8 +4612,8 @@ native LoadFontEx(*fileName, fontSize, *codepoints, codepointCount);
 RLAPI Font LoadFontFromImage(Image image, Color key, int firstChar)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadFontFromImage(image, key, firstChar);
 ```
 
@@ -4624,8 +4624,8 @@ native LoadFontFromImage(image, key, firstChar);
 RLAPI Font LoadFontFromMemory(const char *fileType, const unsigned char *fileData, int dataSize, int fontSize, const int *codepoints, int codepointCount)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadFontFromMemory(*fileType, *fileData, dataSize, fontSize, *codepoints, codepointCount);
 ```
 
@@ -4636,8 +4636,8 @@ native LoadFontFromMemory(*fileType, *fileData, dataSize, fontSize, *codepoints,
 RLAPI bool IsFontValid(Font font)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsFontValid(font);
 ```
 
@@ -4648,8 +4648,8 @@ native IsFontValid(font);
 RLAPI Image GenImageFontAtlas(const GlyphInfo *glyphs, Rectangle **glyphRecs, int glyphCount, int fontSize, int padding, int packMethod)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenImageFontAtlas(*glyphs, **glyphRecs, glyphCount, fontSize, padding, packMethod);
 ```
 
@@ -4660,8 +4660,8 @@ native GenImageFontAtlas(*glyphs, **glyphRecs, glyphCount, fontSize, padding, pa
 RLAPI void UnloadFontData(GlyphInfo *glyphs, int glyphCount)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadFontData(*glyphs, glyphCount);
 ```
 
@@ -4672,8 +4672,8 @@ native UnloadFontData(*glyphs, glyphCount);
 RLAPI void UnloadFont(Font font)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadFont(font);
 ```
 
@@ -4684,8 +4684,8 @@ native UnloadFont(font);
 RLAPI bool ExportFontAsCode(Font font, const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ExportFontAsCode(font, *fileName);
 ```
 
@@ -4696,8 +4696,8 @@ native ExportFontAsCode(font, *fileName);
 RLAPI void DrawFPS(int posX, int posY)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawFPS(posX, posY);
 ```
 
@@ -4708,8 +4708,8 @@ native DrawFPS(posX, posY);
 RLAPI void DrawText(const char *text, int posX, int posY, int fontSize, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawText(*text, posX, posY, fontSize, color);
 ```
 
@@ -4720,8 +4720,8 @@ native DrawText(*text, posX, posY, fontSize, color);
 RLAPI void DrawTextEx(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTextEx(font, *text, position, fontSize, spacing, tint);
 ```
 
@@ -4732,8 +4732,8 @@ native DrawTextEx(font, *text, position, fontSize, spacing, tint);
 RLAPI void DrawTextPro(Font font, const char *text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTextPro(font, *text, position, origin, rotation, fontSize, spacing, tint);
 ```
 
@@ -4744,8 +4744,8 @@ native DrawTextPro(font, *text, position, origin, rotation, fontSize, spacing, t
 RLAPI void DrawTextCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTextCodepoint(font, codepoint, position, fontSize, tint);
 ```
 
@@ -4756,8 +4756,8 @@ native DrawTextCodepoint(font, codepoint, position, fontSize, tint);
 RLAPI void DrawTextCodepoints(Font font, const int *codepoints, int codepointCount, Vector2 position, float fontSize, float spacing, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTextCodepoints(font, *codepoints, codepointCount, position, fontSize, spacing, tint);
 ```
 
@@ -4768,8 +4768,8 @@ native DrawTextCodepoints(font, *codepoints, codepointCount, position, fontSize,
 RLAPI void SetTextLineSpacing(int spacing)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetTextLineSpacing(spacing);
 ```
 
@@ -4780,8 +4780,8 @@ native SetTextLineSpacing(spacing);
 RLAPI int MeasureText(const char *text, int fontSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native MeasureText(*text, fontSize);
 ```
 
@@ -4792,8 +4792,8 @@ native MeasureText(*text, fontSize);
 RLAPI Vector2 MeasureTextEx(Font font, const char *text, float fontSize, float spacing)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native MeasureTextEx(font, *text, fontSize, spacing);
 ```
 
@@ -4804,8 +4804,8 @@ native MeasureTextEx(font, *text, fontSize, spacing);
 RLAPI Vector2 MeasureTextCodepoints(Font font, const int *codepoints, int length, float fontSize, float spacing)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native MeasureTextCodepoints(font, *codepoints, length, fontSize, spacing);
 ```
 
@@ -4816,8 +4816,8 @@ native MeasureTextCodepoints(font, *codepoints, length, fontSize, spacing);
 RLAPI int GetGlyphIndex(Font font, int codepoint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetGlyphIndex(font, codepoint);
 ```
 
@@ -4828,8 +4828,8 @@ native GetGlyphIndex(font, codepoint);
 RLAPI GlyphInfo GetGlyphInfo(Font font, int codepoint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetGlyphInfo(font, codepoint);
 ```
 
@@ -4840,8 +4840,8 @@ native GetGlyphInfo(font, codepoint);
 RLAPI Rectangle GetGlyphAtlasRec(Font font, int codepoint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetGlyphAtlasRec(font, codepoint);
 ```
 
@@ -4852,8 +4852,8 @@ native GetGlyphAtlasRec(font, codepoint);
 RLAPI void UnloadUTF8(char *text)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadUTF8(*text);
 ```
 
@@ -4864,8 +4864,8 @@ native UnloadUTF8(*text);
 RLAPI void UnloadCodepoints(int *codepoints)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadCodepoints(*codepoints);
 ```
 
@@ -4876,8 +4876,8 @@ native UnloadCodepoints(*codepoints);
 RLAPI int GetCodepointCount(const char *text)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetCodepointCount(*text);
 ```
 
@@ -4888,8 +4888,8 @@ native GetCodepointCount(*text);
 RLAPI int GetCodepoint(const char *text, int *codepointSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetCodepoint(*text, *codepointSize);
 ```
 
@@ -4900,8 +4900,8 @@ native GetCodepoint(*text, *codepointSize);
 RLAPI int GetCodepointNext(const char *text, int *codepointSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetCodepointNext(*text, *codepointSize);
 ```
 
@@ -4912,8 +4912,8 @@ native GetCodepointNext(*text, *codepointSize);
 RLAPI int GetCodepointPrevious(const char *text, int *codepointSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetCodepointPrevious(*text, *codepointSize);
 ```
 
@@ -4924,8 +4924,8 @@ native GetCodepointPrevious(*text, *codepointSize);
 RLAPI void UnloadTextLines(char **text, int lineCount)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadTextLines(**text, lineCount);
 ```
 
@@ -4936,8 +4936,8 @@ native UnloadTextLines(**text, lineCount);
 RLAPI int TextCopy(char *dst, const char *src)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native TextCopy(*dst, *src);
 ```
 
@@ -4948,8 +4948,8 @@ native TextCopy(*dst, *src);
 RLAPI bool TextIsEqual(const char *text1, const char *text2)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native TextIsEqual(*text1, *text2);
 ```
 
@@ -4960,8 +4960,8 @@ native TextIsEqual(*text1, *text2);
 RLAPI unsigned int TextLength(const char *text)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native TextLength(*text);
 ```
 
@@ -4972,8 +4972,8 @@ native TextLength(*text);
 RLAPI void TextAppend(char *text, const char *append, int *position)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native TextAppend(*text, *append, *position);
 ```
 
@@ -4984,8 +4984,8 @@ native TextAppend(*text, *append, *position);
 RLAPI int TextFindIndex(const char *text, const char *search)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native TextFindIndex(*text, *search);
 ```
 
@@ -4996,8 +4996,8 @@ native TextFindIndex(*text, *search);
 RLAPI int TextToInteger(const char *text)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native TextToInteger(*text);
 ```
 
@@ -5008,8 +5008,8 @@ native TextToInteger(*text);
 RLAPI float TextToFloat(const char *text)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native TextToFloat(*text);
 ```
 
@@ -5020,8 +5020,8 @@ native TextToFloat(*text);
 RLAPI void DrawLine3D(Vector3 startPos, Vector3 endPos, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawLine3D(startPos, endPos, color);
 ```
 
@@ -5032,8 +5032,8 @@ native DrawLine3D(startPos, endPos, color);
 RLAPI void DrawPoint3D(Vector3 position, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawPoint3D(position, color);
 ```
 
@@ -5044,8 +5044,8 @@ native DrawPoint3D(position, color);
 RLAPI void DrawCircle3D(Vector3 center, float radius, Vector3 rotationAxis, float rotationAngle, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCircle3D(center, radius, rotationAxis, rotationAngle, color);
 ```
 
@@ -5056,8 +5056,8 @@ native DrawCircle3D(center, radius, rotationAxis, rotationAngle, color);
 RLAPI void DrawTriangle3D(Vector3 v1, Vector3 v2, Vector3 v3, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTriangle3D(v1, v2, v3, color);
 ```
 
@@ -5068,8 +5068,8 @@ native DrawTriangle3D(v1, v2, v3, color);
 RLAPI void DrawTriangleStrip3D(const Vector3 *points, int pointCount, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawTriangleStrip3D(*points, pointCount, color);
 ```
 
@@ -5080,8 +5080,8 @@ native DrawTriangleStrip3D(*points, pointCount, color);
 RLAPI void DrawCube(Vector3 position, float width, float height, float length, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCube(position, width, height, length, color);
 ```
 
@@ -5092,8 +5092,8 @@ native DrawCube(position, width, height, length, color);
 RLAPI void DrawCubeV(Vector3 position, Vector3 size, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCubeV(position, size, color);
 ```
 
@@ -5104,8 +5104,8 @@ native DrawCubeV(position, size, color);
 RLAPI void DrawCubeWires(Vector3 position, float width, float height, float length, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCubeWires(position, width, height, length, color);
 ```
 
@@ -5116,8 +5116,8 @@ native DrawCubeWires(position, width, height, length, color);
 RLAPI void DrawCubeWiresV(Vector3 position, Vector3 size, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCubeWiresV(position, size, color);
 ```
 
@@ -5128,8 +5128,8 @@ native DrawCubeWiresV(position, size, color);
 RLAPI void DrawSphere(Vector3 centerPos, float radius, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawSphere(centerPos, radius, color);
 ```
 
@@ -5140,8 +5140,8 @@ native DrawSphere(centerPos, radius, color);
 RLAPI void DrawSphereEx(Vector3 centerPos, float radius, int rings, int slices, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawSphereEx(centerPos, radius, rings, slices, color);
 ```
 
@@ -5152,8 +5152,8 @@ native DrawSphereEx(centerPos, radius, rings, slices, color);
 RLAPI void DrawSphereWires(Vector3 centerPos, float radius, int rings, int slices, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawSphereWires(centerPos, radius, rings, slices, color);
 ```
 
@@ -5164,8 +5164,8 @@ native DrawSphereWires(centerPos, radius, rings, slices, color);
 RLAPI void DrawCylinder(Vector3 position, float radiusTop, float radiusBottom, float height, int slices, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCylinder(position, radiusTop, radiusBottom, height, slices, color);
 ```
 
@@ -5176,8 +5176,8 @@ native DrawCylinder(position, radiusTop, radiusBottom, height, slices, color);
 RLAPI void DrawCylinderEx(Vector3 startPos, Vector3 endPos, float startRadius, float endRadius, int sides, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCylinderEx(startPos, endPos, startRadius, endRadius, sides, color);
 ```
 
@@ -5188,8 +5188,8 @@ native DrawCylinderEx(startPos, endPos, startRadius, endRadius, sides, color);
 RLAPI void DrawCylinderWires(Vector3 position, float radiusTop, float radiusBottom, float height, int slices, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCylinderWires(position, radiusTop, radiusBottom, height, slices, color);
 ```
 
@@ -5200,8 +5200,8 @@ native DrawCylinderWires(position, radiusTop, radiusBottom, height, slices, colo
 RLAPI void DrawCylinderWiresEx(Vector3 startPos, Vector3 endPos, float startRadius, float endRadius, int slices, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCylinderWiresEx(startPos, endPos, startRadius, endRadius, slices, color);
 ```
 
@@ -5212,8 +5212,8 @@ native DrawCylinderWiresEx(startPos, endPos, startRadius, endRadius, slices, col
 RLAPI void DrawCapsule(Vector3 startPos, Vector3 endPos, float radius, int rings, int slices, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCapsule(startPos, endPos, radius, rings, slices, color);
 ```
 
@@ -5224,8 +5224,8 @@ native DrawCapsule(startPos, endPos, radius, rings, slices, color);
 RLAPI void DrawCapsuleWires(Vector3 startPos, Vector3 endPos, float radius, int rings, int slices, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawCapsuleWires(startPos, endPos, radius, rings, slices, color);
 ```
 
@@ -5236,8 +5236,8 @@ native DrawCapsuleWires(startPos, endPos, radius, rings, slices, color);
 RLAPI void DrawPlane(Vector3 centerPos, Vector2 size, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawPlane(centerPos, size, color);
 ```
 
@@ -5248,8 +5248,8 @@ native DrawPlane(centerPos, size, color);
 RLAPI void DrawRay(Ray ray, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawRay(ray, color);
 ```
 
@@ -5260,8 +5260,8 @@ native DrawRay(ray, color);
 RLAPI void DrawGrid(int slices, float spacing)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawGrid(slices, spacing);
 ```
 
@@ -5272,8 +5272,8 @@ native DrawGrid(slices, spacing);
 RLAPI Model LoadModel(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadModel(*fileName);
 ```
 
@@ -5284,8 +5284,8 @@ native LoadModel(*fileName);
 RLAPI Model LoadModelFromMesh(Mesh mesh)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadModelFromMesh(mesh);
 ```
 
@@ -5296,8 +5296,8 @@ native LoadModelFromMesh(mesh);
 RLAPI bool IsModelValid(Model model)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsModelValid(model);
 ```
 
@@ -5308,8 +5308,8 @@ native IsModelValid(model);
 RLAPI void UnloadModel(Model model)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadModel(model);
 ```
 
@@ -5320,8 +5320,8 @@ native UnloadModel(model);
 RLAPI BoundingBox GetModelBoundingBox(Model model)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetModelBoundingBox(model);
 ```
 
@@ -5332,8 +5332,8 @@ native GetModelBoundingBox(model);
 RLAPI void DrawModel(Model model, Vector3 position, float scale, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawModel(model, position, scale, tint);
 ```
 
@@ -5344,8 +5344,8 @@ native DrawModel(model, position, scale, tint);
 RLAPI void DrawModelEx(Model model, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawModelEx(model, position, rotationAxis, rotationAngle, scale, tint);
 ```
 
@@ -5356,8 +5356,8 @@ native DrawModelEx(model, position, rotationAxis, rotationAngle, scale, tint);
 RLAPI void DrawModelWires(Model model, Vector3 position, float scale, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawModelWires(model, position, scale, tint);
 ```
 
@@ -5368,8 +5368,8 @@ native DrawModelWires(model, position, scale, tint);
 RLAPI void DrawModelWiresEx(Model model, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawModelWiresEx(model, position, rotationAxis, rotationAngle, scale, tint);
 ```
 
@@ -5380,8 +5380,8 @@ native DrawModelWiresEx(model, position, rotationAxis, rotationAngle, scale, tin
 RLAPI void DrawBoundingBox(BoundingBox box, Color color)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawBoundingBox(box, color);
 ```
 
@@ -5392,8 +5392,8 @@ native DrawBoundingBox(box, color);
 RLAPI void DrawBillboard(Camera camera, Texture2D texture, Vector3 position, float scale, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawBillboard(camera, texture, position, scale, tint);
 ```
 
@@ -5404,8 +5404,8 @@ native DrawBillboard(camera, texture, position, scale, tint);
 RLAPI void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle source, Vector3 position, Vector2 size, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawBillboardRec(camera, texture, source, position, size, tint);
 ```
 
@@ -5416,8 +5416,8 @@ native DrawBillboardRec(camera, texture, source, position, size, tint);
 RLAPI void DrawBillboardPro(Camera camera, Texture2D texture, Rectangle source, Vector3 position, Vector3 up, Vector2 size, Vector2 origin, float rotation, Color tint)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawBillboardPro(camera, texture, source, position, up, size, origin, rotation, tint);
 ```
 
@@ -5428,8 +5428,8 @@ native DrawBillboardPro(camera, texture, source, position, up, size, origin, rot
 RLAPI void UploadMesh(Mesh *mesh, bool dynamic)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UploadMesh(*mesh, dynamic);
 ```
 
@@ -5440,8 +5440,8 @@ native UploadMesh(*mesh, dynamic);
 RLAPI void UpdateMeshBuffer(Mesh mesh, int index, const void *data, int dataSize, int offset)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UpdateMeshBuffer(mesh, index, *data, dataSize, offset);
 ```
 
@@ -5452,8 +5452,8 @@ native UpdateMeshBuffer(mesh, index, *data, dataSize, offset);
 RLAPI void UnloadMesh(Mesh mesh)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadMesh(mesh);
 ```
 
@@ -5464,8 +5464,8 @@ native UnloadMesh(mesh);
 RLAPI void DrawMesh(Mesh mesh, Material material, Matrix transform)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawMesh(mesh, material, transform);
 ```
 
@@ -5476,8 +5476,8 @@ native DrawMesh(mesh, material, transform);
 RLAPI void DrawMeshInstanced(Mesh mesh, Material material, const Matrix *transforms, int instances)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DrawMeshInstanced(mesh, material, *transforms, instances);
 ```
 
@@ -5488,8 +5488,8 @@ native DrawMeshInstanced(mesh, material, *transforms, instances);
 RLAPI BoundingBox GetMeshBoundingBox(Mesh mesh)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMeshBoundingBox(mesh);
 ```
 
@@ -5500,8 +5500,8 @@ native GetMeshBoundingBox(mesh);
 RLAPI void GenMeshTangents(Mesh *mesh)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenMeshTangents(*mesh);
 ```
 
@@ -5512,8 +5512,8 @@ native GenMeshTangents(*mesh);
 RLAPI bool ExportMesh(Mesh mesh, const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ExportMesh(mesh, *fileName);
 ```
 
@@ -5524,8 +5524,8 @@ native ExportMesh(mesh, *fileName);
 RLAPI bool ExportMeshAsCode(Mesh mesh, const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ExportMeshAsCode(mesh, *fileName);
 ```
 
@@ -5536,8 +5536,8 @@ native ExportMeshAsCode(mesh, *fileName);
 RLAPI Mesh GenMeshPoly(int sides, float radius)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenMeshPoly(sides, radius);
 ```
 
@@ -5548,8 +5548,8 @@ native GenMeshPoly(sides, radius);
 RLAPI Mesh GenMeshPlane(float width, float length, int resX, int resZ)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenMeshPlane(width, length, resX, resZ);
 ```
 
@@ -5560,8 +5560,8 @@ native GenMeshPlane(width, length, resX, resZ);
 RLAPI Mesh GenMeshCube(float width, float height, float length)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenMeshCube(width, height, length);
 ```
 
@@ -5572,8 +5572,8 @@ native GenMeshCube(width, height, length);
 RLAPI Mesh GenMeshSphere(float radius, int rings, int slices)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenMeshSphere(radius, rings, slices);
 ```
 
@@ -5584,8 +5584,8 @@ native GenMeshSphere(radius, rings, slices);
 RLAPI Mesh GenMeshHemiSphere(float radius, int rings, int slices)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenMeshHemiSphere(radius, rings, slices);
 ```
 
@@ -5596,8 +5596,8 @@ native GenMeshHemiSphere(radius, rings, slices);
 RLAPI Mesh GenMeshCylinder(float radius, float height, int slices)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenMeshCylinder(radius, height, slices);
 ```
 
@@ -5608,8 +5608,8 @@ native GenMeshCylinder(radius, height, slices);
 RLAPI Mesh GenMeshCone(float radius, float height, int slices)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenMeshCone(radius, height, slices);
 ```
 
@@ -5620,8 +5620,8 @@ native GenMeshCone(radius, height, slices);
 RLAPI Mesh GenMeshTorus(float radius, float size, int radSeg, int sides)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenMeshTorus(radius, size, radSeg, sides);
 ```
 
@@ -5632,8 +5632,8 @@ native GenMeshTorus(radius, size, radSeg, sides);
 RLAPI Mesh GenMeshKnot(float radius, float size, int radSeg, int sides)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenMeshKnot(radius, size, radSeg, sides);
 ```
 
@@ -5644,8 +5644,8 @@ native GenMeshKnot(radius, size, radSeg, sides);
 RLAPI Mesh GenMeshHeightmap(Image heightmap, Vector3 size)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenMeshHeightmap(heightmap, size);
 ```
 
@@ -5656,8 +5656,8 @@ native GenMeshHeightmap(heightmap, size);
 RLAPI Mesh GenMeshCubicmap(Image cubicmap, Vector3 cubeSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GenMeshCubicmap(cubicmap, cubeSize);
 ```
 
@@ -5668,8 +5668,8 @@ native GenMeshCubicmap(cubicmap, cubeSize);
 RLAPI Material LoadMaterialDefault()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadMaterialDefault();
 ```
 
@@ -5680,8 +5680,8 @@ native LoadMaterialDefault();
 RLAPI bool IsMaterialValid(Material material)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsMaterialValid(material);
 ```
 
@@ -5692,8 +5692,8 @@ native IsMaterialValid(material);
 RLAPI void UnloadMaterial(Material material)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadMaterial(material);
 ```
 
@@ -5704,8 +5704,8 @@ native UnloadMaterial(material);
 RLAPI void SetMaterialTexture(Material *material, int mapType, Texture2D texture)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetMaterialTexture(*material, mapType, texture);
 ```
 
@@ -5716,8 +5716,8 @@ native SetMaterialTexture(*material, mapType, texture);
 RLAPI void SetModelMeshMaterial(Model *model, int meshId, int materialId)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetModelMeshMaterial(*model, meshId, materialId);
 ```
 
@@ -5728,8 +5728,8 @@ native SetModelMeshMaterial(*model, meshId, materialId);
 RLAPI void UpdateModelAnimation(Model model, ModelAnimation anim, float frame)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UpdateModelAnimation(model, anim, frame);
 ```
 
@@ -5740,8 +5740,8 @@ native UpdateModelAnimation(model, anim, frame);
 RLAPI void UpdateModelAnimationEx(Model model, ModelAnimation animA, float frameA, ModelAnimation animB, float frameB, float blend)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UpdateModelAnimationEx(model, animA, frameA, animB, frameB, blend);
 ```
 
@@ -5752,8 +5752,8 @@ native UpdateModelAnimationEx(model, animA, frameA, animB, frameB, blend);
 RLAPI void UnloadModelAnimations(ModelAnimation *animations, int animCount)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadModelAnimations(*animations, animCount);
 ```
 
@@ -5764,8 +5764,8 @@ native UnloadModelAnimations(*animations, animCount);
 RLAPI bool IsModelAnimationValid(Model model, ModelAnimation anim)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsModelAnimationValid(model, anim);
 ```
 
@@ -5776,8 +5776,8 @@ native IsModelAnimationValid(model, anim);
 RLAPI bool CheckCollisionSpheres(Vector3 center1, float radius1, Vector3 center2, float radius2)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CheckCollisionSpheres(center1, radius1, center2, radius2);
 ```
 
@@ -5788,8 +5788,8 @@ native CheckCollisionSpheres(center1, radius1, center2, radius2);
 RLAPI bool CheckCollisionBoxes(BoundingBox box1, BoundingBox box2)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CheckCollisionBoxes(box1, box2);
 ```
 
@@ -5800,8 +5800,8 @@ native CheckCollisionBoxes(box1, box2);
 RLAPI bool CheckCollisionBoxSphere(BoundingBox box, Vector3 center, float radius)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CheckCollisionBoxSphere(box, center, radius);
 ```
 
@@ -5812,8 +5812,8 @@ native CheckCollisionBoxSphere(box, center, radius);
 RLAPI RayCollision GetRayCollisionSphere(Ray ray, Vector3 center, float radius)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetRayCollisionSphere(ray, center, radius);
 ```
 
@@ -5824,8 +5824,8 @@ native GetRayCollisionSphere(ray, center, radius);
 RLAPI RayCollision GetRayCollisionBox(Ray ray, BoundingBox box)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetRayCollisionBox(ray, box);
 ```
 
@@ -5836,8 +5836,8 @@ native GetRayCollisionBox(ray, box);
 RLAPI RayCollision GetRayCollisionMesh(Ray ray, Mesh mesh, Matrix transform)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetRayCollisionMesh(ray, mesh, transform);
 ```
 
@@ -5848,8 +5848,8 @@ native GetRayCollisionMesh(ray, mesh, transform);
 RLAPI RayCollision GetRayCollisionTriangle(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetRayCollisionTriangle(ray, p1, p2, p3);
 ```
 
@@ -5860,8 +5860,8 @@ native GetRayCollisionTriangle(ray, p1, p2, p3);
 RLAPI RayCollision GetRayCollisionQuad(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetRayCollisionQuad(ray, p1, p2, p3, p4);
 ```
 
@@ -5872,8 +5872,8 @@ native GetRayCollisionQuad(ray, p1, p2, p3, p4);
 typedef void()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native void();
 ```
 
@@ -5884,8 +5884,8 @@ native void();
 RLAPI void InitAudioDevice()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native InitAudioDevice();
 ```
 
@@ -5896,8 +5896,8 @@ native InitAudioDevice();
 RLAPI void CloseAudioDevice()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native CloseAudioDevice();
 ```
 
@@ -5908,8 +5908,8 @@ native CloseAudioDevice();
 RLAPI bool IsAudioDeviceReady()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsAudioDeviceReady();
 ```
 
@@ -5920,8 +5920,8 @@ native IsAudioDeviceReady();
 RLAPI void SetMasterVolume(float volume)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetMasterVolume(volume);
 ```
 
@@ -5932,8 +5932,8 @@ native SetMasterVolume(volume);
 RLAPI float GetMasterVolume()
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMasterVolume();
 ```
 
@@ -5944,8 +5944,8 @@ native GetMasterVolume();
 RLAPI Wave LoadWave(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadWave(*fileName);
 ```
 
@@ -5956,8 +5956,8 @@ native LoadWave(*fileName);
 RLAPI Wave LoadWaveFromMemory(const char *fileType, const unsigned char *fileData, int dataSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadWaveFromMemory(*fileType, *fileData, dataSize);
 ```
 
@@ -5968,8 +5968,8 @@ native LoadWaveFromMemory(*fileType, *fileData, dataSize);
 RLAPI bool IsWaveValid(Wave wave)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsWaveValid(wave);
 ```
 
@@ -5980,8 +5980,8 @@ native IsWaveValid(wave);
 RLAPI Sound LoadSound(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadSound(*fileName);
 ```
 
@@ -5992,8 +5992,8 @@ native LoadSound(*fileName);
 RLAPI Sound LoadSoundFromWave(Wave wave)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadSoundFromWave(wave);
 ```
 
@@ -6004,8 +6004,8 @@ native LoadSoundFromWave(wave);
 RLAPI Sound LoadSoundAlias(Sound source)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadSoundAlias(source);
 ```
 
@@ -6016,8 +6016,8 @@ native LoadSoundAlias(source);
 RLAPI bool IsSoundValid(Sound sound)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsSoundValid(sound);
 ```
 
@@ -6028,8 +6028,8 @@ native IsSoundValid(sound);
 RLAPI void UpdateSound(Sound sound, const void *data, int frameCount)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UpdateSound(sound, *data, frameCount);
 ```
 
@@ -6040,8 +6040,8 @@ native UpdateSound(sound, *data, frameCount);
 RLAPI void UnloadWave(Wave wave)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadWave(wave);
 ```
 
@@ -6052,8 +6052,8 @@ native UnloadWave(wave);
 RLAPI void UnloadSound(Sound sound)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadSound(sound);
 ```
 
@@ -6064,8 +6064,8 @@ native UnloadSound(sound);
 RLAPI void UnloadSoundAlias(Sound alias)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadSoundAlias(alias);
 ```
 
@@ -6076,8 +6076,8 @@ native UnloadSoundAlias(alias);
 RLAPI bool ExportWave(Wave wave, const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ExportWave(wave, *fileName);
 ```
 
@@ -6088,8 +6088,8 @@ native ExportWave(wave, *fileName);
 RLAPI bool ExportWaveAsCode(Wave wave, const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ExportWaveAsCode(wave, *fileName);
 ```
 
@@ -6100,8 +6100,8 @@ native ExportWaveAsCode(wave, *fileName);
 RLAPI void PlaySound(Sound sound)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native PlaySound(sound);
 ```
 
@@ -6112,8 +6112,8 @@ native PlaySound(sound);
 RLAPI void StopSound(Sound sound)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native StopSound(sound);
 ```
 
@@ -6124,8 +6124,8 @@ native StopSound(sound);
 RLAPI void PauseSound(Sound sound)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native PauseSound(sound);
 ```
 
@@ -6136,8 +6136,8 @@ native PauseSound(sound);
 RLAPI void ResumeSound(Sound sound)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ResumeSound(sound);
 ```
 
@@ -6148,8 +6148,8 @@ native ResumeSound(sound);
 RLAPI bool IsSoundPlaying(Sound sound)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsSoundPlaying(sound);
 ```
 
@@ -6160,8 +6160,8 @@ native IsSoundPlaying(sound);
 RLAPI void SetSoundVolume(Sound sound, float volume)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetSoundVolume(sound, volume);
 ```
 
@@ -6172,8 +6172,8 @@ native SetSoundVolume(sound, volume);
 RLAPI void SetSoundPitch(Sound sound, float pitch)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetSoundPitch(sound, pitch);
 ```
 
@@ -6184,8 +6184,8 @@ native SetSoundPitch(sound, pitch);
 RLAPI void SetSoundPan(Sound sound, float pan)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetSoundPan(sound, pan);
 ```
 
@@ -6196,8 +6196,8 @@ native SetSoundPan(sound, pan);
 RLAPI Wave WaveCopy(Wave wave)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native WaveCopy(wave);
 ```
 
@@ -6208,8 +6208,8 @@ native WaveCopy(wave);
 RLAPI void WaveCrop(Wave *wave, int initFrame, int finalFrame)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native WaveCrop(*wave, initFrame, finalFrame);
 ```
 
@@ -6220,8 +6220,8 @@ native WaveCrop(*wave, initFrame, finalFrame);
 RLAPI void WaveFormat(Wave *wave, int sampleRate, int sampleSize, int channels)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native WaveFormat(*wave, sampleRate, sampleSize, channels);
 ```
 
@@ -6232,8 +6232,8 @@ native WaveFormat(*wave, sampleRate, sampleSize, channels);
 RLAPI void UnloadWaveSamples(float *samples)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadWaveSamples(*samples);
 ```
 
@@ -6244,8 +6244,8 @@ native UnloadWaveSamples(*samples);
 RLAPI Music LoadMusicStream(const char *fileName)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadMusicStream(*fileName);
 ```
 
@@ -6256,8 +6256,8 @@ native LoadMusicStream(*fileName);
 RLAPI Music LoadMusicStreamFromMemory(const char *fileType, const unsigned char *data, int dataSize)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadMusicStreamFromMemory(*fileType, *data, dataSize);
 ```
 
@@ -6268,8 +6268,8 @@ native LoadMusicStreamFromMemory(*fileType, *data, dataSize);
 RLAPI bool IsMusicValid(Music music)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsMusicValid(music);
 ```
 
@@ -6280,8 +6280,8 @@ native IsMusicValid(music);
 RLAPI void UnloadMusicStream(Music music)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadMusicStream(music);
 ```
 
@@ -6292,8 +6292,8 @@ native UnloadMusicStream(music);
 RLAPI void PlayMusicStream(Music music)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native PlayMusicStream(music);
 ```
 
@@ -6304,8 +6304,8 @@ native PlayMusicStream(music);
 RLAPI bool IsMusicStreamPlaying(Music music)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsMusicStreamPlaying(music);
 ```
 
@@ -6316,8 +6316,8 @@ native IsMusicStreamPlaying(music);
 RLAPI void UpdateMusicStream(Music music)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UpdateMusicStream(music);
 ```
 
@@ -6328,8 +6328,8 @@ native UpdateMusicStream(music);
 RLAPI void StopMusicStream(Music music)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native StopMusicStream(music);
 ```
 
@@ -6340,8 +6340,8 @@ native StopMusicStream(music);
 RLAPI void PauseMusicStream(Music music)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native PauseMusicStream(music);
 ```
 
@@ -6352,8 +6352,8 @@ native PauseMusicStream(music);
 RLAPI void ResumeMusicStream(Music music)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ResumeMusicStream(music);
 ```
 
@@ -6364,8 +6364,8 @@ native ResumeMusicStream(music);
 RLAPI void SeekMusicStream(Music music, float position)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SeekMusicStream(music, position);
 ```
 
@@ -6376,8 +6376,8 @@ native SeekMusicStream(music, position);
 RLAPI void SetMusicVolume(Music music, float volume)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetMusicVolume(music, volume);
 ```
 
@@ -6388,8 +6388,8 @@ native SetMusicVolume(music, volume);
 RLAPI void SetMusicPitch(Music music, float pitch)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetMusicPitch(music, pitch);
 ```
 
@@ -6400,8 +6400,8 @@ native SetMusicPitch(music, pitch);
 RLAPI void SetMusicPan(Music music, float pan)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetMusicPan(music, pan);
 ```
 
@@ -6412,8 +6412,8 @@ native SetMusicPan(music, pan);
 RLAPI float GetMusicTimeLength(Music music)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMusicTimeLength(music);
 ```
 
@@ -6424,8 +6424,8 @@ native GetMusicTimeLength(music);
 RLAPI float GetMusicTimePlayed(Music music)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native GetMusicTimePlayed(music);
 ```
 
@@ -6436,8 +6436,8 @@ native GetMusicTimePlayed(music);
 RLAPI AudioStream LoadAudioStream(unsigned int sampleRate, unsigned int sampleSize, unsigned int channels)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native LoadAudioStream(sampleRate, sampleSize, channels);
 ```
 
@@ -6448,8 +6448,8 @@ native LoadAudioStream(sampleRate, sampleSize, channels);
 RLAPI bool IsAudioStreamValid(AudioStream stream)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsAudioStreamValid(stream);
 ```
 
@@ -6460,8 +6460,8 @@ native IsAudioStreamValid(stream);
 RLAPI void UnloadAudioStream(AudioStream stream)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UnloadAudioStream(stream);
 ```
 
@@ -6472,8 +6472,8 @@ native UnloadAudioStream(stream);
 RLAPI void UpdateAudioStream(AudioStream stream, const void *data, int frameCount)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native UpdateAudioStream(stream, *data, frameCount);
 ```
 
@@ -6484,8 +6484,8 @@ native UpdateAudioStream(stream, *data, frameCount);
 RLAPI bool IsAudioStreamProcessed(AudioStream stream)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsAudioStreamProcessed(stream);
 ```
 
@@ -6496,8 +6496,8 @@ native IsAudioStreamProcessed(stream);
 RLAPI void PlayAudioStream(AudioStream stream)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native PlayAudioStream(stream);
 ```
 
@@ -6508,8 +6508,8 @@ native PlayAudioStream(stream);
 RLAPI void PauseAudioStream(AudioStream stream)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native PauseAudioStream(stream);
 ```
 
@@ -6520,8 +6520,8 @@ native PauseAudioStream(stream);
 RLAPI void ResumeAudioStream(AudioStream stream)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native ResumeAudioStream(stream);
 ```
 
@@ -6532,8 +6532,8 @@ native ResumeAudioStream(stream);
 RLAPI bool IsAudioStreamPlaying(AudioStream stream)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native IsAudioStreamPlaying(stream);
 ```
 
@@ -6544,8 +6544,8 @@ native IsAudioStreamPlaying(stream);
 RLAPI void StopAudioStream(AudioStream stream)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native StopAudioStream(stream);
 ```
 
@@ -6556,8 +6556,8 @@ native StopAudioStream(stream);
 RLAPI void SetAudioStreamVolume(AudioStream stream, float volume)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetAudioStreamVolume(stream, volume);
 ```
 
@@ -6568,8 +6568,8 @@ native SetAudioStreamVolume(stream, volume);
 RLAPI void SetAudioStreamPitch(AudioStream stream, float pitch)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetAudioStreamPitch(stream, pitch);
 ```
 
@@ -6580,8 +6580,8 @@ native SetAudioStreamPitch(stream, pitch);
 RLAPI void SetAudioStreamPan(AudioStream stream, float pan)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetAudioStreamPan(stream, pan);
 ```
 
@@ -6592,8 +6592,8 @@ native SetAudioStreamPan(stream, pan);
 RLAPI void SetAudioStreamBufferSizeDefault(int size)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetAudioStreamBufferSizeDefault(size);
 ```
 
@@ -6604,8 +6604,8 @@ native SetAudioStreamBufferSizeDefault(size);
 RLAPI void SetAudioStreamCallback(AudioStream stream, AudioCallback callback)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native SetAudioStreamCallback(stream, callback);
 ```
 
@@ -6616,8 +6616,8 @@ native SetAudioStreamCallback(stream, callback);
 RLAPI void AttachAudioStreamProcessor(AudioStream stream, AudioCallback processor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native AttachAudioStreamProcessor(stream, processor);
 ```
 
@@ -6628,8 +6628,8 @@ native AttachAudioStreamProcessor(stream, processor);
 RLAPI void DetachAudioStreamProcessor(AudioStream stream, AudioCallback processor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DetachAudioStreamProcessor(stream, processor);
 ```
 
@@ -6640,8 +6640,8 @@ native DetachAudioStreamProcessor(stream, processor);
 RLAPI void AttachAudioMixedProcessor(AudioCallback processor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native AttachAudioMixedProcessor(processor);
 ```
 
@@ -6652,8 +6652,8 @@ native AttachAudioMixedProcessor(processor);
 RLAPI void DetachAudioMixedProcessor(AudioCallback processor)
 ```
 
-**Fuji Binding:**
-```fuji
+**Koda Binding:**
+```koda
 native DetachAudioMixedProcessor(processor);
 ```
 

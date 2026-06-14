@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"fuji/internal/lexer"
+	"koda/internal/lexer"
 )
 
 func TestParseClassicForLoop(t *testing.T) {
@@ -310,7 +310,7 @@ func TestParserDefaultAndRestParams(t *testing.T) {
 
 func TestParserBreakContinueAndInclude(t *testing.T) {
 	program := parseForTest(t, `
-		#include "helpers.fuji"
+		#include "helpers.koda"
 		while (true) {
 			continue;
 			break;
@@ -342,7 +342,7 @@ func TestParserRejectsInvalidRestParams(t *testing.T) {
 }
 
 func TestProgramIncludeLoadsShim(t *testing.T) {
-	repoExamples := filepath.Join("..", "..", "examples", "raylib_shim_demo.fuji")
+	repoExamples := filepath.Join("..", "..", "examples", "raylib_shim_demo.koda")
 	bundle, err := LoadProgram(repoExamples)
 	if err != nil {
 		t.Fatal(err)

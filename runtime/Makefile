@@ -1,4 +1,4 @@
-# Makefile for Fuji Runtime Library
+# Makefile for Koda Runtime Library
 # Use a POSIX shell so `mkdir -p` / `rm -rf` work when GNU Make runs on Windows (cmd.exe does not).
 ifeq ($(OS),Windows_NT)
 SHELL := sh.exe
@@ -14,12 +14,12 @@ ARFLAGS = rcs
 
 SRCDIR = src
 OBJDIR = obj
-# Output: runtime/libfuji_runtime.a (linked by nativebuild)
+# Output: runtime/libkoda_runtime.a (linked by nativebuild)
 LIBDIR = .
 
-SRCS = $(SRCDIR)/value.c $(SRCDIR)/object.c $(SRCDIR)/gc.c $(SRCDIR)/fuji_runtime.c
+SRCS = $(SRCDIR)/value.c $(SRCDIR)/object.c $(SRCDIR)/gc.c $(SRCDIR)/koda_runtime.c
 OBJS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
-TARGET = $(LIBDIR)/libfuji_runtime.a
+TARGET = $(LIBDIR)/libkoda_runtime.a
 
 .PHONY: all clean
 

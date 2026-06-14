@@ -102,14 +102,14 @@ var cKeywords = map[string]bool{
 	"sizeof": true, "return": true,
 }
 
-// TestWriteBarrierCoverage ensures Value stores into GC object arrays in fuji_runtime.c
+// TestWriteBarrierCoverage ensures Value stores into GC object arrays in koda_runtime.c
 // are paired with gc_write_barrier in the same function (see GC mutator invariants).
 func TestWriteBarrierCoverage(t *testing.T) {
 	_, thisFile, _, ok := runtime.Caller(0)
 	if !ok {
 		t.Fatal("runtime.Caller failed")
 	}
-	path := filepath.Clean(filepath.Join(filepath.Dir(thisFile), "..", "..", "runtime", "src", "fuji_runtime.c"))
+	path := filepath.Clean(filepath.Join(filepath.Dir(thisFile), "..", "..", "runtime", "src", "koda_runtime.c"))
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("read %s: %v", path, err)
@@ -145,7 +145,7 @@ func TestWriteBarrierCoverage(t *testing.T) {
 			continue
 		}
 		if !bytes.Contains(body, []byte("gc_write_barrier")) {
-			t.Errorf("function %q in fuji_runtime.c assigns through GC object fields but has no gc_write_barrier in the same function body", name)
+			t.Errorf("function %q in koda_runtime.c assigns through GC object fields but has no gc_write_barrier in the same function body", name)
 		}
 	}
 }

@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       CGO_ENABLED: "0"
-      FUJI_SKIP_TOOLCHAIN_EXTRACT: "1"
+      KODA_SKIP_TOOLCHAIN_EXTRACT: "1"
 
     steps:
       - uses: actions/checkout@v5
@@ -50,8 +50,8 @@ jobs:
           clang -c runtime\src\value.c        -O2 -std=c11 -Iruntime\src -D_AMD64_=1 -o runtime\obj_win\value.o
           clang -c runtime\src\object.c       -O2 -std=c11 -Iruntime\src -D_AMD64_=1 -o runtime\obj_win\object.o
           clang -c runtime\src\gc.c           -O2 -std=c11 -Iruntime\src -D_AMD64_=1 -o runtime\obj_win\gc.o
-          clang -c runtime\src\fuji_runtime.c -O2 -std=c11 -Iruntime\src -D_AMD64_=1 -o runtime\obj_win\fuji_runtime.o
-          llvm-ar rcs runtime\libfuji_runtime.a runtime\obj_win\value.o runtime\obj_win\object.o runtime\obj_win\gc.o runtime\obj_win\fuji_runtime.o
+          clang -c runtime\src\koda_runtime.c -O2 -std=c11 -Iruntime\src -D_AMD64_=1 -o runtime\obj_win\koda_runtime.o
+          llvm-ar rcs runtime\libkoda_runtime.a runtime\obj_win\value.o runtime\obj_win\object.o runtime\obj_win\gc.o runtime\obj_win\koda_runtime.o
 
       - name: Build C runtime (Linux / macOS)
         if: runner.os != 'Windows'
@@ -79,19 +79,19 @@ jobs:
           "$CC_BIN" -c runtime/src/value.c        -O2 -std=c11 -Iruntime/src -o runtime/obj/value.o
           "$CC_BIN" -c runtime/src/object.c       -O2 -std=c11 -Iruntime/src -o runtime/obj/object.o
           "$CC_BIN" -c runtime/src/gc.c           -O2 -std=c11 -Iruntime/src -o runtime/obj/gc.o
-          "$CC_BIN" -c runtime/src/fuji_runtime.c -O2 -std=c11 -Iruntime/src -o runtime/obj/fuji_runtime.o
-          "$AR_BIN" rcs runtime/libfuji_runtime.a runtime/obj/value.o runtime/obj/object.o runtime/obj/gc.o runtime/obj/fuji_runtime.o
+          "$CC_BIN" -c runtime/src/koda_runtime.c -O2 -std=c11 -Iruntime/src -o runtime/obj/koda_runtime.o
+          "$AR_BIN" rcs runtime/libkoda_runtime.a runtime/obj/value.o runtime/obj/object.o runtime/obj/gc.o runtime/obj/koda_runtime.o
 
       - name: Export CI paths (GITHUB_ENV)
         shell: bash
         run: |
           set -euo pipefail
           if [[ "${{ runner.os }}" == "Windows" ]]; then
-            echo "FUJI_CI_BIN=$RUNNER_TEMP/fuji.exe" >> "$GITHUB_ENV"
+            echo "KODA_CI_BIN=$RUNNER_TEMP/koda.exe" >> "$GITHUB_ENV"
             echo "CI_ARTIFACT_DIR=$RUNNER_TEMP/ci-out" >> "$GITHUB_ENV"
             echo "WRAPGEN_SMOKE_OUT=$RUNNER_TEMP/ci-out/raylib_wrapgen_smoke" >> "$GITHUB_ENV"
           else
-            echo "FUJI_CI_BIN=/tmp/fuji" >> "$GITHUB_ENV"
+            echo "KODA_CI_BIN=/tmp/koda" >> "$GITHUB_ENV"
             echo "CI_ARTIFACT_DIR=/tmp/ci-out" >> "$GITHUB_ENV"
             echo "WRAPGEN_SMOKE_OUT=/tmp/ci-out/raylib_wrapgen_smoke" >> "$GITHUB_ENV"
           fi
@@ -110,30 +110,30 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          go build -trimpath -o "$FUJI_CI_BIN" ./cmd/fuji
+          go build -trimpath -o "$KODA_CI_BIN" ./cmd/koda
           if [[ "${{ runner.os }}" == "Windows" ]]; then
-            go build -trimpath -o "$RUNNER_TEMP/fujiwrap.exe" ./cmd/wrapgen
+            go build -trimpath -o "$RUNNER_TEMP/kodawrap.exe" ./cmd/wrapgen
           else
-            go build -trimpath -o /tmp/fujiwrap ./cmd/wrapgen
+            go build -trimpath -o /tmp/kodawrap ./cmd/wrapgen
             go build -trimpath -o /tmp/wrapgen ./cmd/wrapgen
           fi
 
-      - name: fuji fmt --check
+      - name: koda fmt --check
         shell: bash
         run: |
           set -euo pipefail
-          "$FUJI_CI_BIN" fmt --check ./...
+          "$KODA_CI_BIN" fmt --check ./...
 
-      - name: fuji check (sema, no LLVM)
+      - name: koda check (sema, no LLVM)
         shell: bash
         run: |
           set -euo pipefail
-          "$FUJI_CI_BIN" check tests/hello.fuji
-          if "$FUJI_CI_BIN" check tests/undefined_var.fuji 2>/dev/null; then echo "expected check to fail"; exit 1; fi
-          if "$FUJI_CI_BIN" check tests/sema_errors.fuji 2>/dev/null; then echo "expected sema_errors check to fail"; exit 1; fi
-          if "$FUJI_CI_BIN" check tests/struct_typo_test.fuji 2>/dev/null; then echo "expected struct field typo check to fail"; exit 1; fi
+          "$KODA_CI_BIN" check tests/hello.koda
+          if "$KODA_CI_BIN" check tests/undefined_var.koda 2>/dev/null; then echo "expected check to fail"; exit 1; fi
+          if "$KODA_CI_BIN" check tests/sema_errors.koda 2>/dev/null; then echo "expected sema_errors check to fail"; exit 1; fi
+          if "$KODA_CI_BIN" check tests/struct_typo_test.koda 2>/dev/null; then echo "expected struct field typo check to fail"; exit 1; fi
 
-      - name: Native smoke (fuji build / run)
+      - name: Native smoke (koda build / run)
         shell: bash
         run: bash scripts/ci-native-smoke.sh
 
@@ -142,13 +142,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          timeout 90s "$FUJI_CI_BIN" run tests/gc_pressure_expr.fuji
-          timeout 90s "$FUJI_CI_BIN" run tests/globals_perf.fuji
-          timeout 90s "$FUJI_CI_BIN" run tests/gc_soak.fuji
-          timeout 120s "$FUJI_CI_BIN" run --no-opt tests/nursery_test.fuji
-          timeout 120s "$FUJI_CI_BIN" run --no-opt tests/incremental_gc_test.fuji
-          timeout 90s "$FUJI_CI_BIN" run tests/stress/stress_mixed_alloc.fuji
-          timeout 120s "$FUJI_CI_BIN" run --no-opt tests/stress/large_game_sim.fuji
+          timeout 90s "$KODA_CI_BIN" run tests/gc_pressure_expr.koda
+          timeout 90s "$KODA_CI_BIN" run tests/globals_perf.koda
+          timeout 90s "$KODA_CI_BIN" run tests/gc_soak.koda
+          timeout 120s "$KODA_CI_BIN" run --no-opt tests/nursery_test.koda
+          timeout 120s "$KODA_CI_BIN" run --no-opt tests/incremental_gc_test.koda
+          timeout 90s "$KODA_CI_BIN" run tests/stress/stress_mixed_alloc.koda
+          timeout 120s "$KODA_CI_BIN" run --no-opt tests/stress/large_game_sim.koda
 
       - name: GC soak + stress smoke (Windows)
         if: runner.os == 'Windows'
@@ -159,6 +159,6 @@ jobs:
 
       - name: Wrapgen Raylib + link smoke
         env:
-          FUJI_BIN: ${{ env.FUJI_CI_BIN }}
+          KODA_BIN: ${{ env.KODA_CI_BIN }}
         shell: bash
         run: bash scripts/ci-wrapgen-raylib.sh

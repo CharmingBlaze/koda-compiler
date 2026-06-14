@@ -46,8 +46,8 @@ func TestFormatRangeExpr(t *testing.T) {
 	}
 }
 
-func TestFormatHelloFuji(t *testing.T) {
-	path := filepath.Join("..", "..", "tests", "hello.fuji")
+func TestFormatHelloKoda(t *testing.T) {
+	path := filepath.Join("..", "..", "tests", "hello.koda")
 	b, err := os.ReadFile(path)
 	if err != nil {
 		t.Skip(err)
@@ -62,7 +62,7 @@ func TestFormatHelloFuji(t *testing.T) {
 		t.Fatal(err)
 	}
 	if out != out2 {
-		t.Fatal("hello.fuji format not idempotent")
+		t.Fatal("hello.koda format not idempotent")
 	}
 }
 
@@ -132,7 +132,7 @@ func TestFormatUnaryPlusIdempotent(t *testing.T) {
 }
 
 func TestFormatClosureTest(t *testing.T) {
-	path := filepath.Join("..", "..", "tests", "closure_test.fuji")
+	path := filepath.Join("..", "..", "tests", "closure_test.koda")
 	b, err := os.ReadFile(path)
 	if err != nil {
 		t.Skip(err)

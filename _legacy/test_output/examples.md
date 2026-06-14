@@ -1,13 +1,13 @@
 # test - Examples
 
-Copy any snippet into your Fuji program and adjust the arguments.
+Copy any snippet into your Koda program and adjust the arguments.
 
 ---
 
 ## Include the library
 
-```fuji
-#include "test.fuji"
+```koda
+#include "test.koda"
 ```
 
 ---
@@ -16,21 +16,21 @@ Copy any snippet into your Fuji program and adjust the arguments.
 
 ### add
 
-```fuji
+```koda
 let result = add(a, b);
 print(result);
 ```
 
 ### multiply
 
-```fuji
+```koda
 let result = multiply(a, b);
 print(result);
 ```
 
 ### print_hello
 
-```fuji
+```koda
 print_hello(message);
 ```
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build runtime/libfuji_runtime.a for local development (Linux / macOS).
+# Build runtime/libkoda_runtime.a for local development (Linux / macOS).
 # Windows maintainers: use scripts/build-runtime.ps1 (MinGW gcc + ar) or match CI (LLVM clang + llvm-ar).
 set -euo pipefail
 
@@ -30,7 +30,7 @@ mkdir -p runtime/obj
 "$CC_BIN" -c runtime/src/value.c        -O2 -std=c11 -Iruntime/src -o runtime/obj/value.o
 "$CC_BIN" -c runtime/src/object.c       -O2 -std=c11 -Iruntime/src -o runtime/obj/object.o
 "$CC_BIN" -c runtime/src/gc.c           -O2 -std=c11 -Iruntime/src -o runtime/obj/gc.o
-"$CC_BIN" -c runtime/src/fuji_runtime.c -O2 -std=c11 -Iruntime/src -o runtime/obj/fuji_runtime.o
-"$AR_BIN" rcs runtime/libfuji_runtime.a runtime/obj/value.o runtime/obj/object.o runtime/obj/gc.o runtime/obj/fuji_runtime.o
+"$CC_BIN" -c runtime/src/koda_runtime.c -O2 -std=c11 -Iruntime/src -o runtime/obj/koda_runtime.o
+"$AR_BIN" rcs runtime/libkoda_runtime.a runtime/obj/value.o runtime/obj/object.o runtime/obj/gc.o runtime/obj/koda_runtime.o
 
-echo "Wrote runtime/libfuji_runtime.a"
+echo "Wrote runtime/libkoda_runtime.a"

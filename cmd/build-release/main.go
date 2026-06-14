@@ -35,7 +35,7 @@ type Platform struct {
 func main() {
 	config := parseFlags()
 
-	fmt.Printf("Fuji Cross-Platform Release Builder\n")
+	fmt.Printf("Koda Cross-Platform Release Builder\n")
 	fmt.Printf("Version: %s\n", config.Version)
 	fmt.Printf("Platforms: %v\n", config.Platforms)
 	fmt.Printf("Output: %s\n", config.OutputDir)
@@ -97,12 +97,12 @@ func buildPlatformRelease(platformStr string, config *ReleaseConfig) error {
 	platform := parsePlatform(platformStr)
 
 	// Create platform-specific directory
-	platformDir := filepath.Join(config.OutputDir, "fuji-"+platformStr)
+	platformDir := filepath.Join(config.OutputDir, "koda-"+platformStr)
 	if err := os.MkdirAll(platformDir, 0755); err != nil {
 		return err
 	}
 
-	// Build the fuji-single executable for this platform
+	// Build the koda-single executable for this platform
 	if err := buildExecutable(platformDir, platform, config); err != nil {
 		return fmt.Errorf("failed to build executable: %v", err)
 	}
@@ -197,8 +197,8 @@ func buildExecutable(outputDir string, platform Platform, config *ReleaseConfig)
 	// Build command
 	cmd := exec.Command("go", "build",
 		"-ldflags", "-s -w", // Strip symbols for smaller binaries
-		"-o", filepath.Join(outputDir, "fuji"+platform.Ext),
-		"../fuji-single",
+		"-o", filepath.Join(outputDir, "koda"+platform.Ext),
+		"../koda-single",
 	)
 
 	cmd.Dir = "."
@@ -210,7 +210,7 @@ func buildExecutable(outputDir string, platform Platform, config *ReleaseConfig)
 		return fmt.Errorf("build failed: %v, output: %s", err, string(output))
 	}
 
-	fmt.Printf("  [ok] Executable built: fuji%s\n", platform.Ext)
+	fmt.Printf("  [ok] Executable built: koda%s\n", platform.Ext)
 	return nil
 }
 
@@ -221,7 +221,7 @@ func copyResources(outputDir string) error {
 	resources := []string{"runtime", "stdlib", "wrappers"}
 
 	for _, resource := range resources {
-		source := filepath.Join("../fuji-single", resource)
+		source := filepath.Join("../koda-single", resource)
 		dest := filepath.Join(outputDir, resource)
 
 		if err := copyDir(source, dest); err != nil {
@@ -279,25 +279,25 @@ func createPlatformFiles(outputDir string, platform Platform, config *ReleaseCon
 	var launcherContent string
 
 	if platform.GOOS == "windows" {
-		launcherName = "fuji.bat"
+		launcherName = "koda.bat"
 		launcherContent = fmt.Sprintf(`@echo off
-REM Fuji Launcher for Windows
-echo Fuji Programming Language v%s - %s
+REM Koda Launcher for Windows
+echo Koda Programming Language v%s - %s
 echo.
 
-REM Run Fuji with all arguments
-"%%~dp0fuji.exe" %%*
+REM Run Koda with all arguments
+"%%~dp0koda.exe" %%*
 `, config.Version, platform.Name)
 	} else {
-		launcherName = "fuji"
+		launcherName = "koda"
 		launcherContent = fmt.Sprintf(`#!/bin/bash
-# Fuji Launcher for %s
-echo "Fuji Programming Language v%s - %s"
+# Koda Launcher for %s
+echo "Koda Programming Language v%s - %s"
 echo
 
-# Run Fuji with all arguments
+# Run Koda with all arguments
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-"$SCRIPT_DIR/fuji" "$@"
+"$SCRIPT_DIR/koda" "$@"
 `, platform.Name, config.Version, platform.Name)
 	}
 
@@ -324,29 +324,29 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 func createInstallScript(platform Platform, config *ReleaseConfig) string {
 	if platform.GOOS == "windows" {
 		return fmt.Sprintf(`@echo off
-REM Fuji Installation Script for Windows
-echo Installing Fuji v%s...
+REM Koda Installation Script for Windows
+echo Installing Koda v%s...
 
 REM Create installation directory
-if not exist "%%PROGRAMFILES%%\Fuji" mkdir "%%PROGRAMFILES%%\Fuji"
+if not exist "%%PROGRAMFILES%%\Koda" mkdir "%%PROGRAMFILES%%\Koda"
 
 REM Copy files
-xcopy /E /Y "*" "%%PROGRAMFILES%%\Fuji\"
+xcopy /E /Y "*" "%%PROGRAMFILES%%\Koda\"
 
 REM Add to PATH (optional)
-echo Adding Fuji to system PATH...
-setx PATH "%%PATH%%;%%PROGRAMFILES%%\Fuji" /M
+echo Adding Koda to system PATH...
+setx PATH "%%PATH%%;%%PROGRAMFILES%%\Koda" /M
 
 echo Installation completed!
-echo You can now run 'fuji' from anywhere.
+echo You can now run 'koda' from anywhere.
 echo.
 pause
 `, config.Version)
 	}
 
 	return fmt.Sprintf(`#!/bin/bash
-# Fuji Installation Script for %s
-echo "Installing Fuji v%s..."
+# Koda Installation Script for %s
+echo "Installing Koda v%s..."
 
 # Determine installation directory
 INSTALL_DIR="/usr/local/bin"
@@ -359,10 +359,10 @@ fi
 mkdir -p "$INSTALL_DIR"
 
 # Copy files
-cp -r * "$INSTALL_DIR/fuji/"
+cp -r * "$INSTALL_DIR/koda/"
 
 # Create symlink
-ln -sf "$INSTALL_DIR/fuji/fuji" "$INSTALL_DIR/fuji"
+ln -sf "$INSTALL_DIR/koda/koda" "$INSTALL_DIR/koda"
 
 # Update PATH if needed
 if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
@@ -371,7 +371,7 @@ if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
 fi
 
 echo "Installation completed!"
-echo "You can now run 'fuji' from anywhere."
+echo "You can now run 'koda' from anywhere."
 echo "Run 'source ~/.bashrc' or restart your terminal to update PATH."
 `, platform.Name, config.Version)
 }
@@ -385,13 +385,13 @@ func createDocumentation(outputDir string, platform Platform, config *ReleaseCon
 	}
 
 	// Create README
-	readmeContent := fmt.Sprintf(`# Fuji Programming Language v%s
+	readmeContent := fmt.Sprintf(`# Koda Programming Language v%s
 
 ## Platform: %s
 
 ### Quick Start
 
-Fuji is a self-contained programming language that requires no external dependencies.
+Koda is a self-contained programming language that requires no external dependencies.
 
 #### Installation
 
@@ -400,9 +400,9 @@ Fuji is a self-contained programming language that requires no external dependen
    - Windows: Double-click `+"`install.bat`"+`
    - Linux/macOS: Run `+"`./install.sh`"+`
 
-3. Start using Fuji:
+3. Start using Koda:
    `+"```bash"+`
-   fuji hello.fuji
+   koda hello.koda
    `+"```"+`
 
 #### Manual Installation
@@ -411,7 +411,7 @@ If you prefer not to run the install script:
 
 1. Extract the archive to your preferred location
 2. Add the directory to your system PATH
-3. Run `+"`fuji`"+` from anywhere
+3. Run `+"`koda`"+` from anywhere
 
 ### Features
 
@@ -427,8 +427,8 @@ If you prefer not to run the install script:
 ### Directory Structure
 
 `+"```"+`
-fuji/
-├── fuji%s              # Main compiler executable
+koda/
+├── koda%s              # Main compiler executable
 ├── runtime/             # Embedded runtime components
 ├── stdlib/              # Standard library files
 ├── wrappers/            # Pre-built library wrappers
@@ -440,18 +440,18 @@ fuji/
 
 Check the `+"`examples/`"+` directory for sample programs:
 
-- `+"`hello.fuji`"+` - Basic hello world
-- `+"`functions.fuji`"+` - Function definitions and usage
-- `+"`loops.fuji`"+` - Loop constructs
-- `+"`raylib_demo.fuji`"+` - Graphics programming with Raylib
+- `+"`hello.koda`"+` - Basic hello world
+- `+"`functions.koda`"+` - Function definitions and usage
+- `+"`loops.koda`"+` - Loop constructs
+- `+"`raylib_demo.koda`"+` - Graphics programming with Raylib
 
 ### Language Reference
 
 #### Basic Syntax
 
-`+"```fuji"+`
+`+"```koda"+`
 // Variables
-let name = "Fuji";
+let name = "Koda";
 let version = 1.0;
 
 // Functions
@@ -472,7 +472,7 @@ if (version > 1.0) {
 
 #### C Library Integration
 
-`+"```fuji"+`
+`+"```koda"+`
 // Use any C library with automatic wrapper generation
 native printf(format, ...);
 printf("Hello from C: %%d", 42);
@@ -492,9 +492,9 @@ initWindow(800, 600, "My Game");
 ### Getting Help
 
 - Check the `+"`examples/`"+` directory for sample programs
-- Visit the online documentation at https://fuji-lang.org
-- Join the community at https://github.com/fuji-lang/fuji
-- Report issues at https://github.com/fuji-lang/fuji/issues
+- Visit the online documentation at https://koda-lang.org
+- Join the community at https://github.com/koda-lang/koda
+- Report issues at https://github.com/koda-lang/koda/issues
 
 ### System Requirements
 
@@ -506,7 +506,7 @@ No additional software or dependencies required!
 
 ### Uninstallation
 
-To uninstall Fuji:
+To uninstall Koda:
 
 **Windows:**
 1. Delete the installation directory
@@ -514,12 +514,12 @@ To uninstall Fuji:
 
 **Linux/macOS:**
 1. Delete the installation directory
-2. Remove the symlink: `+"`sudo rm /usr/local/bin/fuji`"+`
+2. Remove the symlink: `+"`sudo rm /usr/local/bin/koda`"+`
 3. Remove from PATH in ~/.bashrc if added
 
 ---
 
-Enjoy programming with Fuji.
+Enjoy programming with Koda.
 
 Version: %s
 Build Date: %s
@@ -546,12 +546,12 @@ func createExamples(outputDir string, platform Platform, config *ReleaseConfig) 
 
 	// Create example files
 	examples := map[string]string{
-		"hello.fuji": `// Hello World Example
+		"hello.koda": `// Hello World Example
 print("Hello, World!");
-print("Welcome to Fuji v%s!");
+print("Welcome to Koda v%s!");
 
 // Variables
-let name = "Fuji";
+let name = "Koda";
 let version = 1.0;
 
 print("Language: " + name);
@@ -563,11 +563,11 @@ func greet(who) {
 }
 
 greet("World");
-greet("Self-contained Fuji");
+greet("Self-contained Koda");
 
 print("Example completed successfully!");
 `,
-		"functions.fuji": `// Function Examples
+		"functions.koda": `// Function Examples
 // Simple function
 func add(a, b) {
     return a + b;
@@ -596,7 +596,7 @@ print("5 * 3 = " + multiply(5, 3));
 print("5! = " + factorial(5));
 print("apply(add, 10, 20) = " + apply(add, 10, 20));
 `,
-		"loops.fuji": `// Loop Examples
+		"loops.koda": `// Loop Examples
 print("For loop:");
 for (let i = 0; i < 5; i = i + 1) {
     print("i = " + i);
@@ -625,13 +625,13 @@ for (let i = 0; i < 2; i = i + 1) {
 
 print("Loop examples completed!");
 `,
-		"raylib_demo.fuji": `// Raylib Graphics Demo
+		"raylib_demo.koda": `// Raylib Graphics Demo
 // Note: This requires the Raylib wrapper
 
 import "raylib";
 
 // Initialize window
-initWindow(800, 600, "Fuji + Raylib");
+initWindow(800, 600, "Koda + Raylib");
 
 let targetFPS = 60;
 setTargetFPS(targetFPS);
@@ -649,7 +649,7 @@ while (!windowShouldClose()) {
     clearBackground(RAYWHITE);
     
     // Draw text
-    drawText("Hello from Fuji + Raylib!", 190, 200, 20, BLACK);
+    drawText("Hello from Koda + Raylib!", 190, 200, 20, BLACK);
     drawText("Press ESC to exit", 200, 250, 20, GRAY);
     
     // Draw shapes
@@ -710,7 +710,7 @@ func createInstallerScript(platform Platform, config *ReleaseConfig) string {
 func createDistributionArchive(platformDir, platformStr string, config *ReleaseConfig) error {
 	fmt.Printf("  Creating distribution archive...\n")
 
-	archiveName := fmt.Sprintf("fuji-%s-%s", config.Version, platformStr)
+	archiveName := fmt.Sprintf("koda-%s-%s", config.Version, platformStr)
 	archivePath := filepath.Join(config.OutputDir, archiveName)
 
 	if strings.Contains(platformStr, "windows") {
@@ -832,7 +832,7 @@ func createTarGz(filename, sourceDir string) error {
 
 func createSourceArchive(config *ReleaseConfig) error {
 	// Create source archive
-	sourceDir := filepath.Join(config.OutputDir, "fuji-"+config.Version+"-source")
+	sourceDir := filepath.Join(config.OutputDir, "koda-"+config.Version+"-source")
 	if err := os.MkdirAll(sourceDir, 0755); err != nil {
 		return err
 	}
@@ -840,7 +840,7 @@ func createSourceArchive(config *ReleaseConfig) error {
 	// Copy source files (simplified)
 	// In a real implementation, you'd copy all source files
 
-	archiveName := fmt.Sprintf("fuji-%s-source.tar.gz", config.Version)
+	archiveName := fmt.Sprintf("koda-%s-source.tar.gz", config.Version)
 	archivePath := filepath.Join(config.OutputDir, archiveName)
 
 	if err := createTarGz(archivePath, sourceDir); err != nil {

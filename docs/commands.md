@@ -1,55 +1,212 @@
-# Fuji CLI — every command
+# Koda CLI — every command
 
-Use the **`fuji`** binary from [GitHub Releases](https://github.com/CharmingBlaze/fuji/releases). For full inline help:
+Use the **`koda`** binary from [GitHub Releases](https://github.com/CharmingBlaze/koda-compiler/releases). For full inline help:
 
 ```bash
-fuji help
+koda help
 ```
 
 ---
 
-## `fuji run` / `fuji native`
+## `koda new`
 
-Compile the entry **`.fuji`** file to a native executable (temporary), run it, then delete the temp binary.
+Create a new project directory with `koda.json`, `src/main.koda`, `assets/`, and a template README.
 
 ```bash
-fuji run [--no-opt] <file.fuji>
-fuji native [--no-opt] <file.fuji>   # same as run
+koda new <name> [--template hello|game|graphics]
+```
+
+| Template | What you get |
+|----------|----------------|
+| **hello** (default) | Minimal print program — runs immediately |
+| **game** | Text-based lunar lander — no native libraries |
+| **graphics** | Bouncing-ball window via bundled Raylib shim — requires Raylib link flags |
+
+**Examples**
+
+```bash
+koda new myapp
+koda new lander --template game
+koda new bounce --template graphics
+cd bounce
+# Windows: $env:KODA_LINKFLAGS = "-lraylib -lopengl32 -lgdi32 -lwinmm"
+koda run
+```
+
+---
+
+## `koda.json` (project manifest)
+
+When `koda.json` sits in the project root (or a parent directory), you can omit the entry file on `run`, `build`, `watch`, `check`, and `bundle`.
+
+```json
+{
+  "name": "mygame",
+  "version": "0.1.0",
+  "entry": "src/main.koda",
+  "bundle": {
+    "assets": ["assets"],
+    "extra": ["LICENSE"]
+  },
+  "native": {
+    "sources": ["wrappers/mylib/wrapper.c"],
+    "linkflags": "-lmylib"
+  }
+}
+```
+
+| Field | Purpose |
+|-------|---------|
+| `name` | Project name (default executable / bundle name) |
+| `entry` | Main `.koda` file (required) |
+| `bundle.assets` | Directories copied into `koda bundle` output |
+| `bundle.extra` | Additional files or folders to copy |
+| `native.sources` | C/C++ files linked on every build (sets `KODA_NATIVE_SOURCES` when unset) |
+| `native.linkflags` | Linker flags (sets `KODA_LINKFLAGS` when unset) |
+
+Environment variables always override manifest values.
+
+**Project-aware commands**
+
+```bash
+cd mygame
+koda run
+koda build -o mygame
+koda check
+koda bundle -o dist/mygame
+```
+
+---
+
+## `koda run` / `koda native`
+
+Compile the entry **`.koda`** file to a native executable (temporary), run it, then delete the temp binary.
+
+```bash
+koda run [--no-opt] [<file.koda>]
+koda native [--no-opt] [<file.koda>]   # same as run
 ```
 
 - **`--no-opt`** — skips LLVM IR optimisation and uses a less aggressive native compile. Use if a very large program hits a flaky Clang optimiser on your machine.
+- Omit the file when `koda.json` defines `entry`.
 
 **Example**
 
 ```bash
-fuji run src/main.fuji
-fuji run --no-opt src/main.fuji
+koda run src/main.koda
+koda run              # uses koda.json entry
+koda run --no-opt src/main.koda
 ```
 
 ---
 
-## `fuji watch`
+## `koda watch`
 
-Rebuild and rerun whenever **`.fuji`** files under the entry file’s directory change.
+Rebuild and rerun whenever **`.koda`** files under the entry file’s directory change.
 
 ```bash
-fuji watch [--no-opt] <file.fuji>
+koda watch [--no-opt] [<file.koda>]
 ```
 
 **Example**
 
 ```bash
-fuji watch src/main.fuji
+koda watch src/main.koda
+koda watch            # project entry
 ```
 
 ---
 
-## `fuji check`
+## `koda run`
+
+Compile to a native binary and run (temporary executable).
+
+```bash
+koda run [--no-opt] [--debug] [<file.koda>] [-- <program args...>]
+```
+
+Arguments after `--` are passed to your program.
+
+---
+
+## `koda test`
+
+```bash
+koda test [--no-opt] [-v] [--failfast] [-run <pattern>] [<files...>]
+```
+
+---
+
+## `koda lint`
+
+Run `check` plus `fmt --check` on paths (default `./...`).
+
+```bash
+koda lint [paths...]
+```
+
+---
+
+## `koda bench` / `profile`
+
+Time repeated compile+run cycles.
+
+```bash
+koda bench [--count N] [--warmup N] [--no-opt] [--debug] <file.koda> [-- <args...>]
+```
+
+---
+
+## `koda debug`
+
+Run with debug symbols (`koda run --debug`).
+
+---
+
+## `koda eval` / `repl`
+
+```bash
+koda eval 'print(1 + 2)'
+koda repl
+```
+
+---
+
+## `koda init`
+
+Alias for `koda new`.
+
+---
+
+## `koda env` / `completions` / `update` / `doc` / `lsp`
+
+```bash
+koda env [--export]
+koda completions bash|zsh|fish
+koda update [--check-only]
+koda doc [stdlib | module @name]
+koda lsp
+```
+
+See **[reference/cli.md](reference/cli.md)** for full details.
+
+---
+
+## `koda clean`
+
+```bash
+koda clean [<dir>] [--cache]
+```
+
+---
+
+## `koda check`
 
 Parse, resolve imports, and run semantic analysis only — **no** native compile.
 
 ```bash
-fuji check <file.fuji>
+koda check [<file.koda>]
+koda check ./...
 ```
 
 Prints **`OK`** if the program is valid.
@@ -57,18 +214,19 @@ Prints **`OK`** if the program is valid.
 **Example**
 
 ```bash
-fuji check src/main.fuji
+koda check src/main.koda
+koda check            # project entry
 ```
 
 ---
 
-## `fuji fmt`
+## `koda fmt`
 
-Format **`.fuji`** sources with the canonical formatter.
+Format **`.koda`** sources with the canonical formatter.
 
 ```bash
-fuji fmt [--check] <file.fuji> [more files...]
-fuji fmt [--check] ./...
+koda fmt [--check] <file.koda> [more files...]
+koda fmt [--check] ./...
 ```
 
 - **`--check`** — do not write files; exit with an error if any file would change (for CI).
@@ -76,29 +234,29 @@ fuji fmt [--check] ./...
 **Examples**
 
 ```bash
-fuji fmt src/main.fuji
-fuji fmt ./...
-fuji fmt --check .
+koda fmt src/main.koda
+koda fmt ./...
+koda fmt --check .
 ```
 
 ---
 
-## `fuji disasm`
+## `koda disasm`
 
 Print **LLVM IR** for the program (after parse, sema, and codegen). Useful for debugging the compiler pipeline, not for everyday game dev.
 
 ```bash
-fuji disasm <file.fuji>
+koda disasm <file.koda>
 ```
 
 ---
 
-## `fuji build`
+## `koda build`
 
 Produce a **native executable** you keep.
 
 ```bash
-fuji build [--no-opt] [--debug] <file.fuji> [-o <exe>]
+koda build [--no-opt] [--debug] <file.koda> [-o <exe>]
 ```
 
 - **`--no-opt`** — same meaning as for `run`.
@@ -108,18 +266,18 @@ fuji build [--no-opt] [--debug] <file.fuji> [-o <exe>]
 **Examples**
 
 ```bash
-fuji build game.fuji -o dist/game.exe
-fuji build --debug game.fuji -o dist/game_debug.exe
+koda build game.koda -o dist/game.exe
+koda build --debug game.koda -o dist/game_debug.exe
 ```
 
 ---
 
-## `fuji bundle`
+## `koda bundle`
 
 Build the program and write a **folder** you can zip or ship (executable, helper scripts, README, etc.).
 
 ```bash
-fuji bundle <file.fuji> [-o <dir>]
+koda bundle <file.koda> [-o <dir>]
 ```
 
 Default output directory is **`dist`** if you omit **`-o`**.
@@ -127,64 +285,64 @@ Default output directory is **`dist`** if you omit **`-o`**.
 **Example**
 
 ```bash
-fuji bundle game.fuji -o dist/MyGame
+koda bundle game.koda -o dist/MyGame
 ```
 
-Copy extra files and directories (DLLs, assets folders) with **`FUJI_BUNDLE_FILES`**. Use your OS path-list separator (`;` on Windows, `:` on Linux/macOS), or quote paths that contain spaces.
+Copy extra files and directories (DLLs, assets folders) with **`KODA_BUNDLE_FILES`**. Use your OS path-list separator (`;` on Windows, `:` on Linux/macOS), or quote paths that contain spaces.
 
 ---
 
-## `fuji wrap`
+## `koda wrap`
 
-Forward arguments to **`fujiwrap`** (C/C++ header → **`.fuji`** bindings + **`wrapper.c`**). **`fuji`** looks for **`fujiwrap`** next to itself, then **`wrapgen`**, **`kujiwrap`**, then **`PATH`**.
+Forward arguments to **`kodawrap`** (C/C++ header → **`.koda`** bindings + **`wrapper.c`**). **`koda`** looks for **`kodawrap`** next to itself, then **`wrapgen`**, **`kujiwrap`**, then **`PATH`**.
 
 ```bash
-fuji wrap --help
-fuji wrap -name mylib -headers ./include/mylib.h -out ./wrappers/mylib
+koda wrap --help
+koda wrap -name mylib -headers ./include/mylib.h -out ./wrappers/mylib
 ```
 
 Full workflow: **[wrappers.md](wrappers.md)**.
 
 ---
 
-## `fuji paths`
+## `koda paths`
 
 Print **machine-readable** toolchain paths (for scripts and CI).
 
 ```bash
-fuji paths
+koda paths
 ```
 
 ---
 
-## `fuji doctor`
+## `koda doctor`
 
 Human-readable **health check**: clang resolution, runtime library, stdlib, install directory, etc.
 
 ```bash
-fuji doctor
+koda doctor
 ```
 
 ---
 
-## `fuji version`
+## `koda version`
 
 Print version and platform.
 
 ```bash
-fuji version
-fuji --version
+koda version
+koda --version
 ```
 
 ---
 
-## `fuji help`
+## `koda help`
 
 Print the full help screen (commands, environment variables, examples).
 
 ```bash
-fuji help
-fuji --help
+koda help
+koda --help
 ```
 
 ---
@@ -193,14 +351,14 @@ fuji --help
 
 | Variable | Purpose |
 |----------|---------|
-| **`FUJI_CLANG`** / **`CC`** | Clang driver for native builds (if not using embedded release toolchain) |
-| **`FUJI_PATH`** | Extra **`@module`** search directories |
-| **`FUJI_WRAPPERS`** | Pre-built wrapper **`.fuji`** trees |
-| **`FUJI_NATIVE_SOURCES`** | C/C++ sources linked into your app (e.g. **`wrapper.c`**) |
-| **`FUJI_LINKFLAGS`** | Extra linker flags (**`-l`**, **`-L`**, frameworks, …) |
-| **`FUJI_BUNDLE_FILES`** | Extra files or directories copied into **`fuji bundle`** output |
+| **`KODA_CLANG`** / **`CC`** | Clang driver for native builds (if not using embedded release toolchain) |
+| **`KODA_PATH`** | Extra **`@module`** search directories |
+| **`KODA_WRAPPERS`** | Pre-built wrapper **`.koda`** trees |
+| **`KODA_NATIVE_SOURCES`** | C/C++ sources linked into your app (e.g. **`wrapper.c`**) |
+| **`KODA_LINKFLAGS`** | Extra linker flags (**`-l`**, **`-L`**, frameworks, …) |
+| **`KODA_BUNDLE_FILES`** | Extra files or directories copied into **`koda bundle`** output |
 
-See **`fuji help`** for the complete list and notes.
+See **`koda help`** for the complete list and notes.
  Essential Commands for Game/App Development
 These are critical quality-of-life features that should be in v1.0
 
@@ -872,20 +1030,20 @@ go// Add to internal/runtime/
 - Rounding functions
 - Utility functions (clamp, lerp, distance, etc.)
 Tests:
-javascript// tests/stdlib/time_test.fuji
+javascript// tests/stdlib/time_test.koda
 let start = time();
 sleep(100);
 let end = time();
 assert(end - start >= 0.1, "Sleep failed");
 
-// tests/stdlib/random_test.fuji
+// tests/stdlib/random_test.koda
 randomSeed(12345);
 let a = random();
 randomSeed(12345);
 let b = random();
 assert(a == b, "Seed failed");
 
-// tests/stdlib/math_test.fuji
+// tests/stdlib/math_test.koda
 assert(abs(-5) == 5);
 assert(clamp(15, 0, 10) == 10);
 assert(distance(0, 0, 3, 4) == 5);
@@ -1639,20 +1797,20 @@ go// Add to internal/runtime/
 - Rounding functions
 - Utility functions (clamp, lerp, distance, etc.)
 Tests:
-javascript// tests/stdlib/time_test.fuji
+javascript// tests/stdlib/time_test.koda
 let start = time();
 sleep(100);
 let end = time();
 assert(end - start >= 0.1, "Sleep failed");
 
-// tests/stdlib/random_test.fuji
+// tests/stdlib/random_test.koda
 randomSeed(12345);
 let a = random();
 randomSeed(12345);
 let b = random();
 assert(a == b, "Seed failed");
 
-// tests/stdlib/math_test.fuji
+// tests/stdlib/math_test.koda
 assert(abs(-5) == 5);
 assert(clamp(15, 0, 10) == 10);
 assert(distance(0, 0, 3, 4) == 5);

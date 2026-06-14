@@ -9,7 +9,7 @@ import (
 
 func TestDiagnoseValidProgram(t *testing.T) {
 	dir := t.TempDir()
-	p := filepath.Join(dir, "ok.fuji")
+	p := filepath.Join(dir, "ok.koda")
 	src := "let x = 1;\nprint(x);\n"
 	if err := os.WriteFile(p, []byte(src), 0o644); err != nil {
 		t.Fatal(err)
@@ -22,7 +22,7 @@ func TestDiagnoseValidProgram(t *testing.T) {
 
 func TestDiagnoseTypoSuggestionHint(t *testing.T) {
 	dir := t.TempDir()
-	p := filepath.Join(dir, "typo.fuji")
+	p := filepath.Join(dir, "typo.koda")
 	src := "let drawRectangle = 1;\ndrawRectange;\n"
 	if err := os.WriteFile(p, []byte(src), 0o644); err != nil {
 		t.Fatal(err)
@@ -41,7 +41,7 @@ func TestDiagnoseTypoSuggestionHint(t *testing.T) {
 
 func TestDiagnoseSemaUndefined(t *testing.T) {
 	dir := t.TempDir()
-	p := filepath.Join(dir, "bad.fuji")
+	p := filepath.Join(dir, "bad.koda")
 	if err := os.WriteFile(p, []byte("notARealBinding;\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -57,7 +57,7 @@ func TestDiagnoseSemaUndefined(t *testing.T) {
 
 func TestDiagnoseOverlayReplacesOnDiskSource(t *testing.T) {
 	dir := t.TempDir()
-	p := filepath.Join(dir, "entry.fuji")
+	p := filepath.Join(dir, "entry.koda")
 	if err := os.WriteFile(p, []byte("brokenOnDisk;\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -70,7 +70,7 @@ func TestDiagnoseOverlayReplacesOnDiskSource(t *testing.T) {
 
 func TestDiagnoseCallArity(t *testing.T) {
 	dir := t.TempDir()
-	p := filepath.Join(dir, "arity.fuji")
+	p := filepath.Join(dir, "arity.koda")
 	src := "func f(a) { return a; }\nf(1, 2);\n"
 	if err := os.WriteFile(p, []byte(src), 0o644); err != nil {
 		t.Fatal(err)
@@ -86,7 +86,7 @@ func TestDiagnoseCallArity(t *testing.T) {
 
 func TestDiagnoseArgvMethodArity(t *testing.T) {
 	dir := t.TempDir()
-	p := filepath.Join(dir, "mArity.fuji")
+	p := filepath.Join(dir, "mArity.koda")
 	src := "func main() {\n\t\"x\".split();\n}\n"
 	if err := os.WriteFile(p, []byte(src), 0o644); err != nil {
 		t.Fatal(err)
@@ -103,7 +103,7 @@ func TestDiagnoseArgvMethodArity(t *testing.T) {
 
 func TestDiagnoseMultipleSemaErrorsAggregated(t *testing.T) {
 	dir := t.TempDir()
-	p := filepath.Join(dir, "multi.fuji")
+	p := filepath.Join(dir, "multi.koda")
 	src := "aaa;\nbbb;\n"
 	if err := os.WriteFile(p, []byte(src), 0o644); err != nil {
 		t.Fatal(err)

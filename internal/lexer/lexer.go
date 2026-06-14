@@ -131,9 +131,9 @@ func (l *Lexer) scanToken() error {
 			}
 			comment := string(l.source[start:l.current])
 			trim := strings.TrimLeft(comment, " \t")
-			if len(trim) >= 5 && strings.EqualFold(trim[:5], "fuji:") {
+			if len(trim) >= 5 && strings.EqualFold(trim[:5], "koda:") {
 				payload := strings.TrimSpace(trim[5:])
-				l.addTokenWithLexeme(TokenComment, "fuji:"+payload)
+				l.addTokenWithLexeme(TokenComment, "koda:"+payload)
 			}
 		} else if l.match('*') {
 			for !l.isAtEnd() {

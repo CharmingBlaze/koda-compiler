@@ -1,5 +1,5 @@
 param(
-    [string]$Source = "examples/games/brick_breaker_new.fuji",
+    [string]$Source = "examples/games/brick_breaker_new.koda",
     [string]$Output = "brick_breaker_new.exe"
 )
 
@@ -13,7 +13,7 @@ if (!(Test-Path $raylibDll)) {
     throw "raylib.dll not found at '$raylibDll'"
 }
 
-& ".\fuji.exe" build --no-opt $Source -o $Output
+& ".\koda.exe" build --no-opt $Source -o $Output
 if ($LASTEXITCODE -ne 0) {
     throw "Build failed for $Source"
 }

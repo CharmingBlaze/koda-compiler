@@ -1,0 +1,84 @@
+// Countdown timer — elapsed toward a duration (good for cutscenes, ability cooldown display).
+
+func create(duration) {
+    return { duration: duration, elapsed: 0.0, done: false };
+}
+
+func update(t, dt) {
+    if (t.done) {
+        return t;
+    }
+    t.elapsed = t.elapsed + dt;
+    if (t.elapsed >= t.duration) {
+        t.elapsed = t.duration;
+        t.done = true;
+    }
+    return t;
+}
+
+func done(t) {
+    return t.done;
+}
+
+func reset(t) {
+    t.elapsed = 0.0;
+    t.done = false;
+    return t;
+}
+
+func progress(t) {
+    if (t.duration <= 0.0) {
+        return 1.0;
+    }
+    return t.elapsed / t.duration;
+}
+
+func remaining(t) {
+    return t.duration - t.elapsed;
+}
+
+// One-shot cooldown using programTime() — returns true once per interval when you call try().
+
+func cooldown(seconds) {
+    return { duration: seconds, next: programTime() };
+}
+
+func cooldown_try(c) {
+    let now = programTime();
+    if (now >= c.next) {
+        c.next = now + c.duration;
+        return true;
+    }
+    return false;
+}
+
+func cooldown_reset(c) {
+    c.next = programTime();
+    return c;
+}
+
+// Repeating interval — tick() returns true every `seconds`.
+
+func interval(seconds) {
+    return { interval: seconds, next: programTime() };
+}
+
+func interval_tick(t) {
+    let now = programTime();
+    if (now >= t.next) {
+        t.next = t.next + t.interval;
+        return true;
+    }
+    return false;
+}
+
+func interval_reset(t) {
+    t.next = programTime();
+    return t;
+}
+
+// Wait helper — sleep for milliseconds (wrapper around sleep builtin).
+
+func wait_ms(ms) {
+    sleep(ms);
+}

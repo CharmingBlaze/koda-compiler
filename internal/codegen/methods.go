@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"fuji/internal/parser"
+	"koda/internal/parser"
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
@@ -59,7 +59,7 @@ func (g *Generator) tryEmitMethodCall(member *parser.IndexExpr, recvVal value.Va
 		if len(call.Arguments) != 0 {
 			return nil, true, fmt.Errorf("length expects 0 arguments")
 		}
-		return g.block.NewCall(g.runtimeLen, g.emitAsFujiI64(recvVal)), true, nil
+		return g.block.NewCall(g.runtimeLen, g.emitAsKodaI64(recvVal)), true, nil
 
 	case "map":
 		return g.emitArrayMethodMap(recvVal, call.Arguments)
@@ -81,11 +81,29 @@ func (g *Generator) tryEmitNativeNamespaceCall(member *parser.IndexExpr, name st
 	if !ok {
 		return nil, false, nil
 	}
-	if strings.ToLower(id.Name.Lexeme) != "math" {
+	idName := strings.ToLower(id.Name.Lexeme)
+	var fn *ir.Func
+	switch idName {
+	case "math":
+		fn = g.mathNamespaceNative(name)
+	case "json":
+		fn = g.jsonNamespaceNative(name)
+	case "io":
+		fn = g.ioNamespaceNative(name)
+	default:
 		return nil, false, nil
 	}
-	fn := g.mathNamespaceNative(name)
 	if fn == nil || !isNativeArgvCallee(fn) {
+		if fn == nil {
+			return nil, false, nil
+		}
+		if len(fn.Params) == 1 && fn.Params[0].Typ.Equal(types.I64) && len(args) == 1 {
+			a0, err := g.emitExpr(args[0])
+			if err != nil {
+				return nil, true, err
+			}
+			return g.block.NewCall(fn, g.emitAsKodaI64(a0)), true, nil
+		}
 		return nil, false, nil
 	}
 	argv := make([]value.Value, 0, len(args))
@@ -133,6 +151,8 @@ func (g *Generator) mathNamespaceNative(name string) *ir.Func {
 		return g.runtimeLog
 	case "log10":
 		return g.runtimeLog10
+	case "log2":
+		return g.runtimeLog2
 	case "floor":
 		return g.runtimeFloor
 	case "ceil":
@@ -155,6 +175,12 @@ func (g *Generator) mathNamespaceNative(name string) *ir.Func {
 		return g.runtimeNormalize
 	case "hypot":
 		return g.runtimeHypot
+	case "sqrt":
+		return g.runtimeSqrt
+	case "cbrt":
+		return g.runtimeCbrt
+	case "abs":
+		return g.runtimeAbs
 	case "fmod":
 		return g.runtimeFmod
 	case "degrees":
@@ -167,6 +193,54 @@ func (g *Generator) mathNamespaceNative(name string) *ir.Func {
 		return g.runtimeApproach
 	case "smoothdamp":
 		return g.runtimeSmoothdamp
+	case "random":
+		return g.runtimeRandom
+	case "randomint":
+		return g.runtimeRandomInt
+	case "randomchoice":
+		return g.runtimeRandomChoice
+	case "randomseed":
+		return g.runtimeRandomSeed
+	case "randomrange":
+		return g.runtimeRandom
+	default:
+		return nil
+	}
+}
+
+func (g *Generator) jsonNamespaceNative(name string) *ir.Func {
+	switch name {
+	case "parse":
+		return g.runtimeJsonParse
+	case "stringify":
+		return g.runtimeToJSON
+	case "try_parse", "tryparse":
+		return g.runtimeJsonTryParse
+	default:
+		return nil
+	}
+}
+
+func (g *Generator) ioNamespaceNative(name string) *ir.Func {
+	switch name {
+	case "read":
+		return g.runtimeReadFile
+	case "write":
+		return g.runtimeWriteFile
+	case "append":
+		return g.runtimeAppendFile
+	case "exists":
+		return g.runtimeFileExists
+	case "remove":
+		return g.runtimeDeleteFile
+	case "isfile":
+		return g.runtimeIsFile
+	case "isdir":
+		return g.runtimeIsDir
+	case "size":
+		return g.runtimeFileSize
+	case "list":
+		return g.runtimeListDir
 	default:
 		return nil
 	}
@@ -175,7 +249,7 @@ func (g *Generator) mathNamespaceNative(name string) *ir.Func {
 func (g *Generator) emitStringMethod(name string, recv value.Value, args []parser.Expr) (value.Value, error) {
 	recvSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(recvSlot)
-	g.block.NewStore(g.emitAsFujiI64(recv), recvSlot)
+	g.block.NewStore(g.emitAsKodaI64(recv), recvSlot)
 	loadRecv := func() value.Value { return g.block.NewLoad(types.I64, recvSlot) }
 
 	switch name {
@@ -246,7 +320,7 @@ func (g *Generator) emitStringMethod(name string, recv value.Value, args []parse
 func (g *Generator) emitArrayOnlyMethod(name string, recv value.Value, args []parser.Expr) (value.Value, error) {
 	recvSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(recvSlot)
-	g.block.NewStore(g.emitAsFujiI64(recv), recvSlot)
+	g.block.NewStore(g.emitAsKodaI64(recv), recvSlot)
 	loadRecv := func() value.Value { return g.block.NewLoad(types.I64, recvSlot) }
 
 	switch name {
@@ -271,7 +345,7 @@ func (g *Generator) emitArrayOnlyMethod(name string, recv value.Value, args []pa
 		if err != nil {
 			return nil, err
 		}
-		g.block.NewCall(g.runtimeArrayPush, loadRecv(), g.emitAsFujiI64(a0))
+		g.block.NewCall(g.runtimeArrayPush, loadRecv(), g.emitAsKodaI64(a0))
 		return loadRecv(), nil
 	case "pop":
 		if len(args) != 0 {
@@ -297,7 +371,7 @@ func (g *Generator) emitSliceAmbiguous(recv value.Value, args []parser.Expr) (va
 	}
 	recvSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(recvSlot)
-	g.block.NewStore(g.emitAsFujiI64(recv), recvSlot)
+	g.block.NewStore(g.emitAsKodaI64(recv), recvSlot)
 	loadRecv := func() value.Value { return g.block.NewLoad(types.I64, recvSlot) }
 	return g.emitArgvNilTaggedFallback(g.emitArgvRuntime(g.runtimeArraySlice, []value.Value{loadRecv(), a0, a1}), func() value.Value {
 		return g.emitArgvRuntime(g.runtimeStringSlice, []value.Value{loadRecv(), a0, a1})
@@ -314,7 +388,7 @@ func (g *Generator) emitIndexOrIncludesAmbiguous(name string, recv value.Value, 
 	}
 	recvSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(recvSlot)
-	g.block.NewStore(g.emitAsFujiI64(recv), recvSlot)
+	g.block.NewStore(g.emitAsKodaI64(recv), recvSlot)
 	loadRecv := func() value.Value { return g.block.NewLoad(types.I64, recvSlot) }
 	argv := []value.Value{loadRecv(), a0}
 	switch name {
@@ -330,7 +404,7 @@ func (g *Generator) emitIndexOrIncludesAmbiguous(name string, recv value.Value, 
 			io := g.emitArgvRuntime(g.runtimeStringIndexOf, argv)
 			negOne := constant.NewFloat(types.Double, -1)
 			boxNeg := g.block.NewCall(g.runtimeBoxNumber, negOne)
-			cmp := g.block.NewFCmp(enum.FPredOGT, g.block.NewCall(g.runtimeUnboxNumber, g.emitAsFujiI64(io)), g.block.NewCall(g.runtimeUnboxNumber, boxNeg))
+			cmp := g.block.NewFCmp(enum.FPredOGT, g.block.NewCall(g.runtimeUnboxNumber, g.emitAsKodaI64(io)), g.block.NewCall(g.runtimeUnboxNumber, boxNeg))
 			return g.emitBoxBoolNaN(cmp)
 		}), nil
 	default:
@@ -342,7 +416,7 @@ func (g *Generator) emitIndexOrIncludesAmbiguous(name string, recv value.Value, 
 func (g *Generator) emitArgvNilTaggedFallback(primary value.Value, alt func() value.Value) value.Value {
 	entry := g.block
 	nilTag := constant.NewInt(types.I64, llvmNilTagged)
-	isNil := entry.NewICmp(enum.IPredEQ, g.emitAsFujiI64(primary), nilTag)
+	isNil := entry.NewICmp(enum.IPredEQ, g.emitAsKodaI64(primary), nilTag)
 
 	g.tempN++
 	suf := fmt.Sprintf(".nf%d", g.tempN)
@@ -367,8 +441,8 @@ func (g *Generator) emitArgvNilTaggedFallback(primary value.Value, alt func() va
 }
 
 func (g *Generator) emitArrayLenAsDouble(recv value.Value) value.Value {
-	lv := g.block.NewCall(g.runtimeLen, g.emitAsFujiI64(recv))
-	return g.block.NewCall(g.runtimeUnboxNumber, g.emitAsFujiI64(lv))
+	lv := g.block.NewCall(g.runtimeLen, g.emitAsKodaI64(recv))
+	return g.block.NewCall(g.runtimeUnboxNumber, g.emitAsKodaI64(lv))
 }
 
 func (g *Generator) emitArrayMethodMap(recv value.Value, args []parser.Expr) (value.Value, bool, error) {
@@ -377,7 +451,7 @@ func (g *Generator) emitArrayMethodMap(recv value.Value, args []parser.Expr) (va
 	}
 	recvSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(recvSlot)
-	g.block.NewStore(g.emitAsFujiI64(recv), recvSlot)
+	g.block.NewStore(g.emitAsKodaI64(recv), recvSlot)
 
 	fnVal, err := g.emitExpr(args[0])
 	if err != nil {
@@ -391,7 +465,7 @@ func (g *Generator) emitArrayMethodMap(recv value.Value, args []parser.Expr) (va
 	out := g.block.NewCall(g.runtimeAllocArray, capI)
 	outSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(outSlot)
-	g.block.NewStore(g.emitAsFujiI64(out), outSlot)
+	g.block.NewStore(g.emitAsKodaI64(out), outSlot)
 
 	g.tempN++
 	suf := fmt.Sprintf(".map%d", g.tempN)
@@ -411,10 +485,10 @@ func (g *Generator) emitArrayMethodMap(recv value.Value, args []parser.Expr) (va
 
 	g.block = body
 	idxBox := g.block.NewCall(g.runtimeBoxNumber, idxNow)
-	el := g.block.NewCall(g.runtimeArrayGet, recvLive, g.emitAsFujiI64(idxBox))
+	el := g.block.NewCall(g.runtimeArrayGet, recvLive, g.emitAsKodaI64(idxBox))
 	elSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(elSlot)
-	g.block.NewStore(g.emitAsFujiI64(el), elSlot)
+	g.block.NewStore(g.emitAsKodaI64(el), elSlot)
 	elLive := g.block.NewLoad(types.I64, elSlot)
 	mv, err := g.emitIndirectI64Callee(fnVal, nThis, []value.Value{elLive})
 	if err != nil {
@@ -422,7 +496,7 @@ func (g *Generator) emitArrayMethodMap(recv value.Value, args []parser.Expr) (va
 	}
 	idxInt := g.block.NewFPToSI(idxNow, types.I64)
 	outLive := g.block.NewLoad(types.I64, outSlot)
-	g.block.NewCall(g.runtimeArraySet, outLive, idxInt, g.emitAsFujiI64(mv))
+	g.block.NewCall(g.runtimeArraySet, outLive, idxInt, g.emitAsKodaI64(mv))
 	g.block.NewBr(step)
 
 	g.block = step
@@ -441,7 +515,7 @@ func (g *Generator) emitArrayMethodFilter(recv value.Value, args []parser.Expr) 
 	}
 	recvSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(recvSlot)
-	g.block.NewStore(g.emitAsFujiI64(recv), recvSlot)
+	g.block.NewStore(g.emitAsKodaI64(recv), recvSlot)
 
 	fnVal, err := g.emitExpr(args[0])
 	if err != nil {
@@ -450,7 +524,7 @@ func (g *Generator) emitArrayMethodFilter(recv value.Value, args []parser.Expr) 
 	out := g.block.NewCall(g.runtimeAllocArray, constant.NewInt(types.I32, 1))
 	outSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(outSlot)
-	g.block.NewStore(g.emitAsFujiI64(out), outSlot)
+	g.block.NewStore(g.emitAsKodaI64(out), outSlot)
 	nThis := constant.NewInt(types.I64, 0)
 
 	recvLive := g.block.NewLoad(types.I64, recvSlot)
@@ -476,10 +550,10 @@ func (g *Generator) emitArrayMethodFilter(recv value.Value, args []parser.Expr) 
 
 	g.block = body
 	idxBox := g.block.NewCall(g.runtimeBoxNumber, idxNow)
-	el := g.block.NewCall(g.runtimeArrayGet, recvLive, g.emitAsFujiI64(idxBox))
+	el := g.block.NewCall(g.runtimeArrayGet, recvLive, g.emitAsKodaI64(idxBox))
 	elSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(elSlot)
-	g.block.NewStore(g.emitAsFujiI64(el), elSlot)
+	g.block.NewStore(g.emitAsKodaI64(el), elSlot)
 	elLive := g.block.NewLoad(types.I64, elSlot)
 	predV, err := g.emitIndirectI64Callee(fnVal, nThis, []value.Value{elLive})
 	if err != nil {
@@ -513,7 +587,7 @@ func (g *Generator) emitArrayMethodFind(recv value.Value, args []parser.Expr) (v
 	}
 	recvSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(recvSlot)
-	g.block.NewStore(g.emitAsFujiI64(recv), recvSlot)
+	g.block.NewStore(g.emitAsKodaI64(recv), recvSlot)
 
 	fnVal, err := g.emitExpr(args[0])
 	if err != nil {
@@ -543,10 +617,10 @@ func (g *Generator) emitArrayMethodFind(recv value.Value, args []parser.Expr) (v
 
 	g.block = body
 	idxBox := g.block.NewCall(g.runtimeBoxNumber, idxNow)
-	el := g.block.NewCall(g.runtimeArrayGet, recvLive, g.emitAsFujiI64(idxBox))
+	el := g.block.NewCall(g.runtimeArrayGet, recvLive, g.emitAsKodaI64(idxBox))
 	elSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(elSlot)
-	g.block.NewStore(g.emitAsFujiI64(el), elSlot)
+	g.block.NewStore(g.emitAsKodaI64(el), elSlot)
 	elLive := g.block.NewLoad(types.I64, elSlot)
 	predV, err := g.emitIndirectI64Callee(fnVal, nThis, []value.Value{elLive})
 	if err != nil {
@@ -581,7 +655,7 @@ func (g *Generator) emitArrayMethodReduce(recv value.Value, args []parser.Expr) 
 	}
 	recvSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(recvSlot)
-	g.block.NewStore(g.emitAsFujiI64(recv), recvSlot)
+	g.block.NewStore(g.emitAsKodaI64(recv), recvSlot)
 
 	fnVal, err := g.emitExpr(args[0])
 	if err != nil {
@@ -611,7 +685,7 @@ func (g *Generator) emitArrayMethodReduce(recv value.Value, args []parser.Expr) 
 		if err != nil {
 			return nil, true, err
 		}
-		emptyOut = g.emitAsFujiI64(initV)
+		emptyOut = g.emitAsKodaI64(initV)
 	}
 	emptyB.NewBr(mergeFinal)
 
@@ -620,10 +694,10 @@ func (g *Generator) emitArrayMethodReduce(recv value.Value, args []parser.Expr) 
 	var startIdx value.Value
 	if len(args) == 1 {
 		zBox := g.block.NewCall(g.runtimeBoxNumber, zero)
-		firstEl := g.block.NewCall(g.runtimeArrayGet, recvLive, g.emitAsFujiI64(zBox))
+		firstEl := g.block.NewCall(g.runtimeArrayGet, recvLive, g.emitAsKodaI64(zBox))
 		accSlot = g.entryAlloca(types.I64)
 		g.shadowStoreTemp(accSlot)
-		g.block.NewStore(g.emitAsFujiI64(firstEl), accSlot)
+		g.block.NewStore(g.emitAsKodaI64(firstEl), accSlot)
 		startIdx = constant.NewFloat(types.Double, 1)
 	} else {
 		initV, err := g.emitExpr(args[1])
@@ -632,7 +706,7 @@ func (g *Generator) emitArrayMethodReduce(recv value.Value, args []parser.Expr) 
 		}
 		accSlot = g.entryAlloca(types.I64)
 		g.shadowStoreTemp(accSlot)
-		g.block.NewStore(g.emitAsFujiI64(initV), accSlot)
+		g.block.NewStore(g.emitAsKodaI64(initV), accSlot)
 		startIdx = zero
 	}
 
@@ -652,17 +726,17 @@ func (g *Generator) emitArrayMethodReduce(recv value.Value, args []parser.Expr) 
 
 	g.block = body
 	idxBox := g.block.NewCall(g.runtimeBoxNumber, idxNow)
-	el := g.block.NewCall(g.runtimeArrayGet, recvLive, g.emitAsFujiI64(idxBox))
+	el := g.block.NewCall(g.runtimeArrayGet, recvLive, g.emitAsKodaI64(idxBox))
 	elSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(elSlot)
-	g.block.NewStore(g.emitAsFujiI64(el), elSlot)
+	g.block.NewStore(g.emitAsKodaI64(el), elSlot)
 	elLive := g.block.NewLoad(types.I64, elSlot)
 	accLoad := g.block.NewLoad(types.I64, accSlot)
 	rv, err := g.emitIndirectI64Callee(fnVal, nThis, []value.Value{accLoad, elLive})
 	if err != nil {
 		return nil, true, err
 	}
-	g.block.NewStore(g.emitAsFujiI64(rv), accSlot)
+	g.block.NewStore(g.emitAsKodaI64(rv), accSlot)
 	g.block.NewBr(step)
 
 	g.block = step

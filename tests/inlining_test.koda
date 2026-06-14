@@ -1,0 +1,27 @@
+print("Testing Function Inlining...");
+
+func add(x, y) {
+    return x + y;
+}
+
+func square(n) {
+    return n * n;
+}
+
+func greet(name) {
+    print("Hello, " + name);
+}
+
+let a = 10;
+
+let b = 20;
+
+let c = add(a, b);
+
+print("10 + 20 = " + c);
+
+let d = square(5);
+
+print("5 squared = " + d);
+greet("Koda");
+print("Inlining tests done.");

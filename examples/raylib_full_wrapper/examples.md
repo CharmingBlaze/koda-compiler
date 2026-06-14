@@ -4,7 +4,7 @@ This document provides examples of how to use the raylib wrapper.
 
 ## Basic Usage
 
-```fuji
+```koda
 import "raylib"
 
 // Example: void
@@ -15,14 +15,14 @@ print("Result: " + result);
 
 ## Working with Structs
 
-```fuji
+```koda
 // Example with Vector2
 // Note: Struct handling depends on the wrapper implementation
 ```
 
 ## Using Enums
 
-```fuji
+```koda
 // Example with bool enum
 let value = bool_false;
 let value = bool_true;

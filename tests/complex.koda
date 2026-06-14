@@ -1,0 +1,9 @@
+let arr = [1, 2, 3 + 4];
+
+print(arr);
+
+let obj = { name: "Koda", version: 1.0 };
+
+print(obj);
+print("Modulo 10 % 3 =");
+print(10 % 3);

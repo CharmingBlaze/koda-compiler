@@ -1,12 +1,12 @@
-﻿param(
-    [string]$OutputDir = "dist\fuji-mario64-offline"
+param(
+    [string]$OutputDir = "dist\koda-mario64-offline"
 )
 
 $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Set-Location $repoRoot
 
-Write-Host "Preparing offline Fuji + Raylib + Mario64 package..."
+Write-Host "Preparing offline Koda + Raylib + Mario64 package..."
 
 # 1) Build offline compiler/wrapper bundle.
 powershell -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "build-release.ps1")
@@ -36,9 +36,8 @@ New-Item -ItemType Directory -Force $binDir,$compilerDir,$raylibDir,$raylibLibDi
 
 # 3) Copy compiler + wrappers from offline bundle (see scripts/build-release.ps1 layout).
 $offlineBundle = Join-Path $repoRoot "dist\offline-release\bin"
-Copy-Item -Force (Join-Path $offlineBundle "fuji.exe") (Join-Path $compilerDir "fuji.exe")
-Copy-Item -Force (Join-Path $offlineBundle "fujiwrap.exe") (Join-Path $compilerDir "fujiwrap.exe")
-Copy-Item -Force (Join-Path $offlineBundle "kujiwrap.exe") (Join-Path $compilerDir "kujiwrap.exe")
+Copy-Item -Force (Join-Path $offlineBundle "koda.exe") (Join-Path $compilerDir "koda.exe")
+Copy-Item -Force (Join-Path $offlineBundle "kodawrap.exe") (Join-Path $compilerDir "kodawrap.exe")
 Copy-Item -Recurse -Force (Join-Path $offlineBundle "stdlib") (Join-Path $compilerDir "stdlib")
 if (Test-Path (Join-Path $offlineBundle "runtime")) {
     Copy-Item -Recurse -Force (Join-Path $offlineBundle "runtime") (Join-Path $compilerDir "runtime")
@@ -77,7 +76,7 @@ Copy-Item -Force (Join-Path $raylibRoot "include\rlgl.h") (Join-Path $raylibIncl
 
 # 5) Copy wrappers + game sources.
 Copy-Item -Recurse -Force (Join-Path $repoRoot "wrappers\raylib_shim") (Join-Path $wrappersDir "raylib_shim")
-Copy-Item -Force (Join-Path $repoRoot "examples\games\mario64_style.fuji") (Join-Path $examplesDir "mario64_style.fuji")
+Copy-Item -Force (Join-Path $repoRoot "examples\games\mario64_style.koda") (Join-Path $examplesDir "mario64_style.koda")
 
 # 6) Copy prebuilt game exe and launch script.
 Copy-Item -Force (Join-Path $repoRoot "mario64_style.exe") (Join-Path $binDir "mario64_style.exe")
@@ -95,9 +94,9 @@ $buildBat = @"
 @echo off
 setlocal
 set ROOT=%~dp0\..
-set FUJI_NATIVE_SOURCES=%ROOT%\wrappers\raylib_shim\wrapper.c
-set FUJI_LINKFLAGS=-I%ROOT%\raylib\include -L%ROOT%\raylib\lib -lraylib -lopengl32 -lgdi32 -lwinmm
-"%ROOT%\compiler\fuji.exe" build "%ROOT%\examples\games\mario64_style.fuji" -o "%ROOT%\bin\mario64_style.exe"
+set KODA_NATIVE_SOURCES=%ROOT%\wrappers\raylib_shim\wrapper.c
+set KODA_LINKFLAGS=-I%ROOT%\raylib\include -L%ROOT%\raylib\lib -lraylib -lopengl32 -lgdi32 -lwinmm
+"%ROOT%\compiler\koda.exe" build "%ROOT%\examples\games\mario64_style.koda" -o "%ROOT%\bin\mario64_style.exe"
 if errorlevel 1 exit /b 1
 copy /Y "%ROOT%\raylib\lib\raylib.dll" "%ROOT%\bin\raylib.dll" >nul
 echo Built %ROOT%\bin\mario64_style.exe
@@ -105,15 +104,15 @@ echo Built %ROOT%\bin\mario64_style.exe
 Set-Content -Path (Join-Path $scriptsDir "build-mario64.bat") -Value $buildBat -Encoding ASCII
 
 $readme = @"
-Fuji Mario64 Offline Package
+Koda Mario64 Offline Package
 ============================
 
 Everything needed is included in this folder:
-- compiler\fuji.exe
-- compiler\fujiwrap.exe / compiler\kujiwrap.exe
+- compiler\koda.exe
+- compiler\kodawrap.exe
 - raylib SDK files (include + static lib + raylib.dll)
 - wrappers\raylib_shim
-- examples\games\mario64_style.fuji
+- examples\games\mario64_style.koda
 - bin\mario64_style.exe (playable build)
 
 Play now:

@@ -1,3 +1,0 @@
-#include "tests/hello.fuji"
-
-print("import styles: OK");

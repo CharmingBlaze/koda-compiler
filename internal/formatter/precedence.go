@@ -1,7 +1,7 @@
 package formatter
 
 import (
-	"fuji/internal/lexer"
+	"koda/internal/lexer"
 )
 
 const (

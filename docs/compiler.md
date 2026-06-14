@@ -1,4 +1,4 @@
-Fuji Language - Complete Specification
+Koda Language - Complete Specification
 The Full Master Plan
 
 TABLE OF CONTENTS
@@ -28,7 +28,7 @@ Design Goals
 
 Simple - Learnable in a day
 Powerful - Access to entire C/C++ ecosystem
-Fast - Native compilation (LLVM IR + llc + Clang + `runtime/libfuji_runtime.a`)
+Fast - Native compilation (LLVM IR + llc + Clang + `runtime/libkoda_runtime.a`)
 Practical - Solves real problems
 Fun - Joy to write
 
@@ -60,7 +60,7 @@ javascript// Single-line comment
    Can span multiple lines
 */
 
-/// Documentation comment (for kujidoc tool)
+/// Documentation comment (for kodadoc tool)
 /// @param x The input value
 /// @returns The computed result
 func calculate(x) { ... }
@@ -295,8 +295,8 @@ func damage(amount) {
 }
 
 // Access from anywhere
-#include "other.fuji"
-// other.fuji can see 'health' and 'damage'
+#include "other.koda"
+// other.koda can see 'health' and 'damage'
 
 Functions
 Function Declaration
@@ -738,7 +738,7 @@ s.upper()               // "HELLO WORLD"
 s.lower()               // "hello world"
 s.trim()                // Remove whitespace
 s.split(" ")            // ["hello", "world"]
-s.replace("world", "kuji")  // "hello kuji"
+s.replace("world", "koda")  // "hello koda"
 s.starts_with("hello")  // true
 s.ends_with("world")    // true
 s.contains("lo")        // true
@@ -817,20 +817,20 @@ let difference = a.difference(b);   // [1]
 
 Module System
 File Inclusion
-javascript// Include another Fuji file
-#include "player.fuji"
-#include "enemy.fuji"
-#include "utils.fuji"
+javascript// Include another Koda file
+#include "player.koda"
+#include "enemy.koda"
+#include "utils.koda"
 
 // Include from subdirectory
-#include "libs/json.fuji"
-#include "game/entities/boss.fuji"
+#include "libs/json.koda"
+#include "game/entities/boss.koda"
 
-// Include system library (from FUJI_PATH)
+// Include system library (from KODA_PATH)
 #include <raylib>
 #include <sqlite>
 Module Structure
-File: math_utils.fuji
+File: math_utils.koda
 javascript// All top-level declarations are exported
 
 func square(x) {
@@ -847,65 +847,65 @@ let PI = 3.14159;
 func _helper(x) {
     return x * 2;
 }
-File: main.fuji
-javascript#include "math_utils.fuji"
+File: main.koda
+javascript#include "math_utils.koda"
 
 print(math_utils.square(5));     // 25
 print(math_utils.PI);             // 3.14159
 // print(math_utils._helper(5));  // Error: private
 Namespace Control
 javascript// Import with custom namespace
-#include "math_utils.fuji" as math
+#include "math_utils.koda" as math
 
 print(math.square(5));
 
 // Import specific symbols into current scope
-#include "math_utils.fuji" {square, cube}
+#include "math_utils.koda" {square, cube}
 
 print(square(5));        // No prefix needed
 print(cube(3));          // No prefix needed
 
 // Import all into current scope (use sparingly)
-#include "math_utils.fuji" *
+#include "math_utils.koda" *
 
 print(square(5));
 print(PI);
 Module Resolution
 Search order:
 1. Relative to current file
-   #include "utils.fuji"  → ./utils.fuji
+   #include "utils.koda"  → ./utils.koda
 
 2. Relative with path
-   #include "libs/json.fuji"  → ./libs/json.fuji
+   #include "libs/json.koda"  → ./libs/json.koda
 
-3. System libraries (FUJI_PATH environment variable)
-   #include <raylib>  → $FUJI_PATH/raylib/raylib.fuji
+3. System libraries (KODA_PATH environment variable)
+   #include <raylib>  → $KODA_PATH/raylib/raylib.koda
    
 4. Standard library (built-in)
    #include <math>    → Built-in math module
 Circular Dependencies
-javascript// a.fuji
-#include "b.fuji"
+javascript// a.koda
+#include "b.koda"
 func a_func() { b.b_func(); }
 
-// b.fuji
-#include "a.fuji"
+// b.koda
+#include "a.koda"
 func b_func() { a.a_func(); }
 
-// Error: Circular dependency detected: a.fuji <-> b.fuji
+// Error: Circular dependency detected: a.koda <-> b.koda
 Solution: Introduce third file
-javascript// shared.fuji
+javascript// shared.koda
 func shared_func() { ... }
 
-// a.fuji
-#include "shared.fuji"
+// a.koda
+#include "shared.koda"
 func a_func() { shared.shared_func(); }
 
-// b.fuji
-#include "shared.fuji"
+// b.koda
+#include "shared.koda"
 func b_func() { shared.shared_func(); }
 Module Initialization
-javascript// player.fuji
+javascript// player.koda
 print("Loading player module...");
 
 let player_count = 0;
@@ -915,8 +915,8 @@ func create_player(name) {
     return {name: name, id: player_count};
 }
 
-// main.fuji
-#include "player.fuji"  // Prints "Loading player module..."
+// main.koda
+#include "player.koda"  // Prints "Loading player module..."
 
 let p1 = player.create_player("Alice");
 let p2 = player.create_player("Bob");
@@ -934,7 +934,7 @@ javascript// Manual FFI declaration
 let result = sqrt(16);      // 4.0
 let power = pow(2, 8);      // 256.0
 Type Mapping
-Fuji TypeC TypeNotesnumberdoubleIEEE 754 doublestringchar*UTF-8, null-terminatedboolint0 or 1nullNULLNull pointerarrayvoid*Opaque array handleobjectvoid*Opaque object handlefunctionvoid*Function pointer wrapperptrvoid*Raw pointer
+Koda TypeC TypeNotesnumberdoubleIEEE 754 doublestringchar*UTF-8, null-terminatedboolint0 or 1nullNULLNull pointerarrayvoid*Opaque array handleobjectvoid*Opaque object handlefunctionvoid*Function pointer wrapperptrvoid*Raw pointer
 Struct Mapping
 c// C header: point.h
 typedef struct {
@@ -944,7 +944,7 @@ typedef struct {
 
 Point create_point(int x, int y);
 void print_point(Point p);
-javascript// Fuji wrapper (auto-generated by kujiwrap)
+javascript// Koda wrapper (auto-generated by kodawrap)
 #native "point"
 
 #ffi func create_point(number, number) -> object;
@@ -977,7 +977,7 @@ Callbacks
 javascript// C function that takes callback
 #ffi func iterate(array, function) -> void;
 
-// Fuji callback
+// Koda callback
 let my_callback = func(item) {
     print("Item:", item);
 };
@@ -1376,7 +1376,7 @@ assert(x > 0, "x must be positive");
 assert(items.length() > 0);
 
 // Disabled in release builds
-// fuji build --release (asserts removed)
+// koda build --release (asserts removed)
 
 Memory Management
 Garbage Collection
@@ -1412,7 +1412,7 @@ with (let buffer = alloc(1024)) {
 
 Compiler Architecture
 Frontend Pipeline
-Source Code (.fuji)
+Source Code (.koda)
     ↓
 ┌─────────────────────┐
 │   Lexer             │ - Tokenization
@@ -1465,7 +1465,7 @@ Optimized IR
 └─────────────────────┘
     ↓
 ┌─────────────────────┐
-│ LLVM llc + Clang    │ - .ll → .o + libfuji_runtime.a → native
+│ LLVM llc + Clang    │ - .ll → .o + libkoda_runtime.a → native
 └─────────────────────┘
     ↓
 Native Binary (AOT)
@@ -1602,67 +1602,67 @@ typedef enum {
 } ObjColor;
 
 Tooling Ecosystem
-Fuji Compiler (kuji)
+Koda Compiler (koda)
 bash# Run script in bytecode VM (fast iteration)
-fuji run script.fuji
+koda run script.koda
 
 # Build native binary (production)
-fuji build script.fuji -o program
+koda build script.koda -o program
 
 # Build with optimizations
-fuji build script.fuji -o program --release
+koda build script.koda -o program --release
 
 # Watch mode (auto-reload on change)
-kuji watch script.fuji
+koda watch script.koda
 
 # REPL
-kuji
+koda
 
 # Show bytecode
-kuji disasm script.fuji
+koda disasm script.koda
 
 # Format code
-kuji fmt script.fuji
+koda fmt script.koda
 
 # Check syntax without running
-kuji check script.fuji
-KujiWrap (kujiwrap)
+koda check script.koda
+Kodawrap (kodawrap)
 bash# Generate wrapper from C header
-kujiwrap header.h -o wrapper.fuji
+kodawrap header.h -o wrapper.koda
 
 # With config file
-kujiwrap --config kujiwrap.toml
+kodawrap --config kodawrap.toml
 
 # Multiple headers
-kujiwrap *.h -o library.fuji
+kodawrap *.h -o library.koda
 
 # With documentation
-kujiwrap --docs header.h -o wrapper.fuji
+kodawrap --docs header.h -o wrapper.koda
 
 # Generate markdown docs
-kujiwrap --markdown header.h
-Package Manager (kuji pkg)
+kodawrap --markdown header.h
+Package Manager (koda pkg)
 bash# Install package
-kuji pkg install raylib
-kuji pkg install sqlite
+koda pkg install raylib
+koda pkg install sqlite
 
 # Search packages
-kuji pkg search graphics
+koda pkg search graphics
 
 # List installed
-kuji pkg list
+koda pkg list
 
 # Update package
-kuji pkg update raylib
+koda pkg update raylib
 
 # Remove package
-kuji pkg remove raylib
+koda pkg remove raylib
 
 # Publish package
-kuji pkg publish
-Language Server (kuji-lsp)
+koda pkg publish
+Language Server (koda-lsp)
 bash# Start LSP server
-kuji-lsp
+koda-lsp
 
 # Features:
 # - Autocomplete
@@ -1671,12 +1671,12 @@ kuji-lsp
 # - Hover documentation
 # - Error diagnostics
 # - Code formatting
-Debugger (kuji-debug)
+Debugger (koda-debug)
 bash# Run with debugger
-kuji debug script.fuji
+koda debug script.koda
 
 # Commands:
-# break file.fuji:10    - Set breakpoint
+# break file.koda:10    - Set breakpoint
 # continue              - Continue execution
 # step                  - Step to next line
 # next                  - Step over function
@@ -1684,7 +1684,7 @@ kuji debug script.fuji
 # backtrace             - Show call stack
 # quit                  - Exit debugger
 Testing Framework
-javascript// test.fuji
+javascript// test.koda
 #include <test>
 
 test.describe("Math operations", func() {
@@ -1701,25 +1701,25 @@ test.describe("Math operations", func() {
 
 test.run();
 bash# Run tests
-kuji test test.fuji
+koda test test.koda
 
 # Run all tests in directory
-kuji test tests/
+koda test tests/
 
 # Watch mode
-kuji test --watch
+koda test --watch
 Profiler
 bash# Profile execution
-kuji profile script.fuji
+koda profile script.koda
 
 # Output:
 # Function         Calls    Time (ms)    % Total
 # main                 1      150.2      75.1%
 # update             100       30.5      15.3%
 # render             100       19.3       9.6%
-Documentation Generator (kujidoc)
+Documentation Generator (kodadoc)
 bash# Generate docs from source
-kujidoc src/ -o docs/
+kodadoc src/ -o docs/
 
 # Generates HTML documentation
 # with API reference
@@ -1866,21 +1866,21 @@ COMMENT          = "//" .* NEWLINE
 
 Implementation Status (this repository)
 
-This section describes the Go compiler/VM in this repo (`cmd/kuji`, `internal/kuji`, `internal/runtime`). It is the source of truth for what is implemented today. The **Implementation Roadmap** below remains a **target vision** for the language project as a whole.
+This section describes the Go compiler/VM in this repo (`cmd/koda`, `internal/parser`, `internal/runtime`). It is the source of truth for what is implemented today. The **Implementation Roadmap** below remains a **target vision** for the language project as a whole.
 
-**Distribution model:** Ship a **prebuilt `fuji` executable** (and optionally **kujiwrap** next to it). **`fuji run` / `check` / `disasm`** need no C toolchain. **`fuji build`** / **`fuji bundle`** emit **LLVM IR** (`.ll` via [llir/llvm](https://github.com/llir/llvm)), write **`.FUJI_build/`**, run **llc** to an object file, then drive **LLVM `clang`** to link **`runtime/libfuji_runtime.a`** and headers under **`runtime/src/`** — see [DISTRIBUTION_GUIDE.md](DISTRIBUTION_GUIDE.md), [HANDOFF.md](HANDOFF.md), **`FUJI_CLANG`**, **`CC`**, **`FUJI_USE_LLD`**. **`bundle`** writes a tidy folder + README for sharing with end users (no Go/Python on their side).
+**Distribution model:** Ship a **prebuilt `koda` executable** (and optionally **kodawrap** next to it). **`koda run` / `check` / `disasm`** need no C toolchain. **`koda build`** / **`koda bundle`** emit **LLVM IR** (`.ll` via [llir/llvm](https://github.com/llir/llvm)), write **`.KODA_build/`**, run **llc** to an object file, then drive **LLVM `clang`** to link **`runtime/libkoda_runtime.a`** and headers under **`runtime/src/`** — see [DISTRIBUTION_GUIDE.md](DISTRIBUTION_GUIDE.md), [HANDOFF.md](HANDOFF.md), **`KODA_CLANG`**, **`CC`**, **`KODA_USE_LLD`**. **`bundle`** writes a tidy folder + README for sharing with end users (no Go/Python on their side).
 
 **Tracking:** Use **[list.md](list.md)** in this repository as a checkbox audit vs the rest of this document.
 
 Implemented (high level)
 
-- Lexer, parser, AST, bytecode compiler + stack VM with GC (`internal/kuji`).
-- CLI: `fuji run`, `check`, `disasm`, `build`, **`bundle`**, **`help`**, **`version`**, **`wrap`** (forwards to **kujiwrap** if present beside `fuji`) — [cmd/kuji/main.go](cmd/kuji/main.go).
-- **kujiwrap** (sources under **`cmd/wrapgen`**, same Go module): `go build -o kujiwrap ./cmd/wrapgen` generates readable `.fuji` + `wrapper.c` + Markdown from C headers.
-- **C interop today:** `// fuji:extern` lines parsed in [internal/kuji/native_emit.go](internal/kuji/native_emit.go), not `#native` / `#ffi` tokens from the grammar below.
-- Modules: `import "path"` expression form, `import("@scope/...")`, and `#include "path"` / `#include <name>` ([internal/kuji/loader.go](internal/kuji/loader.go)). Optional `#include` forms `as`, `{names}`, `*` from the grammar are **not** implemented.
-- Core language: control flow (`if`, `while`, `for`, `for (let x in/of …)`, `do`/`while`, `switch` with **C-style fall-through** — use `break` to stop; bytecode VM, tree runtime, and LLVM backend match), operators including bitwise/shift/`===`/`!==`, ternary, objects/arrays, closures, template literals, raw strings, numeric radix forms, `...rest` / defaults (see tests and [FUJI_PROGRAMMER_REFERENCE.md](FUJI_PROGRAMMER_REFERENCE.md)).
-- Builtins: `type`, conversions, `is_*` predicates, core math/time/file helpers per [internal/kuji/native.go](internal/kuji/native.go).
+- Lexer, parser, AST, bytecode compiler + stack VM with GC (`internal/parser`).
+- CLI: `koda run`, `check`, `disasm`, `build`, **`bundle`**, **`help`**, **`version`**, **`wrap`** (forwards to **kodawrap** if present beside `koda`) — [cmd/koda/main.go](cmd/koda/main.go).
+- **kodawrap** (sources under **`cmd/wrapgen`**, same Go module): `go build -o kodawrap ./cmd/wrapgen` generates readable `.koda` + `wrapper.c` + Markdown from C headers.
+- **C interop today:** `// koda:extern` lines parsed in [internal/codegen.go](internal/codegen.go), not `#native` / `#ffi` tokens from the grammar below.
+- Modules: `import "path"` expression form, `import("@scope/...")`, and `#include "path"` / `#include <name>` ([internal/parser/loader.go](internal/parser/loader.go)). Optional `#include` forms `as`, `{names}`, `*` from the grammar are **not** implemented.
+- Core language: control flow (`if`, `while`, `for`, `for (let x in/of …)`, `do`/`while`, `switch` with **C-style fall-through** — use `break` to stop; bytecode VM, tree runtime, and LLVM backend match), operators including bitwise/shift/`===`/`!==`, ternary, objects/arrays, closures, template literals, raw strings, numeric radix forms, `...rest` / defaults (see tests and [KODA_PROGRAMMER_REFERENCE.md](KODA_PROGRAMMER_REFERENCE.md)).
+- Builtins: `type`, conversions, `is_*` predicates, core math/time/file helpers per [internal/sema.go](internal/sema.go).
 
 Release-safe additions implemented after release hardening
 
@@ -1888,13 +1888,13 @@ Release-safe additions implemented after release hardening
 - `@math` includes `cbrt`, `inf`, `nan`, `random`, `randomRange`, and `randomInt` in addition to the existing trig/log/rounding helpers.
 - `@io` includes safe metadata helpers: `isFile(path)`, `isDir(path)`, `size(path)`, and `list(path)`.
 - `json.stringify(value, indent)` supports pretty JSON indentation; `json.try_parse(text)` returns `{error, value}` without throwing.
-- `kuji disasm <file.fuji>` exists for bytecode inspection.
+- `koda disasm <file.koda>` exists for bytecode inspection.
 - Current native/LLVM backend release gate supports core/native-lowered language features. Imported stdlib module objects are primarily VM-supported until module-object lowering is expanded in LLVM.
 Not implemented yet (defer)
 
-- **`#native` / `#ffi`** as first-class syntax (use **wrapgen** + `// fuji:extern` + `wrapper.c` instead).
+- **`#native` / `#ffi`** as first-class syntax (use **wrapgen** + `// koda:extern` + `wrapper.c` instead).
 - **Rich stdlib remaining work:** `@math`, `@json`, `@io`, `@str`, `@array`, `os`, and `path` exist with production-tested core coverage. Larger modules from the vision spec (HTTP, regex, full object/file/string/array APIs, package registry integration) remain deferred.
-- **Tooling**: no REPL, `kuji fmt`, `kuji test`, LSP, package registry, debugger, or profiler in this repo.
+- **Tooling**: no REPL, `koda fmt`, `koda test`, LSP, package registry, debugger, or profiler in this repo.
 - **Grammar gaps vs spec examples:** arrow-function expressions, `for (let a, b in x)` two-variable forms, `switch`/`if` as value expressions, object shorthand/computed keys, many array/string conveniences from the spec — see [list.md](list.md).
 
 Implementation Roadmap (target vision)
@@ -1922,14 +1922,14 @@ Month 3: Language Features
 - Control flow
 - String operations
 
-Deliverable: fuji run command works, can run basic programs
+Deliverable: koda run command works, can run basic programs
 
 Phase 2: Native Compilation (2 months)
 Month 4: LLVM IR + runtime
 
 - LLVM IR emission (llir) for user code
 - Embedded C runtime ([internal/runtime/data](internal/runtime/data)) linked by **LLVM clang**
-- Optional **LLD** via **`FUJI_USE_LLD=1`** (`-fuse-ld=lld`); driver selection via **`FUJI_CLANG`** / **`CC`**
+- Optional **LLD** via **`KODA_USE_LLD=1`** (`-fuse-ld=lld`); driver selection via **`KODA_CLANG`** / **`CC`**
 
 Month 5: Optimization
 
@@ -1938,7 +1938,7 @@ Month 5: Optimization
 - Function inlining
 - Build system
 
-Deliverable: fuji build command works, produces native binaries
+Deliverable: koda build command works, produces native binaries
 
 Phase 3: Module System (1 month)
 Month 6: Includes & Packages
@@ -1950,7 +1950,7 @@ Month 6: Includes & Packages
 
 Deliverable: Can split code into modules
 
-Phase 4: C Interop — **partially delivered**: `// fuji:extern` + **wrapgen** (`cmd/wrapgen`); `#native` / `#ffi` syntax still deferred. See Implementation Status above and [list.md](list.md).
+Phase 4: C Interop — **partially delivered**: `// koda:extern` + **wrapgen** (`cmd/wrapgen`); `#native` / `#ffi` syntax still deferred. See Implementation Status above and [list.md](list.md).
 Month 7: FFI Foundation
 
 - #native directive
@@ -1958,7 +1958,7 @@ Month 7: FFI Foundation
 - Type marshalling
 - Callback support
 
-Month 8: KujiWrap Tool
+Month 8: Kodawrap Tool
 
 - libclang integration
 - Header parsing
@@ -2036,13 +2036,13 @@ User Experience
 - Learn basics in <1 day
 - Zero-config setup
 - Fast edit-run cycle (<1s)
-- Access to 100+ C libraries via KujiWrap
+- Access to 100+ C libraries via Kodawrap
 - Active community
 
 
 Competitive Positioning
-FeatureKujiLuaPythonJavaScriptEase of Learning⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐Speed (VM)⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐Speed (Native)⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐C Interop⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐Auto C Wrapping⭐⭐⭐⭐⭐⭐⭐⭐⭐Zero Config⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐Modern Syntax⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
-Fuji's Unique Value: JavaScript-easy syntax + C-level speed + effortless C library access
+FeatureKodaLuaPythonJavaScriptEase of Learning⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐Speed (VM)⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐Speed (Native)⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐C Interop⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐Auto C Wrapping⭐⭐⭐⭐⭐⭐⭐⭐⭐Zero Config⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐Modern Syntax⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
+Koda's Unique Value: JavaScript-easy syntax + C-level speed + effortless C library access
 
 Example Projects
 1. Game Engine
@@ -2065,7 +2065,7 @@ javascript#include <http>
 func handle_request(req) {
     return {
         status: 200,
-        body: "Hello from Fuji!"
+        body: "Hello from Koda!"
     };
 }
 
@@ -2079,7 +2079,7 @@ let processed = data.map((item) => transform(item));
 file.write("output.json", json.stringify(processed));
 
 Community & Ecosystem
-Website: kuji-lang.org
+Website: github.com/CharmingBlaze/koda-compiler
 
 Documentation
 Tutorial
@@ -2087,7 +2087,7 @@ Playground (WASM)
 Package registry
 Blog
 
-GitHub: github.com/kuji-lang
+GitHub: github.com/CharmingBlaze/koda-compiler
 
 Compiler source
 Standard library
@@ -2110,14 +2110,14 @@ Download statistics
 
 Marketing Tagline
 
-Fuji: Fortune Favors the Bold
+Koda: Fortune Favors the Bold
 Draw your ideas into code.
 JavaScript-easy syntax.
 C-powered performance.
 Effortless C library access.
-One command to rule them all: kuji
+One command to rule them all: koda
 
-bashcurl kuji-lang.org/install | sh
-echo 'print("Hello, World!")' > hello.fuji
-fuji run hello.fuji
+bashcurl github.com/CharmingBlaze/koda-compiler/install | sh
+echo 'print("Hello, World!")' > hello.koda
+koda run hello.koda
 Write it. Draw it. Ship it. 🎴

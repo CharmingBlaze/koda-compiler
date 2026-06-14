@@ -1,0 +1,252 @@
+#include "../../wrappers/raylib_shim/raylib.koda"
+
+let black = 0x000000FF;
+
+let white = 0xFFFFFFFF;
+
+let red = 0xFF0000FF;
+
+let green = 0x00FF00FF;
+
+let blue = 0x0000FFFF;
+
+let yellow = 0xFFFF00FF;
+
+let orange = 0xFFA500FF;
+
+let purple = 0x800080FF;
+
+let gray = 0x808080FF;
+
+let key_left = 263;
+
+let key_right = 262;
+
+let key_space = 32;
+
+let key_r = 82;
+
+let screen_width = 800;
+
+let screen_height = 600;
+
+let paddle_width = 100;
+
+let paddle_height = 15;
+
+let ball_radius = 8;
+
+let brick_width = 75;
+
+let brick_height = 20;
+
+let brick_rows = 5;
+
+let brick_cols = 10;
+
+let brick_padding = 4;
+
+let brick_offset_top = 60;
+
+let brick_offset_left = 35;
+
+let paddlex = 350;
+
+let paddley = 565;
+
+let ballx = 400;
+
+let bally = 300;
+
+let ballspeedx = 5;
+
+let ballspeedy = -5;
+
+let ballactive = false;
+
+let bricks = [];
+
+let score = 0;
+
+let lives = 3;
+
+let gamestate = "START";
+
+let brickcolors = [red, orange, yellow, green, blue];
+
+func initbricks() {
+    bricks = [];
+    let row = 0;
+    while (row < brick_rows) {
+        let col = 0;
+        while (col < brick_cols) {
+            let brick = { x: col * (brick_width + brick_padding) + brick_offset_left, y: row * (brick_height + brick_padding) + brick_offset_top, color: brickcolors[row], destroyed: false };
+            bricks.push(brick);
+            col = col + 1;
+        }
+        row = row + 1;
+    }
+}
+
+func resetball() {
+    ballx = paddlex + paddle_width / 2;
+    bally = paddley - ball_radius - 2;
+    ballspeedx = 5;
+    ballspeedy = -5;
+    ballactive = false;
+}
+
+func checkballrectcollision(bx, by, br, rx, ry, rw, rh) {
+    let closestx = bx;
+    if (bx < rx) {
+        closestx = rx;
+    } else
+        if (bx > rx + rw) {
+            closestx = rx + rw;
+        }
+    let closesty = by;
+    if (by < ry) {
+        closesty = ry;
+    } else
+        if (by > ry + rh) {
+            closesty = ry + rh;
+        }
+    let dx = bx - closestx;
+    let dy = by - closesty;
+    let distsq = dx * dx + dy * dy;
+    return distsq < br * br;
+}
+
+func updategame() {
+    if (gamestate == "START") {
+        if (iskeypressed(key_space)) {
+            gamestate = "PLAYING";
+            ballactive = true;
+        }
+        return;
+    }
+    if (gamestate == "PLAYING") {
+        if (iskeydown(key_left) && paddlex > 0) {
+            paddlex = paddlex - 8;
+        }
+        if (iskeydown(key_right) && paddlex < screen_width - paddle_width) {
+            paddlex = paddlex + 8;
+        }
+        if (ballactive) {
+            ballx = ballx + ballspeedx;
+            bally = bally + ballspeedy;
+            if (ballx + ball_radius > screen_width || ballx - ball_radius < 0) {
+                ballspeedx = -ballspeedx;
+            }
+            if (bally - ball_radius < 0) {
+                ballspeedy = -ballspeedy;
+            }
+            if (bally - ball_radius > screen_height) {
+                lives = lives - 1;
+                if (lives <= 0) {
+                    gamestate = "GAME_OVER";
+                } else {
+                    resetball();
+                }
+            }
+            if (ballspeedy > 0 && checkballrectcollision(ballx, bally, ball_radius, paddlex, paddley, paddle_width, paddle_height)) {
+                ballspeedy = -ballspeedy;
+                let hitpos = (ballx - paddlex) / paddle_width;
+                ballspeedx = 10 * (hitpos - 0.5);
+            }
+            let i = 0;
+            while (i < len(bricks)) {
+                let brick = bricks[i];
+                if (!brick.destroyed && checkballrectcollision(ballx, bally, ball_radius, brick.x, brick.y, brick_width, brick_height)) {
+                    brick.destroyed = true;
+                    ballspeedy = -ballspeedy;
+                    score = score + 10;
+                    let alldestroyed = true;
+                    let j = 0;
+                    while (j < len(bricks)) {
+                        if (!bricks[j].destroyed) {
+                            alldestroyed = false;
+                            break;
+                        }
+                        j = j + 1;
+                    }
+                    if (alldestroyed) {
+                        gamestate = "WIN";
+                    }
+                    break;
+                }
+                i = i + 1;
+            }
+        }
+        if (iskeypressed(key_space)) {
+            gamestate = "PAUSED";
+        }
+    } else
+        if (gamestate == "PAUSED") {
+            if (iskeypressed(key_space)) {
+                gamestate = "PLAYING";
+            }
+        } else
+            if (gamestate == "GAME_OVER" || gamestate == "WIN") {
+                if (iskeypressed(key_r)) {
+                    score = 0;
+                    lives = 3;
+                    gamestate = "START";
+                    initbricks();
+                    paddlex = 350;
+                    resetball();
+                }
+            }
+}
+
+func drawgame() {
+    begindrawing();
+    clearbackground(black);
+    if (gamestate == "START") {
+        drawtext("KODA BRICK BREAKER", 220, 150, 40, white);
+        drawtext("Press SPACE to start", 280, 250, 20, white);
+        drawtext("Use LEFT/RIGHT arrows to move", 240, 300, 20, white);
+    }
+    if (gamestate == "PLAYING" || gamestate == "PAUSED") {
+        let i = 0;
+        while (i < len(bricks)) {
+            let brick = bricks[i];
+            if (!brick.destroyed) {
+                drawrectangle(brick.x, brick.y, brick_width, brick_height, brick.color);
+            }
+            i = i + 1;
+        }
+        drawrectangle(paddlex, paddley, paddle_width, paddle_height, white);
+        drawcircle(ballx, bally, ball_radius, white);
+        drawtext("Score: " + score, 10, 10, 20, white);
+        drawtext("Lives: " + lives, 10, 35, 20, white);
+        if (gamestate == "PAUSED") {
+            drawtext("PAUSED", 350, 300, 30, yellow);
+        }
+    }
+    if (gamestate == "GAME_OVER") {
+        drawtext("GAME OVER", 310, 250, 40, red);
+        drawtext("Score: " + score, 350, 310, 20, white);
+        drawtext("Press R to restart", 320, 350, 20, white);
+    }
+    if (gamestate == "WIN") {
+        drawtext("YOU WIN!", 330, 250, 40, green);
+        drawtext("Score: " + score, 350, 310, 20, white);
+        drawtext("Press R to restart", 320, 350, 20, white);
+    }
+    enddrawing();
+}
+
+func main() {
+    initwindow(screen_width, screen_height, "Koda Production Brick Breaker");
+    settargetfps(60);
+    initbricks();
+    resetball();
+    while (!windowshouldclose()) {
+        updategame();
+        drawgame();
+    }
+    closewindow();
+}
+
+main();

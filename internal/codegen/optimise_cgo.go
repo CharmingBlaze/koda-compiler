@@ -23,7 +23,7 @@ func OptimiseIR(irText string) (string, error) {
 	ctx := tgllvm.NewContext()
 	defer ctx.Dispose()
 
-	f, err := os.CreateTemp("", "fuji-opt-*.ll")
+	f, err := os.CreateTemp("", "koda-opt-*.ll")
 	if err != nil {
 		return irText, fmt.Errorf("temp ir file: %w", err)
 	}

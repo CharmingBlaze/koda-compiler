@@ -1,8 +1,8 @@
-# Build runtime/libfuji_runtime.a (MinGW or MSVC-style gcc + ar on PATH).
+# Build runtime/libkoda_runtime.a (MinGW or MSVC-style gcc + ar on PATH).
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $src = Join-Path $root "runtime\src"
-$outLib = Join-Path $root "runtime\libfuji_runtime.a"
+$outLib = Join-Path $root "runtime\libkoda_runtime.a"
 $objDir = Join-Path $root "runtime\obj_win"
 
 New-Item -ItemType Directory -Force -Path $objDir | Out-Null
@@ -12,7 +12,7 @@ if (-not $cc) { $cc = "gcc" }
 $ar = $env:AR
 if (-not $ar) { $ar = "ar" }
 
-$sources = @("value.c", "object.c", "gc.c", "fuji_runtime.c")
+$sources = @("value.c", "object.c", "gc.c", "koda_runtime.c")
 $objs = @()
 foreach ($s in $sources) {
     $objName = [System.IO.Path]::ChangeExtension($s, "o")

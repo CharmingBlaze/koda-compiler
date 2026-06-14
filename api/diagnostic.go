@@ -1,6 +1,6 @@
 package api
 
-// Diagnostic is a single editor / LSP-style diagnostic for a .fuji file.
+// Diagnostic is a single editor / LSP-style diagnostic for a .koda file.
 type Diagnostic struct {
 	Path     string `json:"path"`
 	Line     int    `json:"line"`

@@ -6,8 +6,8 @@ import (
 	"os"
 	"reflect"
 
-	"fuji/internal/diagnostic"
-	"fuji/internal/parser"
+	"koda/internal/diagnostic"
+	"koda/internal/parser"
 )
 
 // ParamCellKey identifies a function parameter for escape-driven heap-cell lowering.

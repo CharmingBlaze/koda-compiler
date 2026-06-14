@@ -7,7 +7,7 @@
 
 static void validate_value_slot_count(int n, const char* ctx) {
     if (n < 0 || (sizeof(Value) > 0 && (size_t)n > SIZE_MAX / sizeof(Value))) {
-        fprintf(stderr, "fuji: %s capacity overflow: %d\n", ctx, n);
+        fprintf(stderr, "koda: %s capacity overflow: %d\n", ctx, n);
         exit(1);
     }
 }

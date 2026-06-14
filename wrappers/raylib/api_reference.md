@@ -17,9 +17,9 @@
 typedef void()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = void();
 ```
 
@@ -31,9 +31,9 @@ let result = void();
 typedef bool()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = bool();
 ```
 
@@ -45,9 +45,9 @@ let result = bool();
 typedef bool()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = bool();
 ```
 
@@ -59,9 +59,9 @@ let result = bool();
 void InitWindow(int width, int height, const char* title)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 InitWindow(width, height, title);
 ```
 
@@ -79,9 +79,9 @@ InitWindow(width, height, title);
 void CloseWindow()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 CloseWindow();
 ```
 
@@ -93,9 +93,9 @@ CloseWindow();
 bool WindowShouldClose()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = WindowShouldClose();
 ```
 
@@ -107,9 +107,9 @@ let result = WindowShouldClose();
 bool IsWindowReady()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsWindowReady();
 ```
 
@@ -121,9 +121,9 @@ let result = IsWindowReady();
 bool IsWindowFullscreen()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsWindowFullscreen();
 ```
 
@@ -135,9 +135,9 @@ let result = IsWindowFullscreen();
 bool IsWindowHidden()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsWindowHidden();
 ```
 
@@ -149,9 +149,9 @@ let result = IsWindowHidden();
 bool IsWindowMinimized()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsWindowMinimized();
 ```
 
@@ -163,9 +163,9 @@ let result = IsWindowMinimized();
 bool IsWindowMaximized()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsWindowMaximized();
 ```
 
@@ -177,9 +177,9 @@ let result = IsWindowMaximized();
 bool IsWindowFocused()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsWindowFocused();
 ```
 
@@ -191,9 +191,9 @@ let result = IsWindowFocused();
 bool IsWindowResized()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsWindowResized();
 ```
 
@@ -205,9 +205,9 @@ let result = IsWindowResized();
 bool IsWindowState(unsigned int flag)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsWindowState(flag);
 ```
 
@@ -223,9 +223,9 @@ let result = IsWindowState(flag);
 void SetWindowState(unsigned int flags)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetWindowState(flags);
 ```
 
@@ -241,9 +241,9 @@ SetWindowState(flags);
 void ClearWindowState(unsigned int flags)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ClearWindowState(flags);
 ```
 
@@ -259,9 +259,9 @@ ClearWindowState(flags);
 void ToggleFullscreen()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ToggleFullscreen();
 ```
 
@@ -273,9 +273,9 @@ ToggleFullscreen();
 void ToggleBorderlessWindowed()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ToggleBorderlessWindowed();
 ```
 
@@ -287,9 +287,9 @@ ToggleBorderlessWindowed();
 void MaximizeWindow()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 MaximizeWindow();
 ```
 
@@ -301,9 +301,9 @@ MaximizeWindow();
 void MinimizeWindow()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 MinimizeWindow();
 ```
 
@@ -315,9 +315,9 @@ MinimizeWindow();
 void RestoreWindow()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 RestoreWindow();
 ```
 
@@ -329,9 +329,9 @@ RestoreWindow();
 void SetWindowIcon(Image image)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetWindowIcon(image);
 ```
 
@@ -347,9 +347,9 @@ SetWindowIcon(image);
 void SetWindowIcons(Image* images, int count)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetWindowIcons(images, count);
 ```
 
@@ -366,9 +366,9 @@ SetWindowIcons(images, count);
 void SetWindowTitle(const char* title)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetWindowTitle(title);
 ```
 
@@ -384,9 +384,9 @@ SetWindowTitle(title);
 void SetWindowPosition(int x, int y)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetWindowPosition(x, y);
 ```
 
@@ -403,9 +403,9 @@ SetWindowPosition(x, y);
 void SetWindowMonitor(int monitor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetWindowMonitor(monitor);
 ```
 
@@ -421,9 +421,9 @@ SetWindowMonitor(monitor);
 void SetWindowMinSize(int width, int height)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetWindowMinSize(width, height);
 ```
 
@@ -440,9 +440,9 @@ SetWindowMinSize(width, height);
 void SetWindowMaxSize(int width, int height)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetWindowMaxSize(width, height);
 ```
 
@@ -459,9 +459,9 @@ SetWindowMaxSize(width, height);
 void SetWindowSize(int width, int height)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetWindowSize(width, height);
 ```
 
@@ -478,9 +478,9 @@ SetWindowSize(width, height);
 void SetWindowOpacity(float opacity)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetWindowOpacity(opacity);
 ```
 
@@ -496,9 +496,9 @@ SetWindowOpacity(opacity);
 void SetWindowFocused()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetWindowFocused();
 ```
 
@@ -510,9 +510,9 @@ SetWindowFocused();
 int GetScreenWidth()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetScreenWidth();
 ```
 
@@ -524,9 +524,9 @@ let result = GetScreenWidth();
 int GetScreenHeight()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetScreenHeight();
 ```
 
@@ -538,9 +538,9 @@ let result = GetScreenHeight();
 int GetRenderWidth()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetRenderWidth();
 ```
 
@@ -552,9 +552,9 @@ let result = GetRenderWidth();
 int GetRenderHeight()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetRenderHeight();
 ```
 
@@ -566,9 +566,9 @@ let result = GetRenderHeight();
 int GetMonitorCount()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMonitorCount();
 ```
 
@@ -580,9 +580,9 @@ let result = GetMonitorCount();
 int GetCurrentMonitor()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetCurrentMonitor();
 ```
 
@@ -594,9 +594,9 @@ let result = GetCurrentMonitor();
 Vector2 GetMonitorPosition(int monitor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMonitorPosition(monitor);
 ```
 
@@ -612,9 +612,9 @@ let result = GetMonitorPosition(monitor);
 int GetMonitorWidth(int monitor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMonitorWidth(monitor);
 ```
 
@@ -630,9 +630,9 @@ let result = GetMonitorWidth(monitor);
 int GetMonitorHeight(int monitor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMonitorHeight(monitor);
 ```
 
@@ -648,9 +648,9 @@ let result = GetMonitorHeight(monitor);
 int GetMonitorPhysicalWidth(int monitor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMonitorPhysicalWidth(monitor);
 ```
 
@@ -666,9 +666,9 @@ let result = GetMonitorPhysicalWidth(monitor);
 int GetMonitorPhysicalHeight(int monitor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMonitorPhysicalHeight(monitor);
 ```
 
@@ -684,9 +684,9 @@ let result = GetMonitorPhysicalHeight(monitor);
 int GetMonitorRefreshRate(int monitor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMonitorRefreshRate(monitor);
 ```
 
@@ -702,9 +702,9 @@ let result = GetMonitorRefreshRate(monitor);
 Vector2 GetWindowPosition()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetWindowPosition();
 ```
 
@@ -716,9 +716,9 @@ let result = GetWindowPosition();
 Vector2 GetWindowScaleDPI()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetWindowScaleDPI();
 ```
 
@@ -730,9 +730,9 @@ let result = GetWindowScaleDPI();
 void SetClipboardText(const char* text)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetClipboardText(text);
 ```
 
@@ -748,9 +748,9 @@ SetClipboardText(text);
 Image GetClipboardImage()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetClipboardImage();
 ```
 
@@ -762,9 +762,9 @@ let result = GetClipboardImage();
 void EnableEventWaiting()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 EnableEventWaiting();
 ```
 
@@ -776,9 +776,9 @@ EnableEventWaiting();
 void DisableEventWaiting()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DisableEventWaiting();
 ```
 
@@ -790,9 +790,9 @@ DisableEventWaiting();
 void ShowCursor()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ShowCursor();
 ```
 
@@ -804,9 +804,9 @@ ShowCursor();
 void HideCursor()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 HideCursor();
 ```
 
@@ -818,9 +818,9 @@ HideCursor();
 bool IsCursorHidden()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsCursorHidden();
 ```
 
@@ -832,9 +832,9 @@ let result = IsCursorHidden();
 void EnableCursor()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 EnableCursor();
 ```
 
@@ -846,9 +846,9 @@ EnableCursor();
 void DisableCursor()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DisableCursor();
 ```
 
@@ -860,9 +860,9 @@ DisableCursor();
 bool IsCursorOnScreen()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsCursorOnScreen();
 ```
 
@@ -874,9 +874,9 @@ let result = IsCursorOnScreen();
 void ClearBackground(Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ClearBackground(color);
 ```
 
@@ -892,9 +892,9 @@ ClearBackground(color);
 void BeginDrawing()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 BeginDrawing();
 ```
 
@@ -906,9 +906,9 @@ BeginDrawing();
 void EndDrawing()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 EndDrawing();
 ```
 
@@ -920,9 +920,9 @@ EndDrawing();
 void BeginMode2D(Camera2D camera)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 BeginMode2D(camera);
 ```
 
@@ -938,9 +938,9 @@ BeginMode2D(camera);
 void EndMode2D()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 EndMode2D();
 ```
 
@@ -952,9 +952,9 @@ EndMode2D();
 void BeginMode3D(Camera3D camera)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 BeginMode3D(camera);
 ```
 
@@ -970,9 +970,9 @@ BeginMode3D(camera);
 void EndMode3D()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 EndMode3D();
 ```
 
@@ -984,9 +984,9 @@ EndMode3D();
 void BeginTextureMode(RenderTexture2D target)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 BeginTextureMode(target);
 ```
 
@@ -1002,9 +1002,9 @@ BeginTextureMode(target);
 void EndTextureMode()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 EndTextureMode();
 ```
 
@@ -1016,9 +1016,9 @@ EndTextureMode();
 void BeginShaderMode(Shader shader)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 BeginShaderMode(shader);
 ```
 
@@ -1034,9 +1034,9 @@ BeginShaderMode(shader);
 void EndShaderMode()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 EndShaderMode();
 ```
 
@@ -1048,9 +1048,9 @@ EndShaderMode();
 void BeginBlendMode(int mode)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 BeginBlendMode(mode);
 ```
 
@@ -1066,9 +1066,9 @@ BeginBlendMode(mode);
 void EndBlendMode()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 EndBlendMode();
 ```
 
@@ -1080,9 +1080,9 @@ EndBlendMode();
 void BeginScissorMode(int x, int y, int width, int height)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 BeginScissorMode(x, y, width, height);
 ```
 
@@ -1101,9 +1101,9 @@ BeginScissorMode(x, y, width, height);
 void EndScissorMode()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 EndScissorMode();
 ```
 
@@ -1115,9 +1115,9 @@ EndScissorMode();
 void BeginVrStereoMode(VrStereoConfig config)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 BeginVrStereoMode(config);
 ```
 
@@ -1133,9 +1133,9 @@ BeginVrStereoMode(config);
 void EndVrStereoMode()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 EndVrStereoMode();
 ```
 
@@ -1147,9 +1147,9 @@ EndVrStereoMode();
 VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadVrStereoConfig(device);
 ```
 
@@ -1165,9 +1165,9 @@ let result = LoadVrStereoConfig(device);
 void UnloadVrStereoConfig(VrStereoConfig config)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadVrStereoConfig(config);
 ```
 
@@ -1183,9 +1183,9 @@ UnloadVrStereoConfig(config);
 Shader LoadShader(const char* vsFileName, const char* fsFileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadShader(vsFileName, fsFileName);
 ```
 
@@ -1202,9 +1202,9 @@ let result = LoadShader(vsFileName, fsFileName);
 Shader LoadShaderFromMemory(const char* vsCode, const char* fsCode)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadShaderFromMemory(vsCode, fsCode);
 ```
 
@@ -1221,9 +1221,9 @@ let result = LoadShaderFromMemory(vsCode, fsCode);
 bool IsShaderValid(Shader shader)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsShaderValid(shader);
 ```
 
@@ -1239,9 +1239,9 @@ let result = IsShaderValid(shader);
 int GetShaderLocation(Shader shader, const char* uniformName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetShaderLocation(shader, uniformName);
 ```
 
@@ -1258,9 +1258,9 @@ let result = GetShaderLocation(shader, uniformName);
 int GetShaderLocationAttrib(Shader shader, const char* attribName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetShaderLocationAttrib(shader, attribName);
 ```
 
@@ -1277,9 +1277,9 @@ let result = GetShaderLocationAttrib(shader, attribName);
 void SetShaderValue(Shader shader, int locIndex, const void* value, int uniformType)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetShaderValue(shader, locIndex, value, uniformType);
 ```
 
@@ -1298,9 +1298,9 @@ SetShaderValue(shader, locIndex, value, uniformType);
 void SetShaderValueV(Shader shader, int locIndex, const void* value, int uniformType, int count)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetShaderValueV(shader, locIndex, value, uniformType, count);
 ```
 
@@ -1320,9 +1320,9 @@ SetShaderValueV(shader, locIndex, value, uniformType, count);
 void SetShaderValueMatrix(Shader shader, int locIndex, Matrix mat)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetShaderValueMatrix(shader, locIndex, mat);
 ```
 
@@ -1340,9 +1340,9 @@ SetShaderValueMatrix(shader, locIndex, mat);
 void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetShaderValueTexture(shader, locIndex, texture);
 ```
 
@@ -1360,9 +1360,9 @@ SetShaderValueTexture(shader, locIndex, texture);
 void UnloadShader(Shader shader)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadShader(shader);
 ```
 
@@ -1378,9 +1378,9 @@ UnloadShader(shader);
 Ray GetScreenToWorldRay(Vector2 position, Camera camera)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetScreenToWorldRay(position, camera);
 ```
 
@@ -1397,9 +1397,9 @@ let result = GetScreenToWorldRay(position, camera);
 Ray GetScreenToWorldRayEx(Vector2 position, Camera camera, int width, int height)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetScreenToWorldRayEx(position, camera, width, height);
 ```
 
@@ -1418,9 +1418,9 @@ let result = GetScreenToWorldRayEx(position, camera, width, height);
 Vector2 GetWorldToScreen(Vector3 position, Camera camera)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetWorldToScreen(position, camera);
 ```
 
@@ -1437,9 +1437,9 @@ let result = GetWorldToScreen(position, camera);
 Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int height)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetWorldToScreenEx(position, camera, width, height);
 ```
 
@@ -1458,9 +1458,9 @@ let result = GetWorldToScreenEx(position, camera, width, height);
 Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetWorldToScreen2D(position, camera);
 ```
 
@@ -1477,9 +1477,9 @@ let result = GetWorldToScreen2D(position, camera);
 Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetScreenToWorld2D(position, camera);
 ```
 
@@ -1496,9 +1496,9 @@ let result = GetScreenToWorld2D(position, camera);
 Matrix GetCameraMatrix(Camera camera)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetCameraMatrix(camera);
 ```
 
@@ -1514,9 +1514,9 @@ let result = GetCameraMatrix(camera);
 Matrix GetCameraMatrix2D(Camera2D camera)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetCameraMatrix2D(camera);
 ```
 
@@ -1532,9 +1532,9 @@ let result = GetCameraMatrix2D(camera);
 void SetTargetFPS(int fps)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetTargetFPS(fps);
 ```
 
@@ -1550,9 +1550,9 @@ SetTargetFPS(fps);
 float GetFrameTime()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetFrameTime();
 ```
 
@@ -1564,9 +1564,9 @@ let result = GetFrameTime();
 double GetTime()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetTime();
 ```
 
@@ -1578,9 +1578,9 @@ let result = GetTime();
 int GetFPS()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetFPS();
 ```
 
@@ -1592,9 +1592,9 @@ let result = GetFPS();
 void SwapScreenBuffer()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SwapScreenBuffer();
 ```
 
@@ -1606,9 +1606,9 @@ SwapScreenBuffer();
 void PollInputEvents()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 PollInputEvents();
 ```
 
@@ -1620,9 +1620,9 @@ PollInputEvents();
 void WaitTime(double seconds)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 WaitTime(seconds);
 ```
 
@@ -1638,9 +1638,9 @@ WaitTime(seconds);
 void SetRandomSeed(unsigned int seed)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetRandomSeed(seed);
 ```
 
@@ -1656,9 +1656,9 @@ SetRandomSeed(seed);
 int GetRandomValue(int min, int max)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetRandomValue(min, max);
 ```
 
@@ -1675,9 +1675,9 @@ let result = GetRandomValue(min, max);
 void UnloadRandomSequence(int* sequence)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadRandomSequence(sequence);
 ```
 
@@ -1693,9 +1693,9 @@ UnloadRandomSequence(sequence);
 void TakeScreenshot(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 TakeScreenshot(fileName);
 ```
 
@@ -1711,9 +1711,9 @@ TakeScreenshot(fileName);
 void SetConfigFlags(unsigned int flags)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetConfigFlags(flags);
 ```
 
@@ -1729,9 +1729,9 @@ SetConfigFlags(flags);
 void OpenURL(const char* url)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 OpenURL(url);
 ```
 
@@ -1747,9 +1747,9 @@ OpenURL(url);
 void SetTraceLogLevel(int logLevel)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetTraceLogLevel(logLevel);
 ```
 
@@ -1765,9 +1765,9 @@ SetTraceLogLevel(logLevel);
 void TraceLog(int logLevel, const char* text)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 TraceLog(logLevel, text);
 ```
 
@@ -1784,9 +1784,9 @@ TraceLog(logLevel, text);
 void SetTraceLogCallback(TraceLogCallback callback)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetTraceLogCallback(callback);
 ```
 
@@ -1802,9 +1802,9 @@ SetTraceLogCallback(callback);
 void MemFree(void* ptr)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 MemFree(ptr);
 ```
 
@@ -1820,9 +1820,9 @@ MemFree(ptr);
 void UnloadFileData(unsigned char* data)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadFileData(data);
 ```
 
@@ -1838,9 +1838,9 @@ UnloadFileData(data);
 bool SaveFileData(const char* fileName, const void* data, int dataSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = SaveFileData(fileName, data, dataSize);
 ```
 
@@ -1858,9 +1858,9 @@ let result = SaveFileData(fileName, data, dataSize);
 bool ExportDataAsCode(const unsigned char* data, int dataSize, const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ExportDataAsCode(data, dataSize, fileName);
 ```
 
@@ -1878,9 +1878,9 @@ let result = ExportDataAsCode(data, dataSize, fileName);
 void UnloadFileText(char* text)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadFileText(text);
 ```
 
@@ -1896,9 +1896,9 @@ UnloadFileText(text);
 bool SaveFileText(const char* fileName, const char* text)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = SaveFileText(fileName, text);
 ```
 
@@ -1915,9 +1915,9 @@ let result = SaveFileText(fileName, text);
 void SetLoadFileDataCallback(LoadFileDataCallback callback)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetLoadFileDataCallback(callback);
 ```
 
@@ -1933,9 +1933,9 @@ SetLoadFileDataCallback(callback);
 void SetSaveFileDataCallback(SaveFileDataCallback callback)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetSaveFileDataCallback(callback);
 ```
 
@@ -1951,9 +1951,9 @@ SetSaveFileDataCallback(callback);
 void SetLoadFileTextCallback(LoadFileTextCallback callback)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetLoadFileTextCallback(callback);
 ```
 
@@ -1969,9 +1969,9 @@ SetLoadFileTextCallback(callback);
 void SetSaveFileTextCallback(SaveFileTextCallback callback)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetSaveFileTextCallback(callback);
 ```
 
@@ -1987,9 +1987,9 @@ SetSaveFileTextCallback(callback);
 int FileRename(const char* fileName, const char* fileRename)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = FileRename(fileName, fileRename);
 ```
 
@@ -2006,9 +2006,9 @@ let result = FileRename(fileName, fileRename);
 int FileRemove(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = FileRemove(fileName);
 ```
 
@@ -2024,9 +2024,9 @@ let result = FileRemove(fileName);
 int FileCopy(const char* srcPath, const char* dstPath)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = FileCopy(srcPath, dstPath);
 ```
 
@@ -2043,9 +2043,9 @@ let result = FileCopy(srcPath, dstPath);
 int FileMove(const char* srcPath, const char* dstPath)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = FileMove(srcPath, dstPath);
 ```
 
@@ -2062,9 +2062,9 @@ let result = FileMove(srcPath, dstPath);
 int FileTextReplace(const char* fileName, const char* search, const char* replacement)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = FileTextReplace(fileName, search, replacement);
 ```
 
@@ -2082,9 +2082,9 @@ let result = FileTextReplace(fileName, search, replacement);
 int FileTextFindIndex(const char* fileName, const char* search)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = FileTextFindIndex(fileName, search);
 ```
 
@@ -2101,9 +2101,9 @@ let result = FileTextFindIndex(fileName, search);
 bool FileExists(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = FileExists(fileName);
 ```
 
@@ -2119,9 +2119,9 @@ let result = FileExists(fileName);
 bool DirectoryExists(const char* dirPath)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = DirectoryExists(dirPath);
 ```
 
@@ -2137,9 +2137,9 @@ let result = DirectoryExists(dirPath);
 bool IsFileExtension(const char* fileName, const char* ext)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsFileExtension(fileName, ext);
 ```
 
@@ -2156,9 +2156,9 @@ let result = IsFileExtension(fileName, ext);
 int GetFileLength(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetFileLength(fileName);
 ```
 
@@ -2174,9 +2174,9 @@ let result = GetFileLength(fileName);
 long GetFileModTime(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetFileModTime(fileName);
 ```
 
@@ -2192,9 +2192,9 @@ let result = GetFileModTime(fileName);
 int MakeDirectory(const char* dirPath)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = MakeDirectory(dirPath);
 ```
 
@@ -2210,9 +2210,9 @@ let result = MakeDirectory(dirPath);
 bool ChangeDirectory(const char* dirPath)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ChangeDirectory(dirPath);
 ```
 
@@ -2228,9 +2228,9 @@ let result = ChangeDirectory(dirPath);
 bool IsPathFile(const char* path)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsPathFile(path);
 ```
 
@@ -2246,9 +2246,9 @@ let result = IsPathFile(path);
 bool IsFileNameValid(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsFileNameValid(fileName);
 ```
 
@@ -2264,9 +2264,9 @@ let result = IsFileNameValid(fileName);
 FilePathList LoadDirectoryFiles(const char* dirPath)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadDirectoryFiles(dirPath);
 ```
 
@@ -2282,9 +2282,9 @@ let result = LoadDirectoryFiles(dirPath);
 FilePathList LoadDirectoryFilesEx(const char* basePath, const char* filter, bool scanSubdirs)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadDirectoryFilesEx(basePath, filter, scanSubdirs);
 ```
 
@@ -2302,9 +2302,9 @@ let result = LoadDirectoryFilesEx(basePath, filter, scanSubdirs);
 void UnloadDirectoryFiles(FilePathList files)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadDirectoryFiles(files);
 ```
 
@@ -2320,9 +2320,9 @@ UnloadDirectoryFiles(files);
 bool IsFileDropped()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsFileDropped();
 ```
 
@@ -2334,9 +2334,9 @@ let result = IsFileDropped();
 FilePathList LoadDroppedFiles()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadDroppedFiles();
 ```
 
@@ -2348,9 +2348,9 @@ let result = LoadDroppedFiles();
 void UnloadDroppedFiles(FilePathList files)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadDroppedFiles(files);
 ```
 
@@ -2366,9 +2366,9 @@ UnloadDroppedFiles(files);
 unsigned int GetDirectoryFileCount(const char* dirPath)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetDirectoryFileCount(dirPath);
 ```
 
@@ -2384,9 +2384,9 @@ let result = GetDirectoryFileCount(dirPath);
 unsigned int GetDirectoryFileCountEx(const char* basePath, const char* filter, bool scanSubdirs)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetDirectoryFileCountEx(basePath, filter, scanSubdirs);
 ```
 
@@ -2404,9 +2404,9 @@ let result = GetDirectoryFileCountEx(basePath, filter, scanSubdirs);
 unsigned int ComputeCRC32(const unsigned char* data, int dataSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ComputeCRC32(data, dataSize);
 ```
 
@@ -2423,9 +2423,9 @@ let result = ComputeCRC32(data, dataSize);
 AutomationEventList LoadAutomationEventList(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadAutomationEventList(fileName);
 ```
 
@@ -2441,9 +2441,9 @@ let result = LoadAutomationEventList(fileName);
 void UnloadAutomationEventList(AutomationEventList list)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadAutomationEventList(list);
 ```
 
@@ -2459,9 +2459,9 @@ UnloadAutomationEventList(list);
 bool ExportAutomationEventList(AutomationEventList list, const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ExportAutomationEventList(list, fileName);
 ```
 
@@ -2478,9 +2478,9 @@ let result = ExportAutomationEventList(list, fileName);
 void SetAutomationEventList(AutomationEventList* list)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetAutomationEventList(list);
 ```
 
@@ -2496,9 +2496,9 @@ SetAutomationEventList(list);
 void SetAutomationEventBaseFrame(int frame)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetAutomationEventBaseFrame(frame);
 ```
 
@@ -2514,9 +2514,9 @@ SetAutomationEventBaseFrame(frame);
 void StartAutomationEventRecording()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 StartAutomationEventRecording();
 ```
 
@@ -2528,9 +2528,9 @@ StartAutomationEventRecording();
 void StopAutomationEventRecording()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 StopAutomationEventRecording();
 ```
 
@@ -2542,9 +2542,9 @@ StopAutomationEventRecording();
 void PlayAutomationEvent(AutomationEvent event)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 PlayAutomationEvent(event);
 ```
 
@@ -2560,9 +2560,9 @@ PlayAutomationEvent(event);
 bool IsKeyPressed(int key)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsKeyPressed(key);
 ```
 
@@ -2578,9 +2578,9 @@ let result = IsKeyPressed(key);
 bool IsKeyPressedRepeat(int key)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsKeyPressedRepeat(key);
 ```
 
@@ -2596,9 +2596,9 @@ let result = IsKeyPressedRepeat(key);
 bool IsKeyDown(int key)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsKeyDown(key);
 ```
 
@@ -2614,9 +2614,9 @@ let result = IsKeyDown(key);
 bool IsKeyReleased(int key)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsKeyReleased(key);
 ```
 
@@ -2632,9 +2632,9 @@ let result = IsKeyReleased(key);
 bool IsKeyUp(int key)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsKeyUp(key);
 ```
 
@@ -2650,9 +2650,9 @@ let result = IsKeyUp(key);
 int GetKeyPressed()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetKeyPressed();
 ```
 
@@ -2664,9 +2664,9 @@ let result = GetKeyPressed();
 int GetCharPressed()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetCharPressed();
 ```
 
@@ -2678,9 +2678,9 @@ let result = GetCharPressed();
 void SetExitKey(int key)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetExitKey(key);
 ```
 
@@ -2696,9 +2696,9 @@ SetExitKey(key);
 bool IsGamepadAvailable(int gamepad)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsGamepadAvailable(gamepad);
 ```
 
@@ -2714,9 +2714,9 @@ let result = IsGamepadAvailable(gamepad);
 bool IsGamepadButtonPressed(int gamepad, int button)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsGamepadButtonPressed(gamepad, button);
 ```
 
@@ -2733,9 +2733,9 @@ let result = IsGamepadButtonPressed(gamepad, button);
 bool IsGamepadButtonDown(int gamepad, int button)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsGamepadButtonDown(gamepad, button);
 ```
 
@@ -2752,9 +2752,9 @@ let result = IsGamepadButtonDown(gamepad, button);
 bool IsGamepadButtonReleased(int gamepad, int button)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsGamepadButtonReleased(gamepad, button);
 ```
 
@@ -2771,9 +2771,9 @@ let result = IsGamepadButtonReleased(gamepad, button);
 bool IsGamepadButtonUp(int gamepad, int button)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsGamepadButtonUp(gamepad, button);
 ```
 
@@ -2790,9 +2790,9 @@ let result = IsGamepadButtonUp(gamepad, button);
 int GetGamepadButtonPressed()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetGamepadButtonPressed();
 ```
 
@@ -2804,9 +2804,9 @@ let result = GetGamepadButtonPressed();
 int GetGamepadAxisCount(int gamepad)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetGamepadAxisCount(gamepad);
 ```
 
@@ -2822,9 +2822,9 @@ let result = GetGamepadAxisCount(gamepad);
 float GetGamepadAxisMovement(int gamepad, int axis)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetGamepadAxisMovement(gamepad, axis);
 ```
 
@@ -2841,9 +2841,9 @@ let result = GetGamepadAxisMovement(gamepad, axis);
 int SetGamepadMappings(const char* mappings)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = SetGamepadMappings(mappings);
 ```
 
@@ -2859,9 +2859,9 @@ let result = SetGamepadMappings(mappings);
 void SetGamepadVibration(int gamepad, float leftMotor, float rightMotor, float duration)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetGamepadVibration(gamepad, leftMotor, rightMotor, duration);
 ```
 
@@ -2880,9 +2880,9 @@ SetGamepadVibration(gamepad, leftMotor, rightMotor, duration);
 bool IsMouseButtonPressed(int button)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsMouseButtonPressed(button);
 ```
 
@@ -2898,9 +2898,9 @@ let result = IsMouseButtonPressed(button);
 bool IsMouseButtonDown(int button)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsMouseButtonDown(button);
 ```
 
@@ -2916,9 +2916,9 @@ let result = IsMouseButtonDown(button);
 bool IsMouseButtonReleased(int button)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsMouseButtonReleased(button);
 ```
 
@@ -2934,9 +2934,9 @@ let result = IsMouseButtonReleased(button);
 bool IsMouseButtonUp(int button)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsMouseButtonUp(button);
 ```
 
@@ -2952,9 +2952,9 @@ let result = IsMouseButtonUp(button);
 int GetMouseX()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMouseX();
 ```
 
@@ -2966,9 +2966,9 @@ let result = GetMouseX();
 int GetMouseY()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMouseY();
 ```
 
@@ -2980,9 +2980,9 @@ let result = GetMouseY();
 Vector2 GetMousePosition()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMousePosition();
 ```
 
@@ -2994,9 +2994,9 @@ let result = GetMousePosition();
 Vector2 GetMouseDelta()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMouseDelta();
 ```
 
@@ -3008,9 +3008,9 @@ let result = GetMouseDelta();
 void SetMousePosition(int x, int y)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetMousePosition(x, y);
 ```
 
@@ -3027,9 +3027,9 @@ SetMousePosition(x, y);
 void SetMouseOffset(int offsetX, int offsetY)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetMouseOffset(offsetX, offsetY);
 ```
 
@@ -3046,9 +3046,9 @@ SetMouseOffset(offsetX, offsetY);
 void SetMouseScale(float scaleX, float scaleY)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetMouseScale(scaleX, scaleY);
 ```
 
@@ -3065,9 +3065,9 @@ SetMouseScale(scaleX, scaleY);
 float GetMouseWheelMove()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMouseWheelMove();
 ```
 
@@ -3079,9 +3079,9 @@ let result = GetMouseWheelMove();
 Vector2 GetMouseWheelMoveV()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMouseWheelMoveV();
 ```
 
@@ -3093,9 +3093,9 @@ let result = GetMouseWheelMoveV();
 void SetMouseCursor(int cursor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetMouseCursor(cursor);
 ```
 
@@ -3111,9 +3111,9 @@ SetMouseCursor(cursor);
 int GetTouchX()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetTouchX();
 ```
 
@@ -3125,9 +3125,9 @@ let result = GetTouchX();
 int GetTouchY()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetTouchY();
 ```
 
@@ -3139,9 +3139,9 @@ let result = GetTouchY();
 Vector2 GetTouchPosition(int index)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetTouchPosition(index);
 ```
 
@@ -3157,9 +3157,9 @@ let result = GetTouchPosition(index);
 int GetTouchPointId(int index)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetTouchPointId(index);
 ```
 
@@ -3175,9 +3175,9 @@ let result = GetTouchPointId(index);
 int GetTouchPointCount()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetTouchPointCount();
 ```
 
@@ -3189,9 +3189,9 @@ let result = GetTouchPointCount();
 void SetGesturesEnabled(unsigned int flags)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetGesturesEnabled(flags);
 ```
 
@@ -3207,9 +3207,9 @@ SetGesturesEnabled(flags);
 bool IsGestureDetected(unsigned int gesture)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsGestureDetected(gesture);
 ```
 
@@ -3225,9 +3225,9 @@ let result = IsGestureDetected(gesture);
 int GetGestureDetected()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetGestureDetected();
 ```
 
@@ -3239,9 +3239,9 @@ let result = GetGestureDetected();
 float GetGestureHoldDuration()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetGestureHoldDuration();
 ```
 
@@ -3253,9 +3253,9 @@ let result = GetGestureHoldDuration();
 Vector2 GetGestureDragVector()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetGestureDragVector();
 ```
 
@@ -3267,9 +3267,9 @@ let result = GetGestureDragVector();
 float GetGestureDragAngle()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetGestureDragAngle();
 ```
 
@@ -3281,9 +3281,9 @@ let result = GetGestureDragAngle();
 Vector2 GetGesturePinchVector()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetGesturePinchVector();
 ```
 
@@ -3295,9 +3295,9 @@ let result = GetGesturePinchVector();
 float GetGesturePinchAngle()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetGesturePinchAngle();
 ```
 
@@ -3309,9 +3309,9 @@ let result = GetGesturePinchAngle();
 void UpdateCamera(Camera* camera, int mode)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UpdateCamera(camera, mode);
 ```
 
@@ -3328,9 +3328,9 @@ UpdateCamera(camera, mode);
 void UpdateCameraPro(Camera* camera, Vector3 movement, Vector3 rotation, float zoom)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UpdateCameraPro(camera, movement, rotation, zoom);
 ```
 
@@ -3349,9 +3349,9 @@ UpdateCameraPro(camera, movement, rotation, zoom);
 void SetShapesTexture(Texture2D texture, Rectangle source)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetShapesTexture(texture, source);
 ```
 
@@ -3368,9 +3368,9 @@ SetShapesTexture(texture, source);
 Texture2D GetShapesTexture()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetShapesTexture();
 ```
 
@@ -3382,9 +3382,9 @@ let result = GetShapesTexture();
 Rectangle GetShapesTextureRectangle()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetShapesTextureRectangle();
 ```
 
@@ -3396,9 +3396,9 @@ let result = GetShapesTextureRectangle();
 void DrawPixel(int posX, int posY, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawPixel(posX, posY, color);
 ```
 
@@ -3416,9 +3416,9 @@ DrawPixel(posX, posY, color);
 void DrawPixelV(Vector2 position, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawPixelV(position, color);
 ```
 
@@ -3435,9 +3435,9 @@ DrawPixelV(position, color);
 void DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawLine(startPosX, startPosY, endPosX, endPosY, color);
 ```
 
@@ -3457,9 +3457,9 @@ DrawLine(startPosX, startPosY, endPosX, endPosY, color);
 void DrawLineV(Vector2 startPos, Vector2 endPos, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawLineV(startPos, endPos, color);
 ```
 
@@ -3477,9 +3477,9 @@ DrawLineV(startPos, endPos, color);
 void DrawLineEx(Vector2 startPos, Vector2 endPos, float thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawLineEx(startPos, endPos, thick, color);
 ```
 
@@ -3498,9 +3498,9 @@ DrawLineEx(startPos, endPos, thick, color);
 void DrawLineStrip(const Vector2* points, int pointCount, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawLineStrip(points, pointCount, color);
 ```
 
@@ -3518,9 +3518,9 @@ DrawLineStrip(points, pointCount, color);
 void DrawLineBezier(Vector2 startPos, Vector2 endPos, float thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawLineBezier(startPos, endPos, thick, color);
 ```
 
@@ -3539,9 +3539,9 @@ DrawLineBezier(startPos, endPos, thick, color);
 void DrawLineDashed(Vector2 startPos, Vector2 endPos, int dashSize, int spaceSize, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawLineDashed(startPos, endPos, dashSize, spaceSize, color);
 ```
 
@@ -3561,9 +3561,9 @@ DrawLineDashed(startPos, endPos, dashSize, spaceSize, color);
 void DrawCircle(int centerX, int centerY, float radius, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCircle(centerX, centerY, radius, color);
 ```
 
@@ -3582,9 +3582,9 @@ DrawCircle(centerX, centerY, radius, color);
 void DrawCircleV(Vector2 center, float radius, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCircleV(center, radius, color);
 ```
 
@@ -3602,9 +3602,9 @@ DrawCircleV(center, radius, color);
 void DrawCircleGradient(Vector2 center, float radius, Color inner, Color outer)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCircleGradient(center, radius, inner, outer);
 ```
 
@@ -3623,9 +3623,9 @@ DrawCircleGradient(center, radius, inner, outer);
 void DrawCircleSector(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCircleSector(center, radius, startAngle, endAngle, segments, color);
 ```
 
@@ -3646,9 +3646,9 @@ DrawCircleSector(center, radius, startAngle, endAngle, segments, color);
 void DrawCircleSectorLines(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCircleSectorLines(center, radius, startAngle, endAngle, segments, color);
 ```
 
@@ -3669,9 +3669,9 @@ DrawCircleSectorLines(center, radius, startAngle, endAngle, segments, color);
 void DrawCircleLines(int centerX, int centerY, float radius, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCircleLines(centerX, centerY, radius, color);
 ```
 
@@ -3690,9 +3690,9 @@ DrawCircleLines(centerX, centerY, radius, color);
 void DrawCircleLinesV(Vector2 center, float radius, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCircleLinesV(center, radius, color);
 ```
 
@@ -3710,9 +3710,9 @@ DrawCircleLinesV(center, radius, color);
 void DrawEllipse(int centerX, int centerY, float radiusH, float radiusV, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawEllipse(centerX, centerY, radiusH, radiusV, color);
 ```
 
@@ -3732,9 +3732,9 @@ DrawEllipse(centerX, centerY, radiusH, radiusV, color);
 void DrawEllipseV(Vector2 center, float radiusH, float radiusV, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawEllipseV(center, radiusH, radiusV, color);
 ```
 
@@ -3753,9 +3753,9 @@ DrawEllipseV(center, radiusH, radiusV, color);
 void DrawEllipseLines(int centerX, int centerY, float radiusH, float radiusV, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawEllipseLines(centerX, centerY, radiusH, radiusV, color);
 ```
 
@@ -3775,9 +3775,9 @@ DrawEllipseLines(centerX, centerY, radiusH, radiusV, color);
 void DrawEllipseLinesV(Vector2 center, float radiusH, float radiusV, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawEllipseLinesV(center, radiusH, radiusV, color);
 ```
 
@@ -3796,9 +3796,9 @@ DrawEllipseLinesV(center, radiusH, radiusV, color);
 void DrawRing(Vector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRing(center, innerRadius, outerRadius, startAngle, endAngle, segments, color);
 ```
 
@@ -3820,9 +3820,9 @@ DrawRing(center, innerRadius, outerRadius, startAngle, endAngle, segments, color
 void DrawRingLines(Vector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRingLines(center, innerRadius, outerRadius, startAngle, endAngle, segments, color);
 ```
 
@@ -3844,9 +3844,9 @@ DrawRingLines(center, innerRadius, outerRadius, startAngle, endAngle, segments, 
 void DrawRectangle(int posX, int posY, int width, int height, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRectangle(posX, posY, width, height, color);
 ```
 
@@ -3866,9 +3866,9 @@ DrawRectangle(posX, posY, width, height, color);
 void DrawRectangleV(Vector2 position, Vector2 size, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRectangleV(position, size, color);
 ```
 
@@ -3886,9 +3886,9 @@ DrawRectangleV(position, size, color);
 void DrawRectangleRec(Rectangle rec, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRectangleRec(rec, color);
 ```
 
@@ -3905,9 +3905,9 @@ DrawRectangleRec(rec, color);
 void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRectanglePro(rec, origin, rotation, color);
 ```
 
@@ -3926,9 +3926,9 @@ DrawRectanglePro(rec, origin, rotation, color);
 void DrawRectangleGradientV(int posX, int posY, int width, int height, Color top, Color bottom)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRectangleGradientV(posX, posY, width, height, top, bottom);
 ```
 
@@ -3949,9 +3949,9 @@ DrawRectangleGradientV(posX, posY, width, height, top, bottom);
 void DrawRectangleGradientH(int posX, int posY, int width, int height, Color left, Color right)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRectangleGradientH(posX, posY, width, height, left, right);
 ```
 
@@ -3972,9 +3972,9 @@ DrawRectangleGradientH(posX, posY, width, height, left, right);
 void DrawRectangleGradientEx(Rectangle rec, Color topLeft, Color bottomLeft, Color bottomRight, Color topRight)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRectangleGradientEx(rec, topLeft, bottomLeft, bottomRight, topRight);
 ```
 
@@ -3994,9 +3994,9 @@ DrawRectangleGradientEx(rec, topLeft, bottomLeft, bottomRight, topRight);
 void DrawRectangleLines(int posX, int posY, int width, int height, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRectangleLines(posX, posY, width, height, color);
 ```
 
@@ -4016,9 +4016,9 @@ DrawRectangleLines(posX, posY, width, height, color);
 void DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRectangleLinesEx(rec, lineThick, color);
 ```
 
@@ -4036,9 +4036,9 @@ DrawRectangleLinesEx(rec, lineThick, color);
 void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRectangleRounded(rec, roundness, segments, color);
 ```
 
@@ -4057,9 +4057,9 @@ DrawRectangleRounded(rec, roundness, segments, color);
 void DrawRectangleRoundedLines(Rectangle rec, float roundness, int segments, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRectangleRoundedLines(rec, roundness, segments, color);
 ```
 
@@ -4078,9 +4078,9 @@ DrawRectangleRoundedLines(rec, roundness, segments, color);
 void DrawRectangleRoundedLinesEx(Rectangle rec, float roundness, int segments, float lineThick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRectangleRoundedLinesEx(rec, roundness, segments, lineThick, color);
 ```
 
@@ -4100,9 +4100,9 @@ DrawRectangleRoundedLinesEx(rec, roundness, segments, lineThick, color);
 void DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTriangle(v1, v2, v3, color);
 ```
 
@@ -4121,9 +4121,9 @@ DrawTriangle(v1, v2, v3, color);
 void DrawTriangleGradient(Vector2 v1, Vector2 v2, Vector2 v3, Color c1, Color c2, Color c3)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTriangleGradient(v1, v2, v3, c1, c2, c3);
 ```
 
@@ -4144,9 +4144,9 @@ DrawTriangleGradient(v1, v2, v3, c1, c2, c3);
 void DrawTriangleLines(Vector2 v1, Vector2 v2, Vector2 v3, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTriangleLines(v1, v2, v3, color);
 ```
 
@@ -4165,9 +4165,9 @@ DrawTriangleLines(v1, v2, v3, color);
 void DrawTriangleFan(const Vector2* points, int pointCount, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTriangleFan(points, pointCount, color);
 ```
 
@@ -4185,9 +4185,9 @@ DrawTriangleFan(points, pointCount, color);
 void DrawTriangleStrip(const Vector2* points, int pointCount, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTriangleStrip(points, pointCount, color);
 ```
 
@@ -4205,9 +4205,9 @@ DrawTriangleStrip(points, pointCount, color);
 void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawPoly(center, sides, radius, rotation, color);
 ```
 
@@ -4227,9 +4227,9 @@ DrawPoly(center, sides, radius, rotation, color);
 void DrawPolyLines(Vector2 center, int sides, float radius, float rotation, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawPolyLines(center, sides, radius, rotation, color);
 ```
 
@@ -4249,9 +4249,9 @@ DrawPolyLines(center, sides, radius, rotation, color);
 void DrawPolyLinesEx(Vector2 center, int sides, float radius, float rotation, float lineThick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawPolyLinesEx(center, sides, radius, rotation, lineThick, color);
 ```
 
@@ -4272,9 +4272,9 @@ DrawPolyLinesEx(center, sides, radius, rotation, lineThick, color);
 void DrawSplineLinear(const Vector2* points, int pointCount, float thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawSplineLinear(points, pointCount, thick, color);
 ```
 
@@ -4293,9 +4293,9 @@ DrawSplineLinear(points, pointCount, thick, color);
 void DrawSplineBasis(const Vector2* points, int pointCount, float thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawSplineBasis(points, pointCount, thick, color);
 ```
 
@@ -4314,9 +4314,9 @@ DrawSplineBasis(points, pointCount, thick, color);
 void DrawSplineCatmullRom(const Vector2* points, int pointCount, float thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawSplineCatmullRom(points, pointCount, thick, color);
 ```
 
@@ -4335,9 +4335,9 @@ DrawSplineCatmullRom(points, pointCount, thick, color);
 void DrawSplineBezierQuadratic(const Vector2* points, int pointCount, float thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawSplineBezierQuadratic(points, pointCount, thick, color);
 ```
 
@@ -4356,9 +4356,9 @@ DrawSplineBezierQuadratic(points, pointCount, thick, color);
 void DrawSplineBezierCubic(const Vector2* points, int pointCount, float thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawSplineBezierCubic(points, pointCount, thick, color);
 ```
 
@@ -4377,9 +4377,9 @@ DrawSplineBezierCubic(points, pointCount, thick, color);
 void DrawSplineSegmentLinear(Vector2 p1, Vector2 p2, float thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawSplineSegmentLinear(p1, p2, thick, color);
 ```
 
@@ -4398,9 +4398,9 @@ DrawSplineSegmentLinear(p1, p2, thick, color);
 void DrawSplineSegmentBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawSplineSegmentBasis(p1, p2, p3, p4, thick, color);
 ```
 
@@ -4421,9 +4421,9 @@ DrawSplineSegmentBasis(p1, p2, p3, p4, thick, color);
 void DrawSplineSegmentCatmullRom(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawSplineSegmentCatmullRom(p1, p2, p3, p4, thick, color);
 ```
 
@@ -4444,9 +4444,9 @@ DrawSplineSegmentCatmullRom(p1, p2, p3, p4, thick, color);
 void DrawSplineSegmentBezierQuadratic(Vector2 p1, Vector2 c2, Vector2 p3, float thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawSplineSegmentBezierQuadratic(p1, c2, p3, thick, color);
 ```
 
@@ -4466,9 +4466,9 @@ DrawSplineSegmentBezierQuadratic(p1, c2, p3, thick, color);
 void DrawSplineSegmentBezierCubic(Vector2 p1, Vector2 c2, Vector2 c3, Vector2 p4, float thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawSplineSegmentBezierCubic(p1, c2, c3, p4, thick, color);
 ```
 
@@ -4489,9 +4489,9 @@ DrawSplineSegmentBezierCubic(p1, c2, c3, p4, thick, color);
 Vector2 GetSplinePointLinear(Vector2 startPos, Vector2 endPos, float t)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetSplinePointLinear(startPos, endPos, t);
 ```
 
@@ -4509,9 +4509,9 @@ let result = GetSplinePointLinear(startPos, endPos, t);
 Vector2 GetSplinePointBasis(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float t)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetSplinePointBasis(p1, p2, p3, p4, t);
 ```
 
@@ -4531,9 +4531,9 @@ let result = GetSplinePointBasis(p1, p2, p3, p4, t);
 Vector2 GetSplinePointCatmullRom(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float t)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetSplinePointCatmullRom(p1, p2, p3, p4, t);
 ```
 
@@ -4553,9 +4553,9 @@ let result = GetSplinePointCatmullRom(p1, p2, p3, p4, t);
 Vector2 GetSplinePointBezierQuadratic(Vector2 p1, Vector2 c2, Vector2 p3, float t)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetSplinePointBezierQuadratic(p1, c2, p3, t);
 ```
 
@@ -4574,9 +4574,9 @@ let result = GetSplinePointBezierQuadratic(p1, c2, p3, t);
 Vector2 GetSplinePointBezierCubic(Vector2 p1, Vector2 c2, Vector2 c3, Vector2 p4, float t)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetSplinePointBezierCubic(p1, c2, c3, p4, t);
 ```
 
@@ -4596,9 +4596,9 @@ let result = GetSplinePointBezierCubic(p1, c2, c3, p4, t);
 bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = CheckCollisionRecs(rec1, rec2);
 ```
 
@@ -4615,9 +4615,9 @@ let result = CheckCollisionRecs(rec1, rec2);
 bool CheckCollisionCircles(Vector2 center1, float radius1, Vector2 center2, float radius2)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = CheckCollisionCircles(center1, radius1, center2, radius2);
 ```
 
@@ -4636,9 +4636,9 @@ let result = CheckCollisionCircles(center1, radius1, center2, radius2);
 bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = CheckCollisionCircleRec(center, radius, rec);
 ```
 
@@ -4656,9 +4656,9 @@ let result = CheckCollisionCircleRec(center, radius, rec);
 bool CheckCollisionCircleLine(Vector2 center, float radius, Vector2 p1, Vector2 p2)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = CheckCollisionCircleLine(center, radius, p1, p2);
 ```
 
@@ -4677,9 +4677,9 @@ let result = CheckCollisionCircleLine(center, radius, p1, p2);
 bool CheckCollisionPointRec(Vector2 point, Rectangle rec)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = CheckCollisionPointRec(point, rec);
 ```
 
@@ -4696,9 +4696,9 @@ let result = CheckCollisionPointRec(point, rec);
 bool CheckCollisionPointCircle(Vector2 point, Vector2 center, float radius)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = CheckCollisionPointCircle(point, center, radius);
 ```
 
@@ -4716,9 +4716,9 @@ let result = CheckCollisionPointCircle(point, center, radius);
 bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Vector2 p3)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = CheckCollisionPointTriangle(point, p1, p2, p3);
 ```
 
@@ -4737,9 +4737,9 @@ let result = CheckCollisionPointTriangle(point, p1, p2, p3);
 bool CheckCollisionPointLine(Vector2 point, Vector2 p1, Vector2 p2, int threshold)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = CheckCollisionPointLine(point, p1, p2, threshold);
 ```
 
@@ -4758,9 +4758,9 @@ let result = CheckCollisionPointLine(point, p1, p2, threshold);
 bool CheckCollisionPointPoly(Vector2 point, const Vector2* points, int pointCount)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = CheckCollisionPointPoly(point, points, pointCount);
 ```
 
@@ -4778,9 +4778,9 @@ let result = CheckCollisionPointPoly(point, points, pointCount);
 bool CheckCollisionLines(Vector2 startPos1, Vector2 endPos1, Vector2 startPos2, Vector2 endPos2, Vector2* collisionPoint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = CheckCollisionLines(startPos1, endPos1, startPos2, endPos2, collisionPoint);
 ```
 
@@ -4800,9 +4800,9 @@ let result = CheckCollisionLines(startPos1, endPos1, startPos2, endPos2, collisi
 Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetCollisionRec(rec1, rec2);
 ```
 
@@ -4819,9 +4819,9 @@ let result = GetCollisionRec(rec1, rec2);
 Image LoadImage(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadImage(fileName);
 ```
 
@@ -4837,9 +4837,9 @@ let result = LoadImage(fileName);
 Image LoadImageRaw(const char* fileName, int width, int height, int format, int headerSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadImageRaw(fileName, width, height, format, headerSize);
 ```
 
@@ -4859,9 +4859,9 @@ let result = LoadImageRaw(fileName, width, height, format, headerSize);
 Image LoadImageAnim(const char* fileName, int* frames)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadImageAnim(fileName, frames);
 ```
 
@@ -4878,9 +4878,9 @@ let result = LoadImageAnim(fileName, frames);
 Image LoadImageAnimFromMemory(const char* fileType, const unsigned char* fileData, int dataSize, int* frames)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadImageAnimFromMemory(fileType, fileData, dataSize, frames);
 ```
 
@@ -4899,9 +4899,9 @@ let result = LoadImageAnimFromMemory(fileType, fileData, dataSize, frames);
 Image LoadImageFromMemory(const char* fileType, const unsigned char* fileData, int dataSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadImageFromMemory(fileType, fileData, dataSize);
 ```
 
@@ -4919,9 +4919,9 @@ let result = LoadImageFromMemory(fileType, fileData, dataSize);
 Image LoadImageFromTexture(Texture2D texture)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadImageFromTexture(texture);
 ```
 
@@ -4937,9 +4937,9 @@ let result = LoadImageFromTexture(texture);
 Image LoadImageFromScreen()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadImageFromScreen();
 ```
 
@@ -4951,9 +4951,9 @@ let result = LoadImageFromScreen();
 bool IsImageValid(Image image)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsImageValid(image);
 ```
 
@@ -4969,9 +4969,9 @@ let result = IsImageValid(image);
 void UnloadImage(Image image)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadImage(image);
 ```
 
@@ -4987,9 +4987,9 @@ UnloadImage(image);
 bool ExportImage(Image image, const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ExportImage(image, fileName);
 ```
 
@@ -5006,9 +5006,9 @@ let result = ExportImage(image, fileName);
 bool ExportImageAsCode(Image image, const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ExportImageAsCode(image, fileName);
 ```
 
@@ -5025,9 +5025,9 @@ let result = ExportImageAsCode(image, fileName);
 Image GenImageColor(int width, int height, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenImageColor(width, height, color);
 ```
 
@@ -5045,9 +5045,9 @@ let result = GenImageColor(width, height, color);
 Image GenImageGradientLinear(int width, int height, int direction, Color start, Color end)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenImageGradientLinear(width, height, direction, start, end);
 ```
 
@@ -5067,9 +5067,9 @@ let result = GenImageGradientLinear(width, height, direction, start, end);
 Image GenImageGradientRadial(int width, int height, float density, Color inner, Color outer)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenImageGradientRadial(width, height, density, inner, outer);
 ```
 
@@ -5089,9 +5089,9 @@ let result = GenImageGradientRadial(width, height, density, inner, outer);
 Image GenImageGradientSquare(int width, int height, float density, Color inner, Color outer)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenImageGradientSquare(width, height, density, inner, outer);
 ```
 
@@ -5111,9 +5111,9 @@ let result = GenImageGradientSquare(width, height, density, inner, outer);
 Image GenImageChecked(int width, int height, int checksX, int checksY, Color col1, Color col2)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenImageChecked(width, height, checksX, checksY, col1, col2);
 ```
 
@@ -5134,9 +5134,9 @@ let result = GenImageChecked(width, height, checksX, checksY, col1, col2);
 Image GenImageWhiteNoise(int width, int height, float factor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenImageWhiteNoise(width, height, factor);
 ```
 
@@ -5154,9 +5154,9 @@ let result = GenImageWhiteNoise(width, height, factor);
 Image GenImagePerlinNoise(int width, int height, int offsetX, int offsetY, float scale)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenImagePerlinNoise(width, height, offsetX, offsetY, scale);
 ```
 
@@ -5176,9 +5176,9 @@ let result = GenImagePerlinNoise(width, height, offsetX, offsetY, scale);
 Image GenImageCellular(int width, int height, int tileSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenImageCellular(width, height, tileSize);
 ```
 
@@ -5196,9 +5196,9 @@ let result = GenImageCellular(width, height, tileSize);
 Image GenImageText(int width, int height, const char* text)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenImageText(width, height, text);
 ```
 
@@ -5216,9 +5216,9 @@ let result = GenImageText(width, height, text);
 Image ImageCopy(Image image)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ImageCopy(image);
 ```
 
@@ -5234,9 +5234,9 @@ let result = ImageCopy(image);
 Image ImageFromImage(Image image, Rectangle rec)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ImageFromImage(image, rec);
 ```
 
@@ -5253,9 +5253,9 @@ let result = ImageFromImage(image, rec);
 Image ImageFromChannel(Image image, int selectedChannel)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ImageFromChannel(image, selectedChannel);
 ```
 
@@ -5272,9 +5272,9 @@ let result = ImageFromChannel(image, selectedChannel);
 Image ImageText(const char* text, int fontSize, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ImageText(text, fontSize, color);
 ```
 
@@ -5292,9 +5292,9 @@ let result = ImageText(text, fontSize, color);
 Image ImageTextEx(Font font, const char* text, float fontSize, float spacing, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ImageTextEx(font, text, fontSize, spacing, tint);
 ```
 
@@ -5314,9 +5314,9 @@ let result = ImageTextEx(font, text, fontSize, spacing, tint);
 void ImageFormat(Image* image, int newFormat)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageFormat(image, newFormat);
 ```
 
@@ -5333,9 +5333,9 @@ ImageFormat(image, newFormat);
 void ImageToPOT(Image* image, Color fill)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageToPOT(image, fill);
 ```
 
@@ -5352,9 +5352,9 @@ ImageToPOT(image, fill);
 void ImageCrop(Image* image, Rectangle crop)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageCrop(image, crop);
 ```
 
@@ -5371,9 +5371,9 @@ ImageCrop(image, crop);
 void ImageAlphaCrop(Image* image, float threshold)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageAlphaCrop(image, threshold);
 ```
 
@@ -5390,9 +5390,9 @@ ImageAlphaCrop(image, threshold);
 void ImageAlphaClear(Image* image, Color color, float threshold)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageAlphaClear(image, color, threshold);
 ```
 
@@ -5410,9 +5410,9 @@ ImageAlphaClear(image, color, threshold);
 void ImageAlphaMask(Image* image, Image alphaMask)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageAlphaMask(image, alphaMask);
 ```
 
@@ -5429,9 +5429,9 @@ ImageAlphaMask(image, alphaMask);
 void ImageAlphaPremultiply(Image* image)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageAlphaPremultiply(image);
 ```
 
@@ -5447,9 +5447,9 @@ ImageAlphaPremultiply(image);
 void ImageBlurGaussian(Image* image, int blurSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageBlurGaussian(image, blurSize);
 ```
 
@@ -5466,9 +5466,9 @@ ImageBlurGaussian(image, blurSize);
 void ImageKernelConvolution(Image* image, const float* kernel, int kernelSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageKernelConvolution(image, kernel, kernelSize);
 ```
 
@@ -5486,9 +5486,9 @@ ImageKernelConvolution(image, kernel, kernelSize);
 void ImageResize(Image* image, int newWidth, int newHeight)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageResize(image, newWidth, newHeight);
 ```
 
@@ -5506,9 +5506,9 @@ ImageResize(image, newWidth, newHeight);
 void ImageResizeNN(Image* image, int newWidth, int newHeight)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageResizeNN(image, newWidth, newHeight);
 ```
 
@@ -5526,9 +5526,9 @@ ImageResizeNN(image, newWidth, newHeight);
 void ImageResizeCanvas(Image* image, int newWidth, int newHeight, int offsetX, int offsetY, Color fill)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageResizeCanvas(image, newWidth, newHeight, offsetX, offsetY, fill);
 ```
 
@@ -5549,9 +5549,9 @@ ImageResizeCanvas(image, newWidth, newHeight, offsetX, offsetY, fill);
 void ImageMipmaps(Image* image)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageMipmaps(image);
 ```
 
@@ -5567,9 +5567,9 @@ ImageMipmaps(image);
 void ImageDither(Image* image, int rBpp, int gBpp, int bBpp, int aBpp)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDither(image, rBpp, gBpp, bBpp, aBpp);
 ```
 
@@ -5589,9 +5589,9 @@ ImageDither(image, rBpp, gBpp, bBpp, aBpp);
 void ImageFlipVertical(Image* image)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageFlipVertical(image);
 ```
 
@@ -5607,9 +5607,9 @@ ImageFlipVertical(image);
 void ImageFlipHorizontal(Image* image)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageFlipHorizontal(image);
 ```
 
@@ -5625,9 +5625,9 @@ ImageFlipHorizontal(image);
 void ImageRotate(Image* image, int degrees)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageRotate(image, degrees);
 ```
 
@@ -5644,9 +5644,9 @@ ImageRotate(image, degrees);
 void ImageRotateCW(Image* image)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageRotateCW(image);
 ```
 
@@ -5662,9 +5662,9 @@ ImageRotateCW(image);
 void ImageRotateCCW(Image* image)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageRotateCCW(image);
 ```
 
@@ -5680,9 +5680,9 @@ ImageRotateCCW(image);
 void ImageColorTint(Image* image, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageColorTint(image, color);
 ```
 
@@ -5699,9 +5699,9 @@ ImageColorTint(image, color);
 void ImageColorInvert(Image* image)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageColorInvert(image);
 ```
 
@@ -5717,9 +5717,9 @@ ImageColorInvert(image);
 void ImageColorGrayscale(Image* image)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageColorGrayscale(image);
 ```
 
@@ -5735,9 +5735,9 @@ ImageColorGrayscale(image);
 void ImageColorContrast(Image* image, int contrast)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageColorContrast(image, contrast);
 ```
 
@@ -5754,9 +5754,9 @@ ImageColorContrast(image, contrast);
 void ImageColorBrightness(Image* image, int brightness)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageColorBrightness(image, brightness);
 ```
 
@@ -5773,9 +5773,9 @@ ImageColorBrightness(image, brightness);
 void ImageColorReplace(Image* image, Color color, Color replace)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageColorReplace(image, color, replace);
 ```
 
@@ -5793,9 +5793,9 @@ ImageColorReplace(image, color, replace);
 void UnloadImageColors(Color* colors)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadImageColors(colors);
 ```
 
@@ -5811,9 +5811,9 @@ UnloadImageColors(colors);
 void UnloadImagePalette(Color* colors)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadImagePalette(colors);
 ```
 
@@ -5829,9 +5829,9 @@ UnloadImagePalette(colors);
 Rectangle GetImageAlphaBorder(Image image, float threshold)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetImageAlphaBorder(image, threshold);
 ```
 
@@ -5848,9 +5848,9 @@ let result = GetImageAlphaBorder(image, threshold);
 Color GetImageColor(Image image, int x, int y)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetImageColor(image, x, y);
 ```
 
@@ -5868,9 +5868,9 @@ let result = GetImageColor(image, x, y);
 void ImageClearBackground(Image* dst, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageClearBackground(dst, color);
 ```
 
@@ -5887,9 +5887,9 @@ ImageClearBackground(dst, color);
 void ImageDrawPixel(Image* dst, int posX, int posY, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawPixel(dst, posX, posY, color);
 ```
 
@@ -5908,9 +5908,9 @@ ImageDrawPixel(dst, posX, posY, color);
 void ImageDrawPixelV(Image* dst, Vector2 position, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawPixelV(dst, position, color);
 ```
 
@@ -5928,9 +5928,9 @@ ImageDrawPixelV(dst, position, color);
 void ImageDrawLine(Image* dst, int startPosX, int startPosY, int endPosX, int endPosY, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawLine(dst, startPosX, startPosY, endPosX, endPosY, color);
 ```
 
@@ -5951,9 +5951,9 @@ ImageDrawLine(dst, startPosX, startPosY, endPosX, endPosY, color);
 void ImageDrawLineV(Image* dst, Vector2 start, Vector2 end, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawLineV(dst, start, end, color);
 ```
 
@@ -5972,9 +5972,9 @@ ImageDrawLineV(dst, start, end, color);
 void ImageDrawLineEx(Image* dst, Vector2 start, Vector2 end, int thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawLineEx(dst, start, end, thick, color);
 ```
 
@@ -5994,9 +5994,9 @@ ImageDrawLineEx(dst, start, end, thick, color);
 void ImageDrawCircle(Image* dst, int centerX, int centerY, int radius, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawCircle(dst, centerX, centerY, radius, color);
 ```
 
@@ -6016,9 +6016,9 @@ ImageDrawCircle(dst, centerX, centerY, radius, color);
 void ImageDrawCircleV(Image* dst, Vector2 center, int radius, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawCircleV(dst, center, radius, color);
 ```
 
@@ -6037,9 +6037,9 @@ ImageDrawCircleV(dst, center, radius, color);
 void ImageDrawCircleLines(Image* dst, int centerX, int centerY, int radius, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawCircleLines(dst, centerX, centerY, radius, color);
 ```
 
@@ -6059,9 +6059,9 @@ ImageDrawCircleLines(dst, centerX, centerY, radius, color);
 void ImageDrawCircleLinesV(Image* dst, Vector2 center, int radius, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawCircleLinesV(dst, center, radius, color);
 ```
 
@@ -6080,9 +6080,9 @@ ImageDrawCircleLinesV(dst, center, radius, color);
 void ImageDrawRectangle(Image* dst, int posX, int posY, int width, int height, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawRectangle(dst, posX, posY, width, height, color);
 ```
 
@@ -6103,9 +6103,9 @@ ImageDrawRectangle(dst, posX, posY, width, height, color);
 void ImageDrawRectangleV(Image* dst, Vector2 position, Vector2 size, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawRectangleV(dst, position, size, color);
 ```
 
@@ -6124,9 +6124,9 @@ ImageDrawRectangleV(dst, position, size, color);
 void ImageDrawRectangleRec(Image* dst, Rectangle rec, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawRectangleRec(dst, rec, color);
 ```
 
@@ -6144,9 +6144,9 @@ ImageDrawRectangleRec(dst, rec, color);
 void ImageDrawRectangleLines(Image* dst, int posX, int posY, int width, int height, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawRectangleLines(dst, posX, posY, width, height, color);
 ```
 
@@ -6167,9 +6167,9 @@ ImageDrawRectangleLines(dst, posX, posY, width, height, color);
 void ImageDrawRectangleLinesEx(Image* dst, Rectangle rec, int thick, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawRectangleLinesEx(dst, rec, thick, color);
 ```
 
@@ -6188,9 +6188,9 @@ ImageDrawRectangleLinesEx(dst, rec, thick, color);
 void ImageDrawTriangle(Image* dst, Vector2 v1, Vector2 v2, Vector2 v3, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawTriangle(dst, v1, v2, v3, color);
 ```
 
@@ -6210,9 +6210,9 @@ ImageDrawTriangle(dst, v1, v2, v3, color);
 void ImageDrawTriangleGradient(Image* dst, Vector2 v1, Vector2 v2, Vector2 v3, Color c1, Color c2, Color c3)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawTriangleGradient(dst, v1, v2, v3, c1, c2, c3);
 ```
 
@@ -6234,9 +6234,9 @@ ImageDrawTriangleGradient(dst, v1, v2, v3, c1, c2, c3);
 void ImageDrawTriangleLines(Image* dst, Vector2 v1, Vector2 v2, Vector2 v3, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawTriangleLines(dst, v1, v2, v3, color);
 ```
 
@@ -6256,9 +6256,9 @@ ImageDrawTriangleLines(dst, v1, v2, v3, color);
 void ImageDrawTriangleFan(Image* dst, const Vector2* points, int pointCount, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawTriangleFan(dst, points, pointCount, color);
 ```
 
@@ -6277,9 +6277,9 @@ ImageDrawTriangleFan(dst, points, pointCount, color);
 void ImageDrawTriangleStrip(Image* dst, const Vector2* points, int pointCount, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawTriangleStrip(dst, points, pointCount, color);
 ```
 
@@ -6298,9 +6298,9 @@ ImageDrawTriangleStrip(dst, points, pointCount, color);
 void ImageDraw(Image* dst, Image src, Rectangle srcRec, Rectangle dstRec, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDraw(dst, src, srcRec, dstRec, tint);
 ```
 
@@ -6320,9 +6320,9 @@ ImageDraw(dst, src, srcRec, dstRec, tint);
 void ImageDrawText(Image* dst, const char* text, int posX, int posY, int fontSize, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawText(dst, text, posX, posY, fontSize, color);
 ```
 
@@ -6343,9 +6343,9 @@ ImageDrawText(dst, text, posX, posY, fontSize, color);
 void ImageDrawTextEx(Image* dst, Font font, const char* text, Vector2 position, float fontSize, float spacing, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ImageDrawTextEx(dst, font, text, position, fontSize, spacing, tint);
 ```
 
@@ -6367,9 +6367,9 @@ ImageDrawTextEx(dst, font, text, position, fontSize, spacing, tint);
 Texture2D LoadTexture(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadTexture(fileName);
 ```
 
@@ -6385,9 +6385,9 @@ let result = LoadTexture(fileName);
 Texture2D LoadTextureFromImage(Image image)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadTextureFromImage(image);
 ```
 
@@ -6403,9 +6403,9 @@ let result = LoadTextureFromImage(image);
 TextureCubemap LoadTextureCubemap(Image image, int layout)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadTextureCubemap(image, layout);
 ```
 
@@ -6422,9 +6422,9 @@ let result = LoadTextureCubemap(image, layout);
 RenderTexture2D LoadRenderTexture(int width, int height)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadRenderTexture(width, height);
 ```
 
@@ -6441,9 +6441,9 @@ let result = LoadRenderTexture(width, height);
 bool IsTextureValid(Texture2D texture)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsTextureValid(texture);
 ```
 
@@ -6459,9 +6459,9 @@ let result = IsTextureValid(texture);
 void UnloadTexture(Texture2D texture)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadTexture(texture);
 ```
 
@@ -6477,9 +6477,9 @@ UnloadTexture(texture);
 bool IsRenderTextureValid(RenderTexture2D target)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsRenderTextureValid(target);
 ```
 
@@ -6495,9 +6495,9 @@ let result = IsRenderTextureValid(target);
 void UnloadRenderTexture(RenderTexture2D target)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadRenderTexture(target);
 ```
 
@@ -6513,9 +6513,9 @@ UnloadRenderTexture(target);
 void UpdateTexture(Texture2D texture, const void* pixels)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UpdateTexture(texture, pixels);
 ```
 
@@ -6532,9 +6532,9 @@ UpdateTexture(texture, pixels);
 void UpdateTextureRec(Texture2D texture, Rectangle rec, const void* pixels)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UpdateTextureRec(texture, rec, pixels);
 ```
 
@@ -6552,9 +6552,9 @@ UpdateTextureRec(texture, rec, pixels);
 void GenTextureMipmaps(Texture2D* texture)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 GenTextureMipmaps(texture);
 ```
 
@@ -6570,9 +6570,9 @@ GenTextureMipmaps(texture);
 void SetTextureFilter(Texture2D texture, int filter)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetTextureFilter(texture, filter);
 ```
 
@@ -6589,9 +6589,9 @@ SetTextureFilter(texture, filter);
 void SetTextureWrap(Texture2D texture, int wrap)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetTextureWrap(texture, wrap);
 ```
 
@@ -6608,9 +6608,9 @@ SetTextureWrap(texture, wrap);
 void DrawTexture(Texture2D texture, int posX, int posY, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTexture(texture, posX, posY, tint);
 ```
 
@@ -6629,9 +6629,9 @@ DrawTexture(texture, posX, posY, tint);
 void DrawTextureV(Texture2D texture, Vector2 position, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTextureV(texture, position, tint);
 ```
 
@@ -6649,9 +6649,9 @@ DrawTextureV(texture, position, tint);
 void DrawTextureEx(Texture2D texture, Vector2 position, float rotation, float scale, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTextureEx(texture, position, rotation, scale, tint);
 ```
 
@@ -6671,9 +6671,9 @@ DrawTextureEx(texture, position, rotation, scale, tint);
 void DrawTextureRec(Texture2D texture, Rectangle source, Vector2 position, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTextureRec(texture, source, position, tint);
 ```
 
@@ -6692,9 +6692,9 @@ DrawTextureRec(texture, source, position, tint);
 void DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTexturePro(texture, source, dest, origin, rotation, tint);
 ```
 
@@ -6715,9 +6715,9 @@ DrawTexturePro(texture, source, dest, origin, rotation, tint);
 void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest, Vector2 origin, float rotation, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTextureNPatch(texture, nPatchInfo, dest, origin, rotation, tint);
 ```
 
@@ -6738,9 +6738,9 @@ DrawTextureNPatch(texture, nPatchInfo, dest, origin, rotation, tint);
 bool ColorIsEqual(Color col1, Color col2)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ColorIsEqual(col1, col2);
 ```
 
@@ -6757,9 +6757,9 @@ let result = ColorIsEqual(col1, col2);
 Color Fade(Color color, float alpha)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = Fade(color, alpha);
 ```
 
@@ -6776,9 +6776,9 @@ let result = Fade(color, alpha);
 int ColorToInt(Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ColorToInt(color);
 ```
 
@@ -6794,9 +6794,9 @@ let result = ColorToInt(color);
 Vector4 ColorNormalize(Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ColorNormalize(color);
 ```
 
@@ -6812,9 +6812,9 @@ let result = ColorNormalize(color);
 Color ColorFromNormalized(Vector4 normalized)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ColorFromNormalized(normalized);
 ```
 
@@ -6830,9 +6830,9 @@ let result = ColorFromNormalized(normalized);
 Vector3 ColorToHSV(Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ColorToHSV(color);
 ```
 
@@ -6848,9 +6848,9 @@ let result = ColorToHSV(color);
 Color ColorFromHSV(float hue, float saturation, float value)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ColorFromHSV(hue, saturation, value);
 ```
 
@@ -6868,9 +6868,9 @@ let result = ColorFromHSV(hue, saturation, value);
 Color ColorTint(Color color, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ColorTint(color, tint);
 ```
 
@@ -6887,9 +6887,9 @@ let result = ColorTint(color, tint);
 Color ColorBrightness(Color color, float factor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ColorBrightness(color, factor);
 ```
 
@@ -6906,9 +6906,9 @@ let result = ColorBrightness(color, factor);
 Color ColorContrast(Color color, float contrast)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ColorContrast(color, contrast);
 ```
 
@@ -6925,9 +6925,9 @@ let result = ColorContrast(color, contrast);
 Color ColorAlpha(Color color, float alpha)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ColorAlpha(color, alpha);
 ```
 
@@ -6944,9 +6944,9 @@ let result = ColorAlpha(color, alpha);
 Color ColorAlphaBlend(Color dst, Color src, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ColorAlphaBlend(dst, src, tint);
 ```
 
@@ -6964,9 +6964,9 @@ let result = ColorAlphaBlend(dst, src, tint);
 Color ColorLerp(Color color1, Color color2, float factor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ColorLerp(color1, color2, factor);
 ```
 
@@ -6984,9 +6984,9 @@ let result = ColorLerp(color1, color2, factor);
 Color GetColor(unsigned int hexValue)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetColor(hexValue);
 ```
 
@@ -7002,9 +7002,9 @@ let result = GetColor(hexValue);
 Color GetPixelColor(void* srcPtr, int format)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetPixelColor(srcPtr, format);
 ```
 
@@ -7021,9 +7021,9 @@ let result = GetPixelColor(srcPtr, format);
 void SetPixelColor(void* dstPtr, Color color, int format)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetPixelColor(dstPtr, color, format);
 ```
 
@@ -7041,9 +7041,9 @@ SetPixelColor(dstPtr, color, format);
 int GetPixelDataSize(int width, int height, int format)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetPixelDataSize(width, height, format);
 ```
 
@@ -7061,9 +7061,9 @@ let result = GetPixelDataSize(width, height, format);
 Font GetFontDefault()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetFontDefault();
 ```
 
@@ -7075,9 +7075,9 @@ let result = GetFontDefault();
 Font LoadFont(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadFont(fileName);
 ```
 
@@ -7093,9 +7093,9 @@ let result = LoadFont(fileName);
 Font LoadFontEx(const char* fileName, int fontSize, const int* codepoints, int codepointCount)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadFontEx(fileName, fontSize, codepoints, codepointCount);
 ```
 
@@ -7114,9 +7114,9 @@ let result = LoadFontEx(fileName, fontSize, codepoints, codepointCount);
 Font LoadFontFromImage(Image image, Color key, int firstChar)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadFontFromImage(image, key, firstChar);
 ```
 
@@ -7134,9 +7134,9 @@ let result = LoadFontFromImage(image, key, firstChar);
 Font LoadFontFromMemory(const char* fileType, const unsigned char* fileData, int dataSize, int fontSize, const int* codepoints, int codepointCount)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadFontFromMemory(fileType, fileData, dataSize, fontSize, codepoints, codepointCount);
 ```
 
@@ -7157,9 +7157,9 @@ let result = LoadFontFromMemory(fileType, fileData, dataSize, fontSize, codepoin
 bool IsFontValid(Font font)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsFontValid(font);
 ```
 
@@ -7175,9 +7175,9 @@ let result = IsFontValid(font);
 Image GenImageFontAtlas(const GlyphInfo* glyphs, Rectangle** glyphRecs, int glyphCount, int fontSize, int padding, int packMethod)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenImageFontAtlas(glyphs, glyphRecs, glyphCount, fontSize, padding, packMethod);
 ```
 
@@ -7198,9 +7198,9 @@ let result = GenImageFontAtlas(glyphs, glyphRecs, glyphCount, fontSize, padding,
 void UnloadFontData(GlyphInfo* glyphs, int glyphCount)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadFontData(glyphs, glyphCount);
 ```
 
@@ -7217,9 +7217,9 @@ UnloadFontData(glyphs, glyphCount);
 void UnloadFont(Font font)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadFont(font);
 ```
 
@@ -7235,9 +7235,9 @@ UnloadFont(font);
 bool ExportFontAsCode(Font font, const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ExportFontAsCode(font, fileName);
 ```
 
@@ -7254,9 +7254,9 @@ let result = ExportFontAsCode(font, fileName);
 void DrawFPS(int posX, int posY)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawFPS(posX, posY);
 ```
 
@@ -7273,9 +7273,9 @@ DrawFPS(posX, posY);
 void DrawText(const char* text, int posX, int posY, int fontSize, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawText(text, posX, posY, fontSize, color);
 ```
 
@@ -7295,9 +7295,9 @@ DrawText(text, posX, posY, fontSize, color);
 void DrawTextEx(Font font, const char* text, Vector2 position, float fontSize, float spacing, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTextEx(font, text, position, fontSize, spacing, tint);
 ```
 
@@ -7318,9 +7318,9 @@ DrawTextEx(font, text, position, fontSize, spacing, tint);
 void DrawTextPro(Font font, const char* text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTextPro(font, text, position, origin, rotation, fontSize, spacing, tint);
 ```
 
@@ -7343,9 +7343,9 @@ DrawTextPro(font, text, position, origin, rotation, fontSize, spacing, tint);
 void DrawTextCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTextCodepoint(font, codepoint, position, fontSize, tint);
 ```
 
@@ -7365,9 +7365,9 @@ DrawTextCodepoint(font, codepoint, position, fontSize, tint);
 void DrawTextCodepoints(Font font, const int* codepoints, int codepointCount, Vector2 position, float fontSize, float spacing, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTextCodepoints(font, codepoints, codepointCount, position, fontSize, spacing, tint);
 ```
 
@@ -7389,9 +7389,9 @@ DrawTextCodepoints(font, codepoints, codepointCount, position, fontSize, spacing
 void SetTextLineSpacing(int spacing)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetTextLineSpacing(spacing);
 ```
 
@@ -7407,9 +7407,9 @@ SetTextLineSpacing(spacing);
 int MeasureText(const char* text, int fontSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = MeasureText(text, fontSize);
 ```
 
@@ -7426,9 +7426,9 @@ let result = MeasureText(text, fontSize);
 Vector2 MeasureTextEx(Font font, const char* text, float fontSize, float spacing)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = MeasureTextEx(font, text, fontSize, spacing);
 ```
 
@@ -7447,9 +7447,9 @@ let result = MeasureTextEx(font, text, fontSize, spacing);
 Vector2 MeasureTextCodepoints(Font font, const int* codepoints, int length, float fontSize, float spacing)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = MeasureTextCodepoints(font, codepoints, length, fontSize, spacing);
 ```
 
@@ -7469,9 +7469,9 @@ let result = MeasureTextCodepoints(font, codepoints, length, fontSize, spacing);
 int GetGlyphIndex(Font font, int codepoint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetGlyphIndex(font, codepoint);
 ```
 
@@ -7488,9 +7488,9 @@ let result = GetGlyphIndex(font, codepoint);
 GlyphInfo GetGlyphInfo(Font font, int codepoint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetGlyphInfo(font, codepoint);
 ```
 
@@ -7507,9 +7507,9 @@ let result = GetGlyphInfo(font, codepoint);
 Rectangle GetGlyphAtlasRec(Font font, int codepoint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetGlyphAtlasRec(font, codepoint);
 ```
 
@@ -7526,9 +7526,9 @@ let result = GetGlyphAtlasRec(font, codepoint);
 void UnloadUTF8(char* text)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadUTF8(text);
 ```
 
@@ -7544,9 +7544,9 @@ UnloadUTF8(text);
 void UnloadCodepoints(int* codepoints)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadCodepoints(codepoints);
 ```
 
@@ -7562,9 +7562,9 @@ UnloadCodepoints(codepoints);
 int GetCodepointCount(const char* text)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetCodepointCount(text);
 ```
 
@@ -7580,9 +7580,9 @@ let result = GetCodepointCount(text);
 int GetCodepoint(const char* text, int* codepointSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetCodepoint(text, codepointSize);
 ```
 
@@ -7599,9 +7599,9 @@ let result = GetCodepoint(text, codepointSize);
 int GetCodepointNext(const char* text, int* codepointSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetCodepointNext(text, codepointSize);
 ```
 
@@ -7618,9 +7618,9 @@ let result = GetCodepointNext(text, codepointSize);
 int GetCodepointPrevious(const char* text, int* codepointSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetCodepointPrevious(text, codepointSize);
 ```
 
@@ -7637,9 +7637,9 @@ let result = GetCodepointPrevious(text, codepointSize);
 void UnloadTextLines(char** text, int lineCount)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadTextLines(text, lineCount);
 ```
 
@@ -7656,9 +7656,9 @@ UnloadTextLines(text, lineCount);
 int TextCopy(char* dst, const char* src)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = TextCopy(dst, src);
 ```
 
@@ -7675,9 +7675,9 @@ let result = TextCopy(dst, src);
 bool TextIsEqual(const char* text1, const char* text2)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = TextIsEqual(text1, text2);
 ```
 
@@ -7694,9 +7694,9 @@ let result = TextIsEqual(text1, text2);
 unsigned int TextLength(const char* text)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = TextLength(text);
 ```
 
@@ -7712,9 +7712,9 @@ let result = TextLength(text);
 void TextAppend(char* text, const char* append, int* position)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 TextAppend(text, append, position);
 ```
 
@@ -7732,9 +7732,9 @@ TextAppend(text, append, position);
 int TextFindIndex(const char* text, const char* search)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = TextFindIndex(text, search);
 ```
 
@@ -7751,9 +7751,9 @@ let result = TextFindIndex(text, search);
 int TextToInteger(const char* text)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = TextToInteger(text);
 ```
 
@@ -7769,9 +7769,9 @@ let result = TextToInteger(text);
 float TextToFloat(const char* text)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = TextToFloat(text);
 ```
 
@@ -7787,9 +7787,9 @@ let result = TextToFloat(text);
 void DrawLine3D(Vector3 startPos, Vector3 endPos, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawLine3D(startPos, endPos, color);
 ```
 
@@ -7807,9 +7807,9 @@ DrawLine3D(startPos, endPos, color);
 void DrawPoint3D(Vector3 position, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawPoint3D(position, color);
 ```
 
@@ -7826,9 +7826,9 @@ DrawPoint3D(position, color);
 void DrawCircle3D(Vector3 center, float radius, Vector3 rotationAxis, float rotationAngle, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCircle3D(center, radius, rotationAxis, rotationAngle, color);
 ```
 
@@ -7848,9 +7848,9 @@ DrawCircle3D(center, radius, rotationAxis, rotationAngle, color);
 void DrawTriangle3D(Vector3 v1, Vector3 v2, Vector3 v3, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTriangle3D(v1, v2, v3, color);
 ```
 
@@ -7869,9 +7869,9 @@ DrawTriangle3D(v1, v2, v3, color);
 void DrawTriangleStrip3D(const Vector3* points, int pointCount, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawTriangleStrip3D(points, pointCount, color);
 ```
 
@@ -7889,9 +7889,9 @@ DrawTriangleStrip3D(points, pointCount, color);
 void DrawCube(Vector3 position, float width, float height, float length, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCube(position, width, height, length, color);
 ```
 
@@ -7911,9 +7911,9 @@ DrawCube(position, width, height, length, color);
 void DrawCubeV(Vector3 position, Vector3 size, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCubeV(position, size, color);
 ```
 
@@ -7931,9 +7931,9 @@ DrawCubeV(position, size, color);
 void DrawCubeWires(Vector3 position, float width, float height, float length, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCubeWires(position, width, height, length, color);
 ```
 
@@ -7953,9 +7953,9 @@ DrawCubeWires(position, width, height, length, color);
 void DrawCubeWiresV(Vector3 position, Vector3 size, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCubeWiresV(position, size, color);
 ```
 
@@ -7973,9 +7973,9 @@ DrawCubeWiresV(position, size, color);
 void DrawSphere(Vector3 centerPos, float radius, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawSphere(centerPos, radius, color);
 ```
 
@@ -7993,9 +7993,9 @@ DrawSphere(centerPos, radius, color);
 void DrawSphereEx(Vector3 centerPos, float radius, int rings, int slices, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawSphereEx(centerPos, radius, rings, slices, color);
 ```
 
@@ -8015,9 +8015,9 @@ DrawSphereEx(centerPos, radius, rings, slices, color);
 void DrawSphereWires(Vector3 centerPos, float radius, int rings, int slices, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawSphereWires(centerPos, radius, rings, slices, color);
 ```
 
@@ -8037,9 +8037,9 @@ DrawSphereWires(centerPos, radius, rings, slices, color);
 void DrawCylinder(Vector3 position, float radiusTop, float radiusBottom, float height, int slices, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCylinder(position, radiusTop, radiusBottom, height, slices, color);
 ```
 
@@ -8060,9 +8060,9 @@ DrawCylinder(position, radiusTop, radiusBottom, height, slices, color);
 void DrawCylinderEx(Vector3 startPos, Vector3 endPos, float startRadius, float endRadius, int sides, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCylinderEx(startPos, endPos, startRadius, endRadius, sides, color);
 ```
 
@@ -8083,9 +8083,9 @@ DrawCylinderEx(startPos, endPos, startRadius, endRadius, sides, color);
 void DrawCylinderWires(Vector3 position, float radiusTop, float radiusBottom, float height, int slices, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCylinderWires(position, radiusTop, radiusBottom, height, slices, color);
 ```
 
@@ -8106,9 +8106,9 @@ DrawCylinderWires(position, radiusTop, radiusBottom, height, slices, color);
 void DrawCylinderWiresEx(Vector3 startPos, Vector3 endPos, float startRadius, float endRadius, int slices, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCylinderWiresEx(startPos, endPos, startRadius, endRadius, slices, color);
 ```
 
@@ -8129,9 +8129,9 @@ DrawCylinderWiresEx(startPos, endPos, startRadius, endRadius, slices, color);
 void DrawCapsule(Vector3 startPos, Vector3 endPos, float radius, int rings, int slices, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCapsule(startPos, endPos, radius, rings, slices, color);
 ```
 
@@ -8152,9 +8152,9 @@ DrawCapsule(startPos, endPos, radius, rings, slices, color);
 void DrawCapsuleWires(Vector3 startPos, Vector3 endPos, float radius, int rings, int slices, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawCapsuleWires(startPos, endPos, radius, rings, slices, color);
 ```
 
@@ -8175,9 +8175,9 @@ DrawCapsuleWires(startPos, endPos, radius, rings, slices, color);
 void DrawPlane(Vector3 centerPos, Vector2 size, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawPlane(centerPos, size, color);
 ```
 
@@ -8195,9 +8195,9 @@ DrawPlane(centerPos, size, color);
 void DrawRay(Ray ray, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawRay(ray, color);
 ```
 
@@ -8214,9 +8214,9 @@ DrawRay(ray, color);
 void DrawGrid(int slices, float spacing)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawGrid(slices, spacing);
 ```
 
@@ -8233,9 +8233,9 @@ DrawGrid(slices, spacing);
 Model LoadModel(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadModel(fileName);
 ```
 
@@ -8251,9 +8251,9 @@ let result = LoadModel(fileName);
 Model LoadModelFromMesh(Mesh mesh)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadModelFromMesh(mesh);
 ```
 
@@ -8269,9 +8269,9 @@ let result = LoadModelFromMesh(mesh);
 bool IsModelValid(Model model)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsModelValid(model);
 ```
 
@@ -8287,9 +8287,9 @@ let result = IsModelValid(model);
 void UnloadModel(Model model)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadModel(model);
 ```
 
@@ -8305,9 +8305,9 @@ UnloadModel(model);
 BoundingBox GetModelBoundingBox(Model model)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetModelBoundingBox(model);
 ```
 
@@ -8323,9 +8323,9 @@ let result = GetModelBoundingBox(model);
 void DrawModel(Model model, Vector3 position, float scale, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawModel(model, position, scale, tint);
 ```
 
@@ -8344,9 +8344,9 @@ DrawModel(model, position, scale, tint);
 void DrawModelEx(Model model, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawModelEx(model, position, rotationAxis, rotationAngle, scale, tint);
 ```
 
@@ -8367,9 +8367,9 @@ DrawModelEx(model, position, rotationAxis, rotationAngle, scale, tint);
 void DrawModelWires(Model model, Vector3 position, float scale, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawModelWires(model, position, scale, tint);
 ```
 
@@ -8388,9 +8388,9 @@ DrawModelWires(model, position, scale, tint);
 void DrawModelWiresEx(Model model, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawModelWiresEx(model, position, rotationAxis, rotationAngle, scale, tint);
 ```
 
@@ -8411,9 +8411,9 @@ DrawModelWiresEx(model, position, rotationAxis, rotationAngle, scale, tint);
 void DrawBoundingBox(BoundingBox box, Color color)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawBoundingBox(box, color);
 ```
 
@@ -8430,9 +8430,9 @@ DrawBoundingBox(box, color);
 void DrawBillboard(Camera camera, Texture2D texture, Vector3 position, float scale, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawBillboard(camera, texture, position, scale, tint);
 ```
 
@@ -8452,9 +8452,9 @@ DrawBillboard(camera, texture, position, scale, tint);
 void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle source, Vector3 position, Vector2 size, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawBillboardRec(camera, texture, source, position, size, tint);
 ```
 
@@ -8475,9 +8475,9 @@ DrawBillboardRec(camera, texture, source, position, size, tint);
 void DrawBillboardPro(Camera camera, Texture2D texture, Rectangle source, Vector3 position, Vector3 up, Vector2 size, Vector2 origin, float rotation, Color tint)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawBillboardPro(camera, texture, source, position, up, size, origin, rotation, tint);
 ```
 
@@ -8501,9 +8501,9 @@ DrawBillboardPro(camera, texture, source, position, up, size, origin, rotation, 
 void UploadMesh(Mesh* mesh, bool dynamic)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UploadMesh(mesh, dynamic);
 ```
 
@@ -8520,9 +8520,9 @@ UploadMesh(mesh, dynamic);
 void UpdateMeshBuffer(Mesh mesh, int index, const void* data, int dataSize, int offset)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UpdateMeshBuffer(mesh, index, data, dataSize, offset);
 ```
 
@@ -8542,9 +8542,9 @@ UpdateMeshBuffer(mesh, index, data, dataSize, offset);
 void UnloadMesh(Mesh mesh)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadMesh(mesh);
 ```
 
@@ -8560,9 +8560,9 @@ UnloadMesh(mesh);
 void DrawMesh(Mesh mesh, Material material, Matrix transform)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawMesh(mesh, material, transform);
 ```
 
@@ -8580,9 +8580,9 @@ DrawMesh(mesh, material, transform);
 void DrawMeshInstanced(Mesh mesh, Material material, const Matrix* transforms, int instances)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DrawMeshInstanced(mesh, material, transforms, instances);
 ```
 
@@ -8601,9 +8601,9 @@ DrawMeshInstanced(mesh, material, transforms, instances);
 BoundingBox GetMeshBoundingBox(Mesh mesh)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMeshBoundingBox(mesh);
 ```
 
@@ -8619,9 +8619,9 @@ let result = GetMeshBoundingBox(mesh);
 void GenMeshTangents(Mesh* mesh)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 GenMeshTangents(mesh);
 ```
 
@@ -8637,9 +8637,9 @@ GenMeshTangents(mesh);
 bool ExportMesh(Mesh mesh, const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ExportMesh(mesh, fileName);
 ```
 
@@ -8656,9 +8656,9 @@ let result = ExportMesh(mesh, fileName);
 bool ExportMeshAsCode(Mesh mesh, const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ExportMeshAsCode(mesh, fileName);
 ```
 
@@ -8675,9 +8675,9 @@ let result = ExportMeshAsCode(mesh, fileName);
 Mesh GenMeshPoly(int sides, float radius)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenMeshPoly(sides, radius);
 ```
 
@@ -8694,9 +8694,9 @@ let result = GenMeshPoly(sides, radius);
 Mesh GenMeshPlane(float width, float length, int resX, int resZ)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenMeshPlane(width, length, resX, resZ);
 ```
 
@@ -8715,9 +8715,9 @@ let result = GenMeshPlane(width, length, resX, resZ);
 Mesh GenMeshCube(float width, float height, float length)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenMeshCube(width, height, length);
 ```
 
@@ -8735,9 +8735,9 @@ let result = GenMeshCube(width, height, length);
 Mesh GenMeshSphere(float radius, int rings, int slices)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenMeshSphere(radius, rings, slices);
 ```
 
@@ -8755,9 +8755,9 @@ let result = GenMeshSphere(radius, rings, slices);
 Mesh GenMeshHemiSphere(float radius, int rings, int slices)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenMeshHemiSphere(radius, rings, slices);
 ```
 
@@ -8775,9 +8775,9 @@ let result = GenMeshHemiSphere(radius, rings, slices);
 Mesh GenMeshCylinder(float radius, float height, int slices)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenMeshCylinder(radius, height, slices);
 ```
 
@@ -8795,9 +8795,9 @@ let result = GenMeshCylinder(radius, height, slices);
 Mesh GenMeshCone(float radius, float height, int slices)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenMeshCone(radius, height, slices);
 ```
 
@@ -8815,9 +8815,9 @@ let result = GenMeshCone(radius, height, slices);
 Mesh GenMeshTorus(float radius, float size, int radSeg, int sides)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenMeshTorus(radius, size, radSeg, sides);
 ```
 
@@ -8836,9 +8836,9 @@ let result = GenMeshTorus(radius, size, radSeg, sides);
 Mesh GenMeshKnot(float radius, float size, int radSeg, int sides)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenMeshKnot(radius, size, radSeg, sides);
 ```
 
@@ -8857,9 +8857,9 @@ let result = GenMeshKnot(radius, size, radSeg, sides);
 Mesh GenMeshHeightmap(Image heightmap, Vector3 size)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenMeshHeightmap(heightmap, size);
 ```
 
@@ -8876,9 +8876,9 @@ let result = GenMeshHeightmap(heightmap, size);
 Mesh GenMeshCubicmap(Image cubicmap, Vector3 cubeSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GenMeshCubicmap(cubicmap, cubeSize);
 ```
 
@@ -8895,9 +8895,9 @@ let result = GenMeshCubicmap(cubicmap, cubeSize);
 Material LoadMaterialDefault()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadMaterialDefault();
 ```
 
@@ -8909,9 +8909,9 @@ let result = LoadMaterialDefault();
 bool IsMaterialValid(Material material)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsMaterialValid(material);
 ```
 
@@ -8927,9 +8927,9 @@ let result = IsMaterialValid(material);
 void UnloadMaterial(Material material)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadMaterial(material);
 ```
 
@@ -8945,9 +8945,9 @@ UnloadMaterial(material);
 void SetMaterialTexture(Material* material, int mapType, Texture2D texture)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetMaterialTexture(material, mapType, texture);
 ```
 
@@ -8965,9 +8965,9 @@ SetMaterialTexture(material, mapType, texture);
 void SetModelMeshMaterial(Model* model, int meshId, int materialId)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetModelMeshMaterial(model, meshId, materialId);
 ```
 
@@ -8985,9 +8985,9 @@ SetModelMeshMaterial(model, meshId, materialId);
 void UpdateModelAnimation(Model model, ModelAnimation anim, float frame)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UpdateModelAnimation(model, anim, frame);
 ```
 
@@ -9005,9 +9005,9 @@ UpdateModelAnimation(model, anim, frame);
 void UpdateModelAnimationEx(Model model, ModelAnimation animA, float frameA, ModelAnimation animB, float frameB, float blend)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UpdateModelAnimationEx(model, animA, frameA, animB, frameB, blend);
 ```
 
@@ -9028,9 +9028,9 @@ UpdateModelAnimationEx(model, animA, frameA, animB, frameB, blend);
 void UnloadModelAnimations(ModelAnimation* animations, int animCount)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadModelAnimations(animations, animCount);
 ```
 
@@ -9047,9 +9047,9 @@ UnloadModelAnimations(animations, animCount);
 bool IsModelAnimationValid(Model model, ModelAnimation anim)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsModelAnimationValid(model, anim);
 ```
 
@@ -9066,9 +9066,9 @@ let result = IsModelAnimationValid(model, anim);
 bool CheckCollisionSpheres(Vector3 center1, float radius1, Vector3 center2, float radius2)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = CheckCollisionSpheres(center1, radius1, center2, radius2);
 ```
 
@@ -9087,9 +9087,9 @@ let result = CheckCollisionSpheres(center1, radius1, center2, radius2);
 bool CheckCollisionBoxes(BoundingBox box1, BoundingBox box2)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = CheckCollisionBoxes(box1, box2);
 ```
 
@@ -9106,9 +9106,9 @@ let result = CheckCollisionBoxes(box1, box2);
 bool CheckCollisionBoxSphere(BoundingBox box, Vector3 center, float radius)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = CheckCollisionBoxSphere(box, center, radius);
 ```
 
@@ -9126,9 +9126,9 @@ let result = CheckCollisionBoxSphere(box, center, radius);
 RayCollision GetRayCollisionSphere(Ray ray, Vector3 center, float radius)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetRayCollisionSphere(ray, center, radius);
 ```
 
@@ -9146,9 +9146,9 @@ let result = GetRayCollisionSphere(ray, center, radius);
 RayCollision GetRayCollisionBox(Ray ray, BoundingBox box)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetRayCollisionBox(ray, box);
 ```
 
@@ -9165,9 +9165,9 @@ let result = GetRayCollisionBox(ray, box);
 RayCollision GetRayCollisionMesh(Ray ray, Mesh mesh, Matrix transform)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetRayCollisionMesh(ray, mesh, transform);
 ```
 
@@ -9185,9 +9185,9 @@ let result = GetRayCollisionMesh(ray, mesh, transform);
 RayCollision GetRayCollisionTriangle(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetRayCollisionTriangle(ray, p1, p2, p3);
 ```
 
@@ -9206,9 +9206,9 @@ let result = GetRayCollisionTriangle(ray, p1, p2, p3);
 RayCollision GetRayCollisionQuad(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetRayCollisionQuad(ray, p1, p2, p3, p4);
 ```
 
@@ -9228,9 +9228,9 @@ let result = GetRayCollisionQuad(ray, p1, p2, p3, p4);
 typedef void()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = void();
 ```
 
@@ -9242,9 +9242,9 @@ let result = void();
 void InitAudioDevice()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 InitAudioDevice();
 ```
 
@@ -9256,9 +9256,9 @@ InitAudioDevice();
 void CloseAudioDevice()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 CloseAudioDevice();
 ```
 
@@ -9270,9 +9270,9 @@ CloseAudioDevice();
 bool IsAudioDeviceReady()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsAudioDeviceReady();
 ```
 
@@ -9284,9 +9284,9 @@ let result = IsAudioDeviceReady();
 void SetMasterVolume(float volume)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetMasterVolume(volume);
 ```
 
@@ -9302,9 +9302,9 @@ SetMasterVolume(volume);
 float GetMasterVolume()
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMasterVolume();
 ```
 
@@ -9316,9 +9316,9 @@ let result = GetMasterVolume();
 Wave LoadWave(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadWave(fileName);
 ```
 
@@ -9334,9 +9334,9 @@ let result = LoadWave(fileName);
 Wave LoadWaveFromMemory(const char* fileType, const unsigned char* fileData, int dataSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadWaveFromMemory(fileType, fileData, dataSize);
 ```
 
@@ -9354,9 +9354,9 @@ let result = LoadWaveFromMemory(fileType, fileData, dataSize);
 bool IsWaveValid(Wave wave)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsWaveValid(wave);
 ```
 
@@ -9372,9 +9372,9 @@ let result = IsWaveValid(wave);
 Sound LoadSound(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadSound(fileName);
 ```
 
@@ -9390,9 +9390,9 @@ let result = LoadSound(fileName);
 Sound LoadSoundFromWave(Wave wave)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadSoundFromWave(wave);
 ```
 
@@ -9408,9 +9408,9 @@ let result = LoadSoundFromWave(wave);
 Sound LoadSoundAlias(Sound source)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadSoundAlias(source);
 ```
 
@@ -9426,9 +9426,9 @@ let result = LoadSoundAlias(source);
 bool IsSoundValid(Sound sound)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsSoundValid(sound);
 ```
 
@@ -9444,9 +9444,9 @@ let result = IsSoundValid(sound);
 void UpdateSound(Sound sound, const void* data, int frameCount)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UpdateSound(sound, data, frameCount);
 ```
 
@@ -9464,9 +9464,9 @@ UpdateSound(sound, data, frameCount);
 void UnloadWave(Wave wave)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadWave(wave);
 ```
 
@@ -9482,9 +9482,9 @@ UnloadWave(wave);
 void UnloadSound(Sound sound)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadSound(sound);
 ```
 
@@ -9500,9 +9500,9 @@ UnloadSound(sound);
 void UnloadSoundAlias(Sound alias)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadSoundAlias(alias);
 ```
 
@@ -9518,9 +9518,9 @@ UnloadSoundAlias(alias);
 bool ExportWave(Wave wave, const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ExportWave(wave, fileName);
 ```
 
@@ -9537,9 +9537,9 @@ let result = ExportWave(wave, fileName);
 bool ExportWaveAsCode(Wave wave, const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = ExportWaveAsCode(wave, fileName);
 ```
 
@@ -9556,9 +9556,9 @@ let result = ExportWaveAsCode(wave, fileName);
 void PlaySound(Sound sound)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 PlaySound(sound);
 ```
 
@@ -9574,9 +9574,9 @@ PlaySound(sound);
 void StopSound(Sound sound)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 StopSound(sound);
 ```
 
@@ -9592,9 +9592,9 @@ StopSound(sound);
 void PauseSound(Sound sound)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 PauseSound(sound);
 ```
 
@@ -9610,9 +9610,9 @@ PauseSound(sound);
 void ResumeSound(Sound sound)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ResumeSound(sound);
 ```
 
@@ -9628,9 +9628,9 @@ ResumeSound(sound);
 bool IsSoundPlaying(Sound sound)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsSoundPlaying(sound);
 ```
 
@@ -9646,9 +9646,9 @@ let result = IsSoundPlaying(sound);
 void SetSoundVolume(Sound sound, float volume)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetSoundVolume(sound, volume);
 ```
 
@@ -9665,9 +9665,9 @@ SetSoundVolume(sound, volume);
 void SetSoundPitch(Sound sound, float pitch)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetSoundPitch(sound, pitch);
 ```
 
@@ -9684,9 +9684,9 @@ SetSoundPitch(sound, pitch);
 void SetSoundPan(Sound sound, float pan)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetSoundPan(sound, pan);
 ```
 
@@ -9703,9 +9703,9 @@ SetSoundPan(sound, pan);
 Wave WaveCopy(Wave wave)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = WaveCopy(wave);
 ```
 
@@ -9721,9 +9721,9 @@ let result = WaveCopy(wave);
 void WaveCrop(Wave* wave, int initFrame, int finalFrame)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 WaveCrop(wave, initFrame, finalFrame);
 ```
 
@@ -9741,9 +9741,9 @@ WaveCrop(wave, initFrame, finalFrame);
 void WaveFormat(Wave* wave, int sampleRate, int sampleSize, int channels)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 WaveFormat(wave, sampleRate, sampleSize, channels);
 ```
 
@@ -9762,9 +9762,9 @@ WaveFormat(wave, sampleRate, sampleSize, channels);
 void UnloadWaveSamples(float* samples)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadWaveSamples(samples);
 ```
 
@@ -9780,9 +9780,9 @@ UnloadWaveSamples(samples);
 Music LoadMusicStream(const char* fileName)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadMusicStream(fileName);
 ```
 
@@ -9798,9 +9798,9 @@ let result = LoadMusicStream(fileName);
 Music LoadMusicStreamFromMemory(const char* fileType, const unsigned char* data, int dataSize)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadMusicStreamFromMemory(fileType, data, dataSize);
 ```
 
@@ -9818,9 +9818,9 @@ let result = LoadMusicStreamFromMemory(fileType, data, dataSize);
 bool IsMusicValid(Music music)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsMusicValid(music);
 ```
 
@@ -9836,9 +9836,9 @@ let result = IsMusicValid(music);
 void UnloadMusicStream(Music music)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadMusicStream(music);
 ```
 
@@ -9854,9 +9854,9 @@ UnloadMusicStream(music);
 void PlayMusicStream(Music music)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 PlayMusicStream(music);
 ```
 
@@ -9872,9 +9872,9 @@ PlayMusicStream(music);
 bool IsMusicStreamPlaying(Music music)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsMusicStreamPlaying(music);
 ```
 
@@ -9890,9 +9890,9 @@ let result = IsMusicStreamPlaying(music);
 void UpdateMusicStream(Music music)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UpdateMusicStream(music);
 ```
 
@@ -9908,9 +9908,9 @@ UpdateMusicStream(music);
 void StopMusicStream(Music music)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 StopMusicStream(music);
 ```
 
@@ -9926,9 +9926,9 @@ StopMusicStream(music);
 void PauseMusicStream(Music music)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 PauseMusicStream(music);
 ```
 
@@ -9944,9 +9944,9 @@ PauseMusicStream(music);
 void ResumeMusicStream(Music music)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ResumeMusicStream(music);
 ```
 
@@ -9962,9 +9962,9 @@ ResumeMusicStream(music);
 void SeekMusicStream(Music music, float position)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SeekMusicStream(music, position);
 ```
 
@@ -9981,9 +9981,9 @@ SeekMusicStream(music, position);
 void SetMusicVolume(Music music, float volume)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetMusicVolume(music, volume);
 ```
 
@@ -10000,9 +10000,9 @@ SetMusicVolume(music, volume);
 void SetMusicPitch(Music music, float pitch)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetMusicPitch(music, pitch);
 ```
 
@@ -10019,9 +10019,9 @@ SetMusicPitch(music, pitch);
 void SetMusicPan(Music music, float pan)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetMusicPan(music, pan);
 ```
 
@@ -10038,9 +10038,9 @@ SetMusicPan(music, pan);
 float GetMusicTimeLength(Music music)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMusicTimeLength(music);
 ```
 
@@ -10056,9 +10056,9 @@ let result = GetMusicTimeLength(music);
 float GetMusicTimePlayed(Music music)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = GetMusicTimePlayed(music);
 ```
 
@@ -10074,9 +10074,9 @@ let result = GetMusicTimePlayed(music);
 AudioStream LoadAudioStream(unsigned int sampleRate, unsigned int sampleSize, unsigned int channels)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = LoadAudioStream(sampleRate, sampleSize, channels);
 ```
 
@@ -10094,9 +10094,9 @@ let result = LoadAudioStream(sampleRate, sampleSize, channels);
 bool IsAudioStreamValid(AudioStream stream)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsAudioStreamValid(stream);
 ```
 
@@ -10112,9 +10112,9 @@ let result = IsAudioStreamValid(stream);
 void UnloadAudioStream(AudioStream stream)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UnloadAudioStream(stream);
 ```
 
@@ -10130,9 +10130,9 @@ UnloadAudioStream(stream);
 void UpdateAudioStream(AudioStream stream, const void* data, int frameCount)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 UpdateAudioStream(stream, data, frameCount);
 ```
 
@@ -10150,9 +10150,9 @@ UpdateAudioStream(stream, data, frameCount);
 bool IsAudioStreamProcessed(AudioStream stream)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsAudioStreamProcessed(stream);
 ```
 
@@ -10168,9 +10168,9 @@ let result = IsAudioStreamProcessed(stream);
 void PlayAudioStream(AudioStream stream)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 PlayAudioStream(stream);
 ```
 
@@ -10186,9 +10186,9 @@ PlayAudioStream(stream);
 void PauseAudioStream(AudioStream stream)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 PauseAudioStream(stream);
 ```
 
@@ -10204,9 +10204,9 @@ PauseAudioStream(stream);
 void ResumeAudioStream(AudioStream stream)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 ResumeAudioStream(stream);
 ```
 
@@ -10222,9 +10222,9 @@ ResumeAudioStream(stream);
 bool IsAudioStreamPlaying(AudioStream stream)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = IsAudioStreamPlaying(stream);
 ```
 
@@ -10240,9 +10240,9 @@ let result = IsAudioStreamPlaying(stream);
 void StopAudioStream(AudioStream stream)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 StopAudioStream(stream);
 ```
 
@@ -10258,9 +10258,9 @@ StopAudioStream(stream);
 void SetAudioStreamVolume(AudioStream stream, float volume)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetAudioStreamVolume(stream, volume);
 ```
 
@@ -10277,9 +10277,9 @@ SetAudioStreamVolume(stream, volume);
 void SetAudioStreamPitch(AudioStream stream, float pitch)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetAudioStreamPitch(stream, pitch);
 ```
 
@@ -10296,9 +10296,9 @@ SetAudioStreamPitch(stream, pitch);
 void SetAudioStreamPan(AudioStream stream, float pan)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetAudioStreamPan(stream, pan);
 ```
 
@@ -10315,9 +10315,9 @@ SetAudioStreamPan(stream, pan);
 void SetAudioStreamBufferSizeDefault(int size)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetAudioStreamBufferSizeDefault(size);
 ```
 
@@ -10333,9 +10333,9 @@ SetAudioStreamBufferSizeDefault(size);
 void SetAudioStreamCallback(AudioStream stream, AudioCallback callback)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 SetAudioStreamCallback(stream, callback);
 ```
 
@@ -10352,9 +10352,9 @@ SetAudioStreamCallback(stream, callback);
 void AttachAudioStreamProcessor(AudioStream stream, AudioCallback processor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 AttachAudioStreamProcessor(stream, processor);
 ```
 
@@ -10371,9 +10371,9 @@ AttachAudioStreamProcessor(stream, processor);
 void DetachAudioStreamProcessor(AudioStream stream, AudioCallback processor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DetachAudioStreamProcessor(stream, processor);
 ```
 
@@ -10390,9 +10390,9 @@ DetachAudioStreamProcessor(stream, processor);
 void AttachAudioMixedProcessor(AudioCallback processor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 AttachAudioMixedProcessor(processor);
 ```
 
@@ -10408,9 +10408,9 @@ AttachAudioMixedProcessor(processor);
 void DetachAudioMixedProcessor(AudioCallback processor)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 DetachAudioMixedProcessor(processor);
 ```
 

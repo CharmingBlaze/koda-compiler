@@ -1,14 +1,14 @@
-# Fuji language — programmer reference and implementation map
+# Koda language — programmer reference and implementation map
 
-This document is the **authoritative surface syntax** for users and an **honest map** of what the **Go + LLVM** toolchain in this repository implements today. Normative long-form design notes remain in [kuji compiler.md](kuji%20compiler.md). A **checkbox audit** of the master spec vs this repo lives in **[list.md](list.md)**. Engineering workflow and roadmap: [HANDOFF.md](HANDOFF.md).
+This document is the **authoritative surface syntax** for users and an **honest map** of what the **Go + LLVM** toolchain in this repository implements today. Normative long-form design notes remain in [compiler.md](compiler.md). A **checkbox audit** of the master spec vs this repo lives in **[list.md](list.md)**. Engineering workflow and roadmap: [HANDOFF.md](HANDOFF.md).
 
-**Commands:** `fuji run` / `fuji check` / `fuji disasm` (prints LLVM IR) · `fuji build` (LLVM IR → **llc** → object, then **Clang** + **`runtime/libfuji_runtime.a`**). See [RELEASE.md](RELEASE.md) for static binaries.
+**Commands:** `koda run` / `koda check` / `koda disasm` (prints LLVM IR) · `koda build` (LLVM IR → **llc** → object, then **Clang** + **`runtime/libkoda_runtime.a`**). See [RELEASE.md](RELEASE.md) for static binaries.
 
 ---
 
 ## 1. Variable declarations
 
-```fuji
+```koda
 let x = 42;
 let name = "Jesse";
 let alive = true;
@@ -50,7 +50,7 @@ Arithmetic `+ - * / %`, unary `- ! ~ delete`, comparisons, `== !=`, logical `&& 
 
 Unary **`delete`** applies only to **`obj[stringKey]`** on objects (not array slots); it removes the property and evaluates to **`true`** if the key existed, **`false`** otherwise.
 
-**Precedence** matches the usual JS-like ordering (see grammar in [kuji compiler.md](kuji%20compiler.md)).
+**Precedence** matches the usual JS-like ordering (see grammar in [compiler.md](compiler.md)).
 
 ---
 
@@ -91,7 +91,7 @@ Unary **`delete`** applies only to **`obj[stringKey]`** on objects (not array sl
 | Shorthand properties `{ a, b }` | Implemented | |
 | Method shorthand on object literals | Implemented | Parser desugars to `FuncExpr` |
 | `this` in methods | Implemented | Context passed to bound methods and closure-based methods |
-| `obj.method()` binding | Implemented | Handled by `FUJI_get_index` / `OBJ_BOUND_METHOD` in C runtime |
+| `obj.method()` binding | Implemented | Handled by `KODA_get_index` / `OBJ_BOUND_METHOD` in C runtime |
 
 Use **`len(arr)`** for length everywhere; method-style helpers depend on what the C runtime exposes for array objects.
 
@@ -99,7 +99,7 @@ Use **`len(arr)`** for length everywhere; method-style helpers depend on what th
 
 ## 7. Arrays
 
-Indexing, literals, `push`: implemented via runtime. **`pop`** availability depends on [runtime/src/fuji_runtime.c](runtime/src/fuji_runtime.c) — use index/slice patterns or extend the runtime.
+Indexing, literals, `push`: implemented via runtime. **`pop`** availability depends on [runtime/src/koda_runtime.c](runtime/src/koda_runtime.c) — use index/slice patterns or extend the runtime.
 
 ---
 
@@ -114,14 +114,14 @@ Indexing, literals, `push`: implemented via runtime. **`pop`** availability depe
 
 ## 9. Standard library (globals)
 
-**Adding a builtin:** wire the name in **`internal/codegen`** (e.g. `NewGenerator` / `emitCall` / `declare` in [runtime.go](../internal/codegen/runtime.go)), implement the symbol in **`runtime/src/fuji_runtime.c`**, and add tests.
+**Adding a builtin:** wire the name in **`internal/codegen`** (e.g. `NewGenerator` / `emitCall` / `declare` in [runtime.go](../internal/codegen/runtime.go)), implement the symbol in **`runtime/src/koda_runtime.c`**, and add tests.
 
-| Name | Role | Native (`fuji build` / `fuji run`) |
+| Name | Role | Native (`koda build` / `koda run`) |
 |------|------|-------------------------------------|
-| `print` | stdout | Yes (`fuji_print_val`, etc.) |
+| `print` | stdout | Yes (`koda_print_val`, etc.) |
 | `type` | type name string | Yes |
 | `len` | string / array / object size | Yes |
-| `clock` | monotonic / CPU time | C runtime (`FUJI_clock` / argv helpers — see `fuji_runtime.c`) |
+| `clock` | monotonic / CPU time | C runtime (`KODA_clock` / argv helpers — see `koda_runtime.c`) |
 | `time` | wall clock helpers | C runtime |
 | `sleep(ms)` | sleep milliseconds | C runtime |
 | `abs` / `sqrt` / `random` | math helpers | C runtime |
@@ -155,7 +155,7 @@ Implemented in the native C runtime ([runtime/src](runtime/src)) and mirrored in
 
 ## 13. Grammar (subset EBNF)
 
-The executable grammar in this repo is defined by the **hand-written parser** under [internal/parser](../internal/parser/); [kuji compiler.md](kuji%20compiler.md) carries a fuller EBNF. When the two disagree, **parser + tests win**.
+The executable grammar in this repo is defined by the **hand-written parser** under [internal/parser](../internal/parser/); [compiler.md](compiler.md) carries a fuller EBNF. When the two disagree, **parser + tests win**.
 
 ---
 
@@ -163,7 +163,7 @@ The executable grammar in this repo is defined by the **hand-written parser** un
 
 ```mermaid
 flowchart LR
-  src[".fuji sources"]
+  src[".koda sources"]
   L[Lexer]
   P[Parser]
   A[AST]
@@ -190,10 +190,10 @@ Use this as a release gate, not marketing copy.
 When you add a **new global builtin**, update in one commit:
 
 1. [internal/codegen/runtime.go](../internal/codegen/runtime.go) — LLVM `declare` names  
-2. [runtime/src/fuji_runtime.c](runtime/src/fuji_runtime.c) — implementation  
+2. [runtime/src/koda_runtime.c](runtime/src/koda_runtime.c) — implementation  
 3. Codegen wiring (`Generator` / `emitCall` / builtins map) as needed  
 4. Tests under [internal/codegen](../internal/codegen) and/or [tests](../tests)
 
 ---
 
-*Last updated with toolchain: Go + LLVM (`llir/llvm`), native runtime [runtime/src](runtime/src) (see also [internal/runtime/data](../internal/runtime/data) — alternate embed, not used by default `fuji build`).*
+*Last updated with toolchain: Go + LLVM (`llir/llvm`), native runtime [runtime/src](runtime/src) (see also [internal/runtime/data](../internal/runtime/data) — alternate embed, not used by default `koda build`).*

@@ -1,0 +1,88 @@
+print("=== KODA GRAPHICS DEMO ===");
+print("Creating visual game window...");
+
+let screenwidth = 800;
+
+let screenheight = 600;
+
+print("Window: " + screenwidth + "x" + screenheight + " pixels");
+print("Title: Brick Breaker Game");
+
+let paddlex = 350;
+
+let ballx = 400;
+
+let bally = 300;
+
+let score = 0;
+
+let lives = 3;
+
+func drawscreen() {
+    print("");
+    print("╔═══════════════════════════════════════════════════════════════╗");
+    print("║                     BRICK BREAKER                          ║");
+    print("║                                                             ║");
+    print("║  ██████  ██████  ██████  ██████  ██████  ██████  ██████    ║");
+    print("║  ████    ████    ████    ████    ████    ████    ████      ║");
+    print("║  ██████  ██████  ██████  ██████  ██████  ██████  ██████    ║");
+    print("║                                                             ║");
+    print("║                                                             ║");
+    print("║                                                             ║");
+    print("║                                                             ║");
+    print("║                      ●                                      ║");
+    print("║                                                             ║");
+    print("║                                                             ║");
+    print("║               ████████████                                 ║");
+    print("║                                                             ║");
+    print("║  Score: " + score + "                    Lives: " + lives + "              ║");
+    print("║                                                             ║");
+    print("╚═══════════════════════════════════════════════════════════════╝");
+    print("");
+    print("Controls: LEFT/RIGHT arrows to move paddle");
+    print("Press SPACE to start/pause");
+    print("Press ESC to exit");
+}
+
+func updategame() {
+    bally = bally - 10;
+    if (bally < 100) {
+        bally = 400;
+    }
+    paddlex = paddlex + 20;
+    if (paddlex > 600) {
+        paddlex = 200;
+    }
+    score = score + 1;
+}
+
+func gameloop() {
+    print("Starting game loop...");
+    let frame = 0;
+    while (frame < 5) {
+        print("=== FRAME " + frame + " ===");
+        drawscreen();
+        updategame();
+        print("Ball position: (" + ballx + ", " + bally + ")");
+        print("Paddle position: " + paddlex);
+        frame = frame + 1;
+        let i = 0;
+        while (i < 1000000) {
+            i = i + 1;
+        }
+    }
+}
+
+func main() {
+    print("Initializing graphics system...");
+    print("Loading textures...");
+    print("Setting up game objects...");
+    gameloop();
+    print("");
+    print("=== GAME OVER ===");
+    print("Final Score: " + score);
+    print("Thanks for playing!");
+    print("Graphics window closed.");
+}
+
+main();

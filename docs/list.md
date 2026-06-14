@@ -1,10 +1,10 @@
-# Fuji vs `kuji compiler.md` — implementation checklist
+# Koda vs `compiler.md` — implementation checklist
 
-This file tracks the **[kuji compiler.md](kuji%20compiler.md)** master specification against **this repository** (`cmd/fuji`, `internal/parser`, `internal/codegen`, `cmd/wrapgen` / **wrapgen**, `runtime/src`).
+This file tracks the **[compiler.md](compiler.md)** master specification against **this repository** (`cmd/koda`, `internal/parser`, `internal/codegen`, `cmd/wrapgen` / **wrapgen**, `runtime/src`).
 
 **Legend**
 
-- [x] **Implemented** — usable via `fuji run` / `fuji build` as documented in [FUJI_PROGRAMMER_REFERENCE.md](FUJI_PROGRAMMER_REFERENCE.md) or tests.
+- [x] **Implemented** — usable via `koda run` / `koda build` as documented in [KODA_PROGRAMMER_REFERENCE.md](KODA_PROGRAMMER_REFERENCE.md) or tests.
 - [~] **Partial / different** — behavior exists but differs from the spec snippet, is LLVM-only, or needs the noted caveat.
 - [ ] **Not implemented** — no lexer/AST/runtime support yet, or tooling absent.
 
@@ -12,9 +12,9 @@ This file tracks the **[kuji compiler.md](kuji%20compiler.md)** master specifica
 
 ```powershell
 go test ./... -count=1
-.\bin\fuji.exe run .\tests\native_conformance.fuji
+.\bin\koda.exe run .\tests\native_conformance.koda
 # optional native gate (needs clang):
-.\bin\fuji.exe build .\tests\native_conformance.fuji -o .\tests\native_conformance.exe
+.\bin\koda.exe build .\tests\native_conformance.koda -o .\tests\native_conformance.exe
 ```
 
 ---
@@ -22,8 +22,8 @@ go test ./... -count=1
 ## Language overview & goals
 
 - [x] JavaScript-like syntax core (`let`, `func`, `if`, loops, objects, arrays).
-- [x] Single native backend: LLVM IR + C runtime (`fuji run` / `fuji build` / `fuji bundle`).
-- [x] Access to C libraries via generated glue (`// fuji:extern` + `wrapper.c` from **wrapgen**, not `#native` / `#ffi` syntax).
+- [x] Single native backend: LLVM IR + C runtime (`koda run` / `koda build` / `koda bundle`).
+- [x] Access to C libraries via generated glue (`// koda:extern` + `wrapper.c` from **wrapgen**, not `#native` / `#ffi` syntax).
 - [ ] `#native` / `#ffi` directives as in spec grammar — use **wrapgen** + extern lines instead.
 - [ ] Optional static type hints (`x: number`) — spec “future”; not in parser.
 
@@ -34,7 +34,7 @@ go test ./... -count=1
 - [x] UTF-8 source, identifiers with letters/digits/underscore (Unicode-aware start per lexer).
 - [x] `//` single-line comments.
 - [x] `/* … */` multi-line comments.
-- [~] `///` doc comments — treated as ordinary `//` (no **kujidoc** tool).
+- [~] `///` doc comments — treated as ordinary `//` (no **kodadoc** tool).
 - [x] Double-quoted and single-quoted strings with escapes (`\n`, `\t`, `\r`, `\\`, `\"`, `\'`, `\xNN`, `\uNNNN`, `\u{...}`).
 - [x] `` `template ${expr}` `` template literals.
 - [x] `"""` … `"""` multi-line strings.
@@ -51,9 +51,9 @@ go test ./... -count=1
 - [x] Declarations: `let`, `func`.
 - [x] `import` as **expression** `import "path"` (see modules).
 - [x] `in` and `of` in `for (let x in/of iterable)`.
-- [ ] `this` as a dedicated keyword / `TokenThis` — **not** reserved; object methods use identifiers per [FUJI_PROGRAMMER_REFERENCE.md](FUJI_PROGRAMMER_REFERENCE.md) §6.
+- [ ] `this` as a dedicated keyword / `TokenThis` — **not** reserved; object methods use identifiers per [KODA_PROGRAMMER_REFERENCE.md](KODA_PROGRAMMER_REFERENCE.md) §6.
 - [x] Arithmetic `+ - * / % **`, comparisons, `==` `!=` `===` `!==`, logical `&& || !`, bitwise `& | ^ ~ << >> >>>`, compound assigns, ternary `?:`.
-- [x] `>>=` and `>>>=` compound assignment tokens ([lexer.go](internal/kuji/lexer.go)).
+- [x] `>>=` and `>>>=` compound assignment tokens ([lexer.go](internal/lexer.go)).
 - [x] Unary `+ - ! ~`, prefix/postfix `++ --`.
 - [x] **Arrow functions** (`=>`) — parsed as sugar for `func` expressions (`id => …`, `(a, b) => …`, block or expression body).
 
@@ -96,7 +96,7 @@ go test ./... -count=1
 - [x] `switch` / `case` / `default` — **C-style fall-through**; use `break` to exit the switch or to avoid running the next `case` / `default`.
 - [ ] `switch` as **expression** (`let m = switch …`).
 - [ ] `if` as **expression** (`let max = if (a > b) a else b`).
-- [x] `for (let x in arr)` (**keys**, numeric indices for arrays) and `for (let x of arr)` (**values**); `for (let [k, v] of …)` destructuring for keys+values (`tests/for_of_pairs.fuji`).
+- [x] `for (let x in arr)` (**keys**, numeric indices for arrays) and `for (let x of arr)` (**values**); `for (let [k, v] of …)` destructuring for keys+values (`tests/for_of_pairs.koda`).
 - [ ] `for (let i, item in items)` — **second** binding not parsed (only single `let ident`).
 - [ ] `for (let key, value in obj)` — not parsed.
 - [ ] Labeled `break` / `continue`.
@@ -117,14 +117,14 @@ go test ./... -count=1
 - [x] `delete` on **object** properties via bracket form `delete obj["key"]` (returns whether the key existed); not for array elements.
 - [ ] Object spread `{ …obj }`.
 - [ ] Object destructuring `let {a,b} = obj`.
-- [x] `Map()` / `Set()` builtins (constructors + `[]` / methods per [native.go](internal/kuji/native.go) / [mapset.go](internal/kuji/mapset.go); VM + C runtime).
+- [x] `Map()` / `Set()` builtins (constructors + `[]` / methods per [native.go](internal/sema.go) / [mapset.go](internal/sema.go); VM + C runtime).
 - [x] **Tuples** `(a, b, …)` — at least two elements; immutable; indexed with numbers only.
 
 ---
 
 ## Module system
 
-- [x] `#include "path"` and `#include <name>` with `FUJI_PATH` / `FUJI_WRAPPERS` resolution ([loader.go](internal/kuji/loader.go)).
+- [x] `#include "path"` and `#include <name>` with `KODA_PATH` / `KODA_WRAPPERS` resolution ([loader.go](internal/parser/loader.go)).
 - [x] `import "path"` expression form (and `@` modules per loader docs).
 - [ ] `#include "file" as alias` — not implemented.
 - [ ] `#include "file" { sym1, sym2 }` selective import — not implemented.
@@ -137,16 +137,16 @@ go test ./... -count=1
 ## FFI & C interop
 
 - [ ] Spec `#native` / `#ffi` pipeline.
-- [x] **`// fuji:extern`** lines + **`FujiValue` wrapper symbols** in C ([native_emit.go](internal/kuji/native_emit.go), [WRAPPERS.md](WRAPPERS.md)).
-- [x] **wrapgen** (`go build -o wrapgen ./cmd/wrapgen`) generates `.fuji` + `wrapper.c` + docs; merged into root `go.mod`.
-- [x] **`fuji wrap`** forwards to `wrapgen` (or legacy `kujiwrap`) when installed beside `fuji`.
+- [x] **`// koda:extern`** lines + **`KodaValue` wrapper symbols** in C ([native_emit.go](internal/codegen.go), [WRAPPERS.md](WRAPPERS.md)).
+- [x] **wrapgen** (`go build -o wrapgen ./cmd/wrapgen`) generates `.koda` + `wrapper.c` + docs; merged into root `go.mod`.
+- [x] **`koda wrap`** forwards to `wrapgen` (or legacy `kujiwrap`) when installed beside `koda`.
 - [ ] Callback / finalizer attributes from spec (`[finalizer: …]`).
 
 ---
 
 ## Standard library (spec modules)
 
-- [x] Core: `print`, `type`, conversions, `len`, `time`, `sleep`, math helpers (`abs`, `sqrt`, `random`, … per [native.go](internal/kuji/native.go)).
+- [x] Core: `print`, `type`, conversions, `len`, `time`, `sleep`, math helpers (`abs`, `sqrt`, `random`, … per [native.go](internal/sema.go)).
 - [~] File I/O natives (`readFile`, `writeFile`, …) — present as builtins; not necessarily `file.read` namespaced API from spec.
 - [ ] Namespaced `#include <math>` / `math.sin` style stdlib modules from spec.
 - [~] `json` — global **`json`** object with `parse`, `stringify`, and `try_parse` (VM + tree + C runtime); not the spec namespaced `#include <json>` module shape.
@@ -177,7 +177,7 @@ go test ./... -count=1
 - [x] Hand-written lexer ([internal/lexer](../internal/lexer/)).
 - [x] Recursive descent parser → AST ([internal/parser](../internal/parser/)).
 - [x] **Sema** and native emit prep ([internal/sema](../internal/sema/)).
-- [x] LLVM IR via **llir** + **llc** + **clang** linking **`runtime/libfuji_runtime.a`** ([internal/codegen](../internal/codegen), [runtime/src](../runtime/src)).
+- [x] LLVM IR via **llir** + **llc** + **clang** linking **`runtime/libkoda_runtime.a`** ([internal/codegen](../internal/codegen), [runtime/src](../runtime/src)).
 - [~] Optimizer — sema/constant folding; not full spec optimizer list.
 
 ---
@@ -191,16 +191,16 @@ go test ./... -count=1
 
 ## Tooling (spec “Tooling Ecosystem”)
 
-- [x] `fuji run`, `check`, `disasm`, `build`, `bundle`, `wrap`, `paths`, `doctor`, `version`, `help`.
-- [x] **wrapgen** + `fuji wrap` (wrapper generation).
-- [ ] `fuji watch`, `fuji fmt`, REPL, `fuji test`, `fuji profile`, `fuji debug` (if added).
+- [x] `koda run`, `check`, `disasm`, `build`, `bundle`, `wrap`, `paths`, `doctor`, `version`, `help`.
+- [x] **wrapgen** + `koda wrap` (wrapper generation).
+- [ ] `koda watch`, `koda fmt`, REPL, `koda test`, `koda profile`, `koda debug` (if added).
 - [ ] Package manager, LSP, etc. (roadmap).
 
 ---
 
 ## Grammar notes (EBNF in spec)
 
-Anything listed under **“Not implemented yet”** in [kuji compiler.md § Implementation Status](kuji%20compiler.md) plus:
+Anything listed under **“Not implemented yet”** in [compiler.md § Implementation Status](compiler.md) plus:
 
 - [x] **Expression** range `a..b` (`TokenDotDot`) — inclusive integer sequence as an **array** after truncating bounds toward zero; descending ranges supported. **`switch` / `case` with `90..99`** is not implemented.
 - [ ] `templateString` fully aligned with all edge cases in spec.

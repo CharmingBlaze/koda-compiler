@@ -1,6 +1,6 @@
 # Windows 11 native toolchain (LLVM 14, MSVC, go-llvm)
 
-End-to-end setup for **Fuji on Windows** without WSL: Go, LLVM 14 (clang + llc), MSVC (for MSVC-linked CGo / system libs), GNU Make, and environment variables for **go-llvm** (CGo).
+End-to-end setup for **Koda on Windows** without WSL: Go, LLVM 14 (clang + llc), MSVC (for MSVC-linked CGo / system libs), GNU Make, and environment variables for **go-llvm** (CGo).
 
 Use **Developer Command Prompt for VS 2022** for compiler work so MSVC’s environment is loaded.
 
@@ -64,7 +64,7 @@ If `winget` is unavailable, download [make without Guile (ezwinports)](https://s
 
 ---
 
-## Step 4 — Build the Fuji C runtime on Windows
+## Step 4 — Build the Koda C runtime on Windows
 
 `runtime/Makefile` defaults to **`CC=gcc`** and **`AR=ar`**. If you only installed **LLVM** (no MinGW `gcc`), build with **clang** and **llvm-ar**:
 
@@ -82,7 +82,7 @@ $env:AR = "llvm-ar"
 .\scripts\build-runtime.ps1
 ```
 
-That produces **`runtime/libfuji_runtime.a`**.
+That produces **`runtime/libkoda_runtime.a`**.
 
 If `make` fails on Unix-only commands (`rm`, `mkdir -p`), use the manual object + archive sequence from [CONTRIBUTING.md](../CONTRIBUTING.md) or the PowerShell script above.
 
@@ -120,13 +120,13 @@ echo %CGO_CPPFLAGS%
 echo %CGO_LDFLAGS%
 ```
 
-From the Fuji repo root (with `CC`/`AR` set if using clang for the runtime):
+From the Koda repo root (with `CC`/`AR` set if using clang for the runtime):
 
 ```bat
 make -C runtime
-go build ./cmd/fuji/...
+go build ./cmd/koda/...
 go test ./...
-fuji build tests\hello.fuji
+koda build tests\hello.koda
 hello.exe
 ```
 
@@ -135,14 +135,14 @@ hello.exe
 ## Step 7 — Add go-llvm and verify CGo
 
 ```bat
-cd path\to\fuji-main
+cd path\to\koda-main
 go get github.com/tinygo-org/go-llvm
 go build github.com/tinygo-org/go-llvm
 ```
 
 If **`go build github.com/tinygo-org/go-llvm`** succeeds, LLVM headers/libs and MSVC’s link environment are visible to CGo.
 
-Pin the module version to the LLVM line you installed (for example the **llvm14** tagged revision) when you wire go-llvm into Fuji’s `go.mod`.
+Pin the module version to the LLVM line you installed (for example the **llvm14** tagged revision) when you wire go-llvm into Koda’s `go.mod`.
 
 ---
 
@@ -158,19 +158,19 @@ Pin the module version to the LLVM line you installed (for example the **llvm14*
 
 ---
 
-## Self-contained release `fuji` (optional; no LLVM on PATH for end users)
+## Self-contained release `koda` (optional; no LLVM on PATH for end users)
 
-The **Release** GitHub Actions workflow (`.github/workflows/release.yml`, runs on **`v*`** tags) builds **`fuji-windows-amd64.exe`** with **embedded** **`clang.exe`**, **`lld.exe`**, and **`libfuji_runtime.a`** under **`internal/embed/windows/amd64/`**, then compiles Fuji with:
+The **Release** GitHub Actions workflow (`.github/workflows/release.yml`, runs on **`v*`** tags) builds **`koda-windows-amd64.exe`** with **embedded** **`clang.exe`**, **`lld.exe`**, and **`libkoda_runtime.a`** under **`internal/embed/windows/amd64/`**, then compiles Koda with:
 
-`go build -trimpath -tags release -ldflags="-s -w" -o fuji-windows-amd64.exe ./cmd/fuji`
+`go build -trimpath -tags release -ldflags="-s -w" -o koda-windows-amd64.exe ./cmd/koda`
 
-That artifact is intended for **players and authors who only download one file**: it extracts the embedded tools to a temp directory on first **`fuji build`** / **`fuji run`** (see **`fujihome.FindToolchain`**). It does **not** replace the developer setup above for **contributing** from a clean clone (normal **`go build ./cmd/fuji/...`** without **`-tags release`** still expects **LLVM on `PATH`** or a tarball next to the install, as in the rest of this document).
+That artifact is intended for **players and authors who only download one file**: it extracts the embedded tools to a temp directory on first **`koda build`** / **`koda run`** (see **`kodahome.FindToolchain`**). It does **not** replace the developer setup above for **contributing** from a clean clone (normal **`go build ./cmd/koda/...`** without **`-tags release`** still expects **LLVM on `PATH`** or a tarball next to the install, as in the rest of this document).
 
 ---
 
 ## What you have when this is done
 
-- **Go** — Fuji compiler and tests  
+- **Go** — Koda compiler and tests  
 - **LLVM 14** — `clang`, `llc`, headers/libs for CGo and the current `.ll` pipeline  
 - **MSVC** — linker/libs for typical Windows CGo and native links  
 - **Make (+ sh)** — `runtime` archive via Makefile, or PowerShell fallback  

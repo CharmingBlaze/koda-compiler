@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"fuji/internal/lexer"
-	"fuji/internal/parser"
-	"fuji/internal/sema"
+	"koda/internal/lexer"
+	"koda/internal/parser"
+	"koda/internal/sema"
 )
 
 func parseForTest(t *testing.T, source string) *parser.Program {
@@ -86,7 +86,7 @@ func TestCodegenControlFlow(t *testing.T) {
 
 func TestNativeExternDeclaresGlueSymbol(t *testing.T) {
 	src := `
-// fuji:extern Foo FUJI_shim_Foo 1
+// koda:extern Foo KODA_shim_Foo 1
 let Foo = 0;
 func main() {
 	Foo(1);
@@ -103,8 +103,8 @@ func main() {
 		t.Fatalf("Generate: %v", err)
 	}
 	ir := mod.String()
-	if !strings.Contains(ir, "@FUJI_shim_Foo") {
-		t.Fatalf("expected LLVM to declare @FUJI_shim_Foo, got:\n%s", ir)
+	if !strings.Contains(ir, "@KODA_shim_Foo") {
+		t.Fatalf("expected LLVM to declare @KODA_shim_Foo, got:\n%s", ir)
 	}
 }
 
@@ -123,10 +123,10 @@ func TestEmitPrefixPosIntegerLiteralNoUnbox(t *testing.T) {
 		t.Fatal(err)
 	}
 	ir := mod.String()
-	if strings.Contains(ir, "call double @fuji_unbox_number") {
+	if strings.Contains(ir, "call double @koda_unbox_number") {
 		t.Fatalf("expected +literal fold to avoid unbox calls, got:\n%s", ir)
 	}
-	if !strings.Contains(ir, "call i64 @fuji_box_number") {
+	if !strings.Contains(ir, "call i64 @koda_box_number") {
 		t.Fatalf("expected boxed numeric result, got:\n%s", ir)
 	}
 }
@@ -146,7 +146,7 @@ func TestEmitCompileTimePosOfProductNoUnbox(t *testing.T) {
 		t.Fatal(err)
 	}
 	ir := mod.String()
-	if strings.Contains(ir, "call double @fuji_unbox_number") {
+	if strings.Contains(ir, "call double @koda_unbox_number") {
 		t.Fatalf("expected +(2*3) fold to avoid unbox, got:\n%s", ir)
 	}
 }
@@ -166,10 +166,10 @@ func TestEmitPrefixNegIntegerLiteralNoUnbox(t *testing.T) {
 		t.Fatal(err)
 	}
 	ir := mod.String()
-	if strings.Contains(ir, "call double @fuji_unbox_number") {
+	if strings.Contains(ir, "call double @koda_unbox_number") {
 		t.Fatalf("expected -literal fold to avoid unbox calls, got:\n%s", ir)
 	}
-	if !strings.Contains(ir, "call i64 @fuji_box_number") {
+	if !strings.Contains(ir, "call i64 @koda_box_number") {
 		t.Fatalf("expected boxed numeric result, got:\n%s", ir)
 	}
 }
@@ -189,7 +189,7 @@ func TestEmitCompileTimeInt64ChainNoUnbox(t *testing.T) {
 		t.Fatal(err)
 	}
 	ir := mod.String()
-	if strings.Contains(ir, "call double @fuji_unbox_number") {
+	if strings.Contains(ir, "call double @koda_unbox_number") {
 		t.Fatalf("expected chained literal fold to avoid unbox, got:\n%s", ir)
 	}
 }
@@ -209,7 +209,7 @@ func TestEmitCompileTimeNegOfProductNoUnbox(t *testing.T) {
 		t.Fatal(err)
 	}
 	ir := mod.String()
-	if strings.Contains(ir, "call double @fuji_unbox_number") {
+	if strings.Contains(ir, "call double @koda_unbox_number") {
 		t.Fatalf("expected -(2*3) fold to avoid unbox, got:\n%s", ir)
 	}
 }
@@ -229,10 +229,10 @@ func TestEmitInfixIntegerLiteralMulFoldNoUnbox(t *testing.T) {
 		t.Fatal(err)
 	}
 	ir := mod.String()
-	if strings.Contains(ir, "call double @fuji_unbox_number") {
+	if strings.Contains(ir, "call double @koda_unbox_number") {
 		t.Fatalf("expected literal mul fold to avoid unbox calls, got:\n%s", ir)
 	}
-	if !strings.Contains(ir, "call i64 @fuji_box_number") {
+	if !strings.Contains(ir, "call i64 @koda_box_number") {
 		t.Fatalf("expected boxed numeric result, got:\n%s", ir)
 	}
 }

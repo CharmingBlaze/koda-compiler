@@ -2,7 +2,7 @@ package parser
 
 import (
 	"fmt"
-	"fuji/internal/lexer"
+	"koda/internal/lexer"
 	"strconv"
 	"strings"
 )
@@ -232,12 +232,41 @@ func (p *Parser) parseNumberLiteral() (Expr, error) {
 	return &LiteralExpr{Token: token, Value: value}, nil
 }
 
+func unescapeString(s string) string {
+	var out strings.Builder
+	for i := 0; i < len(s); i++ {
+		if s[i] == '\\' && i+1 < len(s) {
+			switch s[i+1] {
+			case 'n':
+				out.WriteByte('\n')
+			case 'r':
+				out.WriteByte('\r')
+			case 't':
+				out.WriteByte('\t')
+			case '\\':
+				out.WriteByte('\\')
+			case '"':
+				out.WriteByte('"')
+			case '\'':
+				out.WriteByte('\'')
+			default:
+				out.WriteByte(s[i+1])
+			}
+			i++
+			continue
+		}
+		out.WriteByte(s[i])
+	}
+	return out.String()
+}
+
 func (p *Parser) parseStringLiteral() (Expr, error) {
 	token := p.advance()
 	s := token.Lexeme
 	if len(s) >= 2 && s[0] == '"' && s[len(s)-1] == '"' {
 		s = s[1 : len(s)-1]
 	}
+	s = unescapeString(s)
 	return &LiteralExpr{Token: token, Value: s}, nil
 }
 

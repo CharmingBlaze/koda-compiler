@@ -1,0 +1,2275 @@
+let bool_false = 0;
+
+let bool_true = 1;
+
+let configflags_flag_vsync_hint = 0;
+
+let configflags_flag_fullscreen_mode = 0;
+
+let configflags_flag_window_resizable = 0;
+
+let configflags_flag_window_undecorated = 0;
+
+let configflags_flag_window_hidden = 0;
+
+let configflags_flag_window_minimized = 0;
+
+let configflags_flag_window_maximized = 0;
+
+let configflags_flag_window_unfocused = 0;
+
+let configflags_flag_window_topmost = 0;
+
+let configflags_flag_window_always_run = 0;
+
+let configflags_flag_window_transparent = 0;
+
+let configflags_flag_window_highdpi = 0;
+
+let configflags_flag_window_mouse_passthrough = 0;
+
+let configflags_flag_borderless_windowed_mode = 0;
+
+let configflags_flag_msaa_4x_hint = 0;
+
+let configflags_flag_interlaced_hint = 0;
+
+let traceloglevel_log_all = 0;
+
+let traceloglevel_log_trace = 1;
+
+let traceloglevel_log_debug = 2;
+
+let traceloglevel_log_info = 3;
+
+let traceloglevel_log_warning = 4;
+
+let traceloglevel_log_error = 5;
+
+let traceloglevel_log_fatal = 6;
+
+let traceloglevel_log_none = 7;
+
+let keyboardkey_key_null = 0;
+
+let keyboardkey_key_apostrophe = 39;
+
+let keyboardkey_key_comma = 44;
+
+let keyboardkey_key_minus = 45;
+
+let keyboardkey_key_period = 46;
+
+let keyboardkey_key_slash = 47;
+
+let keyboardkey_key_zero = 48;
+
+let keyboardkey_key_one = 49;
+
+let keyboardkey_key_two = 50;
+
+let keyboardkey_key_three = 51;
+
+let keyboardkey_key_four = 52;
+
+let keyboardkey_key_five = 53;
+
+let keyboardkey_key_six = 54;
+
+let keyboardkey_key_seven = 55;
+
+let keyboardkey_key_eight = 56;
+
+let keyboardkey_key_nine = 57;
+
+let keyboardkey_key_semicolon = 59;
+
+let keyboardkey_key_equal = 61;
+
+let keyboardkey_key_a = 65;
+
+let keyboardkey_key_b = 66;
+
+let keyboardkey_key_c = 67;
+
+let keyboardkey_key_d = 68;
+
+let keyboardkey_key_e = 69;
+
+let keyboardkey_key_f = 70;
+
+let keyboardkey_key_g = 71;
+
+let keyboardkey_key_h = 72;
+
+let keyboardkey_key_i = 73;
+
+let keyboardkey_key_j = 74;
+
+let keyboardkey_key_k = 75;
+
+let keyboardkey_key_l = 76;
+
+let keyboardkey_key_m = 77;
+
+let keyboardkey_key_n = 78;
+
+let keyboardkey_key_o = 79;
+
+let keyboardkey_key_p = 80;
+
+let keyboardkey_key_q = 81;
+
+let keyboardkey_key_r = 82;
+
+let keyboardkey_key_s = 83;
+
+let keyboardkey_key_t = 84;
+
+let keyboardkey_key_u = 85;
+
+let keyboardkey_key_v = 86;
+
+let keyboardkey_key_w = 87;
+
+let keyboardkey_key_x = 88;
+
+let keyboardkey_key_y = 89;
+
+let keyboardkey_key_z = 90;
+
+let keyboardkey_key_left_bracket = 91;
+
+let keyboardkey_key_backslash = 92;
+
+let keyboardkey_key_right_bracket = 93;
+
+let keyboardkey_key_grave = 96;
+
+let keyboardkey_key_space = 32;
+
+let keyboardkey_key_escape = 256;
+
+let keyboardkey_key_enter = 257;
+
+let keyboardkey_key_tab = 258;
+
+let keyboardkey_key_backspace = 259;
+
+let keyboardkey_key_insert = 260;
+
+let keyboardkey_key_delete = 261;
+
+let keyboardkey_key_right = 262;
+
+let keyboardkey_key_left = 263;
+
+let keyboardkey_key_down = 264;
+
+let keyboardkey_key_up = 265;
+
+let keyboardkey_key_page_up = 266;
+
+let keyboardkey_key_page_down = 267;
+
+let keyboardkey_key_home = 268;
+
+let keyboardkey_key_end = 269;
+
+let keyboardkey_key_caps_lock = 280;
+
+let keyboardkey_key_scroll_lock = 281;
+
+let keyboardkey_key_num_lock = 282;
+
+let keyboardkey_key_print_screen = 283;
+
+let keyboardkey_key_pause = 284;
+
+let keyboardkey_key_f1 = 290;
+
+let keyboardkey_key_f2 = 291;
+
+let keyboardkey_key_f3 = 292;
+
+let keyboardkey_key_f4 = 293;
+
+let keyboardkey_key_f5 = 294;
+
+let keyboardkey_key_f6 = 295;
+
+let keyboardkey_key_f7 = 296;
+
+let keyboardkey_key_f8 = 297;
+
+let keyboardkey_key_f9 = 298;
+
+let keyboardkey_key_f10 = 299;
+
+let keyboardkey_key_f11 = 300;
+
+let keyboardkey_key_f12 = 301;
+
+let keyboardkey_key_left_shift = 340;
+
+let keyboardkey_key_left_control = 341;
+
+let keyboardkey_key_left_alt = 342;
+
+let keyboardkey_key_left_super = 343;
+
+let keyboardkey_key_right_shift = 344;
+
+let keyboardkey_key_right_control = 345;
+
+let keyboardkey_key_right_alt = 346;
+
+let keyboardkey_key_right_super = 347;
+
+let keyboardkey_key_kb_menu = 348;
+
+let keyboardkey_key_kp_0 = 320;
+
+let keyboardkey_key_kp_1 = 321;
+
+let keyboardkey_key_kp_2 = 322;
+
+let keyboardkey_key_kp_3 = 323;
+
+let keyboardkey_key_kp_4 = 324;
+
+let keyboardkey_key_kp_5 = 325;
+
+let keyboardkey_key_kp_6 = 326;
+
+let keyboardkey_key_kp_7 = 327;
+
+let keyboardkey_key_kp_8 = 328;
+
+let keyboardkey_key_kp_9 = 329;
+
+let keyboardkey_key_kp_decimal = 330;
+
+let keyboardkey_key_kp_divide = 331;
+
+let keyboardkey_key_kp_multiply = 332;
+
+let keyboardkey_key_kp_subtract = 333;
+
+let keyboardkey_key_kp_add = 334;
+
+let keyboardkey_key_kp_enter = 335;
+
+let keyboardkey_key_kp_equal = 336;
+
+let keyboardkey_key_back = 4;
+
+let keyboardkey_key_menu = 5;
+
+let keyboardkey_key_volume_up = 24;
+
+let keyboardkey_key_volume_down = 25;
+
+let mousebutton_mouse_button_left = 0;
+
+let mousebutton_mouse_button_right = 1;
+
+let mousebutton_mouse_button_middle = 2;
+
+let mousebutton_mouse_button_side = 3;
+
+let mousebutton_mouse_button_extra = 4;
+
+let mousebutton_mouse_button_forward = 5;
+
+let mousebutton_mouse_button_back = 6;
+
+let mousecursor_mouse_cursor_default = 0;
+
+let mousecursor_mouse_cursor_arrow = 1;
+
+let mousecursor_mouse_cursor_ibeam = 2;
+
+let mousecursor_mouse_cursor_crosshair = 3;
+
+let mousecursor_mouse_cursor_pointing_hand = 4;
+
+let mousecursor_mouse_cursor_resize_ew = 5;
+
+let mousecursor_mouse_cursor_resize_ns = 6;
+
+let mousecursor_mouse_cursor_resize_nwse = 7;
+
+let mousecursor_mouse_cursor_resize_nesw = 8;
+
+let mousecursor_mouse_cursor_resize_all = 9;
+
+let mousecursor_mouse_cursor_not_allowed = 10;
+
+let gamepadbutton_gamepad_button_unknown = 0;
+
+let gamepadbutton_gamepad_button_left_face_up = 1;
+
+let gamepadbutton_gamepad_button_left_face_right = 2;
+
+let gamepadbutton_gamepad_button_left_face_down = 3;
+
+let gamepadbutton_gamepad_button_left_face_left = 4;
+
+let gamepadbutton_gamepad_button_right_face_up = 5;
+
+let gamepadbutton_gamepad_button_right_face_right = 6;
+
+let gamepadbutton_gamepad_button_right_face_down = 7;
+
+let gamepadbutton_gamepad_button_right_face_left = 8;
+
+let gamepadbutton_gamepad_button_left_trigger_1 = 9;
+
+let gamepadbutton_gamepad_button_left_trigger_2 = 10;
+
+let gamepadbutton_gamepad_button_right_trigger_1 = 11;
+
+let gamepadbutton_gamepad_button_right_trigger_2 = 12;
+
+let gamepadbutton_gamepad_button_middle_left = 13;
+
+let gamepadbutton_gamepad_button_middle = 14;
+
+let gamepadbutton_gamepad_button_middle_right = 15;
+
+let gamepadbutton_gamepad_button_left_thumb = 16;
+
+let gamepadbutton_gamepad_button_right_thumb = 17;
+
+let gamepadaxis_gamepad_axis_left_x = 0;
+
+let gamepadaxis_gamepad_axis_left_y = 1;
+
+let gamepadaxis_gamepad_axis_right_x = 2;
+
+let gamepadaxis_gamepad_axis_right_y = 3;
+
+let gamepadaxis_gamepad_axis_left_trigger = 4;
+
+let gamepadaxis_gamepad_axis_right_trigger = 5;
+
+let materialmapindex_material_map_albedo = 0;
+
+let materialmapindex_material_map_metalness = 1;
+
+let materialmapindex_material_map_normal = 2;
+
+let materialmapindex_material_map_roughness = 3;
+
+let materialmapindex_material_map_occlusion = 4;
+
+let materialmapindex_material_map_emission = 5;
+
+let materialmapindex_material_map_height = 6;
+
+let materialmapindex_material_map_cubemap = 7;
+
+let materialmapindex_material_map_irradiance = 8;
+
+let materialmapindex_material_map_prefilter = 9;
+
+let materialmapindex_material_map_brdf = 10;
+
+let shaderlocationindex_shader_loc_vertex_position = 0;
+
+let shaderlocationindex_shader_loc_vertex_texcoord01 = 1;
+
+let shaderlocationindex_shader_loc_vertex_texcoord02 = 2;
+
+let shaderlocationindex_shader_loc_vertex_normal = 3;
+
+let shaderlocationindex_shader_loc_vertex_tangent = 4;
+
+let shaderlocationindex_shader_loc_vertex_color = 5;
+
+let shaderlocationindex_shader_loc_matrix_mvp = 6;
+
+let shaderlocationindex_shader_loc_matrix_view = 7;
+
+let shaderlocationindex_shader_loc_matrix_projection = 8;
+
+let shaderlocationindex_shader_loc_matrix_model = 9;
+
+let shaderlocationindex_shader_loc_matrix_normal = 10;
+
+let shaderlocationindex_shader_loc_vector_view = 11;
+
+let shaderlocationindex_shader_loc_color_diffuse = 12;
+
+let shaderlocationindex_shader_loc_color_specular = 13;
+
+let shaderlocationindex_shader_loc_color_ambient = 14;
+
+let shaderlocationindex_shader_loc_map_albedo = 15;
+
+let shaderlocationindex_shader_loc_map_metalness = 16;
+
+let shaderlocationindex_shader_loc_map_normal = 17;
+
+let shaderlocationindex_shader_loc_map_roughness = 18;
+
+let shaderlocationindex_shader_loc_map_occlusion = 19;
+
+let shaderlocationindex_shader_loc_map_emission = 20;
+
+let shaderlocationindex_shader_loc_map_height = 21;
+
+let shaderlocationindex_shader_loc_map_cubemap = 22;
+
+let shaderlocationindex_shader_loc_map_irradiance = 23;
+
+let shaderlocationindex_shader_loc_map_prefilter = 24;
+
+let shaderlocationindex_shader_loc_map_brdf = 25;
+
+let shaderlocationindex_shader_loc_vertex_boneids = 26;
+
+let shaderlocationindex_shader_loc_vertex_boneweights = 27;
+
+let shaderlocationindex_shader_loc_matrix_bonetransforms = 28;
+
+let shaderlocationindex_shader_loc_vertex_instancetransform = 29;
+
+let shaderuniformdatatype_shader_uniform_float = 0;
+
+let shaderuniformdatatype_shader_uniform_vec2 = 1;
+
+let shaderuniformdatatype_shader_uniform_vec3 = 2;
+
+let shaderuniformdatatype_shader_uniform_vec4 = 3;
+
+let shaderuniformdatatype_shader_uniform_int = 4;
+
+let shaderuniformdatatype_shader_uniform_ivec2 = 5;
+
+let shaderuniformdatatype_shader_uniform_ivec3 = 6;
+
+let shaderuniformdatatype_shader_uniform_ivec4 = 7;
+
+let shaderuniformdatatype_shader_uniform_uint = 8;
+
+let shaderuniformdatatype_shader_uniform_uivec2 = 9;
+
+let shaderuniformdatatype_shader_uniform_uivec3 = 10;
+
+let shaderuniformdatatype_shader_uniform_uivec4 = 11;
+
+let shaderuniformdatatype_shader_uniform_sampler2d = 12;
+
+let shaderattributedatatype_shader_attrib_float = 0;
+
+let shaderattributedatatype_shader_attrib_vec2 = 1;
+
+let shaderattributedatatype_shader_attrib_vec3 = 2;
+
+let shaderattributedatatype_shader_attrib_vec4 = 3;
+
+let pixelformat_pixelformat_uncompressed_grayscale = 1;
+
+let pixelformat_pixelformat_uncompressed_gray_alpha = 2;
+
+let pixelformat_pixelformat_uncompressed_r5g6b5 = 3;
+
+let pixelformat_pixelformat_uncompressed_r8g8b8 = 4;
+
+let pixelformat_pixelformat_uncompressed_r5g5b5a1 = 5;
+
+let pixelformat_pixelformat_uncompressed_r4g4b4a4 = 6;
+
+let pixelformat_pixelformat_uncompressed_r8g8b8a8 = 7;
+
+let pixelformat_pixelformat_uncompressed_r32 = 8;
+
+let pixelformat_pixelformat_uncompressed_r32g32b32 = 9;
+
+let pixelformat_pixelformat_uncompressed_r32g32b32a32 = 10;
+
+let pixelformat_pixelformat_uncompressed_r16 = 11;
+
+let pixelformat_pixelformat_uncompressed_r16g16b16 = 12;
+
+let pixelformat_pixelformat_uncompressed_r16g16b16a16 = 13;
+
+let pixelformat_pixelformat_compressed_dxt1_rgb = 14;
+
+let pixelformat_pixelformat_compressed_dxt1_rgba = 15;
+
+let pixelformat_pixelformat_compressed_dxt3_rgba = 16;
+
+let pixelformat_pixelformat_compressed_dxt5_rgba = 17;
+
+let pixelformat_pixelformat_compressed_etc1_rgb = 18;
+
+let pixelformat_pixelformat_compressed_etc2_rgb = 19;
+
+let pixelformat_pixelformat_compressed_etc2_eac_rgba = 20;
+
+let pixelformat_pixelformat_compressed_pvrt_rgb = 21;
+
+let pixelformat_pixelformat_compressed_pvrt_rgba = 22;
+
+let pixelformat_pixelformat_compressed_astc_4x4_rgba = 23;
+
+let pixelformat_pixelformat_compressed_astc_8x8_rgba = 24;
+
+let texturefilter_texture_filter_point = 0;
+
+let texturefilter_texture_filter_bilinear = 1;
+
+let texturefilter_texture_filter_trilinear = 2;
+
+let texturefilter_texture_filter_anisotropic_4x = 3;
+
+let texturefilter_texture_filter_anisotropic_8x = 4;
+
+let texturefilter_texture_filter_anisotropic_16x = 5;
+
+let texturewrap_texture_wrap_repeat = 0;
+
+let texturewrap_texture_wrap_clamp = 1;
+
+let texturewrap_texture_wrap_mirror_repeat = 2;
+
+let texturewrap_texture_wrap_mirror_clamp = 3;
+
+let cubemaplayout_cubemap_layout_auto_detect = 0;
+
+let cubemaplayout_cubemap_layout_line_vertical = 1;
+
+let cubemaplayout_cubemap_layout_line_horizontal = 2;
+
+let cubemaplayout_cubemap_layout_cross_three_by_four = 3;
+
+let cubemaplayout_cubemap_layout_cross_four_by_three = 4;
+
+let fonttype_font_default = 0;
+
+let fonttype_font_bitmap = 1;
+
+let fonttype_font_sdf = 2;
+
+let blendmode_blend_alpha = 0;
+
+let blendmode_blend_additive = 1;
+
+let blendmode_blend_multiplied = 2;
+
+let blendmode_blend_add_colors = 3;
+
+let blendmode_blend_subtract_colors = 4;
+
+let blendmode_blend_alpha_premultiply = 5;
+
+let blendmode_blend_custom = 6;
+
+let blendmode_blend_custom_separate = 7;
+
+let gesture_gesture_none = 0;
+
+let gesture_gesture_tap = 1;
+
+let gesture_gesture_doubletap = 2;
+
+let gesture_gesture_hold = 4;
+
+let gesture_gesture_drag = 8;
+
+let gesture_gesture_swipe_right = 16;
+
+let gesture_gesture_swipe_left = 32;
+
+let gesture_gesture_swipe_up = 64;
+
+let gesture_gesture_swipe_down = 128;
+
+let gesture_gesture_pinch_in = 256;
+
+let gesture_gesture_pinch_out = 512;
+
+let cameramode_camera_custom = 0;
+
+let cameramode_camera_free = 1;
+
+let cameramode_camera_orbital = 2;
+
+let cameramode_camera_first_person = 3;
+
+let cameramode_camera_third_person = 4;
+
+let cameraprojection_camera_perspective = 0;
+
+let cameraprojection_camera_orthographic = 1;
+
+let npatchlayout_npatch_nine_patch = 0;
+
+let npatchlayout_npatch_three_patch_vertical = 1;
+
+let npatchlayout_npatch_three_patch_horizontal = 2;
+
+// koda:extern void koda_wrap_raylib_void 0
+let void = 0;
+
+// koda:extern bool koda_wrap_raylib_bool 0
+let bool = 0;
+
+// koda:extern bool koda_wrap_raylib_bool 0
+let bool = 0;
+
+// koda:extern initwindow koda_wrap_raylib_InitWindow 3
+let initwindow = 0;
+
+// koda:extern closewindow koda_wrap_raylib_CloseWindow 0
+let closewindow = 0;
+
+// koda:extern windowshouldclose koda_wrap_raylib_WindowShouldClose 0
+let windowshouldclose = 0;
+
+// koda:extern iswindowready koda_wrap_raylib_IsWindowReady 0
+let iswindowready = 0;
+
+// koda:extern iswindowfullscreen koda_wrap_raylib_IsWindowFullscreen 0
+let iswindowfullscreen = 0;
+
+// koda:extern iswindowhidden koda_wrap_raylib_IsWindowHidden 0
+let iswindowhidden = 0;
+
+// koda:extern iswindowminimized koda_wrap_raylib_IsWindowMinimized 0
+let iswindowminimized = 0;
+
+// koda:extern iswindowmaximized koda_wrap_raylib_IsWindowMaximized 0
+let iswindowmaximized = 0;
+
+// koda:extern iswindowfocused koda_wrap_raylib_IsWindowFocused 0
+let iswindowfocused = 0;
+
+// koda:extern iswindowresized koda_wrap_raylib_IsWindowResized 0
+let iswindowresized = 0;
+
+// koda:extern iswindowstate koda_wrap_raylib_IsWindowState 1
+let iswindowstate = 0;
+
+// koda:extern setwindowstate koda_wrap_raylib_SetWindowState 1
+let setwindowstate = 0;
+
+// koda:extern clearwindowstate koda_wrap_raylib_ClearWindowState 1
+let clearwindowstate = 0;
+
+// koda:extern togglefullscreen koda_wrap_raylib_ToggleFullscreen 0
+let togglefullscreen = 0;
+
+// koda:extern toggleborderlesswindowed koda_wrap_raylib_ToggleBorderlessWindowed 0
+let toggleborderlesswindowed = 0;
+
+// koda:extern maximizewindow koda_wrap_raylib_MaximizeWindow 0
+let maximizewindow = 0;
+
+// koda:extern minimizewindow koda_wrap_raylib_MinimizeWindow 0
+let minimizewindow = 0;
+
+// koda:extern restorewindow koda_wrap_raylib_RestoreWindow 0
+let restorewindow = 0;
+
+// koda:extern setwindowicon koda_wrap_raylib_SetWindowIcon 1
+let setwindowicon = 0;
+
+// koda:extern setwindowicons koda_wrap_raylib_SetWindowIcons 2
+let setwindowicons = 0;
+
+// koda:extern setwindowtitle koda_wrap_raylib_SetWindowTitle 1
+let setwindowtitle = 0;
+
+// koda:extern setwindowposition koda_wrap_raylib_SetWindowPosition 2
+let setwindowposition = 0;
+
+// koda:extern setwindowmonitor koda_wrap_raylib_SetWindowMonitor 1
+let setwindowmonitor = 0;
+
+// koda:extern setwindowminsize koda_wrap_raylib_SetWindowMinSize 2
+let setwindowminsize = 0;
+
+// koda:extern setwindowmaxsize koda_wrap_raylib_SetWindowMaxSize 2
+let setwindowmaxsize = 0;
+
+// koda:extern setwindowsize koda_wrap_raylib_SetWindowSize 2
+let setwindowsize = 0;
+
+// koda:extern setwindowopacity koda_wrap_raylib_SetWindowOpacity 1
+let setwindowopacity = 0;
+
+// koda:extern setwindowfocused koda_wrap_raylib_SetWindowFocused 0
+let setwindowfocused = 0;
+
+// koda:extern getscreenwidth koda_wrap_raylib_GetScreenWidth 0
+let getscreenwidth = 0;
+
+// koda:extern getscreenheight koda_wrap_raylib_GetScreenHeight 0
+let getscreenheight = 0;
+
+// koda:extern getrenderwidth koda_wrap_raylib_GetRenderWidth 0
+let getrenderwidth = 0;
+
+// koda:extern getrenderheight koda_wrap_raylib_GetRenderHeight 0
+let getrenderheight = 0;
+
+// koda:extern getmonitorcount koda_wrap_raylib_GetMonitorCount 0
+let getmonitorcount = 0;
+
+// koda:extern getcurrentmonitor koda_wrap_raylib_GetCurrentMonitor 0
+let getcurrentmonitor = 0;
+
+// koda:extern getmonitorposition koda_wrap_raylib_GetMonitorPosition 1
+let getmonitorposition = 0;
+
+// koda:extern getmonitorwidth koda_wrap_raylib_GetMonitorWidth 1
+let getmonitorwidth = 0;
+
+// koda:extern getmonitorheight koda_wrap_raylib_GetMonitorHeight 1
+let getmonitorheight = 0;
+
+// koda:extern getmonitorphysicalwidth koda_wrap_raylib_GetMonitorPhysicalWidth 1
+let getmonitorphysicalwidth = 0;
+
+// koda:extern getmonitorphysicalheight koda_wrap_raylib_GetMonitorPhysicalHeight 1
+let getmonitorphysicalheight = 0;
+
+// koda:extern getmonitorrefreshrate koda_wrap_raylib_GetMonitorRefreshRate 1
+let getmonitorrefreshrate = 0;
+
+// koda:extern getwindowposition koda_wrap_raylib_GetWindowPosition 0
+let getwindowposition = 0;
+
+// koda:extern getwindowscaledpi koda_wrap_raylib_GetWindowScaleDPI 0
+let getwindowscaledpi = 0;
+
+// koda:extern setclipboardtext koda_wrap_raylib_SetClipboardText 1
+let setclipboardtext = 0;
+
+// koda:extern getclipboardimage koda_wrap_raylib_GetClipboardImage 0
+let getclipboardimage = 0;
+
+// koda:extern enableeventwaiting koda_wrap_raylib_EnableEventWaiting 0
+let enableeventwaiting = 0;
+
+// koda:extern disableeventwaiting koda_wrap_raylib_DisableEventWaiting 0
+let disableeventwaiting = 0;
+
+// koda:extern showcursor koda_wrap_raylib_ShowCursor 0
+let showcursor = 0;
+
+// koda:extern hidecursor koda_wrap_raylib_HideCursor 0
+let hidecursor = 0;
+
+// koda:extern iscursorhidden koda_wrap_raylib_IsCursorHidden 0
+let iscursorhidden = 0;
+
+// koda:extern enablecursor koda_wrap_raylib_EnableCursor 0
+let enablecursor = 0;
+
+// koda:extern disablecursor koda_wrap_raylib_DisableCursor 0
+let disablecursor = 0;
+
+// koda:extern iscursoronscreen koda_wrap_raylib_IsCursorOnScreen 0
+let iscursoronscreen = 0;
+
+// koda:extern clearbackground koda_wrap_raylib_ClearBackground 1
+let clearbackground = 0;
+
+// koda:extern begindrawing koda_wrap_raylib_BeginDrawing 0
+let begindrawing = 0;
+
+// koda:extern enddrawing koda_wrap_raylib_EndDrawing 0
+let enddrawing = 0;
+
+// koda:extern beginmode2d koda_wrap_raylib_BeginMode2D 1
+let beginmode2d = 0;
+
+// koda:extern endmode2d koda_wrap_raylib_EndMode2D 0
+let endmode2d = 0;
+
+// koda:extern beginmode3d koda_wrap_raylib_BeginMode3D 1
+let beginmode3d = 0;
+
+// koda:extern endmode3d koda_wrap_raylib_EndMode3D 0
+let endmode3d = 0;
+
+// koda:extern begintexturemode koda_wrap_raylib_BeginTextureMode 1
+let begintexturemode = 0;
+
+// koda:extern endtexturemode koda_wrap_raylib_EndTextureMode 0
+let endtexturemode = 0;
+
+// koda:extern beginshadermode koda_wrap_raylib_BeginShaderMode 1
+let beginshadermode = 0;
+
+// koda:extern endshadermode koda_wrap_raylib_EndShaderMode 0
+let endshadermode = 0;
+
+// koda:extern beginblendmode koda_wrap_raylib_BeginBlendMode 1
+let beginblendmode = 0;
+
+// koda:extern endblendmode koda_wrap_raylib_EndBlendMode 0
+let endblendmode = 0;
+
+// koda:extern beginscissormode koda_wrap_raylib_BeginScissorMode 4
+let beginscissormode = 0;
+
+// koda:extern endscissormode koda_wrap_raylib_EndScissorMode 0
+let endscissormode = 0;
+
+// koda:extern beginvrstereomode koda_wrap_raylib_BeginVrStereoMode 1
+let beginvrstereomode = 0;
+
+// koda:extern endvrstereomode koda_wrap_raylib_EndVrStereoMode 0
+let endvrstereomode = 0;
+
+// koda:extern loadvrstereoconfig koda_wrap_raylib_LoadVrStereoConfig 1
+let loadvrstereoconfig = 0;
+
+// koda:extern unloadvrstereoconfig koda_wrap_raylib_UnloadVrStereoConfig 1
+let unloadvrstereoconfig = 0;
+
+// koda:extern loadshader koda_wrap_raylib_LoadShader 2
+let loadshader = 0;
+
+// koda:extern loadshaderfrommemory koda_wrap_raylib_LoadShaderFromMemory 2
+let loadshaderfrommemory = 0;
+
+// koda:extern isshadervalid koda_wrap_raylib_IsShaderValid 1
+let isshadervalid = 0;
+
+// koda:extern getshaderlocation koda_wrap_raylib_GetShaderLocation 2
+let getshaderlocation = 0;
+
+// koda:extern getshaderlocationattrib koda_wrap_raylib_GetShaderLocationAttrib 2
+let getshaderlocationattrib = 0;
+
+// koda:extern setshadervalue koda_wrap_raylib_SetShaderValue 4
+let setshadervalue = 0;
+
+// koda:extern setshadervaluev koda_wrap_raylib_SetShaderValueV 5
+let setshadervaluev = 0;
+
+// koda:extern setshadervaluematrix koda_wrap_raylib_SetShaderValueMatrix 3
+let setshadervaluematrix = 0;
+
+// koda:extern setshadervaluetexture koda_wrap_raylib_SetShaderValueTexture 3
+let setshadervaluetexture = 0;
+
+// koda:extern unloadshader koda_wrap_raylib_UnloadShader 1
+let unloadshader = 0;
+
+// koda:extern getscreentoworldray koda_wrap_raylib_GetScreenToWorldRay 2
+let getscreentoworldray = 0;
+
+// koda:extern getscreentoworldrayex koda_wrap_raylib_GetScreenToWorldRayEx 4
+let getscreentoworldrayex = 0;
+
+// koda:extern getworldtoscreen koda_wrap_raylib_GetWorldToScreen 2
+let getworldtoscreen = 0;
+
+// koda:extern getworldtoscreenex koda_wrap_raylib_GetWorldToScreenEx 4
+let getworldtoscreenex = 0;
+
+// koda:extern getworldtoscreen2d koda_wrap_raylib_GetWorldToScreen2D 2
+let getworldtoscreen2d = 0;
+
+// koda:extern getscreentoworld2d koda_wrap_raylib_GetScreenToWorld2D 2
+let getscreentoworld2d = 0;
+
+// koda:extern getcameramatrix koda_wrap_raylib_GetCameraMatrix 1
+let getcameramatrix = 0;
+
+// koda:extern getcameramatrix2d koda_wrap_raylib_GetCameraMatrix2D 1
+let getcameramatrix2d = 0;
+
+// koda:extern settargetfps koda_wrap_raylib_SetTargetFPS 1
+let settargetfps = 0;
+
+// koda:extern getframetime koda_wrap_raylib_GetFrameTime 0
+let getframetime = 0;
+
+// koda:extern gettime koda_wrap_raylib_GetTime 0
+let gettime = 0;
+
+// koda:extern getfps koda_wrap_raylib_GetFPS 0
+let getfps = 0;
+
+// koda:extern swapscreenbuffer koda_wrap_raylib_SwapScreenBuffer 0
+let swapscreenbuffer = 0;
+
+// koda:extern pollinputevents koda_wrap_raylib_PollInputEvents 0
+let pollinputevents = 0;
+
+// koda:extern waittime koda_wrap_raylib_WaitTime 1
+let waittime = 0;
+
+// koda:extern setrandomseed koda_wrap_raylib_SetRandomSeed 1
+let setrandomseed = 0;
+
+// koda:extern getrandomvalue koda_wrap_raylib_GetRandomValue 2
+let getrandomvalue = 0;
+
+// koda:extern unloadrandomsequence koda_wrap_raylib_UnloadRandomSequence 1
+let unloadrandomsequence = 0;
+
+// koda:extern takescreenshot koda_wrap_raylib_TakeScreenshot 1
+let takescreenshot = 0;
+
+// koda:extern setconfigflags koda_wrap_raylib_SetConfigFlags 1
+let setconfigflags = 0;
+
+// koda:extern openurl koda_wrap_raylib_OpenURL 1
+let openurl = 0;
+
+// koda:extern settraceloglevel koda_wrap_raylib_SetTraceLogLevel 1
+let settraceloglevel = 0;
+
+// koda:extern tracelog koda_wrap_raylib_TraceLog 2
+let tracelog = 0;
+
+// koda:extern settracelogcallback koda_wrap_raylib_SetTraceLogCallback 1
+let settracelogcallback = 0;
+
+// koda:extern memfree koda_wrap_raylib_MemFree 1
+let memfree = 0;
+
+// koda:extern unloadfiledata koda_wrap_raylib_UnloadFileData 1
+let unloadfiledata = 0;
+
+// koda:extern savefiledata koda_wrap_raylib_SaveFileData 3
+let savefiledata = 0;
+
+// koda:extern exportdataascode koda_wrap_raylib_ExportDataAsCode 3
+let exportdataascode = 0;
+
+// koda:extern unloadfiletext koda_wrap_raylib_UnloadFileText 1
+let unloadfiletext = 0;
+
+// koda:extern savefiletext koda_wrap_raylib_SaveFileText 2
+let savefiletext = 0;
+
+// koda:extern setloadfiledatacallback koda_wrap_raylib_SetLoadFileDataCallback 1
+let setloadfiledatacallback = 0;
+
+// koda:extern setsavefiledatacallback koda_wrap_raylib_SetSaveFileDataCallback 1
+let setsavefiledatacallback = 0;
+
+// koda:extern setloadfiletextcallback koda_wrap_raylib_SetLoadFileTextCallback 1
+let setloadfiletextcallback = 0;
+
+// koda:extern setsavefiletextcallback koda_wrap_raylib_SetSaveFileTextCallback 1
+let setsavefiletextcallback = 0;
+
+// koda:extern filerename koda_wrap_raylib_FileRename 2
+let filerename = 0;
+
+// koda:extern fileremove koda_wrap_raylib_FileRemove 1
+let fileremove = 0;
+
+// koda:extern filecopy koda_wrap_raylib_FileCopy 2
+let filecopy = 0;
+
+// koda:extern filemove koda_wrap_raylib_FileMove 2
+let filemove = 0;
+
+// koda:extern filetextreplace koda_wrap_raylib_FileTextReplace 3
+let filetextreplace = 0;
+
+// koda:extern filetextfindindex koda_wrap_raylib_FileTextFindIndex 2
+let filetextfindindex = 0;
+
+// koda:extern fileexists koda_wrap_raylib_FileExists 1
+let fileexists = 0;
+
+// koda:extern directoryexists koda_wrap_raylib_DirectoryExists 1
+let directoryexists = 0;
+
+// koda:extern isfileextension koda_wrap_raylib_IsFileExtension 2
+let isfileextension = 0;
+
+// koda:extern getfilelength koda_wrap_raylib_GetFileLength 1
+let getfilelength = 0;
+
+// koda:extern getfilemodtime koda_wrap_raylib_GetFileModTime 1
+let getfilemodtime = 0;
+
+// koda:extern makedirectory koda_wrap_raylib_MakeDirectory 1
+let makedirectory = 0;
+
+// koda:extern changedirectory koda_wrap_raylib_ChangeDirectory 1
+let changedirectory = 0;
+
+// koda:extern ispathfile koda_wrap_raylib_IsPathFile 1
+let ispathfile = 0;
+
+// koda:extern isfilenamevalid koda_wrap_raylib_IsFileNameValid 1
+let isfilenamevalid = 0;
+
+// koda:extern loaddirectoryfiles koda_wrap_raylib_LoadDirectoryFiles 1
+let loaddirectoryfiles = 0;
+
+// koda:extern loaddirectoryfilesex koda_wrap_raylib_LoadDirectoryFilesEx 3
+let loaddirectoryfilesex = 0;
+
+// koda:extern unloaddirectoryfiles koda_wrap_raylib_UnloadDirectoryFiles 1
+let unloaddirectoryfiles = 0;
+
+// koda:extern isfiledropped koda_wrap_raylib_IsFileDropped 0
+let isfiledropped = 0;
+
+// koda:extern loaddroppedfiles koda_wrap_raylib_LoadDroppedFiles 0
+let loaddroppedfiles = 0;
+
+// koda:extern unloaddroppedfiles koda_wrap_raylib_UnloadDroppedFiles 1
+let unloaddroppedfiles = 0;
+
+// koda:extern getdirectoryfilecount koda_wrap_raylib_GetDirectoryFileCount 1
+let getdirectoryfilecount = 0;
+
+// koda:extern getdirectoryfilecountex koda_wrap_raylib_GetDirectoryFileCountEx 3
+let getdirectoryfilecountex = 0;
+
+// koda:extern computecrc32 koda_wrap_raylib_ComputeCRC32 2
+let computecrc32 = 0;
+
+// koda:extern loadautomationeventlist koda_wrap_raylib_LoadAutomationEventList 1
+let loadautomationeventlist = 0;
+
+// koda:extern unloadautomationeventlist koda_wrap_raylib_UnloadAutomationEventList 1
+let unloadautomationeventlist = 0;
+
+// koda:extern exportautomationeventlist koda_wrap_raylib_ExportAutomationEventList 2
+let exportautomationeventlist = 0;
+
+// koda:extern setautomationeventlist koda_wrap_raylib_SetAutomationEventList 1
+let setautomationeventlist = 0;
+
+// koda:extern setautomationeventbaseframe koda_wrap_raylib_SetAutomationEventBaseFrame 1
+let setautomationeventbaseframe = 0;
+
+// koda:extern startautomationeventrecording koda_wrap_raylib_StartAutomationEventRecording 0
+let startautomationeventrecording = 0;
+
+// koda:extern stopautomationeventrecording koda_wrap_raylib_StopAutomationEventRecording 0
+let stopautomationeventrecording = 0;
+
+// koda:extern playautomationevent koda_wrap_raylib_PlayAutomationEvent 1
+let playautomationevent = 0;
+
+// koda:extern iskeypressed koda_wrap_raylib_IsKeyPressed 1
+let iskeypressed = 0;
+
+// koda:extern iskeypressedrepeat koda_wrap_raylib_IsKeyPressedRepeat 1
+let iskeypressedrepeat = 0;
+
+// koda:extern iskeydown koda_wrap_raylib_IsKeyDown 1
+let iskeydown = 0;
+
+// koda:extern iskeyreleased koda_wrap_raylib_IsKeyReleased 1
+let iskeyreleased = 0;
+
+// koda:extern iskeyup koda_wrap_raylib_IsKeyUp 1
+let iskeyup = 0;
+
+// koda:extern getkeypressed koda_wrap_raylib_GetKeyPressed 0
+let getkeypressed = 0;
+
+// koda:extern getcharpressed koda_wrap_raylib_GetCharPressed 0
+let getcharpressed = 0;
+
+// koda:extern setexitkey koda_wrap_raylib_SetExitKey 1
+let setexitkey = 0;
+
+// koda:extern isgamepadavailable koda_wrap_raylib_IsGamepadAvailable 1
+let isgamepadavailable = 0;
+
+// koda:extern isgamepadbuttonpressed koda_wrap_raylib_IsGamepadButtonPressed 2
+let isgamepadbuttonpressed = 0;
+
+// koda:extern isgamepadbuttondown koda_wrap_raylib_IsGamepadButtonDown 2
+let isgamepadbuttondown = 0;
+
+// koda:extern isgamepadbuttonreleased koda_wrap_raylib_IsGamepadButtonReleased 2
+let isgamepadbuttonreleased = 0;
+
+// koda:extern isgamepadbuttonup koda_wrap_raylib_IsGamepadButtonUp 2
+let isgamepadbuttonup = 0;
+
+// koda:extern getgamepadbuttonpressed koda_wrap_raylib_GetGamepadButtonPressed 0
+let getgamepadbuttonpressed = 0;
+
+// koda:extern getgamepadaxiscount koda_wrap_raylib_GetGamepadAxisCount 1
+let getgamepadaxiscount = 0;
+
+// koda:extern getgamepadaxismovement koda_wrap_raylib_GetGamepadAxisMovement 2
+let getgamepadaxismovement = 0;
+
+// koda:extern setgamepadmappings koda_wrap_raylib_SetGamepadMappings 1
+let setgamepadmappings = 0;
+
+// koda:extern setgamepadvibration koda_wrap_raylib_SetGamepadVibration 4
+let setgamepadvibration = 0;
+
+// koda:extern ismousebuttonpressed koda_wrap_raylib_IsMouseButtonPressed 1
+let ismousebuttonpressed = 0;
+
+// koda:extern ismousebuttondown koda_wrap_raylib_IsMouseButtonDown 1
+let ismousebuttondown = 0;
+
+// koda:extern ismousebuttonreleased koda_wrap_raylib_IsMouseButtonReleased 1
+let ismousebuttonreleased = 0;
+
+// koda:extern ismousebuttonup koda_wrap_raylib_IsMouseButtonUp 1
+let ismousebuttonup = 0;
+
+// koda:extern getmousex koda_wrap_raylib_GetMouseX 0
+let getmousex = 0;
+
+// koda:extern getmousey koda_wrap_raylib_GetMouseY 0
+let getmousey = 0;
+
+// koda:extern getmouseposition koda_wrap_raylib_GetMousePosition 0
+let getmouseposition = 0;
+
+// koda:extern getmousedelta koda_wrap_raylib_GetMouseDelta 0
+let getmousedelta = 0;
+
+// koda:extern setmouseposition koda_wrap_raylib_SetMousePosition 2
+let setmouseposition = 0;
+
+// koda:extern setmouseoffset koda_wrap_raylib_SetMouseOffset 2
+let setmouseoffset = 0;
+
+// koda:extern setmousescale koda_wrap_raylib_SetMouseScale 2
+let setmousescale = 0;
+
+// koda:extern getmousewheelmove koda_wrap_raylib_GetMouseWheelMove 0
+let getmousewheelmove = 0;
+
+// koda:extern getmousewheelmovev koda_wrap_raylib_GetMouseWheelMoveV 0
+let getmousewheelmovev = 0;
+
+// koda:extern setmousecursor koda_wrap_raylib_SetMouseCursor 1
+let setmousecursor = 0;
+
+// koda:extern gettouchx koda_wrap_raylib_GetTouchX 0
+let gettouchx = 0;
+
+// koda:extern gettouchy koda_wrap_raylib_GetTouchY 0
+let gettouchy = 0;
+
+// koda:extern gettouchposition koda_wrap_raylib_GetTouchPosition 1
+let gettouchposition = 0;
+
+// koda:extern gettouchpointid koda_wrap_raylib_GetTouchPointId 1
+let gettouchpointid = 0;
+
+// koda:extern gettouchpointcount koda_wrap_raylib_GetTouchPointCount 0
+let gettouchpointcount = 0;
+
+// koda:extern setgesturesenabled koda_wrap_raylib_SetGesturesEnabled 1
+let setgesturesenabled = 0;
+
+// koda:extern isgesturedetected koda_wrap_raylib_IsGestureDetected 1
+let isgesturedetected = 0;
+
+// koda:extern getgesturedetected koda_wrap_raylib_GetGestureDetected 0
+let getgesturedetected = 0;
+
+// koda:extern getgestureholdduration koda_wrap_raylib_GetGestureHoldDuration 0
+let getgestureholdduration = 0;
+
+// koda:extern getgesturedragvector koda_wrap_raylib_GetGestureDragVector 0
+let getgesturedragvector = 0;
+
+// koda:extern getgesturedragangle koda_wrap_raylib_GetGestureDragAngle 0
+let getgesturedragangle = 0;
+
+// koda:extern getgesturepinchvector koda_wrap_raylib_GetGesturePinchVector 0
+let getgesturepinchvector = 0;
+
+// koda:extern getgesturepinchangle koda_wrap_raylib_GetGesturePinchAngle 0
+let getgesturepinchangle = 0;
+
+// koda:extern updatecamera koda_wrap_raylib_UpdateCamera 2
+let updatecamera = 0;
+
+// koda:extern updatecamerapro koda_wrap_raylib_UpdateCameraPro 4
+let updatecamerapro = 0;
+
+// koda:extern setshapestexture koda_wrap_raylib_SetShapesTexture 2
+let setshapestexture = 0;
+
+// koda:extern getshapestexture koda_wrap_raylib_GetShapesTexture 0
+let getshapestexture = 0;
+
+// koda:extern getshapestexturerectangle koda_wrap_raylib_GetShapesTextureRectangle 0
+let getshapestexturerectangle = 0;
+
+// koda:extern drawpixel koda_wrap_raylib_DrawPixel 3
+let drawpixel = 0;
+
+// koda:extern drawpixelv koda_wrap_raylib_DrawPixelV 2
+let drawpixelv = 0;
+
+// koda:extern drawline koda_wrap_raylib_DrawLine 5
+let drawline = 0;
+
+// koda:extern drawlinev koda_wrap_raylib_DrawLineV 3
+let drawlinev = 0;
+
+// koda:extern drawlineex koda_wrap_raylib_DrawLineEx 4
+let drawlineex = 0;
+
+// koda:extern drawlinestrip koda_wrap_raylib_DrawLineStrip 3
+let drawlinestrip = 0;
+
+// koda:extern drawlinebezier koda_wrap_raylib_DrawLineBezier 4
+let drawlinebezier = 0;
+
+// koda:extern drawlinedashed koda_wrap_raylib_DrawLineDashed 5
+let drawlinedashed = 0;
+
+// koda:extern drawcircle koda_wrap_raylib_DrawCircle 4
+let drawcircle = 0;
+
+// koda:extern drawcirclev koda_wrap_raylib_DrawCircleV 3
+let drawcirclev = 0;
+
+// koda:extern drawcirclegradient koda_wrap_raylib_DrawCircleGradient 4
+let drawcirclegradient = 0;
+
+// koda:extern drawcirclesector koda_wrap_raylib_DrawCircleSector 6
+let drawcirclesector = 0;
+
+// koda:extern drawcirclesectorlines koda_wrap_raylib_DrawCircleSectorLines 6
+let drawcirclesectorlines = 0;
+
+// koda:extern drawcirclelines koda_wrap_raylib_DrawCircleLines 4
+let drawcirclelines = 0;
+
+// koda:extern drawcirclelinesv koda_wrap_raylib_DrawCircleLinesV 3
+let drawcirclelinesv = 0;
+
+// koda:extern drawellipse koda_wrap_raylib_DrawEllipse 5
+let drawellipse = 0;
+
+// koda:extern drawellipsev koda_wrap_raylib_DrawEllipseV 4
+let drawellipsev = 0;
+
+// koda:extern drawellipselines koda_wrap_raylib_DrawEllipseLines 5
+let drawellipselines = 0;
+
+// koda:extern drawellipselinesv koda_wrap_raylib_DrawEllipseLinesV 4
+let drawellipselinesv = 0;
+
+// koda:extern drawring koda_wrap_raylib_DrawRing 7
+let drawring = 0;
+
+// koda:extern drawringlines koda_wrap_raylib_DrawRingLines 7
+let drawringlines = 0;
+
+// koda:extern drawrectangle koda_wrap_raylib_DrawRectangle 5
+let drawrectangle = 0;
+
+// koda:extern drawrectanglev koda_wrap_raylib_DrawRectangleV 3
+let drawrectanglev = 0;
+
+// koda:extern drawrectanglerec koda_wrap_raylib_DrawRectangleRec 2
+let drawrectanglerec = 0;
+
+// koda:extern drawrectanglepro koda_wrap_raylib_DrawRectanglePro 4
+let drawrectanglepro = 0;
+
+// koda:extern drawrectanglegradientv koda_wrap_raylib_DrawRectangleGradientV 6
+let drawrectanglegradientv = 0;
+
+// koda:extern drawrectanglegradienth koda_wrap_raylib_DrawRectangleGradientH 6
+let drawrectanglegradienth = 0;
+
+// koda:extern drawrectanglegradientex koda_wrap_raylib_DrawRectangleGradientEx 5
+let drawrectanglegradientex = 0;
+
+// koda:extern drawrectanglelines koda_wrap_raylib_DrawRectangleLines 5
+let drawrectanglelines = 0;
+
+// koda:extern drawrectanglelinesex koda_wrap_raylib_DrawRectangleLinesEx 3
+let drawrectanglelinesex = 0;
+
+// koda:extern drawrectanglerounded koda_wrap_raylib_DrawRectangleRounded 4
+let drawrectanglerounded = 0;
+
+// koda:extern drawrectangleroundedlines koda_wrap_raylib_DrawRectangleRoundedLines 4
+let drawrectangleroundedlines = 0;
+
+// koda:extern drawrectangleroundedlinesex koda_wrap_raylib_DrawRectangleRoundedLinesEx 5
+let drawrectangleroundedlinesex = 0;
+
+// koda:extern drawtriangle koda_wrap_raylib_DrawTriangle 4
+let drawtriangle = 0;
+
+// koda:extern drawtrianglegradient koda_wrap_raylib_DrawTriangleGradient 6
+let drawtrianglegradient = 0;
+
+// koda:extern drawtrianglelines koda_wrap_raylib_DrawTriangleLines 4
+let drawtrianglelines = 0;
+
+// koda:extern drawtrianglefan koda_wrap_raylib_DrawTriangleFan 3
+let drawtrianglefan = 0;
+
+// koda:extern drawtrianglestrip koda_wrap_raylib_DrawTriangleStrip 3
+let drawtrianglestrip = 0;
+
+// koda:extern drawpoly koda_wrap_raylib_DrawPoly 5
+let drawpoly = 0;
+
+// koda:extern drawpolylines koda_wrap_raylib_DrawPolyLines 5
+let drawpolylines = 0;
+
+// koda:extern drawpolylinesex koda_wrap_raylib_DrawPolyLinesEx 6
+let drawpolylinesex = 0;
+
+// koda:extern drawsplinelinear koda_wrap_raylib_DrawSplineLinear 4
+let drawsplinelinear = 0;
+
+// koda:extern drawsplinebasis koda_wrap_raylib_DrawSplineBasis 4
+let drawsplinebasis = 0;
+
+// koda:extern drawsplinecatmullrom koda_wrap_raylib_DrawSplineCatmullRom 4
+let drawsplinecatmullrom = 0;
+
+// koda:extern drawsplinebezierquadratic koda_wrap_raylib_DrawSplineBezierQuadratic 4
+let drawsplinebezierquadratic = 0;
+
+// koda:extern drawsplinebeziercubic koda_wrap_raylib_DrawSplineBezierCubic 4
+let drawsplinebeziercubic = 0;
+
+// koda:extern drawsplinesegmentlinear koda_wrap_raylib_DrawSplineSegmentLinear 4
+let drawsplinesegmentlinear = 0;
+
+// koda:extern drawsplinesegmentbasis koda_wrap_raylib_DrawSplineSegmentBasis 6
+let drawsplinesegmentbasis = 0;
+
+// koda:extern drawsplinesegmentcatmullrom koda_wrap_raylib_DrawSplineSegmentCatmullRom 6
+let drawsplinesegmentcatmullrom = 0;
+
+// koda:extern drawsplinesegmentbezierquadratic koda_wrap_raylib_DrawSplineSegmentBezierQuadratic 5
+let drawsplinesegmentbezierquadratic = 0;
+
+// koda:extern drawsplinesegmentbeziercubic koda_wrap_raylib_DrawSplineSegmentBezierCubic 6
+let drawsplinesegmentbeziercubic = 0;
+
+// koda:extern getsplinepointlinear koda_wrap_raylib_GetSplinePointLinear 3
+let getsplinepointlinear = 0;
+
+// koda:extern getsplinepointbasis koda_wrap_raylib_GetSplinePointBasis 5
+let getsplinepointbasis = 0;
+
+// koda:extern getsplinepointcatmullrom koda_wrap_raylib_GetSplinePointCatmullRom 5
+let getsplinepointcatmullrom = 0;
+
+// koda:extern getsplinepointbezierquadratic koda_wrap_raylib_GetSplinePointBezierQuadratic 4
+let getsplinepointbezierquadratic = 0;
+
+// koda:extern getsplinepointbeziercubic koda_wrap_raylib_GetSplinePointBezierCubic 5
+let getsplinepointbeziercubic = 0;
+
+// koda:extern checkcollisionrecs koda_wrap_raylib_CheckCollisionRecs 2
+let checkcollisionrecs = 0;
+
+// koda:extern checkcollisioncircles koda_wrap_raylib_CheckCollisionCircles 4
+let checkcollisioncircles = 0;
+
+// koda:extern checkcollisioncirclerec koda_wrap_raylib_CheckCollisionCircleRec 3
+let checkcollisioncirclerec = 0;
+
+// koda:extern checkcollisioncircleline koda_wrap_raylib_CheckCollisionCircleLine 4
+let checkcollisioncircleline = 0;
+
+// koda:extern checkcollisionpointrec koda_wrap_raylib_CheckCollisionPointRec 2
+let checkcollisionpointrec = 0;
+
+// koda:extern checkcollisionpointcircle koda_wrap_raylib_CheckCollisionPointCircle 3
+let checkcollisionpointcircle = 0;
+
+// koda:extern checkcollisionpointtriangle koda_wrap_raylib_CheckCollisionPointTriangle 4
+let checkcollisionpointtriangle = 0;
+
+// koda:extern checkcollisionpointline koda_wrap_raylib_CheckCollisionPointLine 4
+let checkcollisionpointline = 0;
+
+// koda:extern checkcollisionpointpoly koda_wrap_raylib_CheckCollisionPointPoly 3
+let checkcollisionpointpoly = 0;
+
+// koda:extern checkcollisionlines koda_wrap_raylib_CheckCollisionLines 5
+let checkcollisionlines = 0;
+
+// koda:extern getcollisionrec koda_wrap_raylib_GetCollisionRec 2
+let getcollisionrec = 0;
+
+// koda:extern loadimage koda_wrap_raylib_LoadImage 1
+let loadimage = 0;
+
+// koda:extern loadimageraw koda_wrap_raylib_LoadImageRaw 5
+let loadimageraw = 0;
+
+// koda:extern loadimageanim koda_wrap_raylib_LoadImageAnim 2
+let loadimageanim = 0;
+
+// koda:extern loadimageanimfrommemory koda_wrap_raylib_LoadImageAnimFromMemory 4
+let loadimageanimfrommemory = 0;
+
+// koda:extern loadimagefrommemory koda_wrap_raylib_LoadImageFromMemory 3
+let loadimagefrommemory = 0;
+
+// koda:extern loadimagefromtexture koda_wrap_raylib_LoadImageFromTexture 1
+let loadimagefromtexture = 0;
+
+// koda:extern loadimagefromscreen koda_wrap_raylib_LoadImageFromScreen 0
+let loadimagefromscreen = 0;
+
+// koda:extern isimagevalid koda_wrap_raylib_IsImageValid 1
+let isimagevalid = 0;
+
+// koda:extern unloadimage koda_wrap_raylib_UnloadImage 1
+let unloadimage = 0;
+
+// koda:extern exportimage koda_wrap_raylib_ExportImage 2
+let exportimage = 0;
+
+// koda:extern exportimageascode koda_wrap_raylib_ExportImageAsCode 2
+let exportimageascode = 0;
+
+// koda:extern genimagecolor koda_wrap_raylib_GenImageColor 3
+let genimagecolor = 0;
+
+// koda:extern genimagegradientlinear koda_wrap_raylib_GenImageGradientLinear 5
+let genimagegradientlinear = 0;
+
+// koda:extern genimagegradientradial koda_wrap_raylib_GenImageGradientRadial 5
+let genimagegradientradial = 0;
+
+// koda:extern genimagegradientsquare koda_wrap_raylib_GenImageGradientSquare 5
+let genimagegradientsquare = 0;
+
+// koda:extern genimagechecked koda_wrap_raylib_GenImageChecked 6
+let genimagechecked = 0;
+
+// koda:extern genimagewhitenoise koda_wrap_raylib_GenImageWhiteNoise 3
+let genimagewhitenoise = 0;
+
+// koda:extern genimageperlinnoise koda_wrap_raylib_GenImagePerlinNoise 5
+let genimageperlinnoise = 0;
+
+// koda:extern genimagecellular koda_wrap_raylib_GenImageCellular 3
+let genimagecellular = 0;
+
+// koda:extern genimagetext koda_wrap_raylib_GenImageText 3
+let genimagetext = 0;
+
+// koda:extern imagecopy koda_wrap_raylib_ImageCopy 1
+let imagecopy = 0;
+
+// koda:extern imagefromimage koda_wrap_raylib_ImageFromImage 2
+let imagefromimage = 0;
+
+// koda:extern imagefromchannel koda_wrap_raylib_ImageFromChannel 2
+let imagefromchannel = 0;
+
+// koda:extern imagetext koda_wrap_raylib_ImageText 3
+let imagetext = 0;
+
+// koda:extern imagetextex koda_wrap_raylib_ImageTextEx 5
+let imagetextex = 0;
+
+// koda:extern imageformat koda_wrap_raylib_ImageFormat 2
+let imageformat = 0;
+
+// koda:extern imagetopot koda_wrap_raylib_ImageToPOT 2
+let imagetopot = 0;
+
+// koda:extern imagecrop koda_wrap_raylib_ImageCrop 2
+let imagecrop = 0;
+
+// koda:extern imagealphacrop koda_wrap_raylib_ImageAlphaCrop 2
+let imagealphacrop = 0;
+
+// koda:extern imagealphaclear koda_wrap_raylib_ImageAlphaClear 3
+let imagealphaclear = 0;
+
+// koda:extern imagealphamask koda_wrap_raylib_ImageAlphaMask 2
+let imagealphamask = 0;
+
+// koda:extern imagealphapremultiply koda_wrap_raylib_ImageAlphaPremultiply 1
+let imagealphapremultiply = 0;
+
+// koda:extern imageblurgaussian koda_wrap_raylib_ImageBlurGaussian 2
+let imageblurgaussian = 0;
+
+// koda:extern imagekernelconvolution koda_wrap_raylib_ImageKernelConvolution 3
+let imagekernelconvolution = 0;
+
+// koda:extern imageresize koda_wrap_raylib_ImageResize 3
+let imageresize = 0;
+
+// koda:extern imageresizenn koda_wrap_raylib_ImageResizeNN 3
+let imageresizenn = 0;
+
+// koda:extern imageresizecanvas koda_wrap_raylib_ImageResizeCanvas 6
+let imageresizecanvas = 0;
+
+// koda:extern imagemipmaps koda_wrap_raylib_ImageMipmaps 1
+let imagemipmaps = 0;
+
+// koda:extern imagedither koda_wrap_raylib_ImageDither 5
+let imagedither = 0;
+
+// koda:extern imageflipvertical koda_wrap_raylib_ImageFlipVertical 1
+let imageflipvertical = 0;
+
+// koda:extern imagefliphorizontal koda_wrap_raylib_ImageFlipHorizontal 1
+let imagefliphorizontal = 0;
+
+// koda:extern imagerotate koda_wrap_raylib_ImageRotate 2
+let imagerotate = 0;
+
+// koda:extern imagerotatecw koda_wrap_raylib_ImageRotateCW 1
+let imagerotatecw = 0;
+
+// koda:extern imagerotateccw koda_wrap_raylib_ImageRotateCCW 1
+let imagerotateccw = 0;
+
+// koda:extern imagecolortint koda_wrap_raylib_ImageColorTint 2
+let imagecolortint = 0;
+
+// koda:extern imagecolorinvert koda_wrap_raylib_ImageColorInvert 1
+let imagecolorinvert = 0;
+
+// koda:extern imagecolorgrayscale koda_wrap_raylib_ImageColorGrayscale 1
+let imagecolorgrayscale = 0;
+
+// koda:extern imagecolorcontrast koda_wrap_raylib_ImageColorContrast 2
+let imagecolorcontrast = 0;
+
+// koda:extern imagecolorbrightness koda_wrap_raylib_ImageColorBrightness 2
+let imagecolorbrightness = 0;
+
+// koda:extern imagecolorreplace koda_wrap_raylib_ImageColorReplace 3
+let imagecolorreplace = 0;
+
+// koda:extern unloadimagecolors koda_wrap_raylib_UnloadImageColors 1
+let unloadimagecolors = 0;
+
+// koda:extern unloadimagepalette koda_wrap_raylib_UnloadImagePalette 1
+let unloadimagepalette = 0;
+
+// koda:extern getimagealphaborder koda_wrap_raylib_GetImageAlphaBorder 2
+let getimagealphaborder = 0;
+
+// koda:extern getimagecolor koda_wrap_raylib_GetImageColor 3
+let getimagecolor = 0;
+
+// koda:extern imageclearbackground koda_wrap_raylib_ImageClearBackground 2
+let imageclearbackground = 0;
+
+// koda:extern imagedrawpixel koda_wrap_raylib_ImageDrawPixel 4
+let imagedrawpixel = 0;
+
+// koda:extern imagedrawpixelv koda_wrap_raylib_ImageDrawPixelV 3
+let imagedrawpixelv = 0;
+
+// koda:extern imagedrawline koda_wrap_raylib_ImageDrawLine 6
+let imagedrawline = 0;
+
+// koda:extern imagedrawlinev koda_wrap_raylib_ImageDrawLineV 4
+let imagedrawlinev = 0;
+
+// koda:extern imagedrawlineex koda_wrap_raylib_ImageDrawLineEx 5
+let imagedrawlineex = 0;
+
+// koda:extern imagedrawcircle koda_wrap_raylib_ImageDrawCircle 5
+let imagedrawcircle = 0;
+
+// koda:extern imagedrawcirclev koda_wrap_raylib_ImageDrawCircleV 4
+let imagedrawcirclev = 0;
+
+// koda:extern imagedrawcirclelines koda_wrap_raylib_ImageDrawCircleLines 5
+let imagedrawcirclelines = 0;
+
+// koda:extern imagedrawcirclelinesv koda_wrap_raylib_ImageDrawCircleLinesV 4
+let imagedrawcirclelinesv = 0;
+
+// koda:extern imagedrawrectangle koda_wrap_raylib_ImageDrawRectangle 6
+let imagedrawrectangle = 0;
+
+// koda:extern imagedrawrectanglev koda_wrap_raylib_ImageDrawRectangleV 4
+let imagedrawrectanglev = 0;
+
+// koda:extern imagedrawrectanglerec koda_wrap_raylib_ImageDrawRectangleRec 3
+let imagedrawrectanglerec = 0;
+
+// koda:extern imagedrawrectanglelines koda_wrap_raylib_ImageDrawRectangleLines 6
+let imagedrawrectanglelines = 0;
+
+// koda:extern imagedrawrectanglelinesex koda_wrap_raylib_ImageDrawRectangleLinesEx 4
+let imagedrawrectanglelinesex = 0;
+
+// koda:extern imagedrawtriangle koda_wrap_raylib_ImageDrawTriangle 5
+let imagedrawtriangle = 0;
+
+// koda:extern imagedrawtrianglegradient koda_wrap_raylib_ImageDrawTriangleGradient 7
+let imagedrawtrianglegradient = 0;
+
+// koda:extern imagedrawtrianglelines koda_wrap_raylib_ImageDrawTriangleLines 5
+let imagedrawtrianglelines = 0;
+
+// koda:extern imagedrawtrianglefan koda_wrap_raylib_ImageDrawTriangleFan 4
+let imagedrawtrianglefan = 0;
+
+// koda:extern imagedrawtrianglestrip koda_wrap_raylib_ImageDrawTriangleStrip 4
+let imagedrawtrianglestrip = 0;
+
+// koda:extern imagedraw koda_wrap_raylib_ImageDraw 5
+let imagedraw = 0;
+
+// koda:extern imagedrawtext koda_wrap_raylib_ImageDrawText 6
+let imagedrawtext = 0;
+
+// koda:extern imagedrawtextex koda_wrap_raylib_ImageDrawTextEx 7
+let imagedrawtextex = 0;
+
+// koda:extern loadtexture koda_wrap_raylib_LoadTexture 1
+let loadtexture = 0;
+
+// koda:extern loadtexturefromimage koda_wrap_raylib_LoadTextureFromImage 1
+let loadtexturefromimage = 0;
+
+// koda:extern loadtexturecubemap koda_wrap_raylib_LoadTextureCubemap 2
+let loadtexturecubemap = 0;
+
+// koda:extern loadrendertexture koda_wrap_raylib_LoadRenderTexture 2
+let loadrendertexture = 0;
+
+// koda:extern istexturevalid koda_wrap_raylib_IsTextureValid 1
+let istexturevalid = 0;
+
+// koda:extern unloadtexture koda_wrap_raylib_UnloadTexture 1
+let unloadtexture = 0;
+
+// koda:extern isrendertexturevalid koda_wrap_raylib_IsRenderTextureValid 1
+let isrendertexturevalid = 0;
+
+// koda:extern unloadrendertexture koda_wrap_raylib_UnloadRenderTexture 1
+let unloadrendertexture = 0;
+
+// koda:extern updatetexture koda_wrap_raylib_UpdateTexture 2
+let updatetexture = 0;
+
+// koda:extern updatetexturerec koda_wrap_raylib_UpdateTextureRec 3
+let updatetexturerec = 0;
+
+// koda:extern gentexturemipmaps koda_wrap_raylib_GenTextureMipmaps 1
+let gentexturemipmaps = 0;
+
+// koda:extern settexturefilter koda_wrap_raylib_SetTextureFilter 2
+let settexturefilter = 0;
+
+// koda:extern settexturewrap koda_wrap_raylib_SetTextureWrap 2
+let settexturewrap = 0;
+
+// koda:extern drawtexture koda_wrap_raylib_DrawTexture 4
+let drawtexture = 0;
+
+// koda:extern drawtexturev koda_wrap_raylib_DrawTextureV 3
+let drawtexturev = 0;
+
+// koda:extern drawtextureex koda_wrap_raylib_DrawTextureEx 5
+let drawtextureex = 0;
+
+// koda:extern drawtexturerec koda_wrap_raylib_DrawTextureRec 4
+let drawtexturerec = 0;
+
+// koda:extern drawtexturepro koda_wrap_raylib_DrawTexturePro 6
+let drawtexturepro = 0;
+
+// koda:extern drawtexturenpatch koda_wrap_raylib_DrawTextureNPatch 6
+let drawtexturenpatch = 0;
+
+// koda:extern colorisequal koda_wrap_raylib_ColorIsEqual 2
+let colorisequal = 0;
+
+// koda:extern fade koda_wrap_raylib_Fade 2
+let fade = 0;
+
+// koda:extern colortoint koda_wrap_raylib_ColorToInt 1
+let colortoint = 0;
+
+// koda:extern colornormalize koda_wrap_raylib_ColorNormalize 1
+let colornormalize = 0;
+
+// koda:extern colorfromnormalized koda_wrap_raylib_ColorFromNormalized 1
+let colorfromnormalized = 0;
+
+// koda:extern colortohsv koda_wrap_raylib_ColorToHSV 1
+let colortohsv = 0;
+
+// koda:extern colorfromhsv koda_wrap_raylib_ColorFromHSV 3
+let colorfromhsv = 0;
+
+// koda:extern colortint koda_wrap_raylib_ColorTint 2
+let colortint = 0;
+
+// koda:extern colorbrightness koda_wrap_raylib_ColorBrightness 2
+let colorbrightness = 0;
+
+// koda:extern colorcontrast koda_wrap_raylib_ColorContrast 2
+let colorcontrast = 0;
+
+// koda:extern coloralpha koda_wrap_raylib_ColorAlpha 2
+let coloralpha = 0;
+
+// koda:extern coloralphablend koda_wrap_raylib_ColorAlphaBlend 3
+let coloralphablend = 0;
+
+// koda:extern colorlerp koda_wrap_raylib_ColorLerp 3
+let colorlerp = 0;
+
+// koda:extern getcolor koda_wrap_raylib_GetColor 1
+let getcolor = 0;
+
+// koda:extern getpixelcolor koda_wrap_raylib_GetPixelColor 2
+let getpixelcolor = 0;
+
+// koda:extern setpixelcolor koda_wrap_raylib_SetPixelColor 3
+let setpixelcolor = 0;
+
+// koda:extern getpixeldatasize koda_wrap_raylib_GetPixelDataSize 3
+let getpixeldatasize = 0;
+
+// koda:extern getfontdefault koda_wrap_raylib_GetFontDefault 0
+let getfontdefault = 0;
+
+// koda:extern loadfont koda_wrap_raylib_LoadFont 1
+let loadfont = 0;
+
+// koda:extern loadfontex koda_wrap_raylib_LoadFontEx 4
+let loadfontex = 0;
+
+// koda:extern loadfontfromimage koda_wrap_raylib_LoadFontFromImage 3
+let loadfontfromimage = 0;
+
+// koda:extern loadfontfrommemory koda_wrap_raylib_LoadFontFromMemory 6
+let loadfontfrommemory = 0;
+
+// koda:extern isfontvalid koda_wrap_raylib_IsFontValid 1
+let isfontvalid = 0;
+
+// koda:extern genimagefontatlas koda_wrap_raylib_GenImageFontAtlas 6
+let genimagefontatlas = 0;
+
+// koda:extern unloadfontdata koda_wrap_raylib_UnloadFontData 2
+let unloadfontdata = 0;
+
+// koda:extern unloadfont koda_wrap_raylib_UnloadFont 1
+let unloadfont = 0;
+
+// koda:extern exportfontascode koda_wrap_raylib_ExportFontAsCode 2
+let exportfontascode = 0;
+
+// koda:extern drawfps koda_wrap_raylib_DrawFPS 2
+let drawfps = 0;
+
+// koda:extern drawtext koda_wrap_raylib_DrawText 5
+let drawtext = 0;
+
+// koda:extern drawtextex koda_wrap_raylib_DrawTextEx 6
+let drawtextex = 0;
+
+// koda:extern drawtextpro koda_wrap_raylib_DrawTextPro 8
+let drawtextpro = 0;
+
+// koda:extern drawtextcodepoint koda_wrap_raylib_DrawTextCodepoint 5
+let drawtextcodepoint = 0;
+
+// koda:extern drawtextcodepoints koda_wrap_raylib_DrawTextCodepoints 7
+let drawtextcodepoints = 0;
+
+// koda:extern settextlinespacing koda_wrap_raylib_SetTextLineSpacing 1
+let settextlinespacing = 0;
+
+// koda:extern measuretext koda_wrap_raylib_MeasureText 2
+let measuretext = 0;
+
+// koda:extern measuretextex koda_wrap_raylib_MeasureTextEx 4
+let measuretextex = 0;
+
+// koda:extern measuretextcodepoints koda_wrap_raylib_MeasureTextCodepoints 5
+let measuretextcodepoints = 0;
+
+// koda:extern getglyphindex koda_wrap_raylib_GetGlyphIndex 2
+let getglyphindex = 0;
+
+// koda:extern getglyphinfo koda_wrap_raylib_GetGlyphInfo 2
+let getglyphinfo = 0;
+
+// koda:extern getglyphatlasrec koda_wrap_raylib_GetGlyphAtlasRec 2
+let getglyphatlasrec = 0;
+
+// koda:extern unloadutf8 koda_wrap_raylib_UnloadUTF8 1
+let unloadutf8 = 0;
+
+// koda:extern unloadcodepoints koda_wrap_raylib_UnloadCodepoints 1
+let unloadcodepoints = 0;
+
+// koda:extern getcodepointcount koda_wrap_raylib_GetCodepointCount 1
+let getcodepointcount = 0;
+
+// koda:extern getcodepoint koda_wrap_raylib_GetCodepoint 2
+let getcodepoint = 0;
+
+// koda:extern getcodepointnext koda_wrap_raylib_GetCodepointNext 2
+let getcodepointnext = 0;
+
+// koda:extern getcodepointprevious koda_wrap_raylib_GetCodepointPrevious 2
+let getcodepointprevious = 0;
+
+// koda:extern unloadtextlines koda_wrap_raylib_UnloadTextLines 2
+let unloadtextlines = 0;
+
+// koda:extern textcopy koda_wrap_raylib_TextCopy 2
+let textcopy = 0;
+
+// koda:extern textisequal koda_wrap_raylib_TextIsEqual 2
+let textisequal = 0;
+
+// koda:extern textlength koda_wrap_raylib_TextLength 1
+let textlength = 0;
+
+// koda:extern textappend koda_wrap_raylib_TextAppend 3
+let textappend = 0;
+
+// koda:extern textfindindex koda_wrap_raylib_TextFindIndex 2
+let textfindindex = 0;
+
+// koda:extern texttointeger koda_wrap_raylib_TextToInteger 1
+let texttointeger = 0;
+
+// koda:extern texttofloat koda_wrap_raylib_TextToFloat 1
+let texttofloat = 0;
+
+// koda:extern drawline3d koda_wrap_raylib_DrawLine3D 3
+let drawline3d = 0;
+
+// koda:extern drawpoint3d koda_wrap_raylib_DrawPoint3D 2
+let drawpoint3d = 0;
+
+// koda:extern drawcircle3d koda_wrap_raylib_DrawCircle3D 5
+let drawcircle3d = 0;
+
+// koda:extern drawtriangle3d koda_wrap_raylib_DrawTriangle3D 4
+let drawtriangle3d = 0;
+
+// koda:extern drawtrianglestrip3d koda_wrap_raylib_DrawTriangleStrip3D 3
+let drawtrianglestrip3d = 0;
+
+// koda:extern drawcube koda_wrap_raylib_DrawCube 5
+let drawcube = 0;
+
+// koda:extern drawcubev koda_wrap_raylib_DrawCubeV 3
+let drawcubev = 0;
+
+// koda:extern drawcubewires koda_wrap_raylib_DrawCubeWires 5
+let drawcubewires = 0;
+
+// koda:extern drawcubewiresv koda_wrap_raylib_DrawCubeWiresV 3
+let drawcubewiresv = 0;
+
+// koda:extern drawsphere koda_wrap_raylib_DrawSphere 3
+let drawsphere = 0;
+
+// koda:extern drawsphereex koda_wrap_raylib_DrawSphereEx 5
+let drawsphereex = 0;
+
+// koda:extern drawspherewires koda_wrap_raylib_DrawSphereWires 5
+let drawspherewires = 0;
+
+// koda:extern drawcylinder koda_wrap_raylib_DrawCylinder 6
+let drawcylinder = 0;
+
+// koda:extern drawcylinderex koda_wrap_raylib_DrawCylinderEx 6
+let drawcylinderex = 0;
+
+// koda:extern drawcylinderwires koda_wrap_raylib_DrawCylinderWires 6
+let drawcylinderwires = 0;
+
+// koda:extern drawcylinderwiresex koda_wrap_raylib_DrawCylinderWiresEx 6
+let drawcylinderwiresex = 0;
+
+// koda:extern drawcapsule koda_wrap_raylib_DrawCapsule 6
+let drawcapsule = 0;
+
+// koda:extern drawcapsulewires koda_wrap_raylib_DrawCapsuleWires 6
+let drawcapsulewires = 0;
+
+// koda:extern drawplane koda_wrap_raylib_DrawPlane 3
+let drawplane = 0;
+
+// koda:extern drawray koda_wrap_raylib_DrawRay 2
+let drawray = 0;
+
+// koda:extern drawgrid koda_wrap_raylib_DrawGrid 2
+let drawgrid = 0;
+
+// koda:extern loadmodel koda_wrap_raylib_LoadModel 1
+let loadmodel = 0;
+
+// koda:extern loadmodelfrommesh koda_wrap_raylib_LoadModelFromMesh 1
+let loadmodelfrommesh = 0;
+
+// koda:extern ismodelvalid koda_wrap_raylib_IsModelValid 1
+let ismodelvalid = 0;
+
+// koda:extern unloadmodel koda_wrap_raylib_UnloadModel 1
+let unloadmodel = 0;
+
+// koda:extern getmodelboundingbox koda_wrap_raylib_GetModelBoundingBox 1
+let getmodelboundingbox = 0;
+
+// koda:extern drawmodel koda_wrap_raylib_DrawModel 4
+let drawmodel = 0;
+
+// koda:extern drawmodelex koda_wrap_raylib_DrawModelEx 6
+let drawmodelex = 0;
+
+// koda:extern drawmodelwires koda_wrap_raylib_DrawModelWires 4
+let drawmodelwires = 0;
+
+// koda:extern drawmodelwiresex koda_wrap_raylib_DrawModelWiresEx 6
+let drawmodelwiresex = 0;
+
+// koda:extern drawboundingbox koda_wrap_raylib_DrawBoundingBox 2
+let drawboundingbox = 0;
+
+// koda:extern drawbillboard koda_wrap_raylib_DrawBillboard 5
+let drawbillboard = 0;
+
+// koda:extern drawbillboardrec koda_wrap_raylib_DrawBillboardRec 6
+let drawbillboardrec = 0;
+
+// koda:extern drawbillboardpro koda_wrap_raylib_DrawBillboardPro 9
+let drawbillboardpro = 0;
+
+// koda:extern uploadmesh koda_wrap_raylib_UploadMesh 2
+let uploadmesh = 0;
+
+// koda:extern updatemeshbuffer koda_wrap_raylib_UpdateMeshBuffer 5
+let updatemeshbuffer = 0;
+
+// koda:extern unloadmesh koda_wrap_raylib_UnloadMesh 1
+let unloadmesh = 0;
+
+// koda:extern drawmesh koda_wrap_raylib_DrawMesh 3
+let drawmesh = 0;
+
+// koda:extern drawmeshinstanced koda_wrap_raylib_DrawMeshInstanced 4
+let drawmeshinstanced = 0;
+
+// koda:extern getmeshboundingbox koda_wrap_raylib_GetMeshBoundingBox 1
+let getmeshboundingbox = 0;
+
+// koda:extern genmeshtangents koda_wrap_raylib_GenMeshTangents 1
+let genmeshtangents = 0;
+
+// koda:extern exportmesh koda_wrap_raylib_ExportMesh 2
+let exportmesh = 0;
+
+// koda:extern exportmeshascode koda_wrap_raylib_ExportMeshAsCode 2
+let exportmeshascode = 0;
+
+// koda:extern genmeshpoly koda_wrap_raylib_GenMeshPoly 2
+let genmeshpoly = 0;
+
+// koda:extern genmeshplane koda_wrap_raylib_GenMeshPlane 4
+let genmeshplane = 0;
+
+// koda:extern genmeshcube koda_wrap_raylib_GenMeshCube 3
+let genmeshcube = 0;
+
+// koda:extern genmeshsphere koda_wrap_raylib_GenMeshSphere 3
+let genmeshsphere = 0;
+
+// koda:extern genmeshhemisphere koda_wrap_raylib_GenMeshHemiSphere 3
+let genmeshhemisphere = 0;
+
+// koda:extern genmeshcylinder koda_wrap_raylib_GenMeshCylinder 3
+let genmeshcylinder = 0;
+
+// koda:extern genmeshcone koda_wrap_raylib_GenMeshCone 3
+let genmeshcone = 0;
+
+// koda:extern genmeshtorus koda_wrap_raylib_GenMeshTorus 4
+let genmeshtorus = 0;
+
+// koda:extern genmeshknot koda_wrap_raylib_GenMeshKnot 4
+let genmeshknot = 0;
+
+// koda:extern genmeshheightmap koda_wrap_raylib_GenMeshHeightmap 2
+let genmeshheightmap = 0;
+
+// koda:extern genmeshcubicmap koda_wrap_raylib_GenMeshCubicmap 2
+let genmeshcubicmap = 0;
+
+// koda:extern loadmaterialdefault koda_wrap_raylib_LoadMaterialDefault 0
+let loadmaterialdefault = 0;
+
+// koda:extern ismaterialvalid koda_wrap_raylib_IsMaterialValid 1
+let ismaterialvalid = 0;
+
+// koda:extern unloadmaterial koda_wrap_raylib_UnloadMaterial 1
+let unloadmaterial = 0;
+
+// koda:extern setmaterialtexture koda_wrap_raylib_SetMaterialTexture 3
+let setmaterialtexture = 0;
+
+// koda:extern setmodelmeshmaterial koda_wrap_raylib_SetModelMeshMaterial 3
+let setmodelmeshmaterial = 0;
+
+// koda:extern updatemodelanimation koda_wrap_raylib_UpdateModelAnimation 3
+let updatemodelanimation = 0;
+
+// koda:extern updatemodelanimationex koda_wrap_raylib_UpdateModelAnimationEx 6
+let updatemodelanimationex = 0;
+
+// koda:extern unloadmodelanimations koda_wrap_raylib_UnloadModelAnimations 2
+let unloadmodelanimations = 0;
+
+// koda:extern ismodelanimationvalid koda_wrap_raylib_IsModelAnimationValid 2
+let ismodelanimationvalid = 0;
+
+// koda:extern checkcollisionspheres koda_wrap_raylib_CheckCollisionSpheres 4
+let checkcollisionspheres = 0;
+
+// koda:extern checkcollisionboxes koda_wrap_raylib_CheckCollisionBoxes 2
+let checkcollisionboxes = 0;
+
+// koda:extern checkcollisionboxsphere koda_wrap_raylib_CheckCollisionBoxSphere 3
+let checkcollisionboxsphere = 0;
+
+// koda:extern getraycollisionsphere koda_wrap_raylib_GetRayCollisionSphere 3
+let getraycollisionsphere = 0;
+
+// koda:extern getraycollisionbox koda_wrap_raylib_GetRayCollisionBox 2
+let getraycollisionbox = 0;
+
+// koda:extern getraycollisionmesh koda_wrap_raylib_GetRayCollisionMesh 3
+let getraycollisionmesh = 0;
+
+// koda:extern getraycollisiontriangle koda_wrap_raylib_GetRayCollisionTriangle 4
+let getraycollisiontriangle = 0;
+
+// koda:extern getraycollisionquad koda_wrap_raylib_GetRayCollisionQuad 5
+let getraycollisionquad = 0;
+
+// koda:extern void koda_wrap_raylib_void 0
+let void = 0;
+
+// koda:extern initaudiodevice koda_wrap_raylib_InitAudioDevice 0
+let initaudiodevice = 0;
+
+// koda:extern closeaudiodevice koda_wrap_raylib_CloseAudioDevice 0
+let closeaudiodevice = 0;
+
+// koda:extern isaudiodeviceready koda_wrap_raylib_IsAudioDeviceReady 0
+let isaudiodeviceready = 0;
+
+// koda:extern setmastervolume koda_wrap_raylib_SetMasterVolume 1
+let setmastervolume = 0;
+
+// koda:extern getmastervolume koda_wrap_raylib_GetMasterVolume 0
+let getmastervolume = 0;
+
+// koda:extern loadwave koda_wrap_raylib_LoadWave 1
+let loadwave = 0;
+
+// koda:extern loadwavefrommemory koda_wrap_raylib_LoadWaveFromMemory 3
+let loadwavefrommemory = 0;
+
+// koda:extern iswavevalid koda_wrap_raylib_IsWaveValid 1
+let iswavevalid = 0;
+
+// koda:extern loadsound koda_wrap_raylib_LoadSound 1
+let loadsound = 0;
+
+// koda:extern loadsoundfromwave koda_wrap_raylib_LoadSoundFromWave 1
+let loadsoundfromwave = 0;
+
+// koda:extern loadsoundalias koda_wrap_raylib_LoadSoundAlias 1
+let loadsoundalias = 0;
+
+// koda:extern issoundvalid koda_wrap_raylib_IsSoundValid 1
+let issoundvalid = 0;
+
+// koda:extern updatesound koda_wrap_raylib_UpdateSound 3
+let updatesound = 0;
+
+// koda:extern unloadwave koda_wrap_raylib_UnloadWave 1
+let unloadwave = 0;
+
+// koda:extern unloadsound koda_wrap_raylib_UnloadSound 1
+let unloadsound = 0;
+
+// koda:extern unloadsoundalias koda_wrap_raylib_UnloadSoundAlias 1
+let unloadsoundalias = 0;
+
+// koda:extern exportwave koda_wrap_raylib_ExportWave 2
+let exportwave = 0;
+
+// koda:extern exportwaveascode koda_wrap_raylib_ExportWaveAsCode 2
+let exportwaveascode = 0;
+
+// koda:extern playsound koda_wrap_raylib_PlaySound 1
+let playsound = 0;
+
+// koda:extern stopsound koda_wrap_raylib_StopSound 1
+let stopsound = 0;
+
+// koda:extern pausesound koda_wrap_raylib_PauseSound 1
+let pausesound = 0;
+
+// koda:extern resumesound koda_wrap_raylib_ResumeSound 1
+let resumesound = 0;
+
+// koda:extern issoundplaying koda_wrap_raylib_IsSoundPlaying 1
+let issoundplaying = 0;
+
+// koda:extern setsoundvolume koda_wrap_raylib_SetSoundVolume 2
+let setsoundvolume = 0;
+
+// koda:extern setsoundpitch koda_wrap_raylib_SetSoundPitch 2
+let setsoundpitch = 0;
+
+// koda:extern setsoundpan koda_wrap_raylib_SetSoundPan 2
+let setsoundpan = 0;
+
+// koda:extern wavecopy koda_wrap_raylib_WaveCopy 1
+let wavecopy = 0;
+
+// koda:extern wavecrop koda_wrap_raylib_WaveCrop 3
+let wavecrop = 0;
+
+// koda:extern waveformat koda_wrap_raylib_WaveFormat 4
+let waveformat = 0;
+
+// koda:extern unloadwavesamples koda_wrap_raylib_UnloadWaveSamples 1
+let unloadwavesamples = 0;
+
+// koda:extern loadmusicstream koda_wrap_raylib_LoadMusicStream 1
+let loadmusicstream = 0;
+
+// koda:extern loadmusicstreamfrommemory koda_wrap_raylib_LoadMusicStreamFromMemory 3
+let loadmusicstreamfrommemory = 0;
+
+// koda:extern ismusicvalid koda_wrap_raylib_IsMusicValid 1
+let ismusicvalid = 0;
+
+// koda:extern unloadmusicstream koda_wrap_raylib_UnloadMusicStream 1
+let unloadmusicstream = 0;
+
+// koda:extern playmusicstream koda_wrap_raylib_PlayMusicStream 1
+let playmusicstream = 0;
+
+// koda:extern ismusicstreamplaying koda_wrap_raylib_IsMusicStreamPlaying 1
+let ismusicstreamplaying = 0;
+
+// koda:extern updatemusicstream koda_wrap_raylib_UpdateMusicStream 1
+let updatemusicstream = 0;
+
+// koda:extern stopmusicstream koda_wrap_raylib_StopMusicStream 1
+let stopmusicstream = 0;
+
+// koda:extern pausemusicstream koda_wrap_raylib_PauseMusicStream 1
+let pausemusicstream = 0;
+
+// koda:extern resumemusicstream koda_wrap_raylib_ResumeMusicStream 1
+let resumemusicstream = 0;
+
+// koda:extern seekmusicstream koda_wrap_raylib_SeekMusicStream 2
+let seekmusicstream = 0;
+
+// koda:extern setmusicvolume koda_wrap_raylib_SetMusicVolume 2
+let setmusicvolume = 0;
+
+// koda:extern setmusicpitch koda_wrap_raylib_SetMusicPitch 2
+let setmusicpitch = 0;
+
+// koda:extern setmusicpan koda_wrap_raylib_SetMusicPan 2
+let setmusicpan = 0;
+
+// koda:extern getmusictimelength koda_wrap_raylib_GetMusicTimeLength 1
+let getmusictimelength = 0;
+
+// koda:extern getmusictimeplayed koda_wrap_raylib_GetMusicTimePlayed 1
+let getmusictimeplayed = 0;
+
+// koda:extern loadaudiostream koda_wrap_raylib_LoadAudioStream 3
+let loadaudiostream = 0;
+
+// koda:extern isaudiostreamvalid koda_wrap_raylib_IsAudioStreamValid 1
+let isaudiostreamvalid = 0;
+
+// koda:extern unloadaudiostream koda_wrap_raylib_UnloadAudioStream 1
+let unloadaudiostream = 0;
+
+// koda:extern updateaudiostream koda_wrap_raylib_UpdateAudioStream 3
+let updateaudiostream = 0;
+
+// koda:extern isaudiostreamprocessed koda_wrap_raylib_IsAudioStreamProcessed 1
+let isaudiostreamprocessed = 0;
+
+// koda:extern playaudiostream koda_wrap_raylib_PlayAudioStream 1
+let playaudiostream = 0;
+
+// koda:extern pauseaudiostream koda_wrap_raylib_PauseAudioStream 1
+let pauseaudiostream = 0;
+
+// koda:extern resumeaudiostream koda_wrap_raylib_ResumeAudioStream 1
+let resumeaudiostream = 0;
+
+// koda:extern isaudiostreamplaying koda_wrap_raylib_IsAudioStreamPlaying 1
+let isaudiostreamplaying = 0;
+
+// koda:extern stopaudiostream koda_wrap_raylib_StopAudioStream 1
+let stopaudiostream = 0;
+
+// koda:extern setaudiostreamvolume koda_wrap_raylib_SetAudioStreamVolume 2
+let setaudiostreamvolume = 0;
+
+// koda:extern setaudiostreampitch koda_wrap_raylib_SetAudioStreamPitch 2
+let setaudiostreampitch = 0;
+
+// koda:extern setaudiostreampan koda_wrap_raylib_SetAudioStreamPan 2
+let setaudiostreampan = 0;
+
+// koda:extern setaudiostreambuffersizedefault koda_wrap_raylib_SetAudioStreamBufferSizeDefault 1
+let setaudiostreambuffersizedefault = 0;
+
+// koda:extern setaudiostreamcallback koda_wrap_raylib_SetAudioStreamCallback 2
+let setaudiostreamcallback = 0;
+
+// koda:extern attachaudiostreamprocessor koda_wrap_raylib_AttachAudioStreamProcessor 2
+let attachaudiostreamprocessor = 0;
+
+// koda:extern detachaudiostreamprocessor koda_wrap_raylib_DetachAudioStreamProcessor 2
+let detachaudiostreamprocessor = 0;
+
+// koda:extern attachaudiomixedprocessor koda_wrap_raylib_AttachAudioMixedProcessor 1
+let attachaudiomixedprocessor = 0;
+
+// koda:extern detachaudiomixedprocessor koda_wrap_raylib_DetachAudioMixedProcessor 1
+let detachaudiomixedprocessor = 0;

@@ -1,0 +1,32 @@
+// String helpers — use methods on strings (trim, toupper, …) or import "@str" for aliases.
+
+let upper = func(s) {
+    return s.toupper();
+};
+
+let lower = func(s) {
+    return s.tolower();
+};
+
+let trim = func(s) {
+    return s.trim();
+};
+
+let split = func(s, sep) {
+    return s.split(sep);
+};
+
+let join = func(arr, sep) {
+    return arr.join(sep);
+};
+
+let format = func(tmpl, obj) {
+    let ks = keys(obj);
+    let i = 0;
+    while (i < len(ks)) {
+        let k = ks[i];
+        tmpl = replace(tmpl, "{" + string(k) + "}", string(obj[k]));
+        i = i + 1;
+    }
+    return tmpl;
+};

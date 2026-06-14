@@ -1,23 +1,23 @@
-# Assemble a self-contained Fuji SDK folder (and optional .zip) matching GitHub Release SDK layout
-# for Windows amd64: fuji.exe, fujiwrap.exe, stdlib/, docs/, root *.md, wrappers/, examples/,
+# Assemble a self-contained Koda SDK folder (and optional .zip) matching GitHub Release SDK layout
+# for Windows amd64: koda.exe, kodawrap.exe, stdlib/, docs/, root *.md, wrappers/, examples/,
 # third_party/raylib_static/stage (raylib 5.0 headers + libraylib.a + raylib.dll).
 #
 # Prerequisites:
-#   • Release builds of fuji and fujiwrap (embedded Clang + llc + lld + runtime). Build with:
+#   • Release builds of koda and kodawrap (embedded Clang + llc + lld + runtime). Build with:
 #       powershell -File scripts/build-release.ps1
-#     then pass -FujiExe and -FujiwrapExe, or use -UseBuildRelease to run that script first.
+#     then pass -KodaExe and -KodawrapExe, or use -UseBuildRelease to run that script first.
 #
 # Usage (from repo root):
 #   powershell -File scripts/assemble-offline-sdk.ps1 -UseBuildRelease
-#   powershell -File scripts/assemble-offline-sdk.ps1 -FujiExe .\fuji-release.exe -FujiwrapExe .\fujiwrap.exe -Zip
+#   powershell -File scripts/assemble-offline-sdk.ps1 -KodaExe .\koda-release.exe -KodawrapExe .\kodawrap.exe -Zip
 #
 # GitHub: push a tag v* — .github/workflows/release.yml builds all platforms and runs
 # scripts/vendor-raylib-stage.sh + scripts/package-release-sdk.sh (Linux). This script is the
 # Windows-local equivalent for testing or ad-hoc distribution.
 
 param(
-    [string]$FujiExe = "",
-    [string]$FujiwrapExe = "",
+    [string]$KodaExe = "",
+    [string]$KodawrapExe = "",
     [switch]$UseBuildRelease,
     [string]$Version = "",
     [string]$OutputRoot = "dist",
@@ -30,8 +30,8 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Set-Location $RepoRoot
 
-function Get-FujiVersionFromSource {
-    $mainGo = Join-Path $RepoRoot "cmd\fuji\main.go"
+function Get-KodaVersionFromSource {
+    $mainGo = Join-Path $RepoRoot "cmd\koda\main.go"
     $t = Get-Content -Raw $mainGo
     $m = [regex]::Match($t, 'var version = "([^"]+)"')
     if (-not $m.Success) { throw "Could not parse version from $mainGo" }
@@ -39,24 +39,24 @@ function Get-FujiVersionFromSource {
 }
 
 if ([string]::IsNullOrWhiteSpace($Version)) {
-    $Version = Get-FujiVersionFromSource
+    $Version = Get-KodaVersionFromSource
 }
 
 if ($UseBuildRelease) {
     Write-Host "Running scripts/build-release.ps1 ..."
     & (Join-Path $PSScriptRoot "build-release.ps1")
-    $FujiExe = Join-Path $RepoRoot "fuji-release.exe"
-    $FujiwrapExe = Join-Path $RepoRoot "fujiwrap.exe"
+    $KodaExe = Join-Path $RepoRoot "koda-release.exe"
+    $KodawrapExe = Join-Path $RepoRoot "kodawrap.exe"
 }
 
-if ([string]::IsNullOrWhiteSpace($FujiExe) -or [string]::IsNullOrWhiteSpace($FujiwrapExe)) {
-    throw "Specify -FujiExe and -FujiwrapExe (release builds), or -UseBuildRelease."
+if ([string]::IsNullOrWhiteSpace($KodaExe) -or [string]::IsNullOrWhiteSpace($KodawrapExe)) {
+    throw "Specify -KodaExe and -KodawrapExe (release builds), or -UseBuildRelease."
 }
 
-$FujiExe = (Resolve-Path $FujiExe).Path
-$FujiwrapExe = (Resolve-Path $FujiwrapExe).Path
+$KodaExe = (Resolve-Path $KodaExe).Path
+$KodawrapExe = (Resolve-Path $KodawrapExe).Path
 
-$folderName = "fuji-$Version-sdk-windows-amd64"
+$folderName = "koda-$Version-sdk-windows-amd64"
 $stageParent = Join-Path $RepoRoot $OutputRoot
 $outDir = Join-Path $stageParent $folderName
 
@@ -65,8 +65,8 @@ if (Test-Path $outDir) {
 }
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
-Copy-Item -Force $FujiExe (Join-Path $outDir "fuji.exe")
-Copy-Item -Force $FujiwrapExe (Join-Path $outDir "fujiwrap.exe")
+Copy-Item -Force $KodaExe (Join-Path $outDir "koda.exe")
+Copy-Item -Force $KodawrapExe (Join-Path $outDir "kodawrap.exe")
 
 foreach ($d in @("stdlib", "docs", "wrappers", "examples")) {
     $src = Join-Path $RepoRoot $d
@@ -92,7 +92,7 @@ if (-not $SkipRaylib) {
     if (-not $zipLocal) {
         $raylibVer = "5.0"
         $url = "https://github.com/raysan5/raylib/releases/download/$raylibVer/raylib-${raylibVer}_win64_mingw-w64.zip"
-        $downloadTmp = Join-Path ([System.IO.Path]::GetTempPath()) ("fuji-raylib-" + [Guid]::NewGuid().ToString("n"))
+        $downloadTmp = Join-Path ([System.IO.Path]::GetTempPath()) ("koda-raylib-" + [Guid]::NewGuid().ToString("n"))
         New-Item -ItemType Directory -Force -Path $downloadTmp | Out-Null
         $zipFile = Join-Path $downloadTmp "raylib.zip"
         Write-Host "Downloading raylib $raylibVer Windows prebuild..."
@@ -105,7 +105,7 @@ if (-not $SkipRaylib) {
         }
     }
 
-    $extract = Join-Path ([System.IO.Path]::GetTempPath()) ("fuji-raylib-extract-" + [Guid]::NewGuid().ToString("n"))
+    $extract = Join-Path ([System.IO.Path]::GetTempPath()) ("koda-raylib-extract-" + [Guid]::NewGuid().ToString("n"))
     New-Item -ItemType Directory -Force -Path $extract | Out-Null
     try {
         Expand-Archive -LiteralPath $zipFile -DestinationPath $extract -Force
@@ -141,35 +141,35 @@ if (-not $SkipRaylib) {
     }
     Write-Host "Raylib stage OK under third_party\raylib_static\stage"
 } else {
-    Write-Host "Skipped raylib vendoring (-SkipRaylib). Set FUJI_RAYLIB_STAGE or add stage/ manually for raylib builds."
+    Write-Host "Skipped raylib vendoring (-SkipRaylib). Set KODA_RAYLIB_STAGE or add stage/ manually for raylib builds."
 }
 
 $sdkReadme = @"
-Fuji SDK $Version (windows-amd64)
+Koda SDK $Version (windows-amd64)
 ==============================
 
-Offline layout: compiler, fujiwrap (C header -> .fuji + wrapper.c), stdlib, docs, examples,
+Offline layout: compiler, kodawrap (C header -> .koda + wrapper.c), stdlib, docs, examples,
 wrappers (raylib + glue), and (unless -SkipRaylib) third_party/raylib_static/stage with raylib 5.0.
 
-End users: fuji does not download LLVM, Raylib, or anything else at compile time. Embedded Clang/llc/runtime unpack to a local temp directory on first use only.
+End users: koda does not download LLVM, Raylib, or anything else at compile time. Embedded Clang/llc/runtime unpack to a local temp directory on first use only.
 
 Use
 ---
-  Keep this folder together so stdlib sits next to fuji.exe:
+  Keep this folder together so stdlib sits next to koda.exe:
 
-    .\fuji.exe version
-    .\fuji.exe run examples\games\brick_breaker.fuji
+    .\koda.exe version
+    .\koda.exe run examples\games\brick_breaker.koda
 
-  Raylib static linking: when third_party/raylib_static/stage exists next to fuji.exe, the
+  Raylib static linking: when third_party/raylib_static/stage exists next to koda.exe, the
   compiler adds include + libraylib.a automatically (see docs/guides/raylib.md).
 
-  For distribution of YOUR game: use fuji bundle, and on Windows copy raylib.dll next to the
+  For distribution of YOUR game: use koda bundle, and on Windows copy raylib.dll next to the
   .exe if your link uses the DLL (official prebuild ships both .a and .dll).
 
 Wrapper tool
 ------------
-  .\fujiwrap.exe -help
-  .\fuji.exe wrap -help
+  .\kodawrap.exe -help
+  .\koda.exe wrap -help
 
 GitHub releases
 ---------------

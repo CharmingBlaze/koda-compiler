@@ -1,117 +1,104 @@
-# Fuji
+# Koda
 
-Fuji is a **simple C and JavaScript-like language** for making games and applications.
+A modern language for **games and applications** — compile to a **single native binary**. No VM. No interpreter on the player's machine.
 
-Write familiar syntax — C-style control flow, JavaScript-style objects and closures — and compile to a **single native binary**. No VM. No interpreter. Players run your binary without installing anything.
+Koda is a practical alternative to **C** for game logic, tools, and desktop apps: same native output and C library access, with faster iteration and less boilerplate.
 
----
+```koda
+struct Player { x, y, speed, health }
 
-## If you want to make games or apps with Fuji
-
-**Do not compile this repository from source.** That path is for maintainers only and expects **Go** and **LLVM** on the machine that builds Fuji.
-
-**To use Fuji you only need the release downloads:** **`fuji`** and **`fujiwrap`** from [GitHub Releases](https://github.com/CharmingBlaze/fuji/releases), plus the **`stdlib/`** folder from the same **SDK zip** (keep it next to the executables). Those binaries are **already compiled** and self-contained — they embed the native compiler pieces they need. **You do not install Go, LLVM, or any other compiler** on the computer where you only write and build `.fuji` programs, and **`fuji` does not download LLVM or Raylib** when you compile (embedded tools unpack to a local temp folder on first use only).
-
-Then read:
-- [`language.md`](language.md) — everything you can write in Fuji, with examples
-- [`docs/guides/getting-started.md`](docs/guides/getting-started.md) — your first program
-- [`docs/commands.md`](docs/commands.md) — every `fuji` CLI command
-- [`docs/using-the-language.md`](docs/using-the-language.md) — full language tutorial
-
----
-
-## What the language looks like
-
-```c
-struct Player {
-    x, y, speed, health
+func update(p, dt) {
+    p.x = p.x + p.speed * dt;
+    if (p.health <= 0) { return false; }
+    return true;
 }
-
-enum State {
-    Idle, Running, Dead
-}
-
-func update(player, dt) {
-    player.x = player.x + player.speed * dt;
-    if (player.health <= 0) {
-        return State.Dead;
-    }
-    return State.Running;
-}
-
-let p = Player { x: 0, y: 0, speed: 200, health: 100 };
-let state = update(p, 0.016);
-print(state);
 ```
 
 ---
 
-## Quick start (after unpacking the SDK zip or placing `fuji` next to `stdlib/`)
+## New to Koda?
 
-```bash
-# Run a program directly
-fuji run mygame.fuji
+| Start here | What you'll do |
+|------------|----------------|
+| **[Beginner's guide](docs/beginners-guide.md)** | Install, syntax, modules, ship a build |
+| **[Learn path](docs/learn/README.md)** | 10 short chapters |
+| **[Getting started](docs/guides/getting-started.md)** | Install + daily commands in 5 minutes |
 
-# Compile to a binary
-fuji build mygame.fuji -o mygame
-
-# Check for errors without compiling
-fuji check mygame.fuji
-
-# Format your code
-fuji fmt mygame.fuji
-
-# Watch for changes and rebuild automatically
-fuji watch mygame.fuji
-
-# Bundle for distribution (binary + assets)
-fuji bundle mygame.fuji -o dist/MyGame
-```
-
----
-
-## SDK downloads
-
-Each release includes self-contained SDK zips (**`fuji`** and **`fujiwrap`** are prebuilt native binaries). **You only add the shipped folders (`stdlib/`, `docs/`, …) — no Go install and no LLVM install** on the machine where you write Fuji code.
-
-| Platform | Download |
-|---|---|
-| Windows (x64) | `fuji-vX.Y.Z-sdk-windows-amd64.zip` |
-| Linux (x64) | `fuji-vX.Y.Z-sdk-linux-amd64.zip` |
-| Linux (ARM64) | `fuji-vX.Y.Z-sdk-linux-arm64.zip` |
-| macOS Intel | `fuji-vX.Y.Z-sdk-darwin-amd64.zip` |
-| macOS Apple Silicon | `fuji-vX.Y.Z-sdk-darwin-arm64.zip` |
-
-Unpack into any folder and run `fuji` from that folder so `stdlib/` sits next to the executable.
+Download **`koda`** + **`stdlib/`** from [GitHub Releases](https://github.com/CharmingBlaze/koda-compiler/releases). You do **not** need Go or LLVM to use release binaries.
 
 ---
 
 ## Documentation
 
-| File | Contents |
-|---|---|
-| [`language.md`](language.md) | Compact reference — all syntax, operators, builtins |
-| [`docs/guides/getting-started.md`](docs/guides/getting-started.md) | First steps |
-| [`docs/using-the-language.md`](docs/using-the-language.md) | Full language tutorial |
-| [`docs/commands.md`](docs/commands.md) | Every CLI command |
-| [`docs/reference.md`](docs/reference.md) | Stdlib and builtins reference |
-| [`docs/distribution.md`](docs/distribution.md) | Shipping games and apps |
-| [`docs/wrappers.md`](docs/wrappers.md) | Wrapping C libraries with `fujiwrap` |
-| [`CHANGELOG.md`](CHANGELOG.md) | What changed in each version |
+**[Documentation hub →](docs/README.md)**
+
+| Section | Links |
+|---------|-------|
+| Learn | [Beginner's guide](docs/beginners-guide.md) · [Learn path](docs/learn/README.md) |
+| Guides | [Games](docs/guides/game-dev.md) · [Apps](docs/guides/applications.md) · [From C](docs/guides/from-c.md) · [Raylib](docs/guides/raylib.md) |
+| Reference | [Language](language.md) · [CLI](docs/reference/cli.md) · [Stdlib](docs/stdlib/README.md) · [Builtins](docs/reference/builtins.md) |
+| Help | [FAQ](docs/faq.md) · [Troubleshooting](docs/troubleshooting.md) · [Glossary](docs/glossary.md) |
+| Concepts | [How it works](docs/concepts/README.md) |
+| Style | [Documentation style guide](docs/STYLE-GUIDE.md) |
 
 ---
 
-## For maintainers and contributors
+## Why Koda?
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for how to build the compiler from source, run tests, and contribute changes.
+| | C | Koda |
+|---|-----|------|
+| Output | Native executable | Native executable |
+| Syntax | Headers, macros | `struct`, `func`, `let`, GC |
+| Modules | `.h` + link | `#include` + `import "@math"` |
+| Graphics | Link Raylib yourself | Wrappers + `koda.json` |
+| Iteration | Manual compile/link | `koda run`, `koda watch` |
+| Ship | Binary + DLLs | `koda bundle` |
 
-The build requires Go 1.22+, Clang, llc, and a C toolchain. See [`docs/handoff.md`](docs/handoff.md) for the internal architecture.
+---
 
-**Do not tell users to build from source.** Release binaries are the correct install path.
+## Quick start
+
+```bash
+koda new mygame
+cd mygame
+koda run
+
+# Or single file
+koda run hello.koda
+koda build hello.koda -o hello
+koda bundle -o dist/MyGame
+```
+
+Templates: `hello` (default), `game` (text lander), `graphics` (Raylib).
+
+---
+
+## SDK downloads
+
+Unpack an SDK zip so **`stdlib/`** and **`docs/`** sit next to **`koda`** and **`kodawrap`**.
+
+| Platform | Artifact |
+|----------|----------|
+| Windows x64 | `koda-vX.Y.Z-sdk-windows-amd64.zip` |
+| Linux x64 / ARM64 | `koda-vX.Y.Z-sdk-linux-*.zip` |
+| macOS | `koda-vX.Y.Z-sdk-darwin-*.zip` |
 
 ---
 
 ## Examples
 
-- [`examples/`](examples/) — sample programs and games
-- Run Brick Breaker on Windows: `powershell -ExecutionPolicy Bypass -File scripts/play-brick-breaker.ps1`
+- [`examples/`](examples/) — demos and games
+- `koda new lander --template game` — playable text game
+- `koda new bounce --template graphics` — Raylib bouncing ball
+
+---
+
+## For contributors
+
+Build from source requires Go 1.22+, Clang, and LLVM tools. See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/handoff.md](docs/handoff.md).
+
+**End users should use release binaries**, not a source build.
+
+---
+
+[Changelog](CHANGELOG.md) · [Documentation hub](docs/README.md)

@@ -1,16 +1,16 @@
-# The Fuji Language Guide
+# The Koda Language Guide
 
 > **Start here for an accurate, native-only guide:** [using-the-language.md](using-the-language.md) and the exhaustive catalog [language.md](../language.md).  
-> This file is a long-form tutorial; some early sections still mention older VM-era names (`kuji`, `repl`) — treat **`fuji run`** / **`fuji build`** and the docs above as the source of truth.
+> This file is a long-form tutorial; some early sections still mention older VM-era names (`koda`, `repl`) — treat **`koda run`** / **`koda build`** and the docs above as the source of truth.
 
-A complete, teachable reference for the Fuji programming language — from first
+A complete, teachable reference for the Koda programming language — from first
 principles through advanced features, standard library, and native compilation.
 
 ---
 
 ## Table of Contents
 
-1. [What is Fuji?](#1-what-is-kuji)
+1. [What is Koda?](#1-what-is-koda)
 2. [Getting Started](#2-getting-started)
 3. [Values and Types](#3-values-and-types)
 4. [Variables](#4-variables)
@@ -36,9 +36,9 @@ principles through advanced features, standard library, and native compilation.
 
 ---
 
-## 1. What is Fuji?
+## 1. What is Koda?
 
-Fuji is a statically-scoped, dynamically-typed scripting language designed for
+Koda is a statically-scoped, dynamically-typed scripting language designed for
 performance and expressiveness. It compiles to bytecode that runs in a fast VM,
 and can also be lowered to LLVM IR for native binary generation.
 
@@ -51,7 +51,7 @@ and can also be lowered to LLVM IR for native binary generation.
 - Optional ahead-of-time compilation via LLVM
 - Built-in 2D/3D graphics through Raylib
 
-**Everything in Fuji is a value.** Numbers, strings, booleans, null, arrays,
+**Everything in Koda is a value.** Numbers, strings, booleans, null, arrays,
 objects, and functions are all first-class values that can be assigned to
 variables, passed to functions, and returned from functions.
 
@@ -62,30 +62,30 @@ variables, passed to functions, and returned from functions.
 ### Running a script
 
 ```
-fuji run hello.fuji
+koda run hello.koda
 ```
 
 ### REPL
 
 ```
-kuji repl
+koda repl
 ```
 
 ### Compiling to native binary
 
 ```
-kuji compile myapp.fuji -o myapp
+koda compile myapp.koda -o myapp
 ```
 
 ### Your first program
 
-```fuji
-print("Hello, Fuji!");
+```koda
+print("Hello, Koda!");
 ```
 
 Output:
 ```
-Hello, Fuji!
+Hello, Koda!
 ```
 
 `print` accepts any number of arguments and prints them separated by spaces,
@@ -95,7 +95,7 @@ followed by a newline. This is the primary output function.
 
 ## 3. Values and Types
 
-Fuji has six value types:
+Koda has six value types:
 
 | Type       | Example             | Notes                            |
 |------------|---------------------|----------------------------------|
@@ -109,7 +109,7 @@ Fuji has six value types:
 
 ### Checking the type of a value
 
-```fuji
+```koda
 print(type(42));        // number
 print(type("hello"));   // string
 print(type(true));      // bool
@@ -129,7 +129,7 @@ Every value has a truth value in a boolean context:
 - `false` and `null` are **falsy**
 - Everything else — including `0`, `""`, `[]`, `{}` — is **truthy**
 
-This differs from JavaScript. In Fuji, `0` is truthy. Design your guards
+This differs from JavaScript. In Koda, `0` is truthy. Design your guards
 accordingly.
 
 ---
@@ -138,7 +138,7 @@ accordingly.
 
 ### Declaring a variable
 
-```fuji
+```koda
 let x = 10;
 let name = "Alice";
 let active = true;
@@ -151,7 +151,7 @@ point of declaration to the end of the enclosing block.
 
 ### Reassigning a variable
 
-```fuji
+```koda
 let score = 0;
 score = score + 1;   // reassignment
 score += 10;         // compound assignment
@@ -164,7 +164,7 @@ score--;             // decrement
 
 ### Scope
 
-```fuji
+```koda
 let x = 1;
 
 {
@@ -199,7 +199,7 @@ use `floor(a / b)` when you need integer semantics.
 
 ### Comparison
 
-```fuji
+```koda
 10 == 10       // true
 10 != 5        // true
 10 > 5         // true
@@ -211,19 +211,19 @@ use `floor(a / b)` when you need integer semantics.
 `==` checks **value equality** for numbers, strings, and booleans.
 Arrays and objects compare by **reference**.
 
-```fuji
+```koda
 [1,2] == [1,2]   // false — different objects in memory
 let a = [1,2];
 let b = a;
 b == a           // true — same reference
 ```
 
-For strict equality (no type coercion — Fuji has none anyway), `===` is also
+For strict equality (no type coercion — Koda has none anyway), `===` is also
 available and behaves identically to `==`.
 
 ### Logical
 
-```fuji
+```koda
 true && false    // false  — logical AND, short-circuits
 true || false    // true   — logical OR, short-circuits
 !true            // false  — logical NOT
@@ -233,14 +233,14 @@ true || false    // true   — logical OR, short-circuits
 `||` evaluates the right side only when the left is falsy.
 Both return one of the two original values (not necessarily a bool).
 
-```fuji
+```koda
 let name = input() || "Guest";   // default if input is falsy
 let safe = obj && obj.value;     // guard null access
 ```
 
 ### Bitwise
 
-```fuji
+```koda
 a & b     // AND
 a | b     // OR
 a ^ b     // XOR
@@ -252,7 +252,7 @@ a >>> n   // unsigned right shift
 
 ### Ternary
 
-```fuji
+```koda
 let label = score > 50 ? "pass" : "fail";
 ```
 
@@ -283,7 +283,7 @@ not a statement. It can appear anywhere a value is expected.
 Strings are immutable sequences of UTF-8 characters. They support both `"` and
 `'` delimiters.
 
-```fuji
+```koda
 let s = "Hello, World!";
 let t = 'Single quotes work too';
 ```
@@ -293,7 +293,7 @@ let t = 'Single quotes work too';
 `+` with at least one string operand concatenates. The other operand is
 automatically converted to a string.
 
-```fuji
+```koda
 "Hello, " + "World!"         // "Hello, World!"
 "Score: " + 100              // "Score: 100"
 "Pi is " + 3.14              // "Pi is 3.14"
@@ -303,7 +303,7 @@ automatically converted to a string.
 
 Use backticks and `${}` to embed expressions:
 
-```fuji
+```koda
 let name = "Alice";
 let age  = 30;
 let msg  = `Hello, ${name}! You are ${age} years old.`;
@@ -315,7 +315,7 @@ calls and arithmetic.
 
 ### String indexing
 
-```fuji
+```koda
 let s = "hello";
 print(s[0]);    // h
 print(s[4]);    // o
@@ -325,7 +325,7 @@ Strings are zero-indexed. Indexing returns a single-character string.
 
 ### String length
 
-```fuji
+```koda
 print(len("hello"));   // 5
 ```
 
@@ -333,7 +333,7 @@ print(len("hello"));   // 5
 
 Methods are called with dot notation:
 
-```fuji
+```koda
 "hello".upper()         // "HELLO"
 "HELLO".lower()         // "hello"
 "  hi  ".trim()         // "hi"
@@ -355,7 +355,7 @@ Arrays are ordered, mutable collections of any values.
 
 ### Creating arrays
 
-```fuji
+```koda
 let empty  = [];
 let nums   = [1, 2, 3, 4, 5];
 let mixed  = [1, "two", true, null, [3, 4]];
@@ -365,7 +365,7 @@ let mixed  = [1, "two", true, null, [3, 4]];
 
 Arrays are zero-indexed:
 
-```fuji
+```koda
 let arr = [10, 20, 30];
 print(arr[0]);    // 10
 print(arr[2]);    // 30
@@ -373,20 +373,20 @@ print(arr[2]);    // 30
 
 ### Modifying elements
 
-```fuji
+```koda
 arr[1] = 99;
 print(arr);    // [10, 99, 30]
 ```
 
 ### Array length
 
-```fuji
+```koda
 print(len([1, 2, 3]));   // 3
 ```
 
 ### Slicing
 
-```fuji
+```koda
 let arr = [0, 1, 2, 3, 4];
 print(arr[1..3]);    // [1, 2]   — from index 1 up to (not including) 3
 print(arr[2..]);     // [2, 3, 4]
@@ -395,7 +395,7 @@ print(arr[..3]);     // [0, 1, 2]
 
 ### Array methods
 
-```fuji
+```koda
 let a = [1, 2, 3];
 
 a.push(4);          // [1, 2, 3, 4]  — appends, returns new array
@@ -410,7 +410,7 @@ a.join(", ");       // "1, 2, 3"
 
 ### Iterating
 
-```fuji
+```koda
 let fruits = ["apple", "banana", "cherry"];
 
 for (let i = 0; i < len(fruits); i++) {
@@ -431,7 +431,7 @@ Objects are unordered key-value maps. Keys are always strings.
 
 ### Creating objects
 
-```fuji
+```koda
 let point = { x: 10, y: 20 };
 
 let user = {
@@ -443,7 +443,7 @@ let user = {
 
 ### Accessing fields
 
-```fuji
+```koda
 print(user.name);       // Alice  — dot access
 print(user["age"]);     // 30     — bracket access (dynamic keys)
 
@@ -453,20 +453,20 @@ print(user[field]);     // Alice
 
 ### Modifying and adding fields
 
-```fuji
+```koda
 user.age = 31;
 user.city = "London";    // new field created dynamically
 ```
 
 ### Deleting fields
 
-```fuji
+```koda
 delete user.city;
 ```
 
 ### Checking field existence
 
-```fuji
+```koda
 print(keys(user));    // ["name", "age", "active"]
 ```
 
@@ -474,7 +474,7 @@ print(keys(user));    // ["name", "age", "active"]
 
 ### Nested objects
 
-```fuji
+```koda
 let config = {
     server: {
         host: "localhost",
@@ -489,9 +489,9 @@ print(config.server.port);    // 8080
 
 ### Objects as namespaces
 
-Objects are how Fuji organises related data and behaviour:
+Objects are how Koda organises related data and behaviour:
 
-```fuji
+```koda
 let Vec2 = {
     new: func(x, y) { return {x: x, y: y}; },
     add: func(a, b) { return {x: a.x + b.x, y: a.y + b.y}; },
@@ -508,11 +508,11 @@ print(Vec2.len(a));    // 5
 
 ## 9. Control Flow
 
-Every `if`, `else`, loop, and `switch` body uses **`{ … }` braces** — Fuji does not allow braceless one-statement branches.
+Every `if`, `else`, loop, and `switch` body uses **`{ … }` braces** — Koda does not allow braceless one-statement branches.
 
 Within that rule you can format however you like: **one short line** inside the braces, or **several lines** when the body is longer or you want clearer structure.
 
-```fuji
+```koda
 // Single-line body (still braced)
 if (x > 0) { print("ok"); }
 
@@ -528,11 +528,11 @@ for (let i = 0; i < 3; i += 1) {
 }
 ```
 
-`fuji fmt` will reflow layout; choose a style that reads well for your team.
+`koda fmt` will reflow layout; choose a style that reads well for your team.
 
 ### if / else
 
-```fuji
+```koda
 let x = 10;
 
 if (x > 5) {
@@ -549,7 +549,7 @@ braceless one-liners.
 
 ### if as an expression
 
-```fuji
+```koda
 let label = if (score > 50) { "pass" } else { "fail" };
 ```
 
@@ -558,7 +558,7 @@ expression in the block is the result).
 
 ### switch statement
 
-```fuji
+```koda
 let day = 3;
 
 switch (day) {
@@ -574,7 +574,7 @@ The `default` branch runs when no case matches.
 
 ### switch as an expression
 
-```fuji
+```koda
 let name = switch (day) {
     case 1 => "Monday"
     case 2 => "Tuesday"
@@ -587,7 +587,7 @@ Arrow syntax `=>` makes each arm a value expression.
 
 ### while loop
 
-```fuji
+```koda
 let i = 0;
 while (i < 5) {
     print(i);
@@ -599,7 +599,7 @@ Runs the body repeatedly as long as the condition is truthy.
 
 ### do-while loop
 
-```fuji
+```koda
 let i = 0;
 do {
     print(i);
@@ -611,7 +611,7 @@ The body runs **at least once**, then checks the condition.
 
 ### Choosing a loop style
 
-You can mix **classic C-style loops** with Fuji’s **JavaScript-flavored** forms in the same program:
+You can mix **classic C-style loops** with Koda’s **JavaScript-flavored** forms in the same program:
 
 | Style | Good when |
 |-------|-----------|
@@ -624,7 +624,7 @@ Nothing forces one style: pick whichever reads best.
 
 ### for loop
 
-```fuji
+```koda
 for (let i = 0; i < 10; i++) {
     print(i);
 }
@@ -632,7 +632,7 @@ for (let i = 0; i < 10; i++) {
 
 The classic C-style `for` loop. All three parts are optional:
 
-```fuji
+```koda
 for (;;) {    // infinite loop
     // ...
     break;
@@ -641,7 +641,7 @@ for (;;) {    // infinite loop
 
 Multiple `let` bindings and comma-separated steps are allowed:
 
-```fuji
+```koda
 for (let i = 0, let j = 10; i < j; i += 1, j -= 1) {
     print(i, j);
 }
@@ -649,7 +649,7 @@ for (let i = 0, let j = 10; i < j; i += 1, j -= 1) {
 
 ### for-in loop (iterate over keys)
 
-```fuji
+```koda
 let obj = {a: 1, b: 2, c: 3};
 
 for (let key in obj) {
@@ -661,7 +661,7 @@ for (let key in obj) {
 
 ### for-of loop (iterate values)
 
-```fuji
+```koda
 let items = ["sword", "shield", "potion"];
 
 for (let item of items) {
@@ -673,7 +673,7 @@ for (let item of items) {
 
 Bind **key and value** together:
 
-```fuji
+```koda
 let tbl = { a: 1, b: 2 };
 
 for (let [k, v] of tbl) {
@@ -693,7 +693,7 @@ Need only indices without destructuring? Use a classic **`for`** over **`len(ite
 
 ### break and continue
 
-```fuji
+```koda
 for (let i = 0; i < 10; i++) {
     if (i == 3) { continue; }   // skip 3
     if (i == 7) { break; }      // stop at 7
@@ -711,7 +711,7 @@ for (let i = 0; i < 10; i++) {
 
 ### Declaring a function
 
-```fuji
+```koda
 func greet(name) {
     print("Hello, " + name + "!");
 }
@@ -723,7 +723,7 @@ greet("Alice");    // Hello, Alice!
 
 ### Returning values
 
-```fuji
+```koda
 func add(a, b) {
     return a + b;
 }
@@ -739,7 +739,7 @@ print(result);    // 7
 
 Functions are values. They can be assigned to variables and passed around:
 
-```fuji
+```koda
 let square = func(x) {
     return x * x;
 };
@@ -751,7 +751,7 @@ print(square(5));    // 25
 
 Parameters can have default values for when the caller omits them:
 
-```fuji
+```koda
 func greet(name, greeting = "Hello") {
     print(greeting + ", " + name + "!");
 }
@@ -764,7 +764,7 @@ greet("Bob", "Hi");        // Hi, Bob!
 
 A rest parameter collects all remaining arguments into an array:
 
-```fuji
+```koda
 func sum(...nums) {
     let total = 0;
     for (let i = 0; i < len(nums); i++) {
@@ -782,7 +782,7 @@ The rest parameter must be last and is prefixed with `...`.
 
 A shorthand for single-expression functions:
 
-```fuji
+```koda
 let double = (x) => x * 2;
 let add    = (a, b) => a + b;
 
@@ -794,7 +794,7 @@ Arrow functions use `=> expr` for the body — no braces, no `return`.
 
 ### Passing functions as arguments (higher-order)
 
-```fuji
+```koda
 func apply(f, x) {
     return f(x);
 }
@@ -807,7 +807,7 @@ print(apply(func(x) { return x + 10; }, 5));    // 15
 
 ### Recursive functions
 
-```fuji
+```koda
 func factorial(n) {
     if (n <= 1) { return 1; }
     return n * factorial(n - 1);
@@ -825,7 +825,7 @@ was defined, even after that scope has exited.
 
 ### Basic closure
 
-```fuji
+```koda
 func makeCounter() {
     let count = 0;
     return func() {
@@ -845,7 +845,7 @@ The returned function "closes over" the `count` variable.
 
 ### Closure over parameters
 
-```fuji
+```koda
 func makeAdder(n) {
     return func(x) { return x + n; };
 }
@@ -861,18 +861,18 @@ print(add10(3));    // 13
 
 Closures let you create **factories** — functions that produce customised
 behaviour based on their creation-time arguments. They are the foundation of
-callbacks, event handlers, and stateful objects in Fuji.
+callbacks, event handlers, and stateful objects in Koda.
 
 ---
 
 ## 12. Modules and Imports
 
-Fuji has a first-class module system. Every `.fuji` file is a module — all its
+Koda has a first-class module system. Every `.koda` file is a module — all its
 top-level `let` declarations and `func` declarations become exported values.
 
 ### Importing a module
 
-```fuji
+```koda
 let math = import "@math";
 print(math.pi);             // 3.141592653589793
 print(math.sin(math.pi));   // ~0
@@ -883,16 +883,16 @@ whose fields are the module's top-level names.
 
 ### Import by path
 
-```fuji
-let utils = import "utils.fuji";        // relative path
-let lib   = import "./lib/helpers.fuji";
+```koda
+let utils = import "utils.koda";        // relative path
+let lib   = import "./lib/helpers.koda";
 ```
 
 ### Stdlib imports
 
 Standard library modules use the `@` prefix:
 
-```fuji
+```koda
 let math  = import "@math";
 let io    = import "@io";
 let json  = import "@json";
@@ -900,19 +900,19 @@ let str   = import "@str";
 let array = import "@array";
 ```
 
-Set the `FUJI_PATH` environment variable to point to the stdlib directory:
+Set the `KODA_PATH` environment variable to point to the stdlib directory:
 
 ```
-set FUJI_PATH=C:\kuji\stdlib    (Windows)
-export FUJI_PATH=/usr/local/kuji/stdlib    (Unix)
+set KODA_PATH=C:\koda\stdlib    (Windows)
+export KODA_PATH=/usr/local/koda/stdlib    (Unix)
 ```
 
 ### Writing a module
 
-Any `.fuji` file is a module. Whatever you declare at top level is exported:
+Any `.koda` file is a module. Whatever you declare at top level is exported:
 
-```fuji
-// utils.fuji
+```koda
+// utils.koda
 
 let VERSION = "1.0";
 
@@ -929,8 +929,8 @@ func lerp(a, b, t) {
 
 Importing:
 
-```fuji
-let u = import "utils.fuji";
+```koda
+let u = import "utils.koda";
 print(u.VERSION);          // 1.0
 print(u.clamp(15, 0, 10)); // 10
 print(u.lerp(0, 100, 0.5));// 50
@@ -940,9 +940,9 @@ print(u.lerp(0, 100, 0.5));// 50
 
 For simple code inclusion (no module object), use `#include`:
 
-```fuji
-#include <stdlib/math.fuji>
-#include "helpers.fuji"
+```koda
+#include <stdlib/math.koda>
+#include "helpers.koda"
 ```
 
 This inlines the file as if you had typed it directly. Unlike `import`, there
@@ -956,19 +956,19 @@ These are always available without any import.
 
 ### Output
 
-```fuji
+```koda
 print(v1, v2, ...)
 ```
 Prints all arguments separated by spaces, then a newline.
 
-```fuji
+```koda
 print("x =", 42, "active:", true);
 // x = 42 active: true
 ```
 
 ### Type
 
-```fuji
+```koda
 type(value) -> string
 ```
 Returns `"number"`, `"string"`, `"bool"`, `"null"`, `"array"`, `"object"`,
@@ -976,7 +976,7 @@ or `"function"`.
 
 ### Type predicates
 
-```fuji
+```koda
 is_number(v)    // true if v is a number
 is_string(v)    // true if v is a string
 is_bool(v)      // true if v is a boolean
@@ -990,7 +990,7 @@ These are faster and more idiomatic than `type(v) == "number"`.
 
 ### Conversion
 
-```fuji
+```koda
 number("42")        // 42         — parse string to number
 number("3.14")      // 3.14
 number(true)        // 1
@@ -1002,14 +1002,14 @@ string(null)        // "null"
 
 ### Collections
 
-```fuji
+```koda
 len(v)     // length of string, array, or object (key count)
 keys(obj)  // array of object's own keys
 ```
 
 ### Math
 
-```fuji
+```koda
 abs(x)      // absolute value
 sqrt(x)     // square root
 sin(x)      // sine (radians)
@@ -1024,7 +1024,7 @@ random()    // random float in [0, 1)
 
 ### Time
 
-```fuji
+```koda
 clock()     // CPU time used (seconds, high precision)
 time()      // wall-clock Unix timestamp (seconds)
 sleep(ms)   // pause execution for ms milliseconds
@@ -1032,7 +1032,7 @@ sleep(ms)   // pause execution for ms milliseconds
 
 ### I/O
 
-```fuji
+```koda
 input()          // read a line from stdin, returns string
 input("Prompt: ")// print prompt then read line
 
@@ -1045,7 +1045,7 @@ createDirectory(path)      // create directory
 
 ### Garbage collection
 
-```fuji
+```koda
 gc()    // trigger garbage collection manually
 ```
 
@@ -1055,13 +1055,13 @@ gc()    // trigger garbage collection manually
 
 ### @math
 
-```fuji
+```koda
 let math = import "@math";
 ```
 
 **Constants:**
 
-```fuji
+```koda
 math.pi    // 3.141592653589793
 math.e     // 2.718281828459045
 math.tau   // 6.283185307179586  (2 * pi)
@@ -1070,7 +1070,7 @@ math.phi   // 1.618033988749895  (golden ratio)
 
 **Trigonometry:**
 
-```fuji
+```koda
 math.sin(x)         // sine of x (radians)
 math.cos(x)         // cosine of x (radians)
 math.tan(x)         // tangent of x (radians)
@@ -1083,7 +1083,7 @@ math.hypot(a, b)    // sqrt(a*a + b*b), numerically stable
 
 **Exponential and logarithm:**
 
-```fuji
+```koda
 math.exp(x)     // e^x
 math.log(x)     // natural logarithm
 math.log2(x)    // base-2 logarithm
@@ -1095,7 +1095,7 @@ math.abs(x)     // absolute value
 
 **Rounding:**
 
-```fuji
+```koda
 math.floor(x)   // round toward -infinity
 math.ceil(x)    // round toward +infinity
 math.round(x)   // round to nearest integer
@@ -1104,7 +1104,7 @@ math.trunc(x)   // truncate toward zero
 
 **Utilities:**
 
-```fuji
+```koda
 math.min(a, b)           // smaller value
 math.max(a, b)           // larger value
 math.clamp(v, lo, hi)    // clamp v to [lo, hi]
@@ -1117,7 +1117,7 @@ math.map(v, a1, b1, a2, b2)  // re-map value from one range to another
 
 **Example:**
 
-```fuji
+```koda
 let math = import "@math";
 
 let angle = math.rad(45);           // 45 degrees → radians
@@ -1131,13 +1131,13 @@ print(math.map(5, 0, 10, 0, 100));  // 50
 
 ### @io
 
-```fuji
+```koda
 let io = import "@io";
 ```
 
 **File operations:**
 
-```fuji
+```koda
 io.read(path)              // read entire file, returns string
 io.write(path, content)    // write string to file (overwrites)
 io.append(path, content)   // append string to file
@@ -1149,7 +1149,7 @@ io.ls(path)                // list directory, returns array of names
 
 **Path utilities:**
 
-```fuji
+```koda
 io.joinPath("dir", "file.txt")   // "dir/file.txt"  (OS separator)
 io.baseName("/path/to/file.txt") // "file.txt"
 io.dirName("/path/to/file.txt")  // "/path/to"
@@ -1158,13 +1158,13 @@ io.extName("file.txt")           // ".txt"
 
 **Environment:**
 
-```fuji
+```koda
 io.env("HOME")    // get environment variable value, or null
 ```
 
 **Example:**
 
-```fuji
+```koda
 let io = import "@io";
 
 io.write("notes.txt", "Hello\nWorld\n");
@@ -1181,28 +1181,28 @@ for (let i = 0; i < len(files); i++) {
 
 ### @json
 
-```fuji
+```koda
 let json = import "@json";
 ```
 
-**Stringify** — convert any Fuji value to a JSON string:
+**Stringify** — convert any Koda value to a JSON string:
 
-```fuji
-json.stringify({name: "Fuji", version: 1.2})
-// '{"name":"Fuji","version":1.2}'
+```koda
+json.stringify({name: "Koda", version: 1.2})
+// '{"name":"Koda","version":1.2}'
 
 json.stringify([1, true, null, "hi"])
 // '[1,true,null,"hi"]'
 
-json.stringify({name: "Fuji"}, 2)   // second arg = indent spaces
+json.stringify({name: "Koda"}, 2)   // second arg = indent spaces
 // {
-//   "name": "Fuji"
+//   "name": "Koda"
 // }
 ```
 
-**Parse** — convert a JSON string into Fuji values:
+**Parse** — convert a JSON string into Koda values:
 
-```fuji
+```koda
 let obj = json.parse('{"x": 1, "y": [2, 3]}');
 print(obj.x);       // 1
 print(obj.y[0]);    // 2
@@ -1210,7 +1210,7 @@ print(obj.y[0]);    // 2
 
 **tryParse** — parse without throwing on bad input:
 
-```fuji
+```koda
 let result = json.tryParse("{bad json}");
 if (result.error != null) {
     print("parse failed:", result.error);
@@ -1221,11 +1221,11 @@ if (result.error != null) {
 
 **Round-trip example:**
 
-```fuji
+```koda
 let json = import "@json";
 
 let data = {
-    name: "Fuji",
+    name: "Koda",
     version: 1.2,
     features: ["fast", "native", "clean"],
     active: true,
@@ -1234,7 +1234,7 @@ let data = {
 
 let s = json.stringify(data);
 let p = json.parse(s);
-print(p.name);         // Fuji
+print(p.name);         // Koda
 print(p.features[0]);  // fast
 ```
 
@@ -1242,11 +1242,11 @@ print(p.features[0]);  // fast
 
 ### @str
 
-```fuji
+```koda
 let str = import "@str";
 ```
 
-```fuji
+```koda
 str.upper("hello")          // "HELLO"
 str.lower("HELLO")          // "hello"
 str.trim("  hi  ")          // "hi"
@@ -1259,11 +1259,11 @@ str.charCode("A")           // 65
 
 ### @array
 
-```fuji
+```koda
 let array = import "@array";
 ```
 
-```fuji
+```koda
 array.sort([3, 1, 2])    // [1, 2, 3]  — returns sorted copy
 ```
 
@@ -1271,12 +1271,12 @@ array.sort([3, 1, 2])    // [1, 2, 3]  — returns sorted copy
 
 ## 15. Methods on Values
 
-Fuji supports dot-method calls directly on values. These delegate to built-in
+Koda supports dot-method calls directly on values. These delegate to built-in
 implementations based on the type.
 
 ### String methods
 
-```fuji
+```koda
 "hello".upper()              // "HELLO"
 "HELLO".lower()              // "hello"
 "  trim me  ".trim()         // "trim me"
@@ -1292,7 +1292,7 @@ implementations based on the type.
 
 ### Array methods
 
-```fuji
+```koda
 let a = [1, 2, 3];
 a.push(4)           // returns [1, 2, 3, 4]
 a.pop()             // removes and returns last element
@@ -1306,7 +1306,7 @@ a.join(", ")        // "1, 2, 3"
 
 Methods can be chained:
 
-```fuji
+```koda
 "abc".upper().split("")   // ["A", "B", "C"]
 ```
 
@@ -1316,7 +1316,7 @@ Methods can be chained:
 
 Template literals use backtick syntax and support embedded expressions:
 
-```fuji
+```koda
 let x = 42;
 let s = `The answer is ${x}`;
 print(s);    // The answer is 42
@@ -1324,7 +1324,7 @@ print(s);    // The answer is 42
 
 Any expression works inside `${}`:
 
-```fuji
+```koda
 let a = 3;
 let b = 4;
 print(`Hypotenuse: ${sqrt(a*a + b*b)}`);   // Hypotenuse: 5
@@ -1336,7 +1336,7 @@ print(`Count: ${len(items)}`);
 
 Multi-word expressions:
 
-```fuji
+```koda
 let user = {name: "Alice", score: 95};
 print(`${user.name} scored ${user.score > 90 ? "A" : "B"}`);
 // Alice scored A
@@ -1346,16 +1346,16 @@ print(`${user.name} scored ${user.score > 90 ? "A" : "B"}`);
 
 ## 17. Ranges
 
-The `..` operator creates a range, which Fuji automatically expands to an array:
+The `..` operator creates a range, which Koda automatically expands to an array:
 
-```fuji
+```koda
 let r = 0..5;
 print(r);    // [0, 1, 2, 3, 4]   — exclusive end
 ```
 
 Ranges are useful with for loops:
 
-```fuji
+```koda
 for (let i in 0..10) {
     print(i);
 }
@@ -1365,14 +1365,14 @@ for (let i in 0..10) {
 
 Use ranges to slice arrays and strings:
 
-```fuji
+```koda
 let arr = [10, 20, 30, 40, 50];
 print(arr[1..3]);    // [20, 30]
 print(arr[..2]);     // [10, 20]
 print(arr[3..]);     // [40, 50]
 ```
 
-```fuji
+```koda
 let s = "Hello, World!";
 print(s[7..12]);   // World
 ```
@@ -1385,7 +1385,7 @@ print(s[7..12]);   // World
 
 The `...` prefix spreads an array as individual arguments:
 
-```fuji
+```koda
 func add(a, b, c) { return a + b + c; }
 
 let nums = [1, 2, 3];
@@ -1394,7 +1394,7 @@ print(add(...nums));    // 6
 
 ### Rest in function parameters
 
-```fuji
+```koda
 func first(head, ...rest) {
     print("head:", head);
     print("rest:", rest);
@@ -1409,10 +1409,10 @@ first(1, 2, 3, 4);
 
 ## 19. Tail-Call Optimisation
 
-Fuji optimises **tail calls** — recursive calls that are the last operation in
+Koda optimises **tail calls** — recursive calls that are the last operation in
 a function. This allows unbounded recursion without stack overflow:
 
-```fuji
+```koda
 func loop(n) {
     if (n == 0) { return "done"; }
     return loop(n - 1);    // tail call — no stack growth
@@ -1424,7 +1424,7 @@ print(loop(1000000));    // "done" — no stack overflow
 A call is a tail call when its result is returned directly with no further
 computation. Both direct recursion and mutual recursion are optimised.
 
-```fuji
+```koda
 // Accumulator pattern for tail-recursive factorial
 func factTail(n, acc = 1) {
     if (n <= 1) { return acc; }
@@ -1438,12 +1438,12 @@ print(factTail(20));    // 2432902008176640000
 
 ## 20. Graphics and Windowing
 
-Fuji includes native Raylib bindings for 2D and 3D graphics. These are
+Koda includes native Raylib bindings for 2D and 3D graphics. These are
 available as global built-in functions — no import required.
 
 ### Window lifecycle
 
-```fuji
+```koda
 initWindow(800, 600, "My App");
 setTargetFPS(60);
 
@@ -1461,7 +1461,7 @@ closeWindow();
 
 ### 2D drawing
 
-```fuji
+```koda
 drawText("Hello!", 100, 100, 24, 0xFFFFFFFF);
 drawRectangle(x, y, width, height, color);
 drawCircle(cx, cy, radius, color);
@@ -1471,7 +1471,7 @@ Colors are 32-bit RGBA hex integers: `0xRRGGBBAA`.
 
 ### 3D drawing
 
-```fuji
+```koda
 let camera = {
     px: 0, py: 5, pz: 10,   // position
     tx: 0, ty: 0, tz: 0,    // target
@@ -1491,15 +1491,15 @@ endMode3D();
 
 ### Input
 
-```fuji
+```koda
 isKeyPressed(KEY_SPACE)    // true on the frame the key is pressed
 isKeyDown(KEY_LEFT)        // true while key is held
 ```
 
 ### Complete 3D example
 
-```fuji
-initWindow(1024, 768, "Fuji 3D");
+```koda
+initWindow(1024, 768, "Koda 3D");
 setTargetFPS(60);
 
 let angle = 0;
@@ -1519,7 +1519,7 @@ while (!windowShouldClose()) {
 
     endMode3D();
 
-    drawText("Fuji 3D", 10, 10, 20, 0xFFFFFFFF);
+    drawText("Koda 3D", 10, 10, 20, 0xFFFFFFFF);
     endDrawing();
 }
 
@@ -1530,15 +1530,15 @@ closeWindow();
 
 ## 21. LLVM Native Compilation
 
-Fuji can compile scripts to native machine code via LLVM IR.
+Koda can compile scripts to native machine code via LLVM IR.
 
 ### Compiling
 
 ```
-kuji compile myapp.fuji -o myapp
+koda compile myapp.koda -o myapp
 ```
 
-This produces a native executable. The output runs without the Fuji runtime.
+This produces a native executable. The output runs without the Koda runtime.
 
 ### What gets compiled
 
@@ -1560,7 +1560,7 @@ The LLVM backend handles:
 
 Use `#extern` to call native C functions from compiled code:
 
-```fuji
+```koda
 // #extern double my_c_func(double x);
 
 let result = my_c_func(3.14);
@@ -1607,7 +1607,7 @@ generate the correct call.
 
 ### Fibonacci with memoisation
 
-```fuji
+```koda
 let cache = {};
 
 func fib(n) {
@@ -1626,7 +1626,7 @@ for (let i = 0; i <= 20; i++) {
 
 ### Linked list
 
-```fuji
+```koda
 func node(value, next = null) {
     return {value: value, next: next};
 }
@@ -1652,7 +1652,7 @@ printList(list);   // 1, 2, 3
 
 ### JSON config loader
 
-```fuji
+```koda
 let io   = import "@io";
 let json = import "@json";
 
@@ -1670,7 +1670,7 @@ print(`Running on port ${cfg.port}`);
 
 ### Functional pipeline
 
-```fuji
+```koda
 func map(arr, f) {
     let result = [];
     for (let i = 0; i < len(arr); i++) {
@@ -1713,7 +1713,7 @@ print(result);   // 4 + 16 + 36 + 64 + 100 = 220
 
 ### State machine
 
-```fuji
+```koda
 func makeStateMachine(initial) {
     let state       = initial;
     let transitions = {};
@@ -1752,5 +1752,5 @@ print(door.getState()); // closed
 
 ---
 
-*This guide covers the complete Fuji language as of the current release.*
+*This guide covers the complete Koda language as of the current release.*
 *For the latest changes, see the changelog and test suite in the repository.*

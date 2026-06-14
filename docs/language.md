@@ -1,8 +1,8 @@
-# Fuji — Syntax Reference
+# Koda — Syntax Reference
 
 > **Full specification** — for a compact single-page reference, see [`language.md`](../language.md) in the root.
 
-This is the **compact syntax reference** for Fuji. For full explanations with examples, see the root **`language.md`**. For a step-by-step beginner guide, see **`using-the-language.md`**.
+This is the **compact syntax reference** for Koda. For full explanations with examples, see the root **`language.md`**. For a step-by-step beginner guide, see **`using-the-language.md`**.
 
 > The compiler sources are the ground truth: **`internal/lexer/token.go`**, **`internal/parser/`**, **`internal/codegen/builtin_register.go`**.
 
@@ -10,7 +10,7 @@ This is the **compact syntax reference** for Fuji. For full explanations with ex
 
 ## Program shape
 
-```fuji
+```koda
 // Top-level statements (script style)
 print("hi");
 
@@ -26,7 +26,7 @@ Statements end with **`;`**. All keywords and builtin names are **case-insensiti
 
 ## Variables
 
-```fuji
+```koda
 let x = 10;          // declare and assign
 let y;               // declare as null
 x = x + 1;          // reassign
@@ -82,7 +82,7 @@ let { a, b } = obj;  // object destructuring
 
 ### `if`
 
-```fuji
+```koda
 if (cond) {
     // ...
 } else if (other) {
@@ -97,7 +97,7 @@ let x = if (n > 0) { 1 } else { -1 };
 
 ### `while` and `do`…`while`
 
-```fuji
+```koda
 while (cond) { /* ... */ }
 
 do { /* ... */ } while (cond);
@@ -105,35 +105,35 @@ do { /* ... */ } while (cond);
 
 ### `for` (C-style)
 
-```fuji
+```koda
 for (let i = 0; i < 10; i += 1) { /* ... */ }
 for (;;) { break; }                             // infinite
 ```
 
 ### `for`…`in` (keys)
 
-```fuji
+```koda
 for (let key in obj) { /* key is string */ }
 for (let i in arr)   { /* i is numeric index */ }
 ```
 
 ### `for`…`of` (values)
 
-```fuji
+```koda
 for (let v of arr)      { /* each element */ }
 for (let i of 0..10)    { /* 0,1,…,9 */ }
 ```
 
 ### `for`…`of` with pairs
 
-```fuji
+```koda
 for (let [k, v] of obj) { /* k=key, v=value */ }
 for (let [i, v] of arr) { /* i=index, v=element */ }
 ```
 
 ### `switch` (statement)
 
-```fuji
+```koda
 switch (x) {
     case 1:
         /* ... */
@@ -150,7 +150,7 @@ Falls through unless `break` is used.
 
 ### `switch` (expression)
 
-```fuji
+```koda
 let label = switch (x) {
     case 1 => "one"
     case 2 => "two"
@@ -160,7 +160,7 @@ let label = switch (x) {
 
 ### `break` / `continue` / `return`
 
-```fuji
+```koda
 break;          // exit loop or switch
 continue;       // next loop iteration
 return;         // return null from function
@@ -169,7 +169,7 @@ return expr;    // return value
 
 ### `defer`
 
-```fuji
+```koda
 func f() {
     defer cleanup();  // runs when f() exits, LIFO order
 }
@@ -177,7 +177,7 @@ func f() {
 
 ### `delete`
 
-```fuji
+```koda
 delete obj.key;      // remove own property from object
 delete obj["key"];   // bracket form also works
 ```
@@ -186,7 +186,7 @@ delete obj["key"];   // bracket form also works
 
 ## Functions
 
-```fuji
+```koda
 // Named declaration
 func add(a, b) {
     return a + b;
@@ -208,7 +208,7 @@ func sum(...nums) { /* nums is an array */ }
 
 ## Struct types
 
-```fuji
+```koda
 struct Point {
     x,
     y
@@ -222,7 +222,7 @@ p.y = 10;
 
 ## Enum types
 
-```fuji
+```koda
 enum Dir {
     Up,       // 0
     Down,     // 1
@@ -237,7 +237,7 @@ let d = Dir.Up;   // 0
 
 ## Objects
 
-```fuji
+```koda
 let o = { x: 1, y: 2 };
 o.x;          // dot access
 o["x"];       // bracket access (identical)
@@ -255,7 +255,7 @@ let obj = {
 
 ## Arrays
 
-```fuji
+```koda
 let a = [1, 2, 3];
 a[0];           // read
 a[0] = 99;      // write
@@ -268,7 +268,7 @@ a.pop();        // remove last
 
 ## Template strings
 
-```fuji
+```koda
 let s = `Hello, ${ name }! Score: ${ score * 2 }`;
 ```
 
@@ -276,17 +276,17 @@ let s = `Hello, ${ name }! Score: ${ score * 2 }`;
 
 ## Includes and imports
 
-```fuji
-#include "relative/path.fuji"    // textual include (most common)
-let m = import("./module.fuji"); // expression form
+```koda
+#include "relative/path.koda"    // textual include (most common)
+let m = import("./module.koda"); // expression form
 ```
 
 ---
 
 ## Native FFI hint
 
-```fuji
-// fuji: extern bindingName c_symbol arity
+```koda
+// koda: extern bindingName c_symbol arity
 let bindingName;
 ```
 

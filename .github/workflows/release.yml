@@ -1,4 +1,4 @@
-# Jobs populate internal/embed/<GOOS>/<GOARCH>/ (clang [+ lld on Windows], libfuji_runtime.a),
+# Jobs populate internal/embed/<GOOS>/<GOARCH>/ (clang [+ lld on Windows], libkoda_runtime.a),
 # then build with -tags release. Triggered by version tags.
 
 name: Release
@@ -32,8 +32,8 @@ jobs:
           clang -c runtime\src\value.c        -O2 -std=c11 -Iruntime\src -D_AMD64_=1 -o runtime\obj_win\value.o
           clang -c runtime\src\object.c       -O2 -std=c11 -Iruntime\src -D_AMD64_=1 -o runtime\obj_win\object.o
           clang -c runtime\src\gc.c           -O2 -std=c11 -Iruntime\src -D_AMD64_=1 -o runtime\obj_win\gc.o
-          clang -c runtime\src\fuji_runtime.c -O2 -std=c11 -Iruntime\src -D_AMD64_=1 -o runtime\obj_win\fuji_runtime.o
-          llvm-ar rcs runtime\libfuji_runtime.a runtime\obj_win\value.o runtime\obj_win\object.o runtime\obj_win\gc.o runtime\obj_win\fuji_runtime.o
+          clang -c runtime\src\koda_runtime.c -O2 -std=c11 -Iruntime\src -D_AMD64_=1 -o runtime\obj_win\koda_runtime.o
+          llvm-ar rcs runtime\libkoda_runtime.a runtime\obj_win\value.o runtime\obj_win\object.o runtime\obj_win\gc.o runtime\obj_win\koda_runtime.o
 
       - name: Populate embed/windows/amd64
         run: |
@@ -56,28 +56,28 @@ jobs:
           Copy-Item $clang internal\embed\windows\amd64\clang.exe
           Copy-Item $llc   internal\embed\windows\amd64\llc.exe
           Copy-Item $lld   internal\embed\windows\amd64\lld.exe
-          Copy-Item runtime\libfuji_runtime.a internal\embed\windows\amd64\
+          Copy-Item runtime\libkoda_runtime.a internal\embed\windows\amd64\
 
-      - name: Build fuji.exe
-        run: go build -trimpath -tags release -ldflags="-s -w" -o fuji-windows-amd64.exe ./cmd/fuji
+      - name: Build koda.exe
+        run: go build -trimpath -tags release -ldflags="-s -w" -o koda-windows-amd64.exe ./cmd/koda
 
-      - name: Build fujiwrap.exe
-        run: go build -trimpath -tags release -ldflags="-s -w" -o fujiwrap-windows-amd64.exe ./cmd/wrapgen
+      - name: Build kodawrap.exe
+        run: go build -trimpath -tags release -ldflags="-s -w" -o kodawrap-windows-amd64.exe ./cmd/wrapgen
 
       - name: Test
         run: |
-          .\fuji-windows-amd64.exe version
-          .\fuji-windows-amd64.exe build tests\hello.fuji -o hello.exe
+          .\koda-windows-amd64.exe version
+          .\koda-windows-amd64.exe build tests\hello.koda -o hello.exe
           .\hello.exe
-          .\fuji-windows-amd64.exe build tests\gc_shadow_multi_return_pop.fuji -o gc_shadow.exe
+          .\koda-windows-amd64.exe build tests\gc_shadow_multi_return_pop.koda -o gc_shadow.exe
           .\gc_shadow.exe
 
       - uses: actions/upload-artifact@v4
         with:
           name: windows
           path: |
-            fuji-windows-amd64.exe
-            fujiwrap-windows-amd64.exe
+            koda-windows-amd64.exe
+            kodawrap-windows-amd64.exe
 
   linux-amd64:
     runs-on: ubuntu-latest
@@ -110,8 +110,8 @@ jobs:
           "$CLANG_BIN" -c runtime/src/value.c        -O2 -std=c11 -Iruntime/src -o runtime/obj_linux/value.o
           "$CLANG_BIN" -c runtime/src/object.c       -O2 -std=c11 -Iruntime/src -o runtime/obj_linux/object.o
           "$CLANG_BIN" -c runtime/src/gc.c           -O2 -std=c11 -Iruntime/src -o runtime/obj_linux/gc.o
-          "$CLANG_BIN" -c runtime/src/fuji_runtime.c -O2 -std=c11 -Iruntime/src -o runtime/obj_linux/fuji_runtime.o
-          "$LLVM_AR_BIN" rcs runtime/libfuji_runtime.a runtime/obj_linux/*.o
+          "$CLANG_BIN" -c runtime/src/koda_runtime.c -O2 -std=c11 -Iruntime/src -o runtime/obj_linux/koda_runtime.o
+          "$LLVM_AR_BIN" rcs runtime/libkoda_runtime.a runtime/obj_linux/*.o
 
       - name: Populate embed/linux/amd64
         shell: bash
@@ -130,31 +130,31 @@ jobs:
           mkdir -p internal/embed/linux/amd64
           cp "$CLANG_BIN"                internal/embed/linux/amd64/clang
           cp "$LLC_BIN"                  internal/embed/linux/amd64/llc
-          cp runtime/libfuji_runtime.a internal/embed/linux/amd64/
+          cp runtime/libkoda_runtime.a internal/embed/linux/amd64/
 
-      - name: Build fuji
-        run: go build -trimpath -tags release -ldflags="-s -w" -o fuji-linux-amd64 ./cmd/fuji
+      - name: Build koda
+        run: go build -trimpath -tags release -ldflags="-s -w" -o koda-linux-amd64 ./cmd/koda
 
-      - name: Build fujiwrap
-        run: go build -trimpath -tags release -ldflags="-s -w" -o fujiwrap-linux-amd64 ./cmd/wrapgen
+      - name: Build kodawrap
+        run: go build -trimpath -tags release -ldflags="-s -w" -o kodawrap-linux-amd64 ./cmd/wrapgen
 
       - name: Test
         shell: bash
         run: |
           set -euo pipefail
-          chmod +x fuji-linux-amd64 fujiwrap-linux-amd64
-          ./fuji-linux-amd64 version
-          ./fuji-linux-amd64 build tests/hello.fuji -o hello
+          chmod +x koda-linux-amd64 kodawrap-linux-amd64
+          ./koda-linux-amd64 version
+          ./koda-linux-amd64 build tests/hello.koda -o hello
           ./hello
-          ./fuji-linux-amd64 build tests/gc_shadow_multi_return_pop.fuji -o gc_shadow
+          ./koda-linux-amd64 build tests/gc_shadow_multi_return_pop.koda -o gc_shadow
           ./gc_shadow
 
       - uses: actions/upload-artifact@v4
         with:
           name: linux-amd64
           path: |
-            fuji-linux-amd64
-            fujiwrap-linux-amd64
+            koda-linux-amd64
+            kodawrap-linux-amd64
 
   linux-arm64:
     runs-on: ubuntu-24.04-arm
@@ -187,8 +187,8 @@ jobs:
           "$CLANG_BIN" -c runtime/src/value.c        -O2 -std=c11 -Iruntime/src -o runtime/obj_linux_arm64/value.o
           "$CLANG_BIN" -c runtime/src/object.c       -O2 -std=c11 -Iruntime/src -o runtime/obj_linux_arm64/object.o
           "$CLANG_BIN" -c runtime/src/gc.c           -O2 -std=c11 -Iruntime/src -o runtime/obj_linux_arm64/gc.o
-          "$CLANG_BIN" -c runtime/src/fuji_runtime.c -O2 -std=c11 -Iruntime/src -o runtime/obj_linux_arm64/fuji_runtime.o
-          "$LLVM_AR_BIN" rcs runtime/libfuji_runtime.a runtime/obj_linux_arm64/*.o
+          "$CLANG_BIN" -c runtime/src/koda_runtime.c -O2 -std=c11 -Iruntime/src -o runtime/obj_linux_arm64/koda_runtime.o
+          "$LLVM_AR_BIN" rcs runtime/libkoda_runtime.a runtime/obj_linux_arm64/*.o
 
       - name: Populate embed/linux/arm64
         shell: bash
@@ -207,31 +207,31 @@ jobs:
           mkdir -p internal/embed/linux/arm64
           cp "$CLANG_BIN"                internal/embed/linux/arm64/clang
           cp "$LLC_BIN"                  internal/embed/linux/arm64/llc
-          cp runtime/libfuji_runtime.a internal/embed/linux/arm64/
+          cp runtime/libkoda_runtime.a internal/embed/linux/arm64/
 
-      - name: Build fuji
-        run: GOARCH=arm64 go build -trimpath -tags release -ldflags="-s -w" -o fuji-linux-arm64 ./cmd/fuji
+      - name: Build koda
+        run: GOARCH=arm64 go build -trimpath -tags release -ldflags="-s -w" -o koda-linux-arm64 ./cmd/koda
 
-      - name: Build fujiwrap
-        run: go build -trimpath -tags release -ldflags="-s -w" -o fujiwrap-linux-arm64 ./cmd/wrapgen
+      - name: Build kodawrap
+        run: go build -trimpath -tags release -ldflags="-s -w" -o kodawrap-linux-arm64 ./cmd/wrapgen
 
       - name: Test
         shell: bash
         run: |
           set -euo pipefail
-          chmod +x fuji-linux-arm64 fujiwrap-linux-arm64
-          ./fuji-linux-arm64 version
-          ./fuji-linux-arm64 build tests/hello.fuji -o hello
+          chmod +x koda-linux-arm64 kodawrap-linux-arm64
+          ./koda-linux-arm64 version
+          ./koda-linux-arm64 build tests/hello.koda -o hello
           ./hello
-          ./fuji-linux-arm64 build tests/gc_shadow_multi_return_pop.fuji -o gc_shadow
+          ./koda-linux-arm64 build tests/gc_shadow_multi_return_pop.koda -o gc_shadow
           ./gc_shadow
 
       - uses: actions/upload-artifact@v4
         with:
           name: linux-arm64
           path: |
-            fuji-linux-arm64
-            fujiwrap-linux-arm64
+            koda-linux-arm64
+            kodawrap-linux-arm64
 
   macos:
     runs-on: macos-latest
@@ -254,8 +254,8 @@ jobs:
           "$CLANG_BIN" -c runtime/src/value.c        -O2 -std=c11 -Iruntime/src -isysroot "$SDKROOT" -arch x86_64 -o runtime/obj_macos_amd64/value.o
           "$CLANG_BIN" -c runtime/src/object.c       -O2 -std=c11 -Iruntime/src -isysroot "$SDKROOT" -arch x86_64 -o runtime/obj_macos_amd64/object.o
           "$CLANG_BIN" -c runtime/src/gc.c           -O2 -std=c11 -Iruntime/src -isysroot "$SDKROOT" -arch x86_64 -o runtime/obj_macos_amd64/gc.o
-          "$CLANG_BIN" -c runtime/src/fuji_runtime.c -O2 -std=c11 -Iruntime/src -isysroot "$SDKROOT" -arch x86_64 -o runtime/obj_macos_amd64/fuji_runtime.o
-          llvm-ar rcs runtime/libfuji_runtime_amd64.a runtime/obj_macos_amd64/*.o
+          "$CLANG_BIN" -c runtime/src/koda_runtime.c -O2 -std=c11 -Iruntime/src -isysroot "$SDKROOT" -arch x86_64 -o runtime/obj_macos_amd64/koda_runtime.o
+          llvm-ar rcs runtime/libkoda_runtime_amd64.a runtime/obj_macos_amd64/*.o
 
       - name: Build C runtime — arm64
         run: |
@@ -265,8 +265,8 @@ jobs:
           "$CLANG_BIN" -c runtime/src/value.c        -O2 -std=c11 -Iruntime/src -isysroot "$SDKROOT" -arch arm64 -o runtime/obj_macos_arm64/value.o
           "$CLANG_BIN" -c runtime/src/object.c       -O2 -std=c11 -Iruntime/src -isysroot "$SDKROOT" -arch arm64 -o runtime/obj_macos_arm64/object.o
           "$CLANG_BIN" -c runtime/src/gc.c           -O2 -std=c11 -Iruntime/src -isysroot "$SDKROOT" -arch arm64 -o runtime/obj_macos_arm64/gc.o
-          "$CLANG_BIN" -c runtime/src/fuji_runtime.c -O2 -std=c11 -Iruntime/src -isysroot "$SDKROOT" -arch arm64 -o runtime/obj_macos_arm64/fuji_runtime.o
-          llvm-ar rcs runtime/libfuji_runtime_arm64.a runtime/obj_macos_arm64/*.o
+          "$CLANG_BIN" -c runtime/src/koda_runtime.c -O2 -std=c11 -Iruntime/src -isysroot "$SDKROOT" -arch arm64 -o runtime/obj_macos_arm64/koda_runtime.o
+          llvm-ar rcs runtime/libkoda_runtime_arm64.a runtime/obj_macos_arm64/*.o
 
       - name: Populate embed/darwin
         run: |
@@ -276,40 +276,40 @@ jobs:
           cp "$(which clang)"                       internal/embed/darwin/arm64/clang
           cp "$(which llc)"                         internal/embed/darwin/amd64/llc
           cp "$(which llc)"                         internal/embed/darwin/arm64/llc
-          cp runtime/libfuji_runtime_amd64.a      internal/embed/darwin/amd64/libfuji_runtime.a
-          cp runtime/libfuji_runtime_arm64.a      internal/embed/darwin/arm64/libfuji_runtime.a
+          cp runtime/libkoda_runtime_amd64.a      internal/embed/darwin/amd64/libkoda_runtime.a
+          cp runtime/libkoda_runtime_arm64.a      internal/embed/darwin/arm64/libkoda_runtime.a
 
-      - name: Build fuji — amd64
-        run: GOARCH=amd64 go build -trimpath -tags release -ldflags="-s -w" -o fuji-darwin-amd64 ./cmd/fuji
+      - name: Build koda — amd64
+        run: GOARCH=amd64 go build -trimpath -tags release -ldflags="-s -w" -o koda-darwin-amd64 ./cmd/koda
 
-      - name: Build fuji — arm64
-        run: GOARCH=arm64 go build -trimpath -tags release -ldflags="-s -w" -o fuji-darwin-arm64 ./cmd/fuji
+      - name: Build koda — arm64
+        run: GOARCH=arm64 go build -trimpath -tags release -ldflags="-s -w" -o koda-darwin-arm64 ./cmd/koda
 
-      - name: Build fujiwrap — arm64 (host)
-        run: go build -trimpath -tags release -ldflags="-s -w" -o fujiwrap-darwin-arm64 ./cmd/wrapgen
+      - name: Build kodawrap — arm64 (host)
+        run: go build -trimpath -tags release -ldflags="-s -w" -o kodawrap-darwin-arm64 ./cmd/wrapgen
 
-      - name: Build fujiwrap — amd64 (cross)
-        run: GOOS=darwin GOARCH=amd64 go build -trimpath -tags release -ldflags="-s -w" -o fujiwrap-darwin-amd64 ./cmd/wrapgen
+      - name: Build kodawrap — amd64 (cross)
+        run: GOOS=darwin GOARCH=amd64 go build -trimpath -tags release -ldflags="-s -w" -o kodawrap-darwin-amd64 ./cmd/wrapgen
 
       - name: Test
         shell: bash
         run: |
           set -euo pipefail
-          chmod +x fuji-darwin-arm64 fuji-darwin-amd64 fujiwrap-darwin-arm64 fujiwrap-darwin-amd64
-          ./fuji-darwin-arm64 version
-          ./fuji-darwin-arm64 build tests/hello.fuji -o hello
+          chmod +x koda-darwin-arm64 koda-darwin-amd64 kodawrap-darwin-arm64 kodawrap-darwin-amd64
+          ./koda-darwin-arm64 version
+          ./koda-darwin-arm64 build tests/hello.koda -o hello
           ./hello
-          ./fuji-darwin-arm64 build tests/gc_shadow_multi_return_pop.fuji -o gc_shadow
+          ./koda-darwin-arm64 build tests/gc_shadow_multi_return_pop.koda -o gc_shadow
           ./gc_shadow
 
       - uses: actions/upload-artifact@v4
         with:
           name: macos
           path: |
-            fuji-darwin-amd64
-            fuji-darwin-arm64
-            fujiwrap-darwin-amd64
-            fujiwrap-darwin-arm64
+            koda-darwin-amd64
+            koda-darwin-arm64
+            kodawrap-darwin-amd64
+            kodawrap-darwin-arm64
 
   publish:
     needs: [windows, linux-amd64, linux-arm64, macos]
@@ -344,63 +344,63 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            artifacts/windows/fuji-windows-amd64.exe
-            artifacts/windows/fujiwrap-windows-amd64.exe
-            artifacts/linux-amd64/fuji-linux-amd64
-            artifacts/linux-amd64/fujiwrap-linux-amd64
-            artifacts/linux-arm64/fuji-linux-arm64
-            artifacts/linux-arm64/fujiwrap-linux-arm64
-            artifacts/macos/fuji-darwin-amd64
-            artifacts/macos/fuji-darwin-arm64
-            artifacts/macos/fujiwrap-darwin-amd64
-            artifacts/macos/fujiwrap-darwin-arm64
+            artifacts/windows/koda-windows-amd64.exe
+            artifacts/windows/kodawrap-windows-amd64.exe
+            artifacts/linux-amd64/koda-linux-amd64
+            artifacts/linux-amd64/kodawrap-linux-amd64
+            artifacts/linux-arm64/koda-linux-arm64
+            artifacts/linux-arm64/kodawrap-linux-arm64
+            artifacts/macos/koda-darwin-amd64
+            artifacts/macos/koda-darwin-arm64
+            artifacts/macos/kodawrap-darwin-amd64
+            artifacts/macos/kodawrap-darwin-arm64
             sdk-zips/*.zip
           body: |
-            ## Fuji Programming Language
+            ## Koda Programming Language
 
             ### Offline SDK zips (**recommended**)
 
-            **Windows**, **Linux** (x64 + ARM64), and **macOS** (Intel + Apple Silicon): one zip per CPU OS pair. Each **`fuji-*-sdk-*.zip`** is self-contained:
+            **Windows**, **Linux** (x64 + ARM64), and **macOS** (Intel + Apple Silicon): one zip per CPU OS pair. Each **`koda-*-sdk-*.zip`** is self-contained:
 
             | Archive | Contents |
             |---------|----------|
-            | **`fuji-${{ github.ref_name }}-sdk-windows-amd64.zip`** | `fuji.exe`, `fujiwrap.exe`, `stdlib/`, `docs/`, root `*.md`, **full `wrappers/` (raylib + glue)**, **`third_party/raylib_static/stage`** (headers, `libraylib.a`, `raylib.dll`), `examples/`, `SDK_README.txt` |
-            | **`fuji-${{ github.ref_name }}-sdk-linux-amd64.zip`** | same layout (POSIX binaries) |
-            | **`fuji-${{ github.ref_name }}-sdk-linux-arm64.zip`** | same toolchain + docs + wrappers; **no upstream raylib ARM64 prebuild** — see `third_party/raylib_static/stage/README-Fuji.txt` and install system raylib or build from source |
-            | **`fuji-${{ github.ref_name }}-sdk-darwin-amd64.zip`** | Intel macOS |
-            | **`fuji-${{ github.ref_name }}-sdk-darwin-arm64.zip`** | Apple Silicon |
+            | **`koda-${{ github.ref_name }}-sdk-windows-amd64.zip`** | `koda.exe`, `kodawrap.exe`, `stdlib/`, `docs/`, root `*.md`, **full `wrappers/` (raylib + glue)**, **`third_party/raylib_static/stage`** (headers, `libraylib.a`, `raylib.dll`), `examples/`, `SDK_README.txt` |
+            | **`koda-${{ github.ref_name }}-sdk-linux-amd64.zip`** | same layout (POSIX binaries) |
+            | **`koda-${{ github.ref_name }}-sdk-linux-arm64.zip`** | same toolchain + docs + wrappers; **no upstream raylib ARM64 prebuild** — see `third_party/raylib_static/stage/README-Koda.txt` and install system raylib or build from source |
+            | **`koda-${{ github.ref_name }}-sdk-darwin-amd64.zip`** | Intel macOS |
+            | **`koda-${{ github.ref_name }}-sdk-darwin-arm64.zip`** | Apple Silicon |
 
-            Extract anywhere; keep **`stdlib/`** next to **`fuji`**. Embedded **Clang + llc + runtime** (and Windows `lld`) ship **inside** the `fuji` binary — **no LLVM install** and **`fuji` does not download anything from the internet** when you compile; tools unpack from the binary to a **local temp directory** on first use only. Raylib (where included in the zip) is already on disk under **`third_party/raylib_static/stage/`**. Wrapping/linking **other** external C libs still uses libraries you provide (see `docs/wrappers.md` in the zip).
+            Extract anywhere; keep **`stdlib/`** next to **`koda`**. Embedded **Clang + llc + runtime** (and Windows `lld`) ship **inside** the `koda` binary — **no LLVM install** and **`koda` does not download anything from the internet** when you compile; tools unpack from the binary to a **local temp directory** on first use only. Raylib (where included in the zip) is already on disk under **`third_party/raylib_static/stage/`**. Wrapping/linking **other** external C libs still uses libraries you provide (see `docs/wrappers.md` in the zip).
 
             ### Loose binaries only
 
             | Platform | Compiler | Wrapper Tool |
             |----------|----------|--------------|
-            | Windows 64-bit | fuji-windows-amd64.exe | fujiwrap-windows-amd64.exe |
-            | Linux 64-bit | fuji-linux-amd64 | fujiwrap-linux-amd64 |
-            | Linux ARM64 | fuji-linux-arm64 | fujiwrap-linux-arm64 |
-            | macOS Intel | fuji-darwin-amd64 | fujiwrap-darwin-amd64 |
-            | macOS Apple Silicon | fuji-darwin-arm64 | fujiwrap-darwin-arm64 |
+            | Windows 64-bit | koda-windows-amd64.exe | kodawrap-windows-amd64.exe |
+            | Linux 64-bit | koda-linux-amd64 | kodawrap-linux-amd64 |
+            | Linux ARM64 | koda-linux-arm64 | kodawrap-linux-arm64 |
+            | macOS Intel | koda-darwin-amd64 | kodawrap-darwin-amd64 |
+            | macOS Apple Silicon | koda-darwin-arm64 | kodawrap-darwin-arm64 |
 
             ### Windows
 
             ```powershell
-            fuji-windows-amd64.exe build hello.fuji -o hello.exe
+            koda-windows-amd64.exe build hello.koda -o hello.exe
             .\hello.exe
             ```
 
             ### Linux
 
             ```bash
-            chmod +x fuji-linux-amd64
-            ./fuji-linux-amd64 build hello.fuji -o hello
+            chmod +x koda-linux-amd64
+            ./koda-linux-amd64 build hello.koda -o hello
             ./hello
             ```
 
             ### macOS
 
             ```bash
-            chmod +x fuji-darwin-arm64
-            ./fuji-darwin-arm64 build hello.fuji -o hello
+            chmod +x koda-darwin-arm64
+            ./koda-darwin-arm64 build hello.koda -o hello
             ./hello
             ```

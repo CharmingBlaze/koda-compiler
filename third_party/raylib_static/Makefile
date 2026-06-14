@@ -1,11 +1,11 @@
-# Build Raylib from the repo's `raylib/` tree (CMake), then install into ./stage/ for Fuji native links.
+# Build Raylib from the repo's `raylib/` tree (CMake), then install into ./stage/ for Koda native links.
 #
 # From repo root:
 #   make -C third_party/raylib_static          # static lib (default) -> stage/lib/libraylib.a + headers
 #   make -C third_party/raylib_static shared   # shared -> stage-shared/ with raylib.dll (Windows) + import lib
 #
-# After `make` (static), `fuji build` picks up stage/ automatically (see FUJI_USE_VENDORED_RAYLIB in nativebuild).
-# For shared builds, use the DLL/import lib with your own FUJI_LINKFLAGS; the compiler still prefers static stage/ when present.
+# After `make` (static), `koda build` picks up stage/ automatically (see KODA_USE_VENDORED_RAYLIB in nativebuild).
+# For shared builds, use the DLL/import lib with your own KODA_LINKFLAGS; the compiler still prefers static stage/ when present.
 
 SHELL := sh.exe
 .SHELLFLAGS := -ec

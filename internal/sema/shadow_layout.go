@@ -1,7 +1,7 @@
 package sema
 
 import (
-	"fuji/internal/parser"
+	"koda/internal/parser"
 )
 
 // shadowExprTempSlotCount is reserved at the end of every shadow table for

@@ -1,0 +1,524 @@
+#include "../../wrappers/raylib_shim/raylib.koda"
+
+let black = 0xFF000000;
+
+let white = 0xFFFFFFFF;
+
+let yellow = 0xFF00FFFF;
+
+let cyan = 0xFFFFFF00;
+
+let green = 0xFF00FF00;
+
+let blue = 0xFFFF0000;
+
+let orange = 0xFF00A5FF;
+
+let purple = 0x800080FF;
+
+let sw = 960;
+
+let sh = 640;
+
+let paddlew = 128;
+
+let paddleh = 16;
+
+let paddlex = 416;
+
+let paddley = 590;
+
+let paddlespeed = 10;
+
+let ballx = 480;
+
+let bally = 560;
+
+let ballr = 8;
+
+let ballvx = 6;
+
+let ballvy = -6;
+
+let score = 0;
+
+let lives = 3;
+
+let st_start = 0;
+
+let st_playing = 1;
+
+let st_paused = 2;
+
+let st_win = 3;
+
+let st_gameover = 4;
+
+let state = st_start;
+
+let framecount = 0;
+
+let brickw = 90;
+
+let brickh = 24;
+
+let br1x = 270;
+
+let br1y = 90;
+
+let br1a = true;
+
+let br2x = 366;
+
+let br2y = 90;
+
+let br2a = true;
+
+let br3x = 462;
+
+let br3y = 90;
+
+let br3a = true;
+
+let br4x = 558;
+
+let br4y = 90;
+
+let br4a = true;
+
+let br5x = 270;
+
+let br5y = 120;
+
+let br5a = true;
+
+let br6x = 366;
+
+let br6y = 120;
+
+let br6a = true;
+
+let br7x = 462;
+
+let br7y = 120;
+
+let br7a = true;
+
+let br8x = 558;
+
+let br8y = 120;
+
+let br8a = true;
+
+let br9x = 270;
+
+let br9y = 150;
+
+let br9a = true;
+
+let br10x = 366;
+
+let br10y = 150;
+
+let br10a = true;
+
+let br11x = 462;
+
+let br11y = 150;
+
+let br11a = true;
+
+let br12x = 558;
+
+let br12y = 150;
+
+let br12a = true;
+
+let txt_launch = "PRESS SPACE TO LAUNCH";
+
+let txt_paused = "PAUSED - PRESS SPACE";
+
+let txt_win1 = "LEVEL CLEARED!";
+
+let txt_win2 = "PRESS SPACE FOR NEXT LEVEL";
+
+let txt_over1 = "GAME OVER";
+
+let txt_over2 = "PRESS R TO RESTART";
+
+initwindow(sw, sh, "Koda Brick Breaker");
+settargetfps(60);
+
+while (!windowshouldclose()) {
+    framecount += 1;
+    gcframestep(0.25);
+    if (state == st_start) {
+        if (framecount % 120 == 0) {
+            gc();
+        }
+        ballx = paddlex + paddlew / 2;
+        bally = paddley - ballr - 2;
+        if (iskeypressed(32)) {
+            ballvx = 6;
+            ballvy = -6;
+            state = st_playing;
+        }
+    } else
+        if (state == st_playing) {
+            if (iskeydown(263) && paddlex > 0) {
+                paddlex -= paddlespeed;
+            }
+            if (iskeydown(262) && paddlex < sw - paddlew) {
+                paddlex += paddlespeed;
+            }
+            ballx += ballvx;
+            bally += ballvy;
+            if (ballx + ballr > sw || ballx - ballr < 0) {
+                ballvx = -ballvx;
+            }
+            if (bally - ballr < 0) {
+                ballvy = -ballvy;
+                score += 1;
+            }
+            if (ballvy > 0) {
+                if (ballx >= paddlex) {
+                    if (ballx <= paddlex + paddlew) {
+                        if (bally + ballr >= paddley) {
+                            if (bally - ballr <= paddley + paddleh) {
+                                ballvy = -ballvy;
+                                ballvx = 11 * ((ballx - paddlex) / paddlew - 0.5);
+                                score += 5;
+                            }
+                        }
+                    }
+                }
+            }
+            let hit = false;
+            if (!hit) {
+                if (br1a) {
+                    if (ballx + ballr >= br1x) {
+                        if (ballx - ballr <= br1x + brickw) {
+                            if (bally + ballr >= br1y) {
+                                if (bally - ballr <= br1y + brickh) {
+                                    br1a = false;
+                                    ballvy = -ballvy;
+                                    score += 12;
+                                    hit = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!hit) {
+                if (br2a) {
+                    if (ballx + ballr >= br2x) {
+                        if (ballx - ballr <= br2x + brickw) {
+                            if (bally + ballr >= br2y) {
+                                if (bally - ballr <= br2y + brickh) {
+                                    br2a = false;
+                                    ballvy = -ballvy;
+                                    score += 12;
+                                    hit = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!hit) {
+                if (br3a) {
+                    if (ballx + ballr >= br3x) {
+                        if (ballx - ballr <= br3x + brickw) {
+                            if (bally + ballr >= br3y) {
+                                if (bally - ballr <= br3y + brickh) {
+                                    br3a = false;
+                                    ballvy = -ballvy;
+                                    score += 12;
+                                    hit = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!hit) {
+                if (br4a) {
+                    if (ballx + ballr >= br4x) {
+                        if (ballx - ballr <= br4x + brickw) {
+                            if (bally + ballr >= br4y) {
+                                if (bally - ballr <= br4y + brickh) {
+                                    br4a = false;
+                                    ballvy = -ballvy;
+                                    score += 12;
+                                    hit = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!hit) {
+                if (br5a) {
+                    if (ballx + ballr >= br5x) {
+                        if (ballx - ballr <= br5x + brickw) {
+                            if (bally + ballr >= br5y) {
+                                if (bally - ballr <= br5y + brickh) {
+                                    br5a = false;
+                                    ballvy = -ballvy;
+                                    score += 10;
+                                    hit = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!hit) {
+                if (br6a) {
+                    if (ballx + ballr >= br6x) {
+                        if (ballx - ballr <= br6x + brickw) {
+                            if (bally + ballr >= br6y) {
+                                if (bally - ballr <= br6y + brickh) {
+                                    br6a = false;
+                                    ballvy = -ballvy;
+                                    score += 10;
+                                    hit = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!hit) {
+                if (br7a) {
+                    if (ballx + ballr >= br7x) {
+                        if (ballx - ballr <= br7x + brickw) {
+                            if (bally + ballr >= br7y) {
+                                if (bally - ballr <= br7y + brickh) {
+                                    br7a = false;
+                                    ballvy = -ballvy;
+                                    score += 10;
+                                    hit = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!hit) {
+                if (br8a) {
+                    if (ballx + ballr >= br8x) {
+                        if (ballx - ballr <= br8x + brickw) {
+                            if (bally + ballr >= br8y) {
+                                if (bally - ballr <= br8y + brickh) {
+                                    br8a = false;
+                                    ballvy = -ballvy;
+                                    score += 10;
+                                    hit = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!hit) {
+                if (br9a) {
+                    if (ballx + ballr >= br9x) {
+                        if (ballx - ballr <= br9x + brickw) {
+                            if (bally + ballr >= br9y) {
+                                if (bally - ballr <= br9y + brickh) {
+                                    br9a = false;
+                                    ballvy = -ballvy;
+                                    score += 8;
+                                    hit = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!hit) {
+                if (br10a) {
+                    if (ballx + ballr >= br10x) {
+                        if (ballx - ballr <= br10x + brickw) {
+                            if (bally + ballr >= br10y) {
+                                if (bally - ballr <= br10y + brickh) {
+                                    br10a = false;
+                                    ballvy = -ballvy;
+                                    score += 8;
+                                    hit = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!hit) {
+                if (br11a) {
+                    if (ballx + ballr >= br11x) {
+                        if (ballx - ballr <= br11x + brickw) {
+                            if (bally + ballr >= br11y) {
+                                if (bally - ballr <= br11y + brickh) {
+                                    br11a = false;
+                                    ballvy = -ballvy;
+                                    score += 8;
+                                    hit = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!hit) {
+                if (br12a) {
+                    if (ballx + ballr >= br12x) {
+                        if (ballx - ballr <= br12x + brickw) {
+                            if (bally + ballr >= br12y) {
+                                if (bally - ballr <= br12y + brickh) {
+                                    br12a = false;
+                                    ballvy = -ballvy;
+                                    score += 8;
+                                    hit = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (ballvx > 9) {
+                ballvx = 9;
+            }
+            if (ballvx < -9) {
+                ballvx = -9;
+            }
+            if (!br1a && !br2a && !br3a && !br4a && !br5a && !br6a && !br7a && !br8a && !br9a && !br10a && !br11a && !br12a) {
+                state = st_win;
+            }
+            if (bally - ballr > sh) {
+                lives -= 1;
+                state = st_start;
+                ballx = paddlex + paddlew / 2;
+                bally = paddley - ballr - 3;
+                ballvx = 6;
+                ballvy = -6;
+                if (lives <= 0) {
+                    state = st_gameover;
+                }
+            }
+        } else
+            if (state == st_paused) {
+                if (framecount % 60 == 0) {
+                    gc();
+                }
+                if (iskeypressed(32)) {
+                    state = st_playing;
+                }
+            } else
+                if (state == st_win) {
+                    if (framecount % 60 == 0) {
+                        gc();
+                    }
+                    if (iskeypressed(32)) {
+                        br1a = true;
+                        br2a = true;
+                        br3a = true;
+                        br4a = true;
+                        br5a = true;
+                        br6a = true;
+                        br7a = true;
+                        br8a = true;
+                        br9a = true;
+                        br10a = true;
+                        br11a = true;
+                        br12a = true;
+                        lives += 1;
+                        paddlespeed += 0.5;
+                        state = st_start;
+                    }
+                } else
+                    if (state == st_gameover) {
+                        if (framecount % 60 == 0) {
+                            gc();
+                        }
+                        if (iskeypressed(82)) {
+                            score = 0;
+                            lives = 3;
+                            paddlespeed = 10;
+                            paddlex = 416;
+                            br1a = true;
+                            br2a = true;
+                            br3a = true;
+                            br4a = true;
+                            br5a = true;
+                            br6a = true;
+                            br7a = true;
+                            br8a = true;
+                            br9a = true;
+                            br10a = true;
+                            br11a = true;
+                            br12a = true;
+                            state = st_start;
+                        }
+                    }
+    if (state == st_playing && iskeypressed(80)) {
+        state = st_paused;
+    }
+    begindrawing();
+    clearbackground(black);
+    if (br1a) {
+        drawrectangle(br1x, br1y, brickw, brickh, cyan);
+    }
+    if (br2a) {
+        drawrectangle(br2x, br2y, brickw, brickh, cyan);
+    }
+    if (br3a) {
+        drawrectangle(br3x, br3y, brickw, brickh, cyan);
+    }
+    if (br4a) {
+        drawrectangle(br4x, br4y, brickw, brickh, cyan);
+    }
+    if (br5a) {
+        drawrectangle(br5x, br5y, brickw, brickh, green);
+    }
+    if (br6a) {
+        drawrectangle(br6x, br6y, brickw, brickh, green);
+    }
+    if (br7a) {
+        drawrectangle(br7x, br7y, brickw, brickh, green);
+    }
+    if (br8a) {
+        drawrectangle(br8x, br8y, brickw, brickh, green);
+    }
+    if (br9a) {
+        drawrectangle(br9x, br9y, brickw, brickh, blue);
+    }
+    if (br10a) {
+        drawrectangle(br10x, br10y, brickw, brickh, blue);
+    }
+    if (br11a) {
+        drawrectangle(br11x, br11y, brickw, brickh, purple);
+    }
+    if (br12a) {
+        drawrectangle(br12x, br12y, brickw, brickh, purple);
+    }
+    drawrectangle(paddlex, paddley, paddlew, paddleh, white);
+    drawcircle(ballx, bally, ballr, cyan);
+    if (state == st_start) {
+        drawtext(txt_launch, 285, 305, 34, white);
+    } else
+        if (state == st_paused) {
+            drawtext(txt_paused, 300, 305, 34, yellow);
+        } else
+            if (state == st_win) {
+                drawtext(txt_win1, 330, 280, 38, green);
+                drawtext(txt_win2, 245, 325, 30, cyan);
+            } else
+                if (state == st_gameover) {
+                    drawtext(txt_over1, 360, 275, 44, orange);
+                    drawtext(txt_over2, 300, 325, 34, white);
+                }
+    enddrawing();
+}
+
+closewindow();

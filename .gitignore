@@ -5,7 +5,7 @@
 *.exe
 /bin/
 /dist/
-/.FUJI_build/
+/.KODA_build/
 
 # Release artifacts
 raylib_win.zip

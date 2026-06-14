@@ -45,7 +45,7 @@ func TestLexerLoneOpeningBacktickUnterminatedTemplate(t *testing.T) {
 }
 
 func TestLexerTemplateTokensCarryFile(t *testing.T) {
-	const path = "/tmp/tpl.fuji"
+	const path = "/tmp/tpl.koda"
 	l := NewLexer("`a${x}b`", path)
 	toks, err := l.Tokenize()
 	if err != nil {
@@ -63,12 +63,12 @@ func TestLexerTemplateTokensCarryFile(t *testing.T) {
 
 func TestLexerSetFilePropagates(t *testing.T) {
 	l := NewLexer("let x = 1;", "")
-	l.SetFile("/tmp/example.fuji")
+	l.SetFile("/tmp/example.koda")
 	toks, err := l.Tokenize()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(toks) < 2 || toks[0].File != "/tmp/example.fuji" {
+	if len(toks) < 2 || toks[0].File != "/tmp/example.koda" {
 		t.Fatalf("expected File on tokens, got %#v", toks[0])
 	}
 }
@@ -110,7 +110,7 @@ func TestLexerCaseInsensitiveKeywords(t *testing.T) {
 }
 
 func TestLexerIncludeDirectiveCase(t *testing.T) {
-	l := NewLexer("#INCLUDE \"a.fuji\"\n", "")
+	l := NewLexer("#INCLUDE \"a.koda\"\n", "")
 	toks, err := l.Tokenize()
 	if err != nil {
 		t.Fatal(err)
@@ -154,7 +154,7 @@ func TestLexerStrictEquality(t *testing.T) {
 }
 
 func TestLexerOperatorsAndDirectives(t *testing.T) {
-	source := `#include "x.fuji"
+	source := `#include "x.koda"
 let x = a++ + --b;
 x += 1; x -= 2; x *= 3; x /= 4; x %= 5;
 x &= 1; x |= 2; x ^= 3; x <<= 1; x >>= 1;

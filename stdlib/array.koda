@@ -1,0 +1,80 @@
+let push = arraypush;
+
+let pop = arraypop;
+
+let shift = arrayshift;
+
+let unshift = arrayunshift;
+
+let concat = arrayconcat;
+
+let reverse = arrayreverse;
+
+let includes = arrayincludes;
+
+let indexof = arrayindexof;
+
+let sort = arraysort;
+
+let slice = arrayslice;
+
+let flatten = arrayflatten;
+
+let range = func(from, to) {
+    let arr = [];
+    let i = from;
+    while (i < to) {
+        arraypush(arr, i);
+        i = i + 1;
+    }
+    return arr;
+};
+
+let fill = func(n, val) {
+    let arr = [];
+    let i = 0;
+    while (i < n) {
+        arraypush(arr, val);
+        i = i + 1;
+    }
+    return arr;
+};
+
+let sum = func(arr) {
+    let total = 0;
+    let i = 0;
+    while (i < len(arr)) {
+        total = total + arr[i];
+        i = i + 1;
+    }
+    return total;
+};
+
+let zip = func(a, b) {
+    let out = [];
+    let n = min(len(a), len(b));
+    let i = 0;
+    while (i < n) {
+        arraypush(out, [a[i], b[i]]);
+        i = i + 1;
+    }
+    return out;
+};
+
+func shuffle(arr) {
+    let i = len(arr) - 1;
+    while (i > 0) {
+        let j = randomint(0, i + 1);
+        let tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+        i = i - 1;
+    }
+    return arr;
+};
+
+func sample(arr, count) {
+    let copy = slice(arr, 0, len(arr));
+    shuffle(copy);
+    return slice(copy, 0, count);
+};

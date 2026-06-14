@@ -1,92 +1,88 @@
-# Getting started with Fuji (beginner path)
+# Getting started with Koda
 
-This guide is only about **using Fuji**.
-
-**You do not install Go or LLVM** to use Fuji. Download the release **`fuji`** and **`fujiwrap`** (and unpack an SDK zip so **`stdlib/`** sits next to them). The release binaries embed what they need to compile `.fuji`; that is separate from the Go + LLVM setup **only maintainers** use to build Fuji from this repo.
-
-## 1) Install Fuji the easy way
-
-Download the latest `fuji` (and `fujiwrap`) from [GitHub Releases](https://github.com/CharmingBlaze/fuji/releases), use an SDK zip so **`stdlib/`** is beside the executables, then run:
-
-```bash
-fuji version
-```
-
-Do not compile Fuji from source for normal usage. The source tree is maintainer-focused and not the intended beginner install route.
+The fastest path from zero to running code. For a full onboarding, see the **[Beginner's guide](beginners-guide.md)** or **[Learn path](learn/README.md)**.
 
 ---
 
-## 2) Your first program
+## Install (2 minutes)
 
-Create `hello.fuji`:
-
-```fuji
-print("Hello, Fuji!");
-```
-
-Run it:
+1. Download **`koda`**, **`kodawrap`**, and an **SDK zip** from [GitHub Releases](https://github.com/CharmingBlaze/koda-compiler/releases).
+2. Unzip so **`stdlib/`** is next to the executables.
+3. Run:
 
 ```bash
-fuji run hello.fuji
+koda version
+koda doctor
+```
+
+You do **not** need Go or LLVM for release binaries.
+
+---
+
+## First run
+
+```bash
+koda new myapp
+cd myapp
+koda run
+```
+
+Or a single file:
+
+```koda
+print("Hello, Koda!");
+```
+
+```bash
+koda run hello.koda
 ```
 
 ---
 
-## 3) Commands you will use every day
+## Daily commands
 
 ```bash
-# Run (temporary executable)
-fuji run game.fuji
-
-# Build a native executable
-fuji build game.fuji -o game.exe
-
-# Debug-friendly build
-fuji build --debug game.fuji -o game_debug.exe
-
-# Check parse + semantic errors
-fuji check game.fuji
-
-# Format source
-fuji fmt game.fuji
-fuji fmt --check .
-
-# Rebuild/rerun when files change
-fuji watch game.fuji
-
-# Package for sharing
-fuji bundle game.fuji -o dist/MyGame
+koda run [--debug] [-- <args>]    # compile + run; pass args after --
+koda watch                        # rerun on save
+koda build -o app                 # native executable
+koda check ./...                  # check all sources
+koda lint                         # check + format check
+koda test -v -run io              # filtered tests
+koda bench game.koda --count 5    # timing
+koda eval 'print(2 + 2)'          # one-liner
+koda repl                         # interactive
+koda bundle -o dist/app
+koda clean --cache
+koda doctor
+koda env --export
+koda help build                   # per-command help
 ```
 
-For **every** command, flags, and copy-paste examples, see **[docs/commands.md](../commands.md)** (or run **`fuji help`**).
+Full CLI: [reference/cli.md](reference/cli.md) · [commands.md](../commands.md)
 
 ---
 
-## 4) Using the wrapper tool (`fujiwrap`)
-
-`fujiwrap` generates `.fuji` bindings + `wrapper.c` from C/C++ headers.
+## Templates
 
 ```bash
-fuji wrap --help
+koda new lander --template game      # text lunar lander
+koda new bounce --template graphics  # Raylib (needs link flags)
 ```
-
-Typical flow:
-
-1. Generate bindings from a header.
-2. Import generated `.fuji` module in your game.
-3. Build/run with native glue via `FUJI_NATIVE_SOURCES` and linker flags via `FUJI_LINKFLAGS`.
-
-Full details: `docs/wrappers.md`.
 
 ---
 
-## 5) Learn the whole language
+## Next steps
 
-- `docs/using-the-language.md` — **start here**: how to use the language end-to-end (syntax, types, control flow, modules, builtins, stdlib)
-- `language.md` — complete language catalog (operators, statements, builtins, methods)
-- `docs/user_guide.md` — practical beginner/intermediate walkthrough
-- `docs/reference.md` — builtins and runtime-facing APIs
-- `docs/guides/game-dev.md` — game-focused usage patterns
-- `docs/distribution.md` — shipping and bundles
+| Goal | Read |
+|------|------|
+| Full tutorial | [Beginner's guide](beginners-guide.md) |
+| Chapter by chapter | [Learn path](learn/README.md) |
+| Games | [Game development](game-dev.md) |
+| Desktop / CLI apps | [Applications](applications.md) |
+| From C | [From C](from-c.md) |
+| Every syntax form | [Language reference](../../language.md) |
+| Stuck? | [FAQ](../faq.md) · [Troubleshooting](../troubleshooting.md) |
 
-If docs and behavior ever differ, run a tiny `.fuji` example and trust the CLI result.
+---
+
+[Documentation hub](../README.md)

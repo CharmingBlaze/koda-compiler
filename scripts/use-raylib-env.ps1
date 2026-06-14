@@ -13,12 +13,12 @@ if (!(Test-Path $raylibInclude) -or !(Test-Path $raylibLib) -or !(Test-Path $shi
     throw "Raylib setup not found. Expected raylib files under '$raylibRoot' and shim at '$shim'."
 }
 
-$env:FUJI_CLANG = $clangShim
-$env:FUJI_LLC = $llcPath
-$env:FUJI_NATIVE_SOURCES = $shim
-$env:FUJI_LINKFLAGS = "-I$raylibInclude -L$raylibLib -lraylib -lopengl32 -lgdi32 -lwinmm"
+$env:KODA_CLANG = $clangShim
+$env:KODA_LLC = $llcPath
+$env:KODA_NATIVE_SOURCES = $shim
+$env:KODA_LINKFLAGS = "-I$raylibInclude -L$raylibLib -lraylib -lopengl32 -lgdi32 -lwinmm"
 
-Write-Output "FUJI_CLANG=$env:FUJI_CLANG"
-Write-Output "FUJI_LLC=$env:FUJI_LLC"
-Write-Output "FUJI_NATIVE_SOURCES=$env:FUJI_NATIVE_SOURCES"
-Write-Output "FUJI_LINKFLAGS=$env:FUJI_LINKFLAGS"
+Write-Output "KODA_CLANG=$env:KODA_CLANG"
+Write-Output "KODA_LLC=$env:KODA_LLC"
+Write-Output "KODA_NATIVE_SOURCES=$env:KODA_NATIVE_SOURCES"
+Write-Output "KODA_LINKFLAGS=$env:KODA_LINKFLAGS"

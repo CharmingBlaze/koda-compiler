@@ -1,8 +1,8 @@
 package codegen
 
 import (
-	"fuji/internal/parser"
-	"fuji/internal/sema"
+	"koda/internal/parser"
+	"koda/internal/sema"
 
 	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
@@ -19,7 +19,7 @@ func (g *Generator) emitShadowPop() {
 	g.block.NewCall(g.runtimePopFrame)
 	// Do not clear shadowPushed / shadowFramePtr / shadowFrameArrTy here. A function may have
 	// multiple return blocks; flipping shadowPushed off after the first emitShadowPop skipped
-	// fuji_pop_frame on subsequent returns (broken shadow stack → GC teardown crashes on Win32).
+	// koda_pop_frame on subsequent returns (broken shadow stack → GC teardown crashes on Win32).
 	// Per-function codegen state is restored when leaving emitFuncDecl / emitFuncExpr / user_main emit.
 }
 

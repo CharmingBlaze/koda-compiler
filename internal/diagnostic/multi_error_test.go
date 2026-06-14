@@ -6,8 +6,8 @@ import (
 )
 
 func TestErrorsAsFindsFirstDiagnosticInsideMultiError(t *testing.T) {
-	e1 := &DiagnosticError{File: "a.fuji", Line: 1, Col: 1, Message: "m1"}
-	e2 := &DiagnosticError{File: "a.fuji", Line: 2, Col: 1, Message: "m2"}
+	e1 := &DiagnosticError{File: "a.koda", Line: 1, Col: 1, Message: "m1"}
+	e2 := &DiagnosticError{File: "a.koda", Line: 2, Col: 1, Message: "m2"}
 	m := &MultiError{List: []error{e1, e2}}
 	var got *DiagnosticError
 	if !errors.As(m, &got) {
@@ -20,10 +20,10 @@ func TestErrorsAsFindsFirstDiagnosticInsideMultiError(t *testing.T) {
 
 func TestMultiErrorErrorString(t *testing.T) {
 	m := &MultiError{
-		Label: "game.fuji",
+		Label: "game.koda",
 		List: []error{
-			&DiagnosticError{File: "game.fuji", Line: 2, Col: 3, Message: "bad a"},
-			&DiagnosticError{File: "game.fuji", Line: 5, Col: 1, Message: "bad b"},
+			&DiagnosticError{File: "game.koda", Line: 2, Col: 3, Message: "bad a"},
+			&DiagnosticError{File: "game.koda", Line: 5, Col: 1, Message: "bad b"},
 		},
 	}
 	s := m.Error()

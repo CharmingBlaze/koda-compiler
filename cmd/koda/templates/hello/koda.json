@@ -1,0 +1,8 @@
+{
+  "name": "{{name}}",
+  "version": "0.1.0",
+  "entry": "src/main.koda",
+  "bundle": {
+    "assets": ["assets"]
+  }
+}

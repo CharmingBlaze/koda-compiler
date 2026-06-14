@@ -14,9 +14,9 @@
 int add_ints(int a, int b)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = add_ints(a, b);
 ```
 
@@ -33,9 +33,9 @@ let result = add_ints(a, b);
 int triple_int(int value)
 ```
 
-**Fuji usage**
+**Koda usage**
 
-```fuji
+```koda
 let result = triple_int(value);
 ```
 

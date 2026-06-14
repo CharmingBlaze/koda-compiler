@@ -8,7 +8,7 @@ import (
 
 func TestParseCacheUsesMtime(t *testing.T) {
 	dir := t.TempDir()
-	p := filepath.Join(dir, "one.fuji")
+	p := filepath.Join(dir, "one.koda")
 	if err := os.WriteFile(p, []byte("let a = 1;\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}

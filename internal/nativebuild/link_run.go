@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strings"
 
-	"fuji/internal/fujihome"
+	"koda/internal/kodahome"
 )
 
 func objFileName() string {
@@ -32,7 +32,7 @@ func runLLC(llcPath, irPath, objPath string, optFlag string, debug bool) error {
 	return cmd.Run()
 }
 
-func linkWithLLDGNU(tc *fujihome.Toolchain, objPath, outAbs string) error {
+func linkWithLLDGNU(tc *kodahome.Toolchain, objPath, outAbs string) error {
 	args := []string{
 		"-flavor", "gnu",
 		objPath,
@@ -46,7 +46,7 @@ func linkWithLLDGNU(tc *fujihome.Toolchain, objPath, outAbs string) error {
 	return cmd.Run()
 }
 
-func linkWithLLDDarwin(tc *fujihome.Toolchain, objPath, outAbs string) error {
+func linkWithLLDDarwin(tc *kodahome.Toolchain, objPath, outAbs string) error {
 	args := []string{
 		"-flavor", "darwin",
 		objPath,
@@ -61,8 +61,8 @@ func linkWithLLDDarwin(tc *fujihome.Toolchain, objPath, outAbs string) error {
 	return cmd.Run()
 }
 
-// runCompileAndLink compiles LLVM IR and links the Fuji runtime (and system libs) in one clang invocation.
-func runCompileAndLink(tc *fujihome.Toolchain, irFile, outAbs, rootDir string, opts BuildOptions, log func(string)) error {
+// runCompileAndLink compiles LLVM IR and links the Koda runtime (and system libs) in one clang invocation.
+func runCompileAndLink(tc *kodahome.Toolchain, irFile, outAbs, rootDir string, opts BuildOptions, log func(string)) error {
 	cc := tc.Clang
 	if strings.TrimSpace(cc) == "" {
 		cc = ClangDriver()
@@ -103,15 +103,15 @@ func runCompileAndLink(tc *fujihome.Toolchain, irFile, outAbs, rootDir string, o
 	} else if UseLLD() {
 		linkArgs = append(linkArgs, "-fuse-ld=lld")
 	}
-	if res, err := fujihome.BundledClangResourceFlags(); err == nil {
+	if res, err := kodahome.BundledClangResourceFlags(); err == nil {
 		linkArgs = append(linkArgs, res...)
 	}
 	linkArgs = append(linkArgs, inputFile, "-I", runtimeInclude)
 	// LLVM IR often carries a target triple; suppress noisy override warning from clang.
 	linkArgs = append(linkArgs, "-Wno-override-module")
-	nativeSrc := os.Getenv("FUJI_NATIVE_SOURCES")
+	nativeSrc := os.Getenv("KODA_NATIVE_SOURCES")
 	if strings.TrimSpace(nativeSrc) == "" {
-		nativeSrc = os.Getenv("FUJI_NATIVE_SOURCES")
+		nativeSrc = os.Getenv("KODA_NATIVE_SOURCES")
 	}
 	if nativeSources := strings.Fields(nativeSrc); len(nativeSources) > 0 {
 		if log != nil {
@@ -126,9 +126,9 @@ func runCompileAndLink(tc *fujihome.Toolchain, irFile, outAbs, rootDir string, o
 		}
 		linkArgs = append(linkArgs, "-I", inc, arch)
 	}
-	linkExtra := os.Getenv("FUJI_LINKFLAGS")
+	linkExtra := os.Getenv("KODA_LINKFLAGS")
 	if strings.TrimSpace(linkExtra) == "" {
-		linkExtra = os.Getenv("FUJI_LINKFLAGS")
+		linkExtra = os.Getenv("KODA_LINKFLAGS")
 	}
 	if extra := strings.Fields(linkExtra); len(extra) > 0 {
 		if log != nil {
@@ -157,18 +157,18 @@ func runCompileAndLink(tc *fujihome.Toolchain, irFile, outAbs, rootDir string, o
 		} else if UseLLD() {
 			args = append(args, "-fuse-ld=lld")
 		}
-		if res, err := fujihome.BundledClangResourceFlags(); err == nil {
+		if res, err := kodahome.BundledClangResourceFlags(); err == nil {
 			args = append(args, res...)
 		}
 		args = append(args, inputFile, "-I", runtimeInclude)
-		if nativeSources := strings.Fields(os.Getenv("FUJI_NATIVE_SOURCES")); len(nativeSources) > 0 {
+		if nativeSources := strings.Fields(os.Getenv("KODA_NATIVE_SOURCES")); len(nativeSources) > 0 {
 			args = append(args, nativeSources...)
 		}
 		args = append(args, tc.RuntimeLib)
 		if inc, arch, ok := vendoredRaylibStatic(rootDir); ok {
 			args = append(args, "-I", inc, arch)
 		}
-		if extra := strings.Fields(os.Getenv("FUJI_LINKFLAGS")); len(extra) > 0 {
+		if extra := strings.Fields(os.Getenv("KODA_LINKFLAGS")); len(extra) > 0 {
 			args = append(args, extra...)
 		}
 		args = append(args, defaultSystemLinkFlags()...)
@@ -219,7 +219,7 @@ func looksLikeWindowsClangOptimizerCrash(out string) bool {
 }
 
 func disableWindowsLLCFallback() bool {
-	v := strings.TrimSpace(strings.ToLower(os.Getenv("FUJI_DISABLE_WINDOWS_LLC_FALLBACK")))
+	v := strings.TrimSpace(strings.ToLower(os.Getenv("KODA_DISABLE_WINDOWS_LLC_FALLBACK")))
 	return v == "1" || v == "true" || v == "yes" || v == "on"
 }
 

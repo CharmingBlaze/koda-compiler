@@ -3,7 +3,7 @@ package sema
 import (
 	"testing"
 
-	"fuji/internal/parser"
+	"koda/internal/parser"
 )
 
 func TestArityBoundsFromParams(t *testing.T) {

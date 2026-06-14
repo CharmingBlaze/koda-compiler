@@ -1,13 +1,13 @@
 # raylib - Examples
 
-Copy any snippet into your Fuji program and adjust the arguments.
+Copy any snippet into your Koda program and adjust the arguments.
 
 ---
 
 ## Include the library
 
-```fuji
-#include "raylib.fuji"
+```koda
+#include "raylib.koda"
 ```
 
 ---
@@ -16,54 +16,54 @@ Copy any snippet into your Fuji program and adjust the arguments.
 
 ### void
 
-```fuji
+```koda
 let result = void();
 print(result);
 ```
 
 ### bool
 
-```fuji
+```koda
 let result = bool();
 print(result);
 ```
 
 ### bool
 
-```fuji
+```koda
 let result = bool();
 print(result);
 ```
 
 ### InitWindow
 
-```fuji
+```koda
 InitWindow(width, height, title);
 ```
 
 ### CloseWindow
 
-```fuji
+```koda
 CloseWindow();
 ```
 
 ### WindowShouldClose
 
-```fuji
+```koda
 let result = WindowShouldClose();
 print(result);
 ```
 
 ### IsWindowReady
 
-```fuji
+```koda
 let result = IsWindowReady();
 print(result);
 ```
 
 ### IsWindowFullscreen
 
-```fuji
+```koda
 let result = IsWindowFullscreen();
 print(result);
 ```
@@ -74,9 +74,9 @@ print(result);
 
 ## Structs
 
-Structs are passed as Fuji objects with matching field names:
+Structs are passed as Koda objects with matching field names:
 
-```fuji
+```koda
 let obj = { x: 0,  y: 0 };
 ```
 
@@ -84,7 +84,7 @@ let obj = { x: 0,  y: 0 };
 
 ## Enum values
 
-```fuji
+```koda
 let bool_false = 0;
 let bool_true = 1;
 ```

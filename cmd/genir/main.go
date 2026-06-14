@@ -6,14 +6,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"fuji/internal/codegen"
-	"fuji/internal/lexer"
-	"fuji/internal/parser"
+	"koda/internal/codegen"
+	"koda/internal/lexer"
+	"koda/internal/parser"
 )
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: genir <file.fuji> [output.ll]")
+		fmt.Println("Usage: genir <file.koda> [output.ll]")
 		os.Exit(1)
 	}
 

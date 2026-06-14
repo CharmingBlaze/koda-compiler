@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"fuji/internal/diagnostic"
-	"fuji/internal/parser"
+	"koda/internal/diagnostic"
+	"koda/internal/parser"
 )
 
 // argvMethodArityBounds returns inclusive [min,max] for known argv / array methods

@@ -76,7 +76,7 @@ func splitCamelCase(s string) []string {
 	return parts
 }
 
-func fujiDocTypeForCType(t string) string {
+func kodaDocTypeForCType(t string) string {
 	t = strings.TrimSpace(t)
 	t = strings.ReplaceAll(t, "const ", "")
 	switch {
@@ -99,16 +99,16 @@ func fujiDocTypeForCType(t string) string {
 	}
 }
 
-func paramDocLine(paramName, cType string) (fujiType, hint string) {
-	ft := fujiDocTypeForCType(cType)
+func paramDocLine(paramName, cType string) (kodaType, hint string) {
+	ft := kodaDocTypeForCType(cType)
 	hint = "argument value"
 	switch ft {
 	case "string":
-		hint = "null-terminated C string passed as Fuji string"
+		hint = "null-terminated C string passed as Koda string"
 	case "number":
 		hint = "numeric value"
 	case "bool":
-		hint = "truthy Fuji value"
+		hint = "truthy Koda value"
 	case "object":
 		hint = "boxed object (struct layout depends on the C API)"
 	}
@@ -122,6 +122,6 @@ func returnsClause(ret string) (hasReturns bool, line string) {
 	if ret == "" || ret == "void" {
 		return false, ""
 	}
-	ft := fujiDocTypeForCType(ret)
+	ft := kodaDocTypeForCType(ret)
 	return true, "/// @returns " + ft + " — result from the native call"
 }

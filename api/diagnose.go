@@ -6,9 +6,9 @@ import (
 	"regexp"
 	"strconv"
 
-	"fuji/internal/diagnostic"
-	"fuji/internal/parser"
-	"fuji/internal/sema"
+	"koda/internal/diagnostic"
+	"koda/internal/parser"
+	"koda/internal/sema"
 )
 
 var reLineCol = regexp.MustCompile(`\[line (\d+):(\d+)\]`)

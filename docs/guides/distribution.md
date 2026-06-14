@@ -10,11 +10,11 @@ This page summarizes the key commands.
 
 | Goal | Command |
 |------|---------|
-| Run during development | `fuji run game.fuji` |
-| Build native executable | `fuji build game.fuji -o game.exe` |
-| Create distributable folder | `fuji bundle game.fuji -o dist/game` |
-| Include extra files in bundle | Set `FUJI_BUNDLE_FILES` |
-| Use a C library wrapper | Set `FUJI_NATIVE_SOURCES` and `FUJI_LINKFLAGS` |
+| Run during development | `koda run game.koda` |
+| Build native executable | `koda build game.koda -o game.exe` |
+| Create distributable folder | `koda bundle game.koda -o dist/game` |
+| Include extra files in bundle | Set `KODA_BUNDLE_FILES` |
+| Use a C library wrapper | Set `KODA_NATIVE_SOURCES` and `KODA_LINKFLAGS` |
 
 ---
 
@@ -26,7 +26,7 @@ dist/mygame/
   run.bat             <- Windows launcher
   README.md           <- user-facing instructions
   bundle-info.txt     <- build metadata
-  (extra files)       <- DLLs, assets, licenses from FUJI_BUNDLE_FILES
+  (extra files)       <- DLLs, assets, licenses from KODA_BUNDLE_FILES
 ```
 
 ---
@@ -35,14 +35,14 @@ dist/mygame/
 
 | Variable | Purpose |
 |----------|---------|
-| `FUJI_CLANG` | Path to Clang executable |
+| `KODA_CLANG` | Path to Clang executable |
 | `CC` | Fallback compiler |
-| `FUJI_USE_LLD` | Set `1` to use LLD linker |
-| `FUJI_PATH` | Extra Fuji source search paths |
-| `FUJI_WRAPPERS` | Extra wrapper search paths |
-| `FUJI_NATIVE_SOURCES` | C/C++ wrapper glue files |
-| `FUJI_LINKFLAGS` | Flags passed to Clang linker |
-| `FUJI_BUNDLE_FILES` | Extra files copied into bundle |
+| `KODA_USE_LLD` | Set `1` to use LLD linker |
+| `KODA_PATH` | Extra Koda source search paths |
+| `KODA_WRAPPERS` | Extra wrapper search paths |
+| `KODA_NATIVE_SOURCES` | C/C++ wrapper glue files |
+| `KODA_LINKFLAGS` | Flags passed to Clang linker |
+| `KODA_BUNDLE_FILES` | Extra files copied into bundle |
 
 ---
 
@@ -50,7 +50,7 @@ dist/mygame/
 
 ```powershell
 $env:GOOS = "linux"; $env:GOARCH = "amd64"
-go build -o kuji-linux-amd64 ./cmd/kuji
+go build -o koda-linux-amd64 ./cmd/koda
 ```
 
 Supported targets: `windows/amd64`, `linux/amd64`, `linux/arm64`, `darwin/amd64`, `darwin/arm64`.

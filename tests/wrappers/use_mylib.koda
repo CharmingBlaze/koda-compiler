@@ -1,0 +1,12 @@
+// koda:extern add_ints koda_wrap_mylib_add_ints 2
+let add_ints = 0;
+
+// koda:extern triple_int koda_wrap_mylib_triple_int 1
+let triple_int = 0;
+
+let sum = add_ints(7, 5);
+
+let tripled = triple_int(9);
+
+print("sum", sum);
+print("tripled", tripled);

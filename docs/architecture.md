@@ -1,6 +1,6 @@
-# Fuji / Fuji compiler architecture
+# Koda / Koda compiler architecture
 
-This repository implements **one execution pipeline**: source is lowered to **LLVM IR**, then compiled and linked to a **native executable** with the C runtime (`runtime/src/`, `runtime/libfuji_runtime.a`).
+This repository implements **one execution pipeline**: source is lowered to **LLVM IR**, then compiled and linked to a **native executable** with the C runtime (`runtime/src/`, `runtime/libkoda_runtime.a`).
 
 For language syntax and semantics, see [language/syntax.md](language/syntax.md) and [LANGUAGE.md](LANGUAGE.md).
 
@@ -10,7 +10,7 @@ For language syntax and semantics, see [language/syntax.md](language/syntax.md) 
 
 ```mermaid
 flowchart LR
-  src[Source .fuji]
+  src[Source .koda]
   lex[Lexer]
   parse[Parser]
   ast[AST bundle]
@@ -26,9 +26,9 @@ flowchart LR
 2. **Lexer / parser** — tokens and AST (`internal/lexer`, `internal/parser`).
 3. **Semantic analysis** — `internal/sema` (native emit context, optimiser hooks).
 4. **Codegen** — `internal/codegen` produces an `*ir.Module` (llir/llvm), serialised to `.ll`.
-5. **Native build** — `internal/nativebuild` runs **llc** (optional) and **clang**, links `libfuji_runtime.a`.
+5. **Native build** — `internal/nativebuild` runs **llc** (optional) and **clang**, links `libkoda_runtime.a`.
 
-CLI commands **`fuji run`**, **`fuji build`**, and **`fuji bundle`** all use this pipeline. `fuji run` builds a temporary executable and runs it.
+CLI commands **`koda run`**, **`koda build`**, and **`koda bundle`** all use this pipeline. `koda run` builds a temporary executable and runs it.
 
 ---
 
@@ -41,8 +41,8 @@ CLI commands **`fuji run`**, **`fuji build`**, and **`fuji bundle`** all use thi
 | `internal/sema` | Analysis, `PrepareNativeBundle` |
 | `internal/codegen` | LLVM IR emission |
 | `internal/nativebuild` | llc, clang, link |
-| `internal/fujihome` | Toolchain and stdlib path resolution |
-| `runtime/src` | C runtime: NaN-boxed values, GC, objects, `fuji_*` entry points |
+| `internal/kodahome` | Toolchain and stdlib path resolution |
+| `runtime/src` | C runtime: NaN-boxed values, GC, objects, `koda_*` entry points |
 
 ---
 
@@ -56,11 +56,11 @@ To recover VM-era files from **your** git history (if they ever existed on a bra
 
 `git log --all --full-history -- internal/vm/`
 
-The **native LLVM pipeline** is the only supported path. To inspect IR lowering, use **`fuji disasm <file.fuji>`** (prints LLVM IR text after sema + codegen) or set **`FUJI_DEBUG_IR=1`** with **`fuji build`** to keep `.FUJI_build/main.ll`.
+The **native LLVM pipeline** is the only supported path. To inspect IR lowering, use **`koda disasm <file.koda>`** (prints LLVM IR text after sema + codegen) or set **`KODA_DEBUG_IR=1`** with **`koda build`** to keep `.KODA_build/main.ll`.
 
 ---
 
 ## Contributor notes
 
-- LLVM `declare` names in `internal/codegen/runtime.go` must stay aligned with **symbols implemented in** `runtime/src/fuji_runtime.c`.
-- Wrapper ABI for `// fuji:extern` uses `i64 (i32 arg_count, i64* args)` at the LLVM boundary.
+- LLVM `declare` names in `internal/codegen/runtime.go` must stay aligned with **symbols implemented in** `runtime/src/koda_runtime.c`.
+- Wrapper ABI for `// koda:extern` uses `i64 (i32 arg_count, i64* args)` at the LLVM boundary.

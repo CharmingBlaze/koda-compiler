@@ -1,5 +1,5 @@
-#ifndef FUJI_OBJECT_H
-#define FUJI_OBJECT_H
+#ifndef KODA_OBJECT_H
+#define KODA_OBJECT_H
 
 #include "value.h"
 #include <stddef.h>
@@ -99,4 +99,4 @@ ObjCell* allocate_cell(void);
 void free_object(Obj* obj);
 void print_object(Value v);
 
-#endif // FUJI_OBJECT_H
+#endif // KODA_OBJECT_H

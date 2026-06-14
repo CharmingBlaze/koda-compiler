@@ -1,0 +1,16 @@
+// Simple 1D value noise (deterministic with randomseed). import "@noise"
+
+let _noise_seed = 0.0;
+
+func seed(s) {
+    _noise_seed = s;
+    randomseed(s);
+}
+
+func value1d(x) {
+    let i = floor(x);
+    let f = x - i;
+    let a = random(i + _noise_seed);
+    let b = random(i + 1 + _noise_seed);
+    return lerp(a, b, f * f * (3.0 - 2.0 * f));
+}

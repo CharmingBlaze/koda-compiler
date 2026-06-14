@@ -14,17 +14,17 @@
 #include <time.h>
 #endif
 
-/* Stack base for conservative root scan; set in fuji_runtime_init before any allocation. */
+/* Stack base for conservative root scan; set in koda_runtime_init before any allocation. */
 extern void* gc_stack_base;
 
-extern Value* fuji_globals;
-extern int fuji_globals_count;
-extern Value** fuji_global_slots;
-extern int fuji_global_slots_count;
+extern Value* koda_globals;
+extern int koda_globals_count;
+extern Value** koda_global_slots;
+extern int koda_global_slots_count;
 
-void fuji_mark_module_cache(void);
-void fuji_mark_open_upvalues(void);
-void fuji_sweep_intern_table(void);
+void koda_mark_module_cache(void);
+void koda_mark_open_upvalues(void);
+void koda_sweep_intern_table(void);
 
 #define REMEMBERED_SET_MAX 4096
 #define NURSERY_SIZE (256u * 1024u)
@@ -143,7 +143,7 @@ static void grey_ensure_cap(size_t need) {
     }
     Obj** ng = (Obj**)realloc(gc_grey, ncap * sizeof(Obj*));
     if (ng == NULL) {
-        fprintf(stderr, "fuji: out of memory\n");
+        fprintf(stderr, "koda: out of memory\n");
         exit(1);
     }
     gc_grey = ng;
@@ -266,9 +266,9 @@ static void gc_mark_stack_conservative_grey(void) {
 }
 
 static void gc_mark_shadow_stack_grey(void) {
-    for (int i = 0; i < fuji_shadow_depth; i++) {
-        Value** ptrs = fuji_shadow_stack[i].slot_ptrs;
-        int n = fuji_shadow_stack[i].count;
+    for (int i = 0; i < koda_shadow_depth; i++) {
+        Value** ptrs = koda_shadow_stack[i].slot_ptrs;
+        int n = koda_shadow_stack[i].count;
         if (ptrs == NULL || n <= 0) {
             continue;
         }
@@ -287,20 +287,20 @@ static void gc_seed_roots_grey(void) {
     } else {
         gc_mark_stack_conservative_grey();
     }
-    if (fuji_globals_count > 0) {
-        for (int i = 0; i < fuji_globals_count; i++) {
-            grey_push_from_value(fuji_globals[i]);
+    if (koda_globals_count > 0) {
+        for (int i = 0; i < koda_globals_count; i++) {
+            grey_push_from_value(koda_globals[i]);
         }
     }
-    if (fuji_global_slots_count > 0) {
-        for (int i = 0; i < fuji_global_slots_count; i++) {
-            if (fuji_global_slots[i] != NULL) {
-                grey_push_from_value(*fuji_global_slots[i]);
+    if (koda_global_slots_count > 0) {
+        for (int i = 0; i < koda_global_slots_count; i++) {
+            if (koda_global_slots[i] != NULL) {
+                grey_push_from_value(*koda_global_slots[i]);
             }
         }
     }
-    fuji_mark_module_cache();
-    fuji_mark_open_upvalues();
+    koda_mark_module_cache();
+    koda_mark_open_upvalues();
 }
 
 static bool gc_incremental_mark_step(void) {
@@ -397,7 +397,7 @@ void* gc_alloc(size_t size) {
     if (gc_state.gc_disabled) {
         void* ptr = malloc(size);
         if (ptr == NULL) {
-            fprintf(stderr, "fuji: out of memory\n");
+            fprintf(stderr, "koda: out of memory\n");
             exit(1);
         }
         return ptr;
@@ -414,7 +414,7 @@ void* gc_alloc(size_t size) {
     }
     void* ptr = malloc(size);
     if (ptr == NULL) {
-        fprintf(stderr, "fuji: out of memory\n");
+        fprintf(stderr, "koda: out of memory\n");
         exit(1);
     }
     return ptr;
@@ -483,20 +483,20 @@ void gc_collect_minor(void) {
     } else {
         gc_mark_stack_conservative();
     }
-    if (fuji_globals_count > 0) {
-        for (int i = 0; i < fuji_globals_count; i++) {
-            gc_mark_value(fuji_globals[i]);
+    if (koda_globals_count > 0) {
+        for (int i = 0; i < koda_globals_count; i++) {
+            gc_mark_value(koda_globals[i]);
         }
     }
-    if (fuji_global_slots_count > 0) {
-        for (int i = 0; i < fuji_global_slots_count; i++) {
-            if (fuji_global_slots[i] != NULL) {
-                gc_mark_value(*fuji_global_slots[i]);
+    if (koda_global_slots_count > 0) {
+        for (int i = 0; i < koda_global_slots_count; i++) {
+            if (koda_global_slots[i] != NULL) {
+                gc_mark_value(*koda_global_slots[i]);
             }
         }
     }
-    fuji_mark_module_cache();
-    fuji_mark_open_upvalues();
+    koda_mark_module_cache();
+    koda_mark_open_upvalues();
 
     for (int i = 0; i < gc_state.remembered_count; i++) {
         if (gc_state.remembered[i] != NULL) {
@@ -506,7 +506,7 @@ void gc_collect_minor(void) {
 
     /* Drop intern-table slots for nursery strings that did not survive this mark phase
      * (while is_marked is still valid), before we repurpose flags in the nursery walk. */
-    fuji_sweep_intern_table();
+    koda_sweep_intern_table();
 
     for (Obj* obj = gc_state.objects; obj != NULL; obj = obj->next) {
         if (obj->generation == GEN_NURSERY) {
@@ -734,9 +734,9 @@ static void maybe_mark_stack_addr(uintptr_t addr) {
 }
 
 void gc_mark_shadow_stack(void) {
-    for (int i = 0; i < fuji_shadow_depth; i++) {
-        Value** ptrs = fuji_shadow_stack[i].slot_ptrs;
-        int n = fuji_shadow_stack[i].count;
+    for (int i = 0; i < koda_shadow_depth; i++) {
+        Value** ptrs = koda_shadow_stack[i].slot_ptrs;
+        int n = koda_shadow_stack[i].count;
         if (ptrs == NULL || n <= 0) {
             continue;
         }
@@ -759,20 +759,20 @@ void gc_mark_roots(void) {
     } else {
         gc_mark_stack_conservative();
     }
-    if (fuji_globals_count > 0) {
-        for (int i = 0; i < fuji_globals_count; i++) {
-            gc_mark_value(fuji_globals[i]);
+    if (koda_globals_count > 0) {
+        for (int i = 0; i < koda_globals_count; i++) {
+            gc_mark_value(koda_globals[i]);
         }
     }
-    if (fuji_global_slots_count > 0) {
-        for (int i = 0; i < fuji_global_slots_count; i++) {
-            if (fuji_global_slots[i] != NULL) {
-                gc_mark_value(*fuji_global_slots[i]);
+    if (koda_global_slots_count > 0) {
+        for (int i = 0; i < koda_global_slots_count; i++) {
+            if (koda_global_slots[i] != NULL) {
+                gc_mark_value(*koda_global_slots[i]);
             }
         }
     }
-    fuji_mark_module_cache();
-    fuji_mark_open_upvalues();
+    koda_mark_module_cache();
+    koda_mark_open_upvalues();
 }
 
 static void gc_unmark_all(void) {
@@ -833,7 +833,7 @@ void gc_collect_incremental(uint64_t budget_us) {
             if (gc_incremental_mark_step()) {
                 continue;
             }
-            fuji_sweep_intern_table();
+            koda_sweep_intern_table();
             gc_inc_phase = GC_INC_SWEEPING;
             gc_inc_sweep_prev = &gc_state.objects;
             continue;
@@ -889,7 +889,7 @@ void gc_collect(void) {
     if (gc_debug_enabled()) {
         gc_debug_validate_objects();
     }
-    fuji_sweep_intern_table();
+    koda_sweep_intern_table();
     gc_sweep();
 
     for (Obj* obj = gc_state.objects; obj != NULL; obj = obj->next) {
@@ -960,7 +960,7 @@ static bool gc_debug_enabled(void) {
     if (cached >= 0) {
         return cached != 0;
     }
-    const char* env = getenv("FUJI_GC_DEBUG");
+    const char* env = getenv("KODA_GC_DEBUG");
     if (env == NULL || env[0] == '\0' || env[0] == '0') {
         cached = 0;
     } else {
@@ -972,11 +972,11 @@ static bool gc_debug_enabled(void) {
 static void gc_debug_validate_objects(void) {
     for (Obj* obj = gc_state.objects; obj != NULL; obj = obj->next) {
         if (obj->type < OBJ_STRING || obj->type > OBJ_CELL) {
-            fprintf(stderr, "fuji gc debug: invalid object header type=%d\n", (int)obj->type);
+            fprintf(stderr, "koda gc debug: invalid object header type=%d\n", (int)obj->type);
             abort();
         }
         if (obj->generation > GEN_DEAD) {
-            fprintf(stderr, "fuji gc debug: invalid generation=%u\n", (unsigned)obj->generation);
+            fprintf(stderr, "koda gc debug: invalid generation=%u\n", (unsigned)obj->generation);
             abort();
         }
     }
