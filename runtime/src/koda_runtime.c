@@ -53,14 +53,33 @@ KodaShadowFrame* koda_shadow_stack = NULL;
 int koda_shadow_depth = 0;
 int koda_shadow_capacity = 0;
 static int koda_shadow_depth_high_water = 0;
+int koda_shadow_stack_max_capacity = KODA_SHADOW_STACK_MAX_CAPACITY;
+
+static void koda_shadow_stack_configure_from_env(void) {
+    const char* env = getenv("KODA_STACK_DEPTH");
+    if (env == NULL || env[0] == '\0') {
+        return;
+    }
+    char* end = NULL;
+    long depth = strtol(env, &end, 10);
+    if (end == env || depth < 256 || depth > 1048576) {
+        fprintf(stderr, "koda: ignoring invalid KODA_STACK_DEPTH=%s (use 256..1048576)\n", env);
+        return;
+    }
+    koda_shadow_stack_max_capacity = (int)depth;
+}
 
 typedef struct {
-    ObjString** entries;
-    int count;
-    int capacity;
-} KodaStringInternTable;
+    ObjString* str;
+} InternBucket;
 
-static KodaStringInternTable koda_string_intern = { NULL, 0, 0 };
+typedef struct {
+    InternBucket* buckets;
+    int capacity;
+    int count;
+} KodaInternTable;
+
+static KodaInternTable koda_string_intern = { NULL, 0, 0 };
 
 static int koda_gc_debug_enabled(void) {
     const char* env = getenv("KODA_GC_DEBUG");
@@ -91,12 +110,12 @@ static void koda_shadow_stack_init(void) {
 void koda_push_frame(Value** slot_ptrs, int count) {
     koda_shadow_stack_init();
     if (koda_shadow_depth >= koda_shadow_capacity) {
-        if (koda_shadow_capacity >= KODA_SHADOW_STACK_MAX_CAPACITY) {
+        if (koda_shadow_capacity >= koda_shadow_stack_max_capacity) {
             koda_panic_str("stack overflow — maximum recursion depth reached");
         }
         int next_capacity = koda_shadow_capacity * 2;
-        if (next_capacity > KODA_SHADOW_STACK_MAX_CAPACITY) {
-            next_capacity = KODA_SHADOW_STACK_MAX_CAPACITY;
+        if (next_capacity > koda_shadow_stack_max_capacity) {
+            next_capacity = koda_shadow_stack_max_capacity;
         }
         KodaShadowFrame* next = (KodaShadowFrame*)realloc(koda_shadow_stack, sizeof(KodaShadowFrame) * (size_t)next_capacity);
         if (next == NULL) {
@@ -140,14 +159,46 @@ typedef struct {
 static KodaCallFrame koda_call_stack[KODA_CALL_STACK_MAX];
 static int koda_call_stack_depth = 0;
 
+static uint32_t fnv1a_bytes(const uint8_t* data, int len);
+static uint32_t koda_string_hash(ObjString* s);
+static void koda_intern_add(ObjString* str);
+
+static int intern_probe_index(uint32_t hash, int capacity, int probe) {
+    return (int)((hash + (uint32_t)probe) & (uint32_t)(capacity - 1));
+}
+
+static void koda_intern_table_grow(void) {
+    int old_cap = koda_string_intern.capacity;
+    InternBucket* old_buckets = koda_string_intern.buckets;
+    int new_cap = old_cap == 0 ? 256 : old_cap * 2;
+    InternBucket* next = (InternBucket*)calloc((size_t)new_cap, sizeof(InternBucket));
+    if (next == NULL) {
+        koda_panic_str("out of memory growing string intern table");
+    }
+    koda_string_intern.buckets = next;
+    koda_string_intern.capacity = new_cap;
+    koda_string_intern.count = 0;
+    if (old_buckets != NULL) {
+        for (int i = 0; i < old_cap; i++) {
+            if (old_buckets[i].str != NULL) {
+                koda_intern_add(old_buckets[i].str);
+            }
+        }
+        free(old_buckets);
+    }
+}
+
 static ObjString* koda_intern_find(const char* chars, int length) {
-    if (chars == NULL || length < 0) {
+    if (chars == NULL || length < 0 || koda_string_intern.capacity == 0) {
         return NULL;
     }
-    for (int i = 0; i < koda_string_intern.count; i++) {
-        ObjString* s = koda_string_intern.entries[i];
+    uint32_t hash = fnv1a_bytes((const uint8_t*)chars, length);
+    int cap = koda_string_intern.capacity;
+    for (int probe = 0; probe < cap; probe++) {
+        int i = intern_probe_index(hash, cap, probe);
+        ObjString* s = koda_string_intern.buckets[i].str;
         if (s == NULL) {
-            continue;
+            return NULL;
         }
         if (s->length == length && memcmp(s->chars, chars, (size_t)length) == 0) {
             return s;
@@ -160,31 +211,62 @@ static void koda_intern_add(ObjString* str) {
     if (str == NULL) {
         return;
     }
-    if (koda_string_intern.count >= koda_string_intern.capacity) {
-        int next_capacity = koda_string_intern.capacity == 0 ? 256 : koda_string_intern.capacity * 2;
-        ObjString** next = (ObjString**)realloc(koda_string_intern.entries, sizeof(ObjString*) * (size_t)next_capacity);
-        if (next == NULL) {
-            koda_panic_str("out of memory growing string intern table");
-        }
-        koda_string_intern.entries = next;
-        koda_string_intern.capacity = next_capacity;
+    if (koda_string_intern.capacity == 0) {
+        koda_intern_table_grow();
     }
-    koda_string_intern.entries[koda_string_intern.count++] = str;
+    if (koda_string_intern.count * 4 >= koda_string_intern.capacity * 3) {
+        koda_intern_table_grow();
+    }
+    uint32_t hash = koda_string_hash(str);
+    int cap = koda_string_intern.capacity;
+    for (int probe = 0; probe < cap; probe++) {
+        int i = intern_probe_index(hash, cap, probe);
+        if (koda_string_intern.buckets[i].str == NULL) {
+            koda_string_intern.buckets[i].str = str;
+            koda_string_intern.count++;
+            return;
+        }
+        ObjString* existing = koda_string_intern.buckets[i].str;
+        if (existing->length == str->length &&
+            memcmp(existing->chars, str->chars, (size_t)str->length) == 0) {
+            return;
+        }
+    }
+    koda_intern_table_grow();
+    koda_intern_add(str);
 }
 
 void koda_sweep_intern_table(void) {
-    int w = 0;
-    for (int r = 0; r < koda_string_intern.count; r++) {
-        ObjString* s = koda_string_intern.entries[r];
+    if (koda_string_intern.capacity == 0) {
+        return;
+    }
+    int cap = koda_string_intern.capacity;
+    InternBucket* survivors = (InternBucket*)calloc((size_t)cap, sizeof(InternBucket));
+    if (survivors == NULL) {
+        koda_panic_str("out of memory sweeping string intern table");
+    }
+    int kept = 0;
+    for (int i = 0; i < cap; i++) {
+        ObjString* s = koda_string_intern.buckets[i].str;
         if (s == NULL) {
             continue;
         }
-        /* Keep only strings that the mark phase proved reachable from real roots. */
-        if (s->obj.is_marked) {
-            koda_string_intern.entries[w++] = s;
+        if (!s->obj.is_marked) {
+            continue;
+        }
+        uint32_t hash = koda_string_hash(s);
+        for (int probe = 0; probe < cap; probe++) {
+            int slot = intern_probe_index(hash, cap, probe);
+            if (survivors[slot].str == NULL) {
+                survivors[slot].str = s;
+                kept++;
+                break;
+            }
         }
     }
-    koda_string_intern.count = w;
+    free(koda_string_intern.buckets);
+    koda_string_intern.buckets = survivors;
+    koda_string_intern.count = kept;
 }
 
 void koda_push_call(const char* fn_name, const char* file_name, int line) {
@@ -302,6 +384,8 @@ const char* koda_value_type_name(Value v) {
 			return "function";
 		case OBJ_CELL:
 			return "cell";
+		case OBJ_ARENA:
+			return "arena";
 		default:
 			return "object";
 		}
@@ -557,6 +641,7 @@ void koda_runtime_init_ex(void* stack_base) {
         abort();
     }
     gc_stack_base = stack_base;
+    koda_shadow_stack_configure_from_env();
     gc_init();
     koda_globals_init();
     koda_shadow_stack_init();
@@ -651,9 +736,9 @@ void koda_runtime_shutdown(void) {
             koda_global_slots_capacity);
     }
     koda_globals_free();
-    if (koda_string_intern.entries != NULL) {
-        free(koda_string_intern.entries);
-        koda_string_intern.entries = NULL;
+    if (koda_string_intern.buckets != NULL) {
+        free(koda_string_intern.buckets);
+        koda_string_intern.buckets = NULL;
     }
     koda_string_intern.count = 0;
     koda_string_intern.capacity = 0;
@@ -725,6 +810,7 @@ Value koda_typeof(int arg_count, Value* args) {
             case OBJ_CLOSURE: type_str = "closure"; break;
             case OBJ_NATIVE: type_str = "native"; break;
             case OBJ_CELL: type_str = "cell"; break;
+            case OBJ_ARENA: type_str = "arena"; break;
         }
         int len = strlen(type_str);
         ObjString* str = allocate_string(len);
@@ -742,6 +828,70 @@ Value koda_allocate_object(int property_count) {
 
 Value koda_allocate_struct(int field_count) {
     ObjTable* table = allocate_struct_table(field_count);
+    return OBJ_VAL((Obj*)table);
+}
+
+static ObjArena* koda_arena_from_value(Value v, const char* op) {
+    if (!IS_OBJ(v)) {
+        koda_type_error(op, "arena", v);
+    }
+    Obj* obj = AS_OBJ(v);
+    if (obj->type != OBJ_ARENA) {
+        koda_type_error(op, "arena", v);
+    }
+    return (ObjArena*)obj;
+}
+
+Value koda_arena(int argc, Value* argv) {
+    if (argc < 1 || !IS_NUMBER(argv[0])) {
+        koda_panic_str("arena() requires a size in bytes");
+    }
+    double nbytes = AS_NUMBER(argv[0]);
+    if (nbytes <= 0.0 || nbytes > (double)SIZE_MAX) {
+        koda_panic_str("arena size out of range");
+    }
+    ObjArena* arena = allocate_arena((size_t)nbytes);
+    return OBJ_VAL((Obj*)arena);
+}
+
+Value koda_arena_reset(int argc, Value* argv) {
+    if (argc < 1) {
+        koda_panic_str("arenaReset() requires an arena");
+    }
+    ObjArena* arena = koda_arena_from_value(argv[0], "arenaReset");
+    arena_reset(arena);
+    return NIL_VAL;
+}
+
+Value koda_arena_alloc_array(int argc, Value* argv) {
+    if (argc < 2) {
+        koda_panic_str("arenaAllocArray() requires arena and capacity");
+    }
+    ObjArena* arena = koda_arena_from_value(argv[0], "arenaAllocArray");
+    if (!IS_NUMBER(argv[1])) {
+        koda_type_error("arenaAllocArray capacity", "number", argv[1]);
+    }
+    int capacity = (int)AS_NUMBER(argv[1]);
+    if (capacity < 0) {
+        koda_panic_str("arenaAllocArray capacity must be non-negative");
+    }
+    ObjArray* array = arena_allocate_array(arena, capacity);
+    return OBJ_VAL((Obj*)array);
+}
+
+Value koda_arena_alloc_struct(int argc, Value* argv) {
+    if (argc < 2) {
+        koda_panic_str("arenaAllocStruct() requires arena and field count");
+    }
+    ObjArena* arena = koda_arena_from_value(argv[0], "arenaAllocStruct");
+    if (!IS_NUMBER(argv[1])) {
+        koda_type_error("arenaAllocStruct field count", "number", argv[1]);
+    }
+    int field_count = (int)AS_NUMBER(argv[1]);
+    if (field_count < 1) {
+        field_count = 1;
+    }
+    ObjTable* table = arena_allocate_struct_table(arena, field_count);
     return OBJ_VAL((Obj*)table);
 }
 
@@ -834,7 +984,7 @@ static Value koda_object_get_linear(ObjTable* table, Value key) {
 }
 
 static bool table_key_is_tombstone(Value k) {
-    return IS_BOOL(k) && AS_BOOL(k);
+    return IS_TOMBSTONE(k);
 }
 
 static Value koda_object_get_hash(ObjTable* table, Value key) {
@@ -904,8 +1054,8 @@ static bool table_remove_pair(ObjTable* table, Value key) {
                 continue;
             }
             if (values_equal(k, key)) {
-                gc_write_barrier(&table->obj, TRUE_VAL);
-                table->keys[i] = TRUE_VAL;
+                gc_write_barrier(&table->obj, TOMBSTONE_VAL);
+                table->keys[i] = TOMBSTONE_VAL;
                 gc_write_barrier(&table->obj, NIL_VAL);
                 table->values[i] = NIL_VAL;
                 table->hashes[i] = 0u;
@@ -1000,7 +1150,8 @@ static void table_rehash_open(Obj* parent, ObjTable* table) {
     table->count = 0;
     table->keys = (Value*)gc_alloc(sizeof(Value) * (size_t)new_cap);
     table->values = (Value*)gc_alloc(sizeof(Value) * (size_t)new_cap);
-    table->hashes = (uint32_t*)calloc((size_t)new_cap, sizeof(uint32_t));
+    table->hashes = (uint32_t*)gc_alloc(sizeof(uint32_t) * (size_t)new_cap);
+    memset(table->hashes, 0, sizeof(uint32_t) * (size_t)new_cap);
     for (int i = 0; i < new_cap; i++) {
         table->keys[i] = NIL_VAL;
         table->values[i] = NIL_VAL;
@@ -1233,9 +1384,12 @@ void koda_array_push(Value arr, Value value) {
         Value* next = (Value*)gc_alloc(sizeof(Value) * (size_t)new_cap);
         if (array->elements != NULL && old_cap > 0) {
             memcpy(next, array->elements, sizeof(Value) * (size_t)old_cap);
-            gc_free(array->elements, sizeof(Value) * (size_t)old_cap);
+            if (!array->inline_elements) {
+                gc_free(array->elements, sizeof(Value) * (size_t)old_cap);
+            }
         }
         array->elements = next;
+        array->inline_elements = false;
         array->capacity = new_cap;
     }
     gc_write_barrier(obj, value);
@@ -1339,6 +1493,7 @@ Value koda_type(Value value) {
             case OBJ_CLOSURE: type_str = "closure"; break;
             case OBJ_NATIVE: type_str = "native"; break;
             case OBJ_CELL: type_str = "cell"; break;
+            case OBJ_ARENA: type_str = "arena"; break;
         }
         int len = strlen(type_str);
         ObjString* str = allocate_string(len);
@@ -1451,6 +1606,12 @@ Value koda_string(Value value) {
 }
 
 Value koda_string_concat(Value a, Value b) {
+    /* Intermediate strings live in C stack slots; conservative stack scan keeps them
+     * rooted across chained allocations. Precise shadow-stack mode does not scan C
+     * locals — runtime helpers that chain allocations must not run with shadow stack on. */
+    if (gc_uses_shadow_stack()) {
+        koda_panic_str("internal error: koda_string_concat called with precise GC active");
+    }
     Value sa = koda_string(a);
     Value sb = koda_string(b);
     if (!IS_OBJ(sa) || AS_OBJ(sa)->type != OBJ_STRING) return sb;
@@ -1473,7 +1634,7 @@ Value koda_delta_time(int arg_count, Value* args) {
     double dt = now - koda_frame_clock_last;
     koda_frame_clock_last = now;
     if (dt <= 0.0 || dt > 0.25) {
-        dt = 1.0 / 60.0;
+        dt = 0.25;
     }
     return NUMBER_VAL(dt);
 }

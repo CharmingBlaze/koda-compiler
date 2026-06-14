@@ -27,12 +27,26 @@ ObjString* allocate_string(int length) {
 
 ObjArray* allocate_array(int capacity) {
     validate_value_slot_count(capacity, "array");
+    if (capacity <= KODA_ARRAY_INLINE_MAX_CAP) {
+        size_t total = sizeof(ObjArray) + sizeof(Value) * (size_t)capacity;
+        ObjArray* array = (ObjArray*)gc_alloc(total);
+        array->obj.type = OBJ_ARRAY;
+        array->obj.is_marked = false;
+        array->obj.next = NULL;
+        array->capacity = capacity;
+        array->count = 0;
+        array->inline_elements = true;
+        array->elements = (Value*)(array + 1);
+        gc_register_object(&array->obj);
+        return array;
+    }
     ObjArray* array = (ObjArray*)gc_alloc(sizeof(ObjArray));
     array->obj.type = OBJ_ARRAY;
     array->obj.is_marked = false;
     array->obj.next = NULL;
     array->capacity = capacity;
     array->count = 0;
+    array->inline_elements = false;
     array->elements = NULL;
     gc_register_object(&array->obj);
     array->elements = (Value*)gc_alloc(sizeof(Value) * (size_t)capacity);
@@ -59,7 +73,8 @@ ObjTable* allocate_table(int capacity) {
         table->values[i] = NIL_VAL;
     }
     if (capacity >= 8) {
-        table->hashes = (uint32_t*)calloc((size_t)capacity, sizeof(uint32_t));
+        table->hashes = (uint32_t*)gc_alloc(sizeof(uint32_t) * (size_t)capacity);
+        memset(table->hashes, 0, sizeof(uint32_t) * (size_t)capacity);
     }
     return table;
 }
@@ -138,7 +153,132 @@ ObjCell* allocate_cell(void) {
     return cell;
 }
 
+static void arena_track_allocation(ObjArena* arena, Obj* obj) {
+    if (arena->alloc_count >= arena->alloc_capacity) {
+        int next_cap = arena->alloc_capacity == 0 ? 64 : arena->alloc_capacity * 2;
+        Obj** next = (Obj**)realloc(arena->allocations, sizeof(Obj*) * (size_t)next_cap);
+        if (next == NULL) {
+            fprintf(stderr, "koda: out of memory tracking arena allocations\n");
+            exit(1);
+        }
+        arena->allocations = next;
+        arena->alloc_capacity = next_cap;
+    }
+    arena->allocations[arena->alloc_count++] = obj;
+}
+
+static void* arena_bump(ObjArena* arena, size_t nbytes) {
+    size_t top = (arena->top + 7u) & ~7u;
+    if (top + nbytes > arena->capacity) {
+        fprintf(stderr, "koda: arena out of memory\n");
+        exit(1);
+    }
+    void* ptr = arena->buffer + top;
+    arena->top = top + nbytes;
+    return ptr;
+}
+
+ObjArena* allocate_arena(size_t capacity) {
+    if (capacity == 0) {
+        capacity = 1;
+    }
+    ObjArena* arena = (ObjArena*)gc_alloc(sizeof(ObjArena));
+    arena->obj.type = OBJ_ARENA;
+    arena->obj.is_marked = false;
+    arena->obj.next = NULL;
+    arena->buffer = (uint8_t*)malloc(capacity);
+    if (arena->buffer == NULL) {
+        fprintf(stderr, "koda: out of memory allocating arena buffer\n");
+        exit(1);
+    }
+    arena->capacity = capacity;
+    arena->top = 0;
+    arena->allocations = NULL;
+    arena->alloc_count = 0;
+    arena->alloc_capacity = 0;
+    gc_register_object(&arena->obj);
+    return arena;
+}
+
+void arena_reset(ObjArena* arena) {
+    if (arena == NULL) {
+        return;
+    }
+    for (int i = 0; i < arena->alloc_count; i++) {
+        Obj* child = arena->allocations[i];
+        if (child != NULL) {
+            gc_unlink_object(child);
+            child->in_arena = false;
+        }
+    }
+    arena->alloc_count = 0;
+    arena->top = 0;
+}
+
+ObjArray* arena_allocate_array(ObjArena* arena, int capacity) {
+    validate_value_slot_count(capacity, "arena array");
+    if (capacity <= KODA_ARRAY_INLINE_MAX_CAP) {
+        size_t total = sizeof(ObjArray) + sizeof(Value) * (size_t)capacity;
+        ObjArray* array = (ObjArray*)arena_bump(arena, total);
+        array->obj.type = OBJ_ARRAY;
+        array->obj.is_marked = false;
+        array->obj.next = NULL;
+        array->capacity = capacity;
+        array->count = 0;
+        array->inline_elements = true;
+        array->elements = (Value*)(array + 1);
+        gc_register_object(&array->obj);
+        array->obj.in_arena = true;
+        arena_track_allocation(arena, &array->obj);
+        return array;
+    }
+    size_t header = sizeof(ObjArray);
+    ObjArray* array = (ObjArray*)arena_bump(arena, header);
+    array->obj.type = OBJ_ARRAY;
+    array->obj.is_marked = false;
+    array->obj.next = NULL;
+    array->capacity = capacity;
+    array->count = 0;
+    array->inline_elements = false;
+    array->elements = NULL;
+    gc_register_object(&array->obj);
+    array->obj.in_arena = true;
+    arena_track_allocation(arena, &array->obj);
+    array->elements = (Value*)arena_bump(arena, sizeof(Value) * (size_t)capacity);
+    return array;
+}
+
+ObjTable* arena_allocate_struct_table(ObjArena* arena, int field_count) {
+    if (field_count < 1) {
+        field_count = 1;
+    }
+    validate_value_slot_count(field_count, "arena struct fields");
+    size_t header = sizeof(ObjTable);
+    size_t slots = sizeof(Value) * (size_t)field_count;
+    ObjTable* table = (ObjTable*)arena_bump(arena, header);
+    table->obj.type = OBJ_TABLE;
+    table->obj.is_marked = false;
+    table->obj.next = NULL;
+    table->capacity = field_count;
+    table->count = field_count;
+    table->is_struct_layout = true;
+    table->hashes = NULL;
+    gc_register_object(&table->obj);
+    table->obj.in_arena = true;
+    arena_track_allocation(arena, &table->obj);
+    table->keys = (Value*)arena_bump(arena, slots);
+    table->values = (Value*)arena_bump(arena, slots);
+    for (int i = 0; i < field_count; i++) {
+        table->keys[i] = NIL_VAL;
+        table->values[i] = NIL_VAL;
+    }
+    return table;
+}
+
 void free_object(Obj* obj) {
+    if (obj->in_arena) {
+        return;
+    }
     switch (obj->type) {
         case OBJ_STRING: {
             ObjString* string = (ObjString*)obj;
@@ -148,10 +288,15 @@ void free_object(Obj* obj) {
         }
         case OBJ_ARRAY: {
             ObjArray* array = (ObjArray*)obj;
-            if (array->elements != NULL) {
-                gc_free(array->elements, (size_t)array->capacity * sizeof(Value));
+            if (array->inline_elements) {
+                size_t total = sizeof(ObjArray) + (size_t)array->capacity * sizeof(Value);
+                gc_free(array, total);
+            } else {
+                if (array->elements != NULL) {
+                    gc_free(array->elements, (size_t)array->capacity * sizeof(Value));
+                }
+                gc_free(array, sizeof(ObjArray));
             }
-            gc_free(array, sizeof(ObjArray));
             break;
         }
         case OBJ_TABLE: {
@@ -163,9 +308,7 @@ void free_object(Obj* obj) {
                 gc_free(table->values, (size_t)table->capacity * sizeof(Value));
             }
             if (table->hashes != NULL) {
-                // hashes is allocated with calloc (not gc_alloc), so release it with raw free
-                // to avoid corrupting GC bytes_allocated accounting.
-                free(table->hashes);
+                gc_free(table->hashes, (size_t)table->capacity * sizeof(uint32_t));
             }
             gc_free(table, sizeof(ObjTable));
             break;
@@ -191,6 +334,22 @@ void free_object(Obj* obj) {
         case OBJ_CELL: {
             ObjCell* cell = (ObjCell*)obj;
             gc_free(cell, sizeof(ObjCell));
+            break;
+        }
+        case OBJ_ARENA: {
+            ObjArena* arena = (ObjArena*)obj;
+            for (int i = 0; i < arena->alloc_count; i++) {
+                if (arena->allocations[i] != NULL) {
+                    gc_unlink_object(arena->allocations[i]);
+                }
+            }
+            if (arena->allocations != NULL) {
+                free(arena->allocations);
+            }
+            if (arena->buffer != NULL) {
+                free(arena->buffer);
+            }
+            gc_free(arena, sizeof(ObjArena));
             break;
         }
     }
@@ -233,6 +392,9 @@ void print_object(Value v) {
             break;
         case OBJ_CELL:
             printf("[cell]");
+            break;
+        case OBJ_ARENA:
+            printf("[arena]");
             break;
     }
 }

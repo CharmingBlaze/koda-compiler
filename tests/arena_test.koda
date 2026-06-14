@@ -1,0 +1,8 @@
+func main() {
+    let frameArena = arena(4096);
+    let arr = arenaAllocArray(frameArena, 8);
+    arr[0] = 42;
+    assert(arr[0] == 42, "arena array write");
+    arenaReset(frameArena);
+    print("PASS arena_test");
+}

@@ -96,10 +96,14 @@ See [json stdlib](../stdlib/json.md).
 
 | Name | Purpose |
 |------|---------|
-| `gc()` / `gccollect()` | Full collection |
-| `gcdisable()` / `gcenable()` | Toggle GC |
-| `gcframestep()` | Incremental step (per frame in games) |
-| `gcstats()` | Collector stats |
+| `gc()` / `gcCollect()` | Full collection |
+| `gcDisable()` / `gcEnable()` | Toggle GC |
+| `gcFrameStep(ms)` | Incremental step (per frame in games; budget in ms) |
+| `gcStats()` | Collector stats |
+| `arena(bytes)` | Create bump allocator |
+| `arenaReset(arena)` | Reset arena for next frame |
+| `arenaAllocArray(arena, cap)` | Array inside arena |
+| `arenaAllocStruct(arena, fields)` | Struct inside arena |
 
 ---
 

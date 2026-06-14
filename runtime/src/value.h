@@ -20,10 +20,11 @@
 typedef uint64_t Value;
 
 // Value tags (stored in NaN-boxed values)
-#define TAG_NIL    0x01
-#define TAG_FALSE  0x02
-#define TAG_TRUE   0x03
-#define TAG_OBJ    0x04
+#define TAG_NIL        0x01
+#define TAG_FALSE      0x02
+#define TAG_TRUE       0x03
+#define TAG_OBJ        0x04
+#define TAG_TOMBSTONE  0x05
 
 // NaN-boxed constants
 #define QNAN      ((uint64_t)0x7ffc000000000000)
@@ -32,14 +33,16 @@ typedef uint64_t Value;
 // Tagged value constructors
 #define NIL_VAL     (QNAN | TAG_NIL)
 #define FALSE_VAL   (QNAN | TAG_FALSE)
-#define TRUE_VAL    (QNAN | TAG_TRUE)
+#define TRUE_VAL       (QNAN | TAG_TRUE)
+#define TOMBSTONE_VAL  (QNAN | TAG_TOMBSTONE)
 
 // Type predicates
 static inline bool IS_NIL(Value v)    { return v == NIL_VAL; }
 static inline bool IS_FALSE(Value v)  { return v == FALSE_VAL; }
 static inline bool IS_TRUE(Value v)   { return v == TRUE_VAL; }
-static inline bool IS_BOOL(Value v)   { return IS_FALSE(v) || IS_TRUE(v); }
-static inline bool IS_OBJ(Value v)    { return (v & QNAN) == QNAN && (v & 0x7) == TAG_OBJ; }
+static inline bool IS_BOOL(Value v)       { return IS_FALSE(v) || IS_TRUE(v); }
+static inline bool IS_TOMBSTONE(Value v)  { return v == TOMBSTONE_VAL; }
+static inline bool IS_OBJ(Value v)        { return (v & QNAN) == QNAN && (v & 0x7) == TAG_OBJ; }
 
 // Boolean conversion
 static inline bool AS_BOOL(Value v)   { return IS_TRUE(v); }

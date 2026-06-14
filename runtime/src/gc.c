@@ -124,6 +124,8 @@ bool gc_incremental_is_idle(void) {
 
 static bool gc_is_heap_object_exact(Obj* candidate);
 static Obj* gc_find_containing_obj(void* p);
+static void gc_build_heap_lookup_cache(void);
+static void gc_heap_cache_invalidate(void);
 static void gc_unmark_all(void);
 
 static void gc_incremental_abort(void) {
@@ -251,6 +253,7 @@ static void gc_mark_stack_conservative_grey(void) {
     if (gc_stack_base == NULL) {
         return;
     }
+    gc_heap_cache_invalidate();
     void* stack_top;
     GC_GET_SP(stack_top);
     uintptr_t a = (uintptr_t)stack_top;
@@ -352,8 +355,25 @@ void gc_register_object(Obj* obj) {
     } else {
         obj->generation = GEN_OLD;
     }
+    obj->in_remembered_set = false;
+    obj->in_arena = false;
     obj->next = gc_state.objects;
     gc_state.objects = obj;
+}
+
+void gc_unlink_object(Obj* victim) {
+    if (victim == NULL) {
+        return;
+    }
+    Obj** previous = &gc_state.objects;
+    while (*previous != NULL) {
+        if (*previous == victim) {
+            *previous = victim->next;
+            victim->next = NULL;
+            return;
+        }
+        previous = &(*previous)->next;
+    }
 }
 
 void gc_free(void* ptr, size_t size) {
@@ -420,22 +440,28 @@ void* gc_alloc(size_t size) {
     return ptr;
 }
 
-static void remembered_set_add(Obj* obj) {
-    if (obj == NULL) {
-        return;
-    }
+static void remembered_set_clear(void) {
     for (int i = 0; i < gc_state.remembered_count; i++) {
-        if (gc_state.remembered[i] == obj) {
-            return;
+        if (gc_state.remembered[i] != NULL) {
+            gc_state.remembered[i]->in_remembered_set = false;
         }
     }
+    gc_state.remembered_count = 0;
+}
+
+static void remembered_set_add(Obj* obj) {
+    if (obj == NULL || obj->in_remembered_set) {
+        return;
+    }
     if (gc_state.remembered_count < REMEMBERED_SET_MAX) {
+        obj->in_remembered_set = true;
         gc_state.remembered[gc_state.remembered_count++] = obj;
         return;
     }
     gc_state.remembered_overflow_count++;
     gc_collect();
-    gc_state.remembered_count = 0;
+    remembered_set_clear();
+    obj->in_remembered_set = true;
     gc_state.remembered[gc_state.remembered_count++] = obj;
 }
 
@@ -520,7 +546,7 @@ void gc_collect_minor(void) {
     }
 
     gc_unlink_gen_dead();
-    gc_state.remembered_count = 0;
+    remembered_set_clear();
 
     if (!nursery_has_live_object()) {
         gc_reset_nursery();
@@ -572,6 +598,8 @@ static size_t gc_obj_total_bytes(Obj* obj) {
             return sizeof(ObjNative);
         case OBJ_CELL:
             return sizeof(ObjCell);
+        case OBJ_ARENA:
+            return sizeof(ObjArena);
         default:
             return sizeof(Obj);
     }
@@ -656,15 +684,122 @@ void gc_write_barrier(Obj* parent, Value new_val) {
     }
 }
 
-static bool gc_is_heap_object_exact(Obj* candidate) {
-    if (candidate == NULL) {
-        return false;
+static int gc_ptr_cache_probe(Obj* key, int cap) {
+    uintptr_t h = (uintptr_t)key;
+    h ^= h >> 33;
+    h *= 0xff51afd7ed558ccdULL;
+    h ^= h >> 33;
+    return (int)(h & (uint32_t)(cap - 1));
+}
+
+typedef struct {
+    uintptr_t base;
+    uintptr_t end;
+    Obj* obj;
+} GcObjRange;
+
+static Obj** gc_ptr_cache = NULL;
+static int gc_ptr_cache_cap = 0;
+static GcObjRange* gc_range_cache = NULL;
+static int gc_range_cache_len = 0;
+static int gc_range_cache_cap = 0;
+static bool gc_heap_cache_built = false;
+
+static void gc_heap_cache_invalidate(void) {
+    gc_heap_cache_built = false;
+}
+
+static int gc_range_cmp(const void* a, const void* b) {
+    uintptr_t ba = ((const GcObjRange*)a)->base;
+    uintptr_t bb = ((const GcObjRange*)b)->base;
+    if (ba < bb) {
+        return -1;
     }
+    if (ba > bb) {
+        return 1;
+    }
+    return 0;
+}
+
+static void gc_build_heap_lookup_cache(void) {
+    if (gc_heap_cache_built) {
+        return;
+    }
+    int live = 0;
+    for (Obj* obj = gc_state.objects; obj != NULL; obj = obj->next) {
+        if (obj->generation != GEN_DEAD) {
+            live++;
+        }
+    }
+    int cap = 256;
+    while (cap < live * 2) {
+        cap *= 2;
+    }
+    if (gc_ptr_cache_cap < cap) {
+        Obj** next = (Obj**)realloc(gc_ptr_cache, sizeof(Obj*) * (size_t)cap);
+        if (next == NULL) {
+            fprintf(stderr, "koda: out of memory building GC pointer cache\n");
+            exit(1);
+        }
+        gc_ptr_cache = next;
+        gc_ptr_cache_cap = cap;
+    }
+    memset(gc_ptr_cache, 0, sizeof(Obj*) * (size_t)gc_ptr_cache_cap);
+
+    if (gc_range_cache_cap < live) {
+        int next_cap = gc_range_cache_cap == 0 ? 256 : gc_range_cache_cap;
+        while (next_cap < live) {
+            next_cap *= 2;
+        }
+        GcObjRange* next = (GcObjRange*)realloc(gc_range_cache, sizeof(GcObjRange) * (size_t)next_cap);
+        if (next == NULL) {
+            fprintf(stderr, "koda: out of memory building GC range cache\n");
+            exit(1);
+        }
+        gc_range_cache = next;
+        gc_range_cache_cap = next_cap;
+    }
+
+    int range_n = 0;
     for (Obj* obj = gc_state.objects; obj != NULL; obj = obj->next) {
         if (obj->generation == GEN_DEAD) {
             continue;
         }
-        if (obj == candidate) {
+        int slot = gc_ptr_cache_probe(obj, gc_ptr_cache_cap);
+        for (int p = 0; p < gc_ptr_cache_cap; p++) {
+            int i = (slot + p) % gc_ptr_cache_cap;
+            if (gc_ptr_cache[i] == NULL) {
+                gc_ptr_cache[i] = obj;
+                break;
+            }
+        }
+        if (range_n < gc_range_cache_cap) {
+            gc_range_cache[range_n].base = (uintptr_t)obj;
+            gc_range_cache[range_n].end = (uintptr_t)obj + gc_obj_total_bytes(obj);
+            gc_range_cache[range_n].obj = obj;
+            range_n++;
+        }
+    }
+    gc_range_cache_len = range_n;
+    if (range_n > 1) {
+        qsort(gc_range_cache, (size_t)range_n, sizeof(GcObjRange), gc_range_cmp);
+    }
+    gc_heap_cache_built = true;
+}
+
+static bool gc_is_heap_object_exact(Obj* candidate) {
+    if (candidate == NULL) {
+        return false;
+    }
+    gc_build_heap_lookup_cache();
+    int start = gc_ptr_cache_probe(candidate, gc_ptr_cache_cap);
+    for (int p = 0; p < gc_ptr_cache_cap; p++) {
+        int i = (start + p) % gc_ptr_cache_cap;
+        Obj* slot = gc_ptr_cache[i];
+        if (slot == NULL) {
+            return false;
+        }
+        if (slot == candidate) {
             return true;
         }
     }
@@ -676,15 +811,18 @@ static Obj* gc_find_containing_obj(void* p) {
         return NULL;
     }
     uintptr_t c = (uintptr_t)p;
-    for (Obj* obj = gc_state.objects; obj != NULL; obj = obj->next) {
-        if (obj->generation == GEN_DEAD) {
-            continue;
-        }
-        uintptr_t base = (uintptr_t)obj;
-        size_t sz = gc_obj_total_bytes(obj);
-        uintptr_t end = base + sz;
-        if (c >= base && c < end) {
-            return obj;
+    gc_build_heap_lookup_cache();
+    int lo = 0;
+    int hi = gc_range_cache_len - 1;
+    while (lo <= hi) {
+        int mid = lo + (hi - lo) / 2;
+        GcObjRange* r = &gc_range_cache[mid];
+        if (c < r->base) {
+            hi = mid - 1;
+        } else if (c >= r->end) {
+            lo = mid + 1;
+        } else {
+            return r->obj;
         }
     }
     return NULL;
@@ -694,6 +832,7 @@ void gc_mark_stack_conservative(void) {
     if (gc_stack_base == NULL) {
         return;
     }
+    gc_heap_cache_invalidate();
     void* stack_top;
     GC_GET_SP(stack_top);
     uintptr_t a = (uintptr_t)stack_top;
@@ -751,6 +890,10 @@ void gc_mark_shadow_stack(void) {
 
 void gc_set_use_shadow_stack(bool enabled) {
     gc_state.use_shadow_stack = enabled;
+}
+
+bool gc_uses_shadow_stack(void) {
+    return gc_state.use_shadow_stack;
 }
 
 void gc_mark_roots(void) {
@@ -842,7 +985,7 @@ void gc_collect_incremental(uint64_t budget_us) {
             if (gc_incremental_sweep_step()) {
                 continue;
             }
-            gc_state.remembered_count = 0;
+            remembered_set_clear();
             gc_state.next_gc = gc_state.bytes_allocated * 2;
             if (gc_state.next_gc < 1024u * 1024u) {
                 gc_state.next_gc = 1024u * 1024u;
@@ -895,7 +1038,7 @@ void gc_collect(void) {
     for (Obj* obj = gc_state.objects; obj != NULL; obj = obj->next) {
         obj->generation = GEN_OLD;
     }
-    gc_state.remembered_count = 0;
+    remembered_set_clear();
 
     gc_state.next_gc = gc_state.bytes_allocated * 2;
     if (gc_state.next_gc < 1024u * 1024u) {

@@ -12,7 +12,8 @@ typedef enum {
     OBJ_CLOSURE,
     OBJ_FUNCTION,
     OBJ_NATIVE,
-    OBJ_CELL
+    OBJ_CELL,
+    OBJ_ARENA
 } ObjType;
 
 #define GEN_NURSERY 0
@@ -25,6 +26,8 @@ struct Obj {
     ObjType type;
     bool is_marked;
     uint8_t generation;
+    bool in_remembered_set;
+    bool in_arena;
     struct Obj* next;
 };
 
@@ -36,12 +39,15 @@ typedef struct {
     char chars[];
 } ObjString;
 
+#define KODA_ARRAY_INLINE_MAX_CAP 64
+
 // Array object
 typedef struct {
     Obj obj;
     int capacity;
     int count;
     Value* elements;
+    bool inline_elements;
 } ObjArray;
 
 // Table object (hash table)
@@ -85,6 +91,17 @@ typedef struct {
     Value value;
 } ObjCell;
 
+/* Bump allocator for per-frame / scoped short-lived objects (see arena builtins). */
+typedef struct {
+    Obj obj;
+    uint8_t* buffer;
+    size_t capacity;
+    size_t top;
+    Obj** allocations;
+    int alloc_count;
+    int alloc_capacity;
+} ObjArena;
+
 // Object allocation
 ObjString* allocate_string(int length);
 ObjArray* allocate_array(int capacity);
@@ -94,6 +111,10 @@ ObjFunction* allocate_function(int arity);
 ObjClosure* allocate_closure(ObjFunction* function, int upvalue_count);
 ObjNative* allocate_native(Value (*native)(int, Value*));
 ObjCell* allocate_cell(void);
+ObjArena* allocate_arena(size_t capacity);
+void arena_reset(ObjArena* arena);
+ObjArray* arena_allocate_array(ObjArena* arena, int capacity);
+ObjTable* arena_allocate_struct_table(ObjArena* arena, int field_count);
 
 // Object operations
 void free_object(Obj* obj);

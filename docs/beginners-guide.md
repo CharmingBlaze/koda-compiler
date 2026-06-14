@@ -415,7 +415,17 @@ while (!windowshouldclose()) {
     let dt = deltatime();
     // update(dt)
     // draw()
+    gcFrameStep(0.5);   // spread GC work across frames (~0.5 ms budget)
 }
+```
+
+For heavy per-frame allocation (particles, temp objects), use a bump arena and reset it each frame:
+
+```koda
+let frameArena = arena(512 * 1024);
+let particles = arenaAllocArray(frameArena, 256);
+// ... use particles this frame ...
+arenaReset(frameArena);
 ```
 
 Cheatsheet: [Game development](guides/game-dev.md) · [Raylib guide](guides/raylib.md).

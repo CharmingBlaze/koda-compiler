@@ -5,7 +5,9 @@
 #include <stdbool.h>
 
 #define KODA_SHADOW_STACK_INITIAL_CAPACITY 4096
-#define KODA_SHADOW_STACK_MAX_CAPACITY 65536
+#define KODA_SHADOW_STACK_MAX_CAPACITY 131072
+
+extern int koda_shadow_stack_max_capacity;
 
 typedef struct {
     Value** slot_ptrs;

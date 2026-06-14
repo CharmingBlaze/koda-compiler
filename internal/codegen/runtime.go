@@ -263,6 +263,10 @@ func declareRuntimeFunctions(mod *ir.Module) map[string]*ir.Func {
 	functions["KODA_gc_frame_step"] = mod.NewFunc("koda_gc_frame_step", types.Void,
 		ir.NewParam("budget_ms", types.Double))
 	functions["KODA_gc_stats"] = argvI64(mod, "koda_gc_stats")
+	functions["KODA_arena"] = argvI64(mod, "koda_arena")
+	functions["KODA_arena_reset"] = argvI64(mod, "koda_arena_reset")
+	functions["KODA_arena_alloc_array"] = argvI64(mod, "koda_arena_alloc_array")
+	functions["KODA_arena_alloc_struct"] = argvI64(mod, "koda_arena_alloc_struct")
 
 	ptrPtr := types.NewPointer(types.NewPointer(types.I64))
 	functions["KODA_push_frame"] = mod.NewFunc("koda_push_frame", types.Void,

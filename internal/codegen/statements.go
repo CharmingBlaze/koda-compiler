@@ -187,7 +187,9 @@ func (g *Generator) emitWhileStmt(s *parser.WhileStmt) error {
 	if err := g.emitStmt(s.Body); err != nil {
 		return err
 	}
-	g.block.NewBr(condBlock)
+	if g.block.Term == nil {
+		g.block.NewBr(condBlock)
+	}
 
 	g.block = afterBlock
 	g.shadowRewindTemps()
@@ -217,7 +219,9 @@ func (g *Generator) emitDoWhileStmt(s *parser.DoWhileStmt) error {
 	if err := g.emitStmt(s.Body); err != nil {
 		return err
 	}
-	g.block.NewBr(condBlock)
+	if g.block.Term == nil {
+		g.block.NewBr(condBlock)
+	}
 
 	g.block = condBlock
 	g.shadowRewindTemps()

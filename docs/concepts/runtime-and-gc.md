@@ -21,16 +21,21 @@ Gameplay code allocates freely; the GC reclaims unreachable objects.
 
 | Function | When to use |
 |----------|-------------|
-| `gcframestep()` | Once per frame in games — spreads collection work |
-| `gcdisable()` / `gcenable()` | Brief critical sections (rare) |
-| `gc()` / `gccollect()` | Force full collection (debugging) |
-| `gcstats()` | Inspect collector state |
+| `gcFrameStep(ms)` | Once per frame in games — spreads collection work (try `0.5`–`1.0` ms) |
+| `gcDisable()` / `gcEnable()` | Brief critical sections (rare) |
+| `gc()` / `gcCollect()` | Force full collection (debugging) |
+| `gcStats()` | Inspect collector state |
+| `arena(bytes)` | Per-frame bump allocator for short-lived objects |
+| `arenaReset(arena)` | O(1) reset at end of frame (do not keep arena object refs after reset) |
+| `arenaAllocArray(arena, cap)` | Array allocated inside an arena |
+| `arenaAllocStruct(arena, fields)` | Struct table allocated inside an arena |
 
 **Tips:**
 
 - Reuse arrays and objects in hot loops when possible.
 - Avoid building huge temporary strings every frame.
-- Call `gcframestep()` in your main loop for steady frame times.
+- Call **`gcFrameStep()`** in your main loop for steady frame times.
+- Set **`KODA_STACK_DEPTH`** (256–1048576) if deep recursion hits the shadow-stack cap.
 
 ---
 

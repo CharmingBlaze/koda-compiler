@@ -209,6 +209,10 @@ type Generator struct {
 	runtimeGcEnable     *ir.Func
 	runtimeGcFrameStep  *ir.Func
 	runtimeGcStats      *ir.Func
+	runtimeArena        *ir.Func
+	runtimeArenaReset   *ir.Func
+	runtimeArenaAllocArray  *ir.Func
+	runtimeArenaAllocStruct *ir.Func
 	runtimePushFrame    *ir.Func
 	runtimePopFrame     *ir.Func
 	runtimeOk           *ir.Func
@@ -404,6 +408,10 @@ func NewGenerator(ctx *sema.NativeEmitContext) *Generator {
 		runtimeGcEnable:         runtimeFuncs["KODA_gc_enable"],
 		runtimeGcFrameStep:      runtimeFuncs["KODA_gc_frame_step"],
 		runtimeGcStats:          runtimeFuncs["KODA_gc_stats"],
+		runtimeArena:            runtimeFuncs["KODA_arena"],
+		runtimeArenaReset:       runtimeFuncs["KODA_arena_reset"],
+		runtimeArenaAllocArray:  runtimeFuncs["KODA_arena_alloc_array"],
+		runtimeArenaAllocStruct: runtimeFuncs["KODA_arena_alloc_struct"],
 		runtimePushFrame:        runtimeFuncs["KODA_push_frame"],
 		runtimePopFrame:         runtimeFuncs["KODA_pop_frame"],
 		runtimeOk:               runtimeFuncs["KODA_ok"],

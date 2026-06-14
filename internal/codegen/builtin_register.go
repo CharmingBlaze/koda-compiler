@@ -101,6 +101,10 @@ func (g *Generator) registerBuiltinFuncs() {
 		{"gcEnable", g.runtimeGcEnable},
 		{"gcFrameStep", g.runtimeGcFrameStep},
 		{"gcStats", g.runtimeGcStats},
+		{"arena", g.runtimeArena},
+		{"arenaReset", g.runtimeArenaReset},
+		{"arenaAllocArray", g.runtimeArenaAllocArray},
+		{"arenaAllocStruct", g.runtimeArenaAllocStruct},
 	}
 	for _, p := range pairs {
 		if p.fn != nil {

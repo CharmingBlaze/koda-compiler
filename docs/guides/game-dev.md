@@ -244,9 +244,11 @@ See `examples/keys.koda` for common Raylib key/color constants.
 
 ## GC and performance
 
-- Call **`gcFrameStep()`** once per frame in heavy games (see `tests/incremental_gc_test.koda`).
+- Call **`gcFrameStep(0.5)`** once per frame in heavy games — budget is milliseconds of incremental GC work (see `tests/incremental_gc_test.koda`).
+- Use **`arena(size)`** + **`arenaAllocArray`** / **`arenaAllocStruct`** + **`arenaReset`** for per-frame temp objects that should not pressure the nursery.
 - Use **`gcDisable()`** / **`gcEnable()`** around critical sections if needed.
 - Keep per-frame allocation low; reuse structs and arrays where possible.
+- Deep recursion: set **`KODA_STACK_DEPTH`** (default shadow-stack cap is 131072 frames).
 - Push hot math to C libraries (physics, rendering) via wrappers.
 
 ---

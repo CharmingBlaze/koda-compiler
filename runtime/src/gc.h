@@ -30,6 +30,7 @@ typedef struct {
 void gc_init(void);
 void* gc_alloc(size_t size);
 void gc_register_object(Obj* obj);
+void gc_unlink_object(Obj* obj);
 void gc_free(void* ptr, size_t size);
 
 void gc_mark_object(Obj* obj);
@@ -47,6 +48,7 @@ void gc_frame_step_incremental(uint64_t budget_us);
 bool gc_incremental_is_idle(void);
 void gc_record_pause_since(uint64_t start_us);
 void gc_set_use_shadow_stack(bool enabled);
+bool gc_uses_shadow_stack(void);
 
 size_t gc_nursery_used_bytes(void);
 size_t gc_nursery_capacity_bytes(void);
