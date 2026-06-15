@@ -5,6 +5,7 @@ export namespace api {
 	    line: number;
 	    col: number;
 	    message: string;
+	    hint?: string;
 	    severity: string;
 	
 	    static createFrom(source: any = {}) {
@@ -17,6 +18,7 @@ export namespace api {
 	        this.line = source["line"];
 	        this.col = source["col"];
 	        this.message = source["message"];
+	        this.hint = source["hint"];
 	        this.severity = source["severity"];
 	    }
 	}

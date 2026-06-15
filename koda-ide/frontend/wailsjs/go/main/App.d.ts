@@ -7,6 +7,8 @@ export function AbsFromWorkspace(arg1:string):Promise<string>;
 
 export function BuildProgram(arg1:string,arg2:string,arg3:string):Promise<void>;
 
+export function CreateProjectInParent(arg1:string,arg2:string):Promise<string>;
+
 export function DefaultBuildOutput(arg1:string):Promise<string>;
 
 export function DiagnoseFile(arg1:string,arg2:string):Promise<Array<api.Diagnostic>>;
@@ -19,11 +21,9 @@ export function ListDir(arg1:string):Promise<Array<main.DirEntry>>;
 
 export function OpenWorkspace(arg1:string):Promise<void>;
 
-export function PickWorkspaceFolder():Promise<string>;
-
 export function PickParentFolderForNewProject():Promise<string>;
 
-export function CreateProjectInParent(arg1:string,arg2:string):Promise<string>;
+export function PickWorkspaceFolder():Promise<string>;
 
 export function ReadFile(arg1:string):Promise<string>;
 

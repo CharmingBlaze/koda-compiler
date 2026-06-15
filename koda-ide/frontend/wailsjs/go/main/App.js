@@ -10,6 +10,10 @@ export function BuildProgram(arg1, arg2, arg3) {
   return window['go']['main']['App']['BuildProgram'](arg1, arg2, arg3);
 }
 
+export function CreateProjectInParent(arg1, arg2) {
+  return window['go']['main']['App']['CreateProjectInParent'](arg1, arg2);
+}
+
 export function DefaultBuildOutput(arg1) {
   return window['go']['main']['App']['DefaultBuildOutput'](arg1);
 }
@@ -34,16 +38,12 @@ export function OpenWorkspace(arg1) {
   return window['go']['main']['App']['OpenWorkspace'](arg1);
 }
 
-export function PickWorkspaceFolder() {
-  return window['go']['main']['App']['PickWorkspaceFolder']();
-}
-
 export function PickParentFolderForNewProject() {
   return window['go']['main']['App']['PickParentFolderForNewProject']();
 }
 
-export function CreateProjectInParent(arg1, arg2) {
-  return window['go']['main']['App']['CreateProjectInParent'](arg1, arg2);
+export function PickWorkspaceFolder() {
+  return window['go']['main']['App']['PickWorkspaceFolder']();
 }
 
 export function ReadFile(arg1) {
