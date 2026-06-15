@@ -14,9 +14,17 @@ A language that **compiles to native executables** for games and applications. S
 
 No. `koda run` compiles to a native binary (often a temp file). Users run your built executable without installing Koda.
 
-### Do I need Go or LLVM to use Koda?
+### Do I need Go, LLVM, Python, or C++ to use Koda?
 
-**No** for release SDK binaries. **Yes** only if you build Koda from source as a contributor.
+**No** for release SDK binaries. Download the **SDK zip**, unzip, run `koda`. The compiler embeds Clang and the runtime.
+
+You need Go/LLVM **only** if you modify the Koda compiler itself ([CONTRIBUTING.md](../CONTRIBUTING.md)).
+
+Koda is **not** Python — it compiles to a native executable. Your players do not install Python or Koda to run your game.
+
+### Do I need Visual Studio or CMake?
+
+**No** to get started with the SDK. Graphics templates use bundled Raylib and `"graphics": true` in `koda.json`.
 
 ### Is Koda case-sensitive?
 

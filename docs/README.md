@@ -1,10 +1,10 @@
 # Koda documentation
 
-**Draw it. Run it. Ship it.**
+**Replace C/C++ for your first native game or app.** One SDK zip — no Go, no Python, no LLVM install.
 
-Koda compiles to a **native binary** — no VM on your players' machines. This hub links every user-facing document.
+This hub links every user-facing document.
 
-> New here? Start with the **[Beginner's guide](beginners-guide.md)** (one file) or the **[Learn path](learn/README.md)** (10 short chapters).
+> New here? **[START_HERE.md](../START_HERE.md)** → **[Beginner's guide](beginners-guide.md)** → **[Learn path](learn/README.md)**
 
 ---
 

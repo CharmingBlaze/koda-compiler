@@ -10,15 +10,17 @@ Welcome. This guide assumes you have **never used Koda** and may be new to compi
 
 ## What is Koda?
 
-Koda is an **easy native language for games, tools, and desktop apps**. You write `.koda` files, run `koda build`, and get a binary your players or users can run **without installing Koda**.
+Koda is an **easy native language for games, tools, and desktop apps** — a practical **replacement for C and C++** when you want native speed without installing Go, Python, LLVM, or a giant IDE.
 
 | You write | You get |
 |-----------|---------|
-| Game logic, tools, desktop apps | One native binary (like C) |
+| Game logic, tools, desktop apps | One native binary (like C/C++) |
 | `struct`, `func`, loops | Fast iteration with `koda run` |
 | Optional Raylib / C libraries | Via wrappers and `koda.json` |
 
-Koda is **not** a VM language. There is no interpreter on the user's machine.
+Koda is **not** a VM language (not Python, not Lua-in-a-runtime). There is no interpreter on the user's machine.
+
+**You do not need:** Go, Python, Node, Rust, LLVM, Visual Studio, or CMake to **use** the release SDK.
 
 ---
 
@@ -35,15 +37,25 @@ Koda is **not** a VM language. There is no interpreter on the user's machine.
 
 ## 1. Install (5 minutes)
 
-You do **not** need Go, LLVM, or a C compiler to **use** Koda from releases.
+You do **not** need Go, Python, LLVM, Visual Studio, Node, or Rust to **use** Koda from releases.
 
-1. Download **`koda`** and **`kodawrap`** from [GitHub Releases](https://github.com/CharmingBlaze/koda-compiler/releases).
-2. Unpack an **SDK zip** so **`stdlib/`** sits next to the executables.
-3. Open a terminal in that folder and run:
+1. Download the **SDK zip** for your platform from [GitHub Releases](https://github.com/CharmingBlaze/koda-compiler/releases).
+2. Unzip so **`stdlib/`** sits next to **`koda`** (or `koda.exe`).
+3. Open a terminal in that folder:
 
 ```bash
+koda doctor
 koda version
 ```
+
+If `doctor` shows **FAIL**, fix those lines before continuing. See [START_HERE.md](../START_HERE.md) for platform-specific steps.
+
+Optional — add Koda to PATH:
+
+| Platform | Command (from SDK folder) |
+|----------|---------------------------|
+| Windows | `powershell -File scripts\install-koda.ps1` |
+| macOS / Linux | `bash scripts/install-koda.sh` |
 
 > **Note:** Building Koda from source is for **contributors** only. See [CONTRIBUTING.md](../CONTRIBUTING.md).
 

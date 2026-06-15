@@ -75,6 +75,12 @@ foreach ($d in @("stdlib", "docs", "wrappers", "examples")) {
     }
 }
 
+$scriptsOut = Join-Path $outDir "scripts"
+New-Item -ItemType Directory -Force -Path $scriptsOut | Out-Null
+foreach ($s in @("install-koda.ps1", "install-koda.sh")) {
+    Copy-Item -Force (Join-Path $RepoRoot "scripts\$s") (Join-Path $scriptsOut $s)
+}
+
 Get-ChildItem -Path $RepoRoot -Filter "*.md" -File | ForEach-Object {
     Copy-Item -Force $_.FullName (Join-Path $outDir $_.Name)
 }
@@ -152,6 +158,19 @@ Offline layout: compiler, kodawrap (C header -> .koda + wrapper.c), stdlib, docs
 wrappers (raylib + glue), and (unless -SkipRaylib) third_party/raylib_static/stage with raylib 5.0.
 
 End users: koda does not download LLVM, Raylib, or anything else at compile time. Embedded Clang/llc/runtime unpack to a local temp directory on first use only.
+
+You do NOT need Go, Python, LLVM, Visual Studio, or CMake to use this SDK.
+
+Quick start
+-----------
+  Read START_HERE.md in this folder, then:
+
+    .\koda.exe doctor
+    .\koda.exe new bounce --template graphics
+    cd bounce
+    ..\koda.exe run
+
+  Optional PATH install: powershell -File scripts\install-koda.ps1
 
 Use
 ---

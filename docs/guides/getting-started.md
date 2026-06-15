@@ -1,21 +1,28 @@
 # Getting started with Koda
 
-The fastest path from zero to running code. For a full onboarding, see the **[Beginner's guide](beginners-guide.md)** or **[Learn path](learn/README.md)**.
+The fastest path from zero to a **native game or app** — no Go, Python, or LLVM install.
+
+For the full story see **[START_HERE.md](../../START_HERE.md)** or the **[Beginner's guide](../beginners-guide.md)**.
 
 ---
 
 ## Install (2 minutes)
 
-1. Download **`koda`**, **`kodawrap`**, and an **SDK zip** from [GitHub Releases](https://github.com/CharmingBlaze/koda-compiler/releases).
-2. Unzip so **`stdlib/`** is next to the executables.
+1. Download the **SDK zip** for your OS from [GitHub Releases](https://github.com/CharmingBlaze/koda-compiler/releases).
+2. Unzip so **`stdlib/`** is next to **`koda`**.
 3. Run:
 
 ```bash
-koda version
 koda doctor
+koda version
 ```
 
-You do **not** need Go or LLVM for release binaries.
+You do **not** need Go, Python, LLVM, Visual Studio, Node, or Rust for release binaries.
+
+| Platform | Optional: add to PATH |
+|----------|------------------------|
+| Windows | `powershell -File scripts\install-koda.ps1` |
+| macOS / Linux | `bash scripts/install-koda.sh` |
 
 ---
 

@@ -77,7 +77,10 @@ zip_sdk() {
   cp -a "$REPO_ROOT/stdlib" "$stage/$root_name/stdlib"
   cp -a "$REPO_ROOT/docs" "$stage/$root_name/docs"
 
-  # All top-level documentation markdown (CHANGELOG, CONTRIBUTING, language.md, …).
+  mkdir -p "$stage/$root_name/scripts"
+  cp -a "$REPO_ROOT/scripts/install-koda.ps1" "$REPO_ROOT/scripts/install-koda.sh" "$stage/$root_name/scripts/"
+
+  # All top-level documentation markdown (CHANGELOG, CONTRIBUTING, language.md, START_HERE.md, …).
   shopt -s nullglob
   local md
   for md in "$REPO_ROOT"/*.md; do
@@ -114,10 +117,28 @@ zip_sdk() {
 Koda SDK ${VERSION} (${slug})
 ==============================
 
+The beginner-friendly replacement for C/C++ — native games and apps from one zip.
+No Go. No Python. No LLVM install required.
+
 Platforms: Windows, Linux, and macOS each have dedicated release zips (this archive is ${slug}).
-Everything offline: compiler, kodawrap, stdlib, docs, examples — no Go or LLVM install required to compile .koda.
+Everything offline: compiler, kodawrap, stdlib, docs, examples — unzip and run koda doctor.
 
 The compiler never fetches LLVM, Raylib, or other dependencies from the network. Release builds embed Clang + llc + the Koda runtime; they unpack to a local temp directory on first use only. Raylib (where included in this zip) lives under third_party/raylib_static/stage/.
+
+Quick start
+-----------
+  Read START_HERE.md, then:
+
+  • Windows:
+      .\koda.exe doctor
+      .\koda.exe new bounce --template graphics
+
+  • Linux / macOS:
+      chmod +x koda kodawrap
+      ./koda doctor
+      ./koda new bounce --template graphics
+
+  Optional PATH: scripts/install-koda.ps1 (Windows) or scripts/install-koda.sh (Unix)
 
 Layout
 ------

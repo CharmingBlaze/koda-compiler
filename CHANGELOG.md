@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Product positioning** — README, START_HERE.md, and docs frame Koda as the beginner-friendly **C/C++ replacement** for native games and apps; one SDK zip, no Go/Python/LLVM for end users.
+- **Install helpers** — `scripts/install-koda.ps1` and `scripts/install-koda.sh` ship in SDK zips for optional PATH setup.
+
 ## [0.4.0] - 2026-06-15
 
 Production release: beginner-native language surface, hardened toolchain, and expanded CI/release gates.

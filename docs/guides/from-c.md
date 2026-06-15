@@ -1,8 +1,25 @@
-# Coming from C
+# Coming from C and C++
 
-Koda is built for developers who want **C-level outcomes** — a single native executable, direct hardware access through C libraries, no interpreter on the player's machine — without C's ceremony around headers, build systems, and manual memory for everyday game and app logic.
+Koda is the **beginner-friendly replacement for C and C++** when you want **native games and desktop apps** — one executable for your players, no Python or VM, no Go or LLVM to install (SDK zip only).
 
-This guide explains what feels familiar, what is different, and how to think about Koda as a **modern replacement for C** when you're building games and desktop applications.
+You get **C-level outcomes** (single native binary, Raylib/SDL through thin wrappers, no interpreter on the player's machine) without C++ ceremony: headers everywhere, CMake, manual memory for everyday logic, and cryptic linker errors.
+
+This guide explains what feels familiar, what is different, and how to think about Koda vs **both C and C++** for games and applications.
+
+---
+
+## C++ vs Koda (why beginners switch)
+
+| You want… | C++ | Koda |
+|-----------|-----|------|
+| First window / game | Toolchain + CMake + vcpkg/conan | Unzip SDK, `koda new bounce --template graphics` |
+| Strings, JSON, dynamic data | std::string, nlohmann/json, or pain | Built in |
+| Memory for gameplay | new/delete, smart pointers, leaks | GC; optional arena per frame |
+| Build system | CMakeLists.txt, link flags | `koda.json` + `koda build` |
+| Ship to friends | Your `.exe` + MSVC runtime / DLLs | `koda bundle` |
+| Install to **make** things | GB of IDE + SDK | One SDK zip (~embedded compiler) |
+
+Koda is **not** a replacement for C++ in AAA engine internals or zero-overhead systems code. It **is** a replacement for the C++ beginners write in tutorials, game jams, and first apps.
 
 ---
 

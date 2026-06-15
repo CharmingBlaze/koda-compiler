@@ -18,21 +18,31 @@ koda/
   koda.exe          (or `koda` on Unix)
   kodawrap.exe
   stdlib/           ← required
+  START_HERE.md     ← read this first
   docs/
+  scripts/          ← optional PATH installers
 ```
 
-5. Add the folder to your **PATH** (optional but convenient).
+5. Add the folder to your **PATH** (optional):
 
-> **Note:** You do **not** install Go or LLVM to use release binaries. Those are only for building Koda from source.
+```bash
+# Windows (from SDK folder)
+powershell -File scripts\install-koda.ps1
+
+# macOS / Linux
+bash scripts/install-koda.sh
+```
+
+> **You do not install:** Go, Python, LLVM, Visual Studio, Node, npm, Cargo, or CMake to **use** the release SDK.
 
 Verify:
 
 ```bash
-koda version
 koda doctor
+koda version
 ```
 
-`koda doctor` checks for `stdlib/` and common configuration issues.
+`koda doctor` checks for `stdlib/` and common configuration issues. Fix every **FAIL** line before building games.
 
 ---
 
