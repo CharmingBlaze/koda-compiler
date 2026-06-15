@@ -2,11 +2,12 @@
   "name": "{{name}}",
   "version": "0.1.0",
   "entry": "src/main.koda",
+  "lint": "beginner",
   "bundle": {
     "assets": ["assets"]
   },
   "native": {
     "sources": ["wrappers/raylib_shim/wrapper.c"],
-    "linkflags": ""
+    "graphics": true
   }
 }

@@ -1,0 +1,9 @@
+func main() {
+    let frameArena = arena(4096);
+    let s = format("item_%d", 1);
+    internClear();
+    let s2 = format("item_%d", 2);
+    assert(len(s2) > 0, "string after intern clear");
+    arenaReset(frameArena);
+    print("PASS intern_clear_test");
+}

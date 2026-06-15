@@ -1,0 +1,18 @@
+struct Rect {
+    w, h;
+    func area() {
+        return this.w * this.h;
+    }
+    func scale(f) {
+        this.w = this.w * f;
+        this.h = this.h * f;
+    }
+};
+
+func main() {
+    let r = Rect { w: 10, h: 5 };
+    assert(r.area() == 50, "area");
+    r.scale(2);
+    assert(r.area() == 200, "scaled area");
+    print("PASS struct_methods");
+}

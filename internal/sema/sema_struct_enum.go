@@ -25,6 +25,28 @@ func (a *Analyzer) analyzeStructDecl(d *parser.StructDecl) {
 		fields[i] = t.Lexeme
 	}
 	a.structLayouts[name] = fields
+	methods := make(map[string]*parser.FuncDecl)
+	for _, m := range d.Methods {
+		mname := m.Name.Lexeme
+		if _, dup := methods[mname]; dup {
+			a.record(&diagnostic.DiagnosticError{
+				File:    m.Name.File,
+				Line:    m.Name.Line,
+				Col:     m.Name.Col,
+				Message: fmt.Sprintf("duplicate method '%s' on struct %s", mname, name),
+			})
+			continue
+		}
+		methods[mname] = m
+		a.funcReads[m] = 0
+		prev := a.currentStructType
+		a.currentStructType = name
+		a.analyzeFuncDecl(m)
+		a.currentStructType = prev
+	}
+	if len(methods) > 0 {
+		a.structMethods[name] = methods
+	}
 }
 
 func (a *Analyzer) analyzeEnumDecl(d *parser.EnumDecl) {
@@ -100,6 +122,36 @@ func (a *Analyzer) validateStructLiteral(e *parser.ObjectExpr) {
 }
 
 func (a *Analyzer) checkStructFieldAccess(e *parser.IndexExpr) {
+	if te, ok := e.Object.(*parser.ThisExpr); ok && a.currentStructType != "" {
+		lit, ok := e.Index.(*parser.LiteralExpr)
+		if !ok {
+			return
+		}
+		field, ok := lit.Value.(string)
+		if !ok {
+			return
+		}
+		stName := a.currentStructType
+		fields, ok := a.structLayouts[stName]
+		if !ok {
+			return
+		}
+		for i, f := range fields {
+			if f == field {
+				a.indexExprStructSlot[e] = i
+				return
+			}
+		}
+		a.record(&diagnostic.DiagnosticError{
+			File:    lit.Token.File,
+			Line:    lit.Token.Line,
+			Col:     lit.Token.Col,
+			Message: fmt.Sprintf("'%s' is not a field of struct %s", field, stName),
+			Hint:    fmt.Sprintf("fields: %s", strings.Join(fields, ", ")),
+		})
+		_ = te
+		return
+	}
 	idObj, ok := e.Object.(*parser.IdentifierExpr)
 	if !ok {
 		return
@@ -115,6 +167,11 @@ func (a *Analyzer) checkStructFieldAccess(e *parser.IndexExpr) {
 	stName, ok := a.varStructType[idObj.Name.Lexeme]
 	if !ok {
 		return
+	}
+	if methods, ok := a.structMethods[stName]; ok {
+		if _, isMethod := methods[field]; isMethod {
+			return
+		}
 	}
 	fields, ok := a.structLayouts[stName]
 	if !ok {
@@ -206,12 +263,20 @@ func (a *Analyzer) enumCaseOrdinal(val parser.Expr, enumName string) (int, bool)
 }
 
 // ExportForCodegen copies struct/enum binding maps for LLVM emission.
-func (a *Analyzer) ExportForCodegen() (structFields map[string][]string, varStruct map[string]string, varEnum map[string]string, indexStruct map[*parser.IndexExpr]int, indexEnum map[*parser.IndexExpr]int64) {
+func (a *Analyzer) ExportForCodegen() (structFields map[string][]string, structMethods map[string]map[string]*parser.FuncDecl, varStruct map[string]string, varEnum map[string]string, indexStruct map[*parser.IndexExpr]int, indexEnum map[*parser.IndexExpr]int64) {
 	structFields = make(map[string][]string)
 	for k, v := range a.structLayouts {
 		cp := make([]string, len(v))
 		copy(cp, v)
 		structFields[k] = cp
+	}
+	structMethods = make(map[string]map[string]*parser.FuncDecl)
+	for st, ms := range a.structMethods {
+		cp := make(map[string]*parser.FuncDecl)
+		for k, v := range ms {
+			cp[k] = v
+		}
+		structMethods[st] = cp
 	}
 	varStruct = make(map[string]string)
 	for k, v := range a.varStructType {
@@ -229,7 +294,7 @@ func (a *Analyzer) ExportForCodegen() (structFields map[string][]string, varStru
 	for k, v := range a.indexExprEnumConst {
 		indexEnum[k] = v
 	}
-	return structFields, varStruct, varEnum, indexStruct, indexEnum
+	return structFields, structMethods, varStruct, varEnum, indexStruct, indexEnum
 }
 
 func enumOrdinalMap(entry *parser.Program) map[string]int {

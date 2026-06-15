@@ -1,0 +1,14 @@
+enum State {
+    Idle,
+    Running,
+    Done
+};
+
+func main() {
+    let s = State.Idle;
+    switch (s) {
+        case State.Idle:
+            print("idle");
+    }
+    print("PASS enum_exhaustive");
+}

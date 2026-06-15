@@ -101,10 +101,22 @@ func (g *Generator) registerBuiltinFuncs() {
 		{"gcEnable", g.runtimeGcEnable},
 		{"gcFrameStep", g.runtimeGcFrameStep},
 		{"gcStats", g.runtimeGcStats},
+		{"internClear", g.runtimeInternClear},
 		{"arena", g.runtimeArena},
 		{"arenaReset", g.runtimeArenaReset},
 		{"arenaAllocArray", g.runtimeArenaAllocArray},
 		{"arenaAllocStruct", g.runtimeArenaAllocStruct},
+		{"arraypush", g.runtimeArrayPushArgv},
+		{"arraypop", g.runtimeArrayPopArgv},
+		{"arrayslice", g.runtimeArraySlice},
+		{"arraysort", g.runtimeArraySort},
+		{"arrayreverse", g.runtimeArrayReverse},
+		{"arrayincludes", g.runtimeArrayIncludes},
+		{"arrayindexof", g.runtimeArrayIndexOf},
+		{"arrayconcat", g.runtimeArrayConcat},
+		{"assetpath", g.runtimeAssetPath},
+		{"replace", g.runtimeStringReplace},
+		{"replaceall", g.runtimeStringReplaceAll},
 	}
 	for _, p := range pairs {
 		if p.fn != nil {

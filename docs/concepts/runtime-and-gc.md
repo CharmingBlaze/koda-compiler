@@ -37,6 +37,15 @@ Gameplay code allocates freely; the GC reclaims unreachable objects.
 - Call **`gcFrameStep()`** in your main loop for steady frame times.
 - Set **`KODA_STACK_DEPTH`** (256–1048576) if deep recursion hits the shadow-stack cap.
 
+### String intern table
+
+Every allocated string is stored in a global **intern table** (open-addressing hash map) so equal text shares one object. Entries stay in the table until:
+
+1. **GC sweep** rebuilds the table, keeping only strings still reachable from the heap, or
+2. You call **`internClear()`**, which empties the table immediately (live `Value` strings remain valid; the next allocation of the same text re-interns).
+
+Programs that create many unique strings in a tight loop (for example `format("item_%d", i)` with changing `i`) can grow the table between collections. Use `internClear()` after a burst of unique strings, or rely on `gcCollect()` / `gcFrameStep()` for periodic sweep rebuilds.
+
 ---
 
 ## Manual memory vs Koda

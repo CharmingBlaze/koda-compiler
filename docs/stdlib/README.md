@@ -20,6 +20,7 @@ Built-in `@math`, `@json`, and `@io` objects are optimized in the compiler; file
 | `@util` | [util.koda](util.md) | clamp01, pick_weighted, pingpong |
 | `@noise` | [noise.koda](noise.md) | 1D value noise |
 | `@str` | [str.koda](str.md) | String helper aliases |
+| `@game` | [game.koda](game.md) | Beginner game loop API over Raylib |
 
 ---
 

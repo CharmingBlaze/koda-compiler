@@ -69,10 +69,12 @@ Koda compiles to a **native binary** — no VM on your players' machines. This h
 | Document | Contents |
 |----------|----------|
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | Build from source, PRs |
+| [positioning.md](positioning.md) | Honest product framing (who Koda is for) |
+| [ROADMAP.md](ROADMAP.md) | Prioritized engineering queue |
+| [status.md](status.md) | Implementation matrix |
+| [MASTER_PLAN.md](MASTER_PLAN.md) | Detailed engineering roadmap |
 | [handoff.md](handoff.md) | Compiler pipeline |
 | [STYLE-GUIDE.md](STYLE-GUIDE.md) | How we write docs |
-| [status.md](status.md) | Implementation matrix |
-| [MASTER_PLAN.md](MASTER_PLAN.md) | Engineering roadmap |
 
 ---
 

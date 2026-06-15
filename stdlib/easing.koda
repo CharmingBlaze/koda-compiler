@@ -1,0 +1,41 @@
+// Easing curves — pure Koda animation helpers.
+
+func easeIn(t) {
+    return t * t;
+}
+
+func easeOut(t) {
+    return 1 - (1 - t) * (1 - t);
+}
+
+func easeInOut(t) {
+    if (t < 0.5) {
+        return 2 * t * t;
+    }
+    return 1 - pow(-2 * t + 2, 2) / 2;
+}
+
+func elastic(t) {
+    if (t == 0 || t == 1) {
+        return t;
+    }
+    return -pow(2, 10 * t - 10) * sin((t * 10 - 10.75) * (2 * pi / 3));
+}
+
+func bounce(t) {
+    let n1 = 7.5625;
+    let d1 = 2.75;
+    if (t < 1 / d1) {
+        return n1 * t * t;
+    }
+    if (t < 2 / d1) {
+        t = t - 1.5 / d1;
+        return n1 * t * t + 0.75;
+    }
+    if (t < 2.5 / d1) {
+        t = t - 2.25 / d1;
+        return n1 * t * t + 0.9375;
+    }
+    t = t - 2.625 / d1;
+    return n1 * t * t + 0.984375;
+}

@@ -1,0 +1,15 @@
+// Deep recursion stress — catches shadow-stack imbalance and GC root leaks.
+func recurse(n) {
+    if (n <= 0) {
+        return 0;
+    }
+    let arr = [n, n + 1];
+    return arr[0] + recurse(n - 1);
+}
+
+func main() {
+    let sum = recurse(200);
+    assert(sum > 0, "recurse sum");
+    gcCollect();
+    print("PASS stress_deep_recursion");
+}

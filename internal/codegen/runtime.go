@@ -139,6 +139,7 @@ func declareRuntimeFunctions(mod *ir.Module) map[string]*ir.Func {
 	functions["KODA_readFile"] = argvI64(mod, "koda_readFile")
 	functions["KODA_writeFile"] = argvI64(mod, "koda_writeFile")
 	functions["KODA_appendFile"] = argvI64(mod, "koda_appendFile")
+	functions["KODA_asset_path"] = argvI64(mod, "koda_asset_path")
 	functions["KODA_fileExists"] = argvI64(mod, "koda_fileExists")
 	functions["KODA_deleteFile"] = argvI64(mod, "koda_deleteFile")
 	functions["KODA_isFile"] = argvI64(mod, "koda_is_file")
@@ -215,8 +216,10 @@ func declareRuntimeFunctions(mod *ir.Module) map[string]*ir.Func {
 	functions["KODA_array_push"] = mod.NewFunc("koda_array_push", types.Void,
 		ir.NewParam("arr", types.I64),
 		ir.NewParam("value", types.I64))
+	functions["KODA_array_push_argv"] = argvI64(mod, "koda_array_push_argv")
 	functions["KODA_array_pop"] = mod.NewFunc("koda_array_pop", types.I64,
 		ir.NewParam("arr", types.I64))
+	functions["KODA_array_pop_argv"] = argvI64(mod, "koda_array_pop_argv")
 	lenFn := mod.NewFunc("koda_len", types.I64,
 		ir.NewParam("value", types.I64))
 	functions["KODA_len"] = lenFn
@@ -263,6 +266,7 @@ func declareRuntimeFunctions(mod *ir.Module) map[string]*ir.Func {
 	functions["KODA_gc_frame_step"] = mod.NewFunc("koda_gc_frame_step", types.Void,
 		ir.NewParam("budget_ms", types.Double))
 	functions["KODA_gc_stats"] = argvI64(mod, "koda_gc_stats")
+	functions["KODA_intern_clear"] = mod.NewFunc("koda_intern_clear", types.Void)
 	functions["KODA_arena"] = argvI64(mod, "koda_arena")
 	functions["KODA_arena_reset"] = argvI64(mod, "koda_arena_reset")
 	functions["KODA_arena_alloc_array"] = argvI64(mod, "koda_arena_alloc_array")

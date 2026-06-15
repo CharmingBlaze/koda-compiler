@@ -1,31 +1,48 @@
 # Chapter 8 — Modules and imports
 
-**You will learn:** `#include`, `import()`, `@` stdlib modules, and dot notation.
+**You will learn:** `import()` for stdlib and local modules. `#include` is advanced.
 
 **Time:** ~15 minutes.
 
 ---
 
-## Include — merge source files
-
-```koda
-#include "stdlib/timer.koda"
-#include "src/utils.koda"
-```
-
-The included file is compiled as if pasted at that line. Use for small helpers and stdlib `.koda` files.
-
----
-
-## Import — module exports
+## Import — preferred for beginners
 
 ```koda
 let math = import "@math";
 print(math.pi);
 print(math.sqrt(25));
+
+let io = import "@io";
+let json = import "@json";
 ```
 
-`@name` resolves to `stdlib/name.koda` or a built-in export object for `@math`, `@json`, `@io`.
+`@name` resolves to `stdlib/name.koda`. Local modules:
+
+```koda
+let player = import "./player";
+```
+
+| Import | Use for |
+|--------|---------|
+| `@game` | Beginner game API (`game.open`, `game.running`, …) |
+| `@math` | Trig, lerp, clamp, RNG |
+| `@json` | parse, stringify |
+| `@io` | read, write, list, exists |
+| `@array` | range, shuffle, zip |
+
+Graphics projects also `#include` the Raylib shim before `@game` — see [game dev guide](../guides/game-dev.md).
+
+---
+
+## Include — merge source files (advanced)
+
+```koda
+#include "wrappers/raylib_shim/raylib.koda"
+#include "@game"
+```
+
+The included file is compiled as if pasted at that line. Beginners use `import` for stdlib modules instead of `#include "stdlib/..."`.
 
 ---
 

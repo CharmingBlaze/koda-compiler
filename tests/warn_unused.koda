@@ -1,0 +1,9 @@
+let unusedScore = 100;
+
+func unusedHelper() {
+    return 1;
+};
+
+func main() {
+    print("ok");
+}

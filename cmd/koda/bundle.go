@@ -51,6 +51,9 @@ func bundleFile(path string, outputDir string) error {
 		if err := copyBundleProjectAssets(outputDir, ctx); err != nil {
 			return err
 		}
+		if err := writeBundleAssetsManifest(outputDir, ctx); err != nil {
+			return err
+		}
 	}
 
 	fmt.Println()
@@ -229,6 +232,36 @@ func copyFile(src, dst string) error {
 		return err
 	}
 	return os.WriteFile(dst, data, 0644)
+}
+
+func writeBundleAssetsManifest(outputDir string, ctx *project.Context) error {
+	paths := ctx.BundleExtraPaths()
+	if len(paths) == 0 {
+		return nil
+	}
+	var lines []string
+	lines = append(lines, "# Koda bundled assets — use assetPath(\"file.png\") at runtime")
+	for _, p := range paths {
+		base := filepath.Base(p)
+		if fi, err := os.Stat(p); err == nil && fi.IsDir() {
+			_ = filepath.WalkDir(p, func(path string, d os.DirEntry, err error) error {
+				if err != nil || d.IsDir() {
+					return nil
+				}
+				rel, _ := filepath.Rel(p, path)
+				lines = append(lines, filepath.ToSlash(filepath.Join(base, rel)))
+				return nil
+			})
+		} else {
+			lines = append(lines, base)
+		}
+	}
+	manifest := filepath.Join(outputDir, "koda-assets.txt")
+	if err := os.WriteFile(manifest, []byte(strings.Join(lines, "\n")+"\n"), 0644); err != nil {
+		return err
+	}
+	fmt.Printf("  assets manifest: %s\n", manifest)
+	return nil
 }
 
 func parseBundleArgs(args []string) (src string, outputDir string, err error) {

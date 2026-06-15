@@ -10,17 +10,24 @@ import (
 
 // Analyzer performs semantic analysis on the AST.
 type Analyzer struct {
+	opts *AnalysisOptions
 	currentScope *Scope
 	scopes       []*Scope
 	errors       []error
 
 	structLayouts map[string][]string // struct type name -> ordered field names
+	structMethods map[string]map[string]*parser.FuncDecl
 	varStructType map[string]string   // variable name -> struct type name
 	varEnumType   map[string]string   // variable name -> enum type name
 	warnings      []string
 
 	indexExprStructSlot map[*parser.IndexExpr]int
 	indexExprEnumConst  map[*parser.IndexExpr]int64
+
+	letReads  map[*parser.LetDecl]int
+	funcReads map[*parser.FuncDecl]int
+
+	currentStructType string // set while analyzing a struct method body
 }
 
 // Scope represents a lexical scope with symbol bindings.
@@ -70,18 +77,27 @@ func (s *Scope) VisibleNames() []string {
 
 // NewAnalyzer creates a new semantic analyzer.
 func NewAnalyzer() *Analyzer {
+	return NewAnalyzerWithOptions(nil)
+}
+
+// NewAnalyzerWithOptions creates an analyzer with optional passes enabled.
+func NewAnalyzerWithOptions(opts *AnalysisOptions) *Analyzer {
 	builtinRoot := NewScope(nil)
 	seedGlobalBuiltins(builtinRoot)
 	globalScope := NewScope(builtinRoot)
 	return &Analyzer{
+		opts:                opts,
 		currentScope:        globalScope,
 		scopes:              []*Scope{builtinRoot, globalScope},
 		errors:              []error{},
 		structLayouts:       make(map[string][]string),
+		structMethods:       make(map[string]map[string]*parser.FuncDecl),
 		varStructType:       make(map[string]string),
 		varEnumType:         make(map[string]string),
 		indexExprStructSlot: make(map[*parser.IndexExpr]int),
 		indexExprEnumConst:  make(map[*parser.IndexExpr]int64),
+		letReads:            make(map[*parser.LetDecl]int),
+		funcReads:           make(map[*parser.FuncDecl]int),
 	}
 }
 
@@ -90,12 +106,24 @@ func (a *Analyzer) Analyze(prog *parser.Program) error {
 	a.errors = nil
 	a.warnings = nil
 	a.structLayouts = make(map[string][]string)
+	a.structMethods = make(map[string]map[string]*parser.FuncDecl)
 	a.varStructType = make(map[string]string)
 	a.varEnumType = make(map[string]string)
 	a.indexExprStructSlot = make(map[*parser.IndexExpr]int)
 	a.indexExprEnumConst = make(map[*parser.IndexExpr]int64)
+	a.letReads = make(map[*parser.LetDecl]int)
+	a.funcReads = make(map[*parser.FuncDecl]int)
+	a.currentStructType = ""
 	for _, decl := range prog.Declarations {
 		a.analyzeDecl(decl)
+	}
+	a.checkUnusedBindings()
+	if a.opts != nil && a.opts.WarnUnreachable {
+		for _, decl := range prog.Declarations {
+			if fd, ok := decl.(*parser.FuncDecl); ok && fd.Body != nil {
+				a.checkUnreachableCode(fd.Body)
+			}
+		}
 	}
 	switch len(a.errors) {
 	case 0:
@@ -170,11 +198,31 @@ func (a *Analyzer) analyzeLetDecl(d *parser.LetDecl) {
 		})
 		return
 	}
-	a.currentScope.Define(name, d)
+	if d.TypeAnnot != "" {
+		if !isKnownTypeAnnotation(d.TypeAnnot) {
+			a.record(&diagnostic.DiagnosticError{
+				File:    d.Name.File,
+				Line:    d.Name.Line,
+				Col:     d.Name.Col,
+				Message: fmt.Sprintf("unknown type '%s' (supported: int, float, bool, string, byte, i32, u8, …)", d.TypeAnnot),
+			})
+		}
+	}
+	if d.IsConst && d.Init == nil {
+		a.record(&diagnostic.DiagnosticError{
+			File:    d.Name.File,
+			Line:    d.Name.Line,
+			Col:     d.Name.Col,
+			Message: fmt.Sprintf("const '%s' requires an initializer", name),
+		})
+	}
+	// Analyze initializer before binding the name so enum/type names are not shadowed (e.g. let phase = Phase.Menu).
 	if d.Init != nil {
 		a.analyzeExpr(d.Init)
 		a.recordVarTypesFromInit(name, d.Init)
 	}
+	a.currentScope.Define(name, d)
+	a.letReads[d] = 0
 }
 
 func (a *Analyzer) analyzeFuncDecl(d *parser.FuncDecl) {
@@ -189,6 +237,7 @@ func (a *Analyzer) analyzeFuncDecl(d *parser.FuncDecl) {
 		return
 	}
 	a.currentScope.Define(name, d)
+	a.funcReads[d] = 0
 
 	a.enterScope()
 	defer a.exitScope()
@@ -281,6 +330,10 @@ func (a *Analyzer) analyzeStmt(stmt parser.Stmt) {
 		}
 		a.checkSwitchEnumExhaustive(s)
 	case *parser.DeleteStmt:
+		if a.opts != nil && a.opts.BeginnerLint {
+			a.warn(fmt.Sprintf("%s:%d:%d: delete is an advanced feature; prefer struct fields or new objects for game data",
+				s.Token.File, s.Token.Line, s.Token.Col))
+		}
 		a.analyzeExpr(s.Target)
 	case *parser.DeferStmt:
 		a.analyzeExpr(s.Expr)
@@ -321,11 +374,39 @@ func (a *Analyzer) suggestName(name string) string {
 	return ""
 }
 
+func (a *Analyzer) noteStructMethodRead(ix *parser.IndexExpr) {
+	idObj, ok := ix.Object.(*parser.IdentifierExpr)
+	if !ok {
+		return
+	}
+	lit, ok := ix.Index.(*parser.LiteralExpr)
+	if !ok {
+		return
+	}
+	mname, ok := lit.Value.(string)
+	if !ok {
+		return
+	}
+	stName, ok := a.varStructType[idObj.Name.Lexeme]
+	if !ok {
+		return
+	}
+	methods, ok := a.structMethods[stName]
+	if !ok {
+		return
+	}
+	if fd, ok := methods[mname]; ok {
+		a.funcReads[fd]++
+	}
+}
+
 func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 	switch e := expr.(type) {
 	case *parser.IdentifierExpr:
 		name := e.Name.Lexeme
-		if _, ok := a.currentScope.Resolve(name); !ok {
+		if decl, ok := a.currentScope.Resolve(name); ok {
+			a.noteBindingRead(decl)
+		} else {
 			hint := a.suggestName(name)
 			a.record(&diagnostic.DiagnosticError{
 				File:    e.Name.File,
@@ -340,6 +421,14 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 	case *parser.PrefixExpr:
 		a.analyzeExpr(e.Right)
 	case *parser.InfixExpr:
+		if e.Operator == "===" || e.Operator == "!==" {
+			alt := "=="
+			if e.Operator == "!==" {
+				alt = "!="
+			}
+			a.warn(fmt.Sprintf("%s:%d:%d: '%s' is deprecated; use '%s' instead (Koda has no loose equality)",
+				e.Token.File, e.Token.Line, e.Token.Col, e.Operator, alt))
+		}
 		a.analyzeExpr(e.Left)
 		a.analyzeExpr(e.Right)
 	case *parser.LogicalExpr:
@@ -347,6 +436,14 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 		a.analyzeExpr(e.Right)
 	case *parser.CallExpr:
 		a.analyzeExpr(e.Function)
+		if id, ok := e.Function.(*parser.IdentifierExpr); ok {
+			if decl, ok2 := a.currentScope.Resolve(id.Name.Lexeme); ok2 {
+				a.noteBindingRead(decl)
+			}
+		}
+		if ix, ok := e.Function.(*parser.IndexExpr); ok {
+			a.noteStructMethodRead(ix)
+		}
 		for _, arg := range e.Arguments {
 			a.analyzeExpr(arg)
 		}
@@ -355,6 +452,18 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 		a.analyzeExpr(e.Value)
 		if ident, ok := e.Left.(*parser.IdentifierExpr); ok {
 			name := ident.Name.Lexeme
+			if decl, ok := a.currentScope.Resolve(name); ok {
+				if ld, ok := decl.(*parser.LetDecl); ok && ld.IsConst {
+					a.record(&diagnostic.DiagnosticError{
+						File:    ident.Name.File,
+						Line:    ident.Name.Line,
+						Col:     ident.Name.Col,
+						Message: fmt.Sprintf("cannot assign to const '%s'", name),
+						Hint:    "use let for mutable bindings; const is immutable",
+					})
+					return
+				}
+			}
 			if _, ok := a.currentScope.Resolve(name); !ok {
 				hint := a.suggestName(name)
 				a.record(&diagnostic.DiagnosticError{

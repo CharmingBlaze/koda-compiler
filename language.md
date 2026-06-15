@@ -107,33 +107,35 @@ print(type(print));    // function
 
 ## 4. Variables
 
-Declare with `let`. Variables must be declared before use.
+Declare mutable bindings with `let`. Immutable bindings with `const`:
 
 ```koda
 let name = "Koda";
 let score = 0;
+const gravity = 900;
+const screenWidth = 800;
 let active = true;
 let nothing = null;
 let uninit;           // starts as null
 ```
 
-**Reassign** at any time:
+**Reassign** `let` at any time (`const` cannot be reassigned):
 
 ```koda
 score = score + 10;
 score += 10;   // same thing
 score++;       // increment by 1
-score--;       // decrement by 1
 ```
 
-**Destructuring** — pull fields out of an object into individual variables:
+**Optional type annotations:**
 
 ```koda
-let player = { x: 10, y: 20, name: "Ada" };
-let { x, y } = player;   // x = 10, y = 20
+let lives: int = 3;
+let dt: float = 0.016;
+let label: string = "Player";
 ```
 
-> `var` is **reserved** — always use `let`.
+> `var` is **reserved** — use `let` or `const`.
 
 ---
 
@@ -157,11 +159,11 @@ let f = 2 ** 8;   // 256 (power)
 1 <= 1    // true
 2 > 1     // true
 1 >= 1    // true
-1 == 1    // true   (loose equal)
+1 == 1    // true
 1 != 2    // true
-1 === 1   // true   (strict equal)
-1 !== 2   // true
 ```
+
+Use `==` and `!=` for equality. Legacy `===` / `!==` are identical but deprecated — `koda check` warns when you use them.
 
 ### Logic
 
@@ -1096,7 +1098,7 @@ From highest (evaluated first) to lowest:
 | | `+` `-` |
 | | `<<` `>>` `>>>` |
 | | `<` `<=` `>` `>=` |
-| | `==` `!=` `===` `!==` |
+| | `==` `!=` |
 | | `&` |
 | | `^` |
 | | `\|` |
@@ -1116,7 +1118,7 @@ All keywords are **case-insensitive**.
 break    case     continue  default   defer
 delete   do       else      enum      false
 for      func     if        import    in
-let      null     of        return    struct
+const    let      null     of        return    struct
 switch   this     true      typeof    while
 ```
 

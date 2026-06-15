@@ -1,0 +1,12 @@
+// String intern pressure — many unique strings; catches intern table growth bugs.
+func main() {
+    let i = 0;
+    while (i < 500) {
+        let s = "key_" + string(i);
+        assert(len(s) > 0, "string len");
+        i = i + 1;
+    }
+    internClear();
+    gcFrameStep(1.0);
+    print("PASS stress_string_pressure");
+}

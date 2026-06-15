@@ -45,6 +45,9 @@ func (g *Generator) emitIdentifier(e *parser.IdentifierExpr) (value.Value, error
 		if g.localIsCell != nil && g.localIsCell[name] {
 			return g.block.NewCall(g.runtimeCellRead, slot), nil
 		}
+		if _, annot, ok2 := g.typedLocalDecl(name); ok2 {
+			return g.emitAsKodaI64FromTyped(slot, annot), nil
+		}
 		return g.block.NewLoad(types.I64, slot), nil
 	}
 	if slot, ok := g.moduleGlobals[name]; ok {
@@ -201,6 +204,10 @@ func (g *Generator) emitInfix(e *parser.InfixExpr) (value.Value, error) {
 		if res, ok := compileTimeInt64(e); ok {
 			return g.block.NewCall(g.runtimeBoxNumber, constant.NewFloat(types.Double, float64(res))), nil
 		}
+	}
+
+	if v, ok := g.tryEmitIntKindInfix(e); ok {
+		return v, nil
 	}
 
 	left, err := g.emitExpr(e.Left)

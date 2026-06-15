@@ -15,6 +15,7 @@ type Config struct {
 	Name    string       `json:"name"`
 	Version string       `json:"version"`
 	Entry   string       `json:"entry"`
+	Lint    string       `json:"lint"` // "", "beginner", "strict"
 	Bundle  BundleConfig `json:"bundle"`
 	Native  NativeConfig `json:"native"`
 }
@@ -27,6 +28,7 @@ type BundleConfig struct {
 type NativeConfig struct {
 	Sources   []string `json:"sources"`
 	Linkflags string   `json:"linkflags"`
+	Graphics  bool     `json:"graphics"` // auto platform link flags + raylib when linkflags empty
 }
 
 // Load reads koda.json from path (file or directory containing it).
@@ -150,9 +152,16 @@ func (c *Context) ApplyNativeEnv() error {
 			return err
 		}
 	}
-	if os.Getenv("KODA_LINKFLAGS") == "" && strings.TrimSpace(c.Cfg.Native.Linkflags) != "" {
-		if err := os.Setenv("KODA_LINKFLAGS", strings.TrimSpace(c.Cfg.Native.Linkflags)); err != nil {
-			return err
+	link := strings.TrimSpace(c.Cfg.Native.Linkflags)
+	if os.Getenv("KODA_LINKFLAGS") == "" {
+		if link != "" {
+			if err := os.Setenv("KODA_LINKFLAGS", link); err != nil {
+				return err
+			}
+		} else if c.Cfg.Native.Graphics {
+			if err := os.Setenv("KODA_LINKFLAGS", DefaultGraphicsLinkFlags()); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

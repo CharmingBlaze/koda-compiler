@@ -132,6 +132,7 @@ jobs:
           if "$KODA_CI_BIN" check tests/undefined_var.koda 2>/dev/null; then echo "expected check to fail"; exit 1; fi
           if "$KODA_CI_BIN" check tests/sema_errors.koda 2>/dev/null; then echo "expected sema_errors check to fail"; exit 1; fi
           if "$KODA_CI_BIN" check tests/struct_typo_test.koda 2>/dev/null; then echo "expected struct field typo check to fail"; exit 1; fi
+          if "$KODA_CI_BIN" check --warn-unused tests/warn_unused.koda 2>&1 | grep -q "unused variable"; then echo "warn-unused OK"; else echo "expected warn-unused warnings"; exit 1; fi
 
       - name: Native smoke (koda build / run)
         shell: bash
@@ -148,7 +149,19 @@ jobs:
           timeout 120s "$KODA_CI_BIN" run --no-opt tests/nursery_test.koda
           timeout 120s "$KODA_CI_BIN" run --no-opt tests/incremental_gc_test.koda
           timeout 90s "$KODA_CI_BIN" run tests/stress/stress_mixed_alloc.koda
+          timeout 90s "$KODA_CI_BIN" run tests/stress/stress_deep_recursion.koda
+          timeout 90s "$KODA_CI_BIN" run tests/stress/stress_string_pressure.koda
           timeout 120s "$KODA_CI_BIN" run --no-opt tests/stress/large_game_sim.koda
+          "$KODA_CI_BIN" run tests/struct_methods.koda
+          "$KODA_CI_BIN" run tests/integer_types.koda
+          "$KODA_CI_BIN" run tests/intern_clear_test.koda
+          "$KODA_CI_BIN" run tests/stdlib_modules_test.koda
+
+      - name: ASAN smoke (Linux, non-blocking)
+        if: runner.os == 'Linux'
+        continue-on-error: true
+        shell: bash
+        run: bash scripts/ci-asan-smoke.sh
 
       - name: GC soak + stress smoke (Windows)
         if: runner.os == 'Windows'

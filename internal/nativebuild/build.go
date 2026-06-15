@@ -9,6 +9,7 @@ import (
 	"koda/internal/codegen"
 	"koda/internal/kodahome"
 	"koda/internal/parser"
+	"koda/internal/sema"
 )
 
 // Build compiles a loaded program bundle to a native executable using the same
@@ -26,7 +27,9 @@ func BuildWithOptions(bundle *parser.ProgramBundle, output, sourceDisplay string
 	if err := kodahome.EnsureEnvironment(log); err != nil {
 		return err
 	}
-	ctx, err := codegen.PrepareNativeBundle(bundle)
+	ctx, err := sema.PrepareNativeBundleWithOptions(bundle, &sema.PrepareOptions{
+		EmitDebug: opts.Debug,
+	})
 	if err != nil {
 		return fmt.Errorf("prepare native bundle: %w", err)
 	}

@@ -13,156 +13,257 @@ import (
 
 	fujembed "koda/internal/embed"
 	"koda/internal/kodahome"
+	"koda/internal/project"
 )
 
-// runDoctor prints a diagnostic report for zero-install / native builds.
+type doctorLine struct {
+	ok   bool
+	label string
+	detail string
+	fix   string
+}
+
+// runDoctor prints a beginner-friendly SDK health report.
 func runDoctor() error {
-	fmt.Println("=== koda doctor ===")
-	fmt.Println()
+	var lines []doctorLine
+	var failures int
 
-	releaseToolchain := false
-	if embedDir, err := fujembed.Extract(); err == nil {
-		releaseToolchain = true
-		fmt.Printf("Release build — embedded toolchain at %s\n", embedDir)
-		fmt.Println("You only need koda + kodawrap (and stdlib next to them). No Go install and no LLVM install on your machine.")
-		clang, _ := fujembed.ClangPath()
-		lib, _ := fujembed.RuntimeLibPath()
-		fmt.Printf("  clang:   %s\n", clang)
-		fmt.Printf("  runtime: %s\n", lib)
-		if runtime.GOOS == "windows" {
-			if lld, err := fujembed.LLDPathWindows(); err == nil {
-				fmt.Printf("  lld:     %s\n", lld)
-			}
-		}
-	} else if errors.Is(err, fujembed.ErrDevelopmentBuild) {
-		fmt.Println("Development build — system toolchain")
-
-		tc, err := kodahome.FindToolchain()
-		if err != nil {
-			fmt.Printf("x toolchain: %v\n", err)
-		} else {
-			fmt.Printf("ok clang:   %s\n", tc.Clang)
-			fmt.Printf("ok runtime: %s\n", tc.RuntimeLib)
-			fmt.Printf("  llc:     %s\n", tc.LLC)
-			if tc.LLD != "" {
-				fmt.Printf("  lld:     %s\n", tc.LLD)
-			}
-		}
-
-		llcPath, llcSrc := kodahome.LLCWithSource()
-		fmt.Printf("llc resolution: %s (from %s)\n", llcPath, llcSrc)
-		printToolProbe("llc", llcPath)
-	} else {
-		fmt.Printf("Embedded toolchain failed: %v\n", err)
-	}
-
-	fmt.Println()
+	lines = append(lines, doctorLine{ok: true, label: "koda", detail: strings.TrimSpace(version)})
 
 	install, err := kodahome.InstallDir()
 	if err != nil {
-		return fmt.Errorf("install dir: %w", err)
-	}
-	fmt.Printf("install_dir: %s\n", install)
-
-	if ok, why := kodahome.InstallDirWritable(install); ok {
-		fmt.Println("install_writable: ok")
+		lines = append(lines, doctorLine{ok: false, label: "install dir", detail: err.Error()})
+		failures++
 	} else {
-		fmt.Printf("install_writable: NO (%s)\n", why)
-		fmt.Println("  hint: move the binary to a normal writable folder; Gatekeeper translocation can block writes.")
-	}
-	for _, w := range kodahome.InstallDirWarnings(install) {
-		fmt.Printf("install_warning: %s\n", w)
-	}
-	fmt.Println()
-
-	clangPath, clangSrc := kodahome.ClangWithSource()
-	fmt.Printf("clang (resolution): %s (from %s)\n", clangPath, clangSrc)
-	printToolProbe("clang", clangPath)
-
-	if p, ok := kodahome.BundledLLDPath(); ok {
-		fmt.Printf("lld next to binary: %s\n", p)
-		if fi, err := os.Stat(p); err != nil || fi.IsDir() {
-			fmt.Println("lld_status: missing_or_invalid")
+		lines = append(lines, doctorLine{ok: true, label: "SDK path", detail: install})
+		if ok, why := kodahome.InstallDirWritable(install); ok {
+			lines = append(lines, doctorLine{ok: true, label: "writable install", detail: "ok"})
 		} else {
-			fmt.Println("lld_status: ok")
+			lines = append(lines, doctorLine{
+				ok: false, label: "writable install", detail: why,
+				fix: "Move koda.exe to a normal folder (not Downloads with Gatekeeper translocation).",
+			})
+			failures++
 		}
-	} else {
-		fmt.Println("lld next to binary: (none)")
 	}
-	fmt.Println()
 
 	stdlib, err := kodahome.StdlibDir()
 	if err != nil {
-		return err
-	}
-	fmt.Printf("stdlib_dir: %s\n", stdlib)
-	printDirStatus("stdlib", stdlib)
-	if fi, err := os.Stat(filepath.Join(stdlib, "math.koda")); err != nil || fi.IsDir() {
-		fmt.Println("stdlib_hint: @math / @json imports need stdlib/ next to koda (or set KODA_PATH)")
-	}
-
-	wrap, err := kodahome.WrappersDir()
-	if err != nil {
-		return err
-	}
-	fmt.Printf("wrappers_dir: %s\n", wrap)
-	printDirStatus("wrappers", wrap)
-
-	flags, err := kodahome.BundledClangResourceFlags()
-	if err != nil {
-		fmt.Printf("bundled_clang_isystem: error: %v\n", err)
+		lines = append(lines, doctorLine{ok: false, label: "stdlib", detail: err.Error(), fix: "Unpack the SDK zip so stdlib/ sits next to koda.exe."})
+		failures++
+	} else if fi, err := os.Stat(filepath.Join(stdlib, "math.koda")); err != nil || fi.IsDir() {
+		lines = append(lines, doctorLine{ok: false, label: "stdlib", detail: stdlib, fix: "Missing math.koda — reinstall the SDK bundle."})
+		failures++
 	} else {
-		fmt.Printf("bundled_clang_isystem_entries: %d\n", len(flags))
-		if len(flags) > 0 && os.Getenv("KODA_DOCTOR_VERBOSE") != "" {
-			fmt.Println(strings.Join(flags, "\n"))
+		lines = append(lines, doctorLine{ok: true, label: "stdlib", detail: stdlib})
+	}
+
+	tc, tcErr := kodahome.FindToolchain()
+	if tcErr != nil {
+		lines = append(lines, doctorLine{ok: false, label: "runtime archive", detail: tcErr.Error(), fix: "Run scripts/build-runtime.ps1 or make -C runtime from a source checkout."})
+		failures++
+	} else if fi, err := os.Stat(tc.RuntimeLib); err != nil || fi.IsDir() {
+		lines = append(lines, doctorLine{ok: false, label: "runtime archive", detail: tc.RuntimeLib, fix: "Rebuild runtime/libkoda_runtime.a"})
+		failures++
+	} else {
+		lines = append(lines, doctorLine{ok: true, label: "runtime archive", detail: tc.RuntimeLib})
+		if exe, err := os.Executable(); err == nil {
+			if exeFi, err := os.Stat(exe); err == nil {
+				if exeFi.ModTime().After(fi.ModTime()) {
+					lines = append(lines, doctorLine{
+						ok: false, label: "runtime freshness", detail: "koda.exe is newer than libkoda_runtime.a",
+						fix: "Run scripts/build-runtime.ps1 or scripts/build-runtime.sh",
+					})
+					failures++
+				} else {
+					lines = append(lines, doctorLine{ok: true, label: "runtime freshness", detail: "archive up to date"})
+				}
+			}
 		}
 	}
 
-	fmt.Println()
-	fmt.Printf("Platform: %s/%s\n", runtime.GOOS, runtime.GOARCH)
-	if releaseToolchain {
-		fmt.Println("koda is a normal native program; you do not install Go separately to use it.")
+	clangPath, _ := kodahome.ClangWithSource()
+	if probeOK(clangPath) {
+		lines = append(lines, doctorLine{ok: true, label: "clang", detail: shortVersion(clangPath)})
 	} else {
-		fmt.Printf("Go version (this koda binary was built with): %s\n", runtime.Version())
+		lines = append(lines, doctorLine{ok: false, label: "clang", detail: clangPath, fix: "Install LLVM/clang or use a release build with an embedded toolchain."})
+		failures++
+	}
+
+	llcPath, _ := kodahome.LLCWithSource()
+	if probeOK(llcPath) {
+		lines = append(lines, doctorLine{ok: true, label: "llc", detail: shortVersion(llcPath)})
+	} else {
+		lines = append(lines, doctorLine{ok: false, label: "llc", detail: llcPath, fix: "Install LLVM (llc) or use a release SDK zip."})
+		failures++
+	}
+
+	if p, ok := kodahome.BundledLLDPath(); ok && fileOK(p) {
+		lines = append(lines, doctorLine{ok: true, label: "lld", detail: p})
+	} else if runtime.GOOS == "windows" {
+		lines = append(lines, doctorLine{ok: false, label: "lld", detail: "not bundled", fix: "Use a release build with lld.exe next to koda, or install LLVM."})
+		failures++
+	}
+
+	raylibOK, raylibDetail := detectRaylib()
+	if raylibOK {
+		lines = append(lines, doctorLine{ok: true, label: "raylib", detail: raylibDetail})
+	} else {
+		lines = append(lines, doctorLine{
+			ok: false, label: "raylib", detail: raylibDetail,
+			fix: "For graphics: build third_party/raylib_static (make raylib-lib) or set KODA_LINKFLAGS manually. Console games work without raylib.",
+		})
+	}
+
+	tmpDir := os.TempDir()
+	if f, err := os.CreateTemp(tmpDir, "koda_doctor_*"); err != nil {
+		lines = append(lines, doctorLine{ok: false, label: "temp folder write", detail: err.Error()})
+		failures++
+	} else {
+		_ = f.Close()
+		_ = os.Remove(f.Name())
+		lines = append(lines, doctorLine{ok: true, label: "temp folder write", detail: tmpDir})
+	}
+
+	if free, ok := diskFreeBytes(tmpDir); ok {
+		if free < 64*1024*1024 {
+			lines = append(lines, doctorLine{
+				ok: false, label: "disk space", detail: fmt.Sprintf("%.0f MB free on temp drive", float64(free)/(1024*1024)),
+				fix: "Free at least 64 MB on your temp drive for builds.",
+			})
+			failures++
+		} else {
+			lines = append(lines, doctorLine{ok: true, label: "disk space", detail: fmt.Sprintf("%.0f MB free", float64(free)/(1024*1024))})
+		}
+	}
+
+	if exe, err := os.Executable(); err == nil {
+		if err := doctorSmokeBuild(exe, "hello"); err != nil {
+			lines = append(lines, doctorLine{ok: false, label: "sample hello build", detail: err.Error(), fix: "Fix clang/runtime issues above, then retry."})
+			failures++
+		} else {
+			lines = append(lines, doctorLine{ok: true, label: "sample hello build", detail: "ok"})
+		}
+	}
+
+	fmt.Println("Koda Doctor")
+	fmt.Println()
+	for _, ln := range lines {
+		tag := "OK  "
+		if !ln.ok {
+			tag = "FAIL"
+		}
+		fmt.Printf("%s  %s", tag, ln.label)
+		if ln.detail != "" {
+			fmt.Printf(" — %s", ln.detail)
+		}
+		fmt.Println()
+		if !ln.ok && ln.fix != "" {
+			fmt.Printf("      Fix: %s\n", ln.fix)
+		}
 	}
 	fmt.Println()
-	fmt.Println("Doctor finished.")
+	fmt.Printf("Platform: %s/%s\n", runtime.GOOS, runtime.GOARCH)
+	if _, err := fujembed.Extract(); err == nil {
+		fmt.Println("Toolchain: release (embedded clang/runtime)")
+	} else if errors.Is(err, fujembed.ErrDevelopmentBuild) {
+		fmt.Println("Toolchain: development (system clang)")
+	}
+	fmt.Printf("Graphics link hint: %s\n", project.DefaultGraphicsLinkFlags())
+	fmt.Println()
+	if failures > 0 {
+		fmt.Printf("Result: %d issue(s) found. Fix FAIL lines before building games.\n", failures)
+		return fmt.Errorf("%d doctor check(s) failed", failures)
+	}
+	fmt.Println("Result: all checks passed.")
 	return nil
 }
 
-func printDirStatus(label, path string) {
-	fi, err := os.Stat(path)
-	if err != nil {
-		fmt.Printf("%s_exists: 0 (%v)\n", label, err)
-		return
-	}
-	if !fi.IsDir() {
-		fmt.Printf("%s_exists: 0 (not a directory)\n", label)
-		return
-	}
-	fmt.Printf("%s_exists: 1\n", label)
-}
-
-func printToolProbe(name, path string) {
-	if path == "" {
-		fmt.Printf("%s_probe: skip (empty path)\n", name)
-		return
+func probeOK(path string) bool {
+	if strings.TrimSpace(path) == "" {
+		return false
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, path, "--version")
-	cmd.Stderr = nil
-	out, err := cmd.Output()
+	return cmd.Run() == nil
+}
+
+func shortVersion(path string) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, path, "--version").Output()
 	if err != nil {
-		fmt.Printf("%s_probe: failed (%v)\n", name, err)
-		return
+		return path
 	}
 	line := strings.TrimSpace(string(out))
 	if idx := strings.IndexByte(line, '\n'); idx >= 0 {
 		line = line[:idx]
 	}
-	if len(line) > 120 {
-		line = line[:120] + "..."
+	if len(line) > 80 {
+		line = line[:80] + "..."
 	}
-	fmt.Printf("%s_probe: %s\n", name, line)
+	return line
+}
+
+func fileOK(path string) bool {
+	fi, err := os.Stat(path)
+	return err == nil && !fi.IsDir()
+}
+
+func detectRaylib() (bool, string) {
+	if stage, _, ok := nativeRaylibStage(); ok {
+		return true, stage
+	}
+	if os.Getenv("KODA_LINKFLAGS") != "" {
+		return true, "KODA_LINKFLAGS set in environment"
+	}
+	return false, "not found (optional for console programs)"
+}
+
+func nativeRaylibStage() (stage string, archive string, ok bool) {
+	inst, err := kodahome.InstallDir()
+	if err != nil {
+		return "", "", false
+	}
+	candidates := []string{
+		filepath.Join(inst, "third_party", "raylib_static", "stage"),
+		filepath.Join(filepath.Dir(inst), "third_party", "raylib_static", "stage"),
+	}
+	for _, c := range candidates {
+		lib := filepath.Join(c, "lib", "libraylib.a")
+		if runtime.GOOS == "windows" {
+			lib = filepath.Join(c, "lib", "raylib.lib")
+		}
+		if fileOK(lib) {
+			return c, lib, true
+		}
+	}
+	return "", "", false
+}
+
+func doctorSmokeBuild(kodaExe, kind string) error {
+	tmp, err := os.MkdirTemp("", "koda_doctor_build_*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmp)
+	src := filepath.Join(tmp, "hello.koda")
+	if err := os.WriteFile(src, []byte(`func main() { print("doctor"); }`), 0o644); err != nil {
+		return err
+	}
+	out := filepath.Join(tmp, "hello")
+	if runtime.GOOS == "windows" {
+		out += ".exe"
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, kodaExe, "build", src, "-o", out)
+	cmd.Stdout = nil
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+	_ = kind
+	return nil
 }

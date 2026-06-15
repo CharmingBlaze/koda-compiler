@@ -30,3 +30,27 @@ let format = func(tmpl, obj) {
     }
     return tmpl;
 };
+
+let padStart = func(s, n, c) {
+    while (len(s) < n) {
+        s = c + s;
+    }
+    return s;
+};
+
+let padEnd = func(s, n, c) {
+    while (len(s) < n) {
+        s = s + c;
+    }
+    return s;
+};
+
+let repeat = func(s, n) {
+    let out = "";
+    let i = 0;
+    while (i < n) {
+        out = out + s;
+        i = i + 1;
+    }
+    return out;
+};

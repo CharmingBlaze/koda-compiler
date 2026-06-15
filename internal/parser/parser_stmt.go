@@ -39,7 +39,7 @@ func (p *Parser) parseDeclaration() ([]Decl, error) {
 		return nil, fmt.Errorf("%d:%d: 'var' is reserved; use 'let' to declare a variable", tok.Line, tok.Col)
 	}
 	if p.match(lexer.TokenLet) {
-		decls, err := p.parseLetDeclarations()
+		decls, err := p.parseLetDeclarations(false)
 		if err != nil {
 			return nil, err
 		}
@@ -47,6 +47,14 @@ func (p *Parser) parseDeclaration() ([]Decl, error) {
 			if let, ok := decls[0].(*LetDecl); ok {
 				let.Native = p.lastDirective
 			}
+		}
+		p.lastDirective = nil
+		return decls, nil
+	}
+	if p.match(lexer.TokenConst) {
+		decls, err := p.parseLetDeclarations(true)
+		if err != nil {
+			return nil, err
 		}
 		p.lastDirective = nil
 		return decls, nil
@@ -95,7 +103,7 @@ func (p *Parser) parseIncludeDeclaration() (Decl, error) {
 	return &IncludeDecl{Token: token, Path: path}, nil
 }
 
-func (p *Parser) parseLetDeclarations() ([]Decl, error) {
+func (p *Parser) parseLetDeclarations(isConst bool) ([]Decl, error) {
 	token := p.previous()
 
 	if p.check(lexer.TokenLBrace) {
@@ -132,14 +140,14 @@ func (p *Parser) parseLetDeclarations() ([]Decl, error) {
 		tmpTok := lexer.Token{Type: lexer.TokenIdentifier, Lexeme: tmpLexeme, Line: token.Line, Col: token.Col, File: token.File}
 
 		out := []Decl{
-			&LetDecl{Token: token, Name: tmpTok, Init: init},
+			&LetDecl{Token: token, Name: tmpTok, IsConst: isConst, Init: init},
 		}
 		for _, kt := range keys {
 			idTok := kt
 			objIdent := &IdentifierExpr{Token: tmpTok, Name: tmpTok}
 			idxLit := &LiteralExpr{Token: kt, Value: kt.Lexeme}
 			initIx := &IndexExpr{Token: kt, Object: objIdent, Index: idxLit}
-			out = append(out, &LetDecl{Token: token, Name: idTok, Init: initIx})
+			out = append(out, &LetDecl{Token: token, Name: idTok, IsConst: isConst, Init: initIx})
 		}
 		return out, nil
 	}
@@ -155,6 +163,15 @@ func (p *Parser) parseLetDeclarations() ([]Decl, error) {
 	}
 	name = normalizeIdentLexeme(name)
 
+	var typeAnnot string
+	if p.match(lexer.TokenColon) {
+		typeTok, err := p.consume(lexer.TokenIdentifier, "expected type name after ':'")
+		if err != nil {
+			return nil, err
+		}
+		typeAnnot = typeTok.Lexeme
+	}
+
 	var init Expr
 	if p.match(lexer.TokenEqual) {
 		init, err = p.parseExpression(PrecedenceLowest)
@@ -167,7 +184,7 @@ func (p *Parser) parseLetDeclarations() ([]Decl, error) {
 		return nil, err
 	}
 
-	return []Decl{&LetDecl{Token: token, Name: name, Init: init}}, nil
+	return []Decl{&LetDecl{Token: token, Name: name, TypeAnnot: typeAnnot, IsConst: isConst, Init: init}}, nil
 }
 
 func (p *Parser) parseFuncDeclaration() (Decl, error) {
@@ -671,16 +688,36 @@ func (p *Parser) parseStructDeclaration() (Decl, error) {
 		return nil, err
 	}
 	var fields []lexer.Token
-	if !p.check(lexer.TokenRBrace) {
-		for {
-			f, err := p.consume(lexer.TokenIdentifier, "expected field name")
+	var methods []*FuncDecl
+	for !p.check(lexer.TokenRBrace) {
+		if p.match(lexer.TokenFunc) {
+			fd, err := p.parseFuncDeclaration()
 			if err != nil {
 				return nil, err
 			}
-			f = normalizeIdentLexeme(f)
-			fields = append(fields, f)
-			if !p.match(lexer.TokenComma) {
+			methods = append(methods, fd.(*FuncDecl))
+			_ = p.match(lexer.TokenSemicolon)
+			continue
+		}
+		f, err := p.consume(lexer.TokenIdentifier, "expected field name or func declaration")
+		if err != nil {
+			return nil, err
+		}
+		f = normalizeIdentLexeme(f)
+		fields = append(fields, f)
+		if p.check(lexer.TokenRBrace) {
+			break
+		}
+		if p.check(lexer.TokenFunc) {
+			continue
+		}
+		_ = p.match(lexer.TokenSemicolon)
+		if !p.match(lexer.TokenComma) {
+			if p.check(lexer.TokenRBrace) {
 				break
+			}
+			if p.check(lexer.TokenFunc) {
+				continue
 			}
 		}
 	}
@@ -688,7 +725,7 @@ func (p *Parser) parseStructDeclaration() (Decl, error) {
 		return nil, err
 	}
 	_ = p.match(lexer.TokenSemicolon)
-	return &StructDecl{Token: kwTok, Name: name, Fields: fields}, nil
+	return &StructDecl{Token: kwTok, Name: name, Fields: fields, Methods: methods}, nil
 }
 
 func (p *Parser) parseEnumDeclaration() (Decl, error) {

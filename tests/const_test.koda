@@ -1,0 +1,8 @@
+func main() {
+    const gravity = 900;
+    const screenWidth = 800;
+    let y = 0;
+    y = y + gravity;
+    print(gravity);
+    print(screenWidth);
+}

@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include <ctype.h>
+#include <limits.h>
 
 // Platform-specific sleep and monotonic clock
 #ifdef _WIN32
@@ -22,11 +23,17 @@
 #include <direct.h>
 #define KODA_STAT _stat
 #define KODA_STAT_FUNC _stat
+#if defined(_MSC_VER) || defined(__clang__)
+__declspec(selectany) int _fltused = 0;
+#endif
 #else
 #include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#if defined(__APPLE__)
+#include <mach-o/dyld.h>
+#endif
 #define KODA_STAT stat
 #define KODA_STAT_FUNC stat
 #endif
@@ -267,6 +274,15 @@ void koda_sweep_intern_table(void) {
     free(koda_string_intern.buckets);
     koda_string_intern.buckets = survivors;
     koda_string_intern.count = kept;
+}
+
+void koda_intern_clear(void) {
+    if (koda_string_intern.buckets != NULL) {
+        free(koda_string_intern.buckets);
+        koda_string_intern.buckets = NULL;
+    }
+    koda_string_intern.capacity = 0;
+    koda_string_intern.count = 0;
 }
 
 void koda_push_call(const char* fn_name, const char* file_name, int line) {
@@ -747,6 +763,9 @@ void koda_runtime_shutdown(void) {
         koda_shadow_stack = NULL;
     }
     koda_shadow_capacity = 0;
+    if (koda_gc_debug_enabled() && koda_shadow_depth != 0) {
+        fprintf(stderr, "koda gc debug: shadow stack imbalance depth=%d at shutdown\n", koda_shadow_depth);
+    }
     koda_shadow_depth = 0;
 }
 
@@ -987,6 +1006,97 @@ static bool table_key_is_tombstone(Value k) {
     return IS_TOMBSTONE(k);
 }
 
+static int koda_levenshtein_distance(const char* a, const char* b) {
+    if (a == NULL || b == NULL) {
+        return 0;
+    }
+    size_t alen = strlen(a);
+    size_t blen = strlen(b);
+    if (alen == 0u) {
+        return (int)blen;
+    }
+    if (blen == 0u) {
+        return (int)alen;
+    }
+    int* prev = (int*)malloc((blen + 1u) * sizeof(int));
+    int* curr = (int*)malloc((blen + 1u) * sizeof(int));
+    if (prev == NULL || curr == NULL) {
+        free(prev);
+        free(curr);
+        return (int)(alen > blen ? alen : blen);
+    }
+    for (size_t j = 0; j <= blen; j++) {
+        prev[j] = (int)j;
+    }
+    for (size_t i = 1; i <= alen; i++) {
+        curr[0] = (int)i;
+        for (size_t j = 1; j <= blen; j++) {
+            int cost = (a[i - 1u] == b[j - 1u]) ? 0 : 1;
+            int del = prev[j] + 1;
+            int ins = curr[j - 1u] + 1;
+            int sub = prev[j - 1u] + cost;
+            int best = del < ins ? del : ins;
+            curr[j] = sub < best ? sub : best;
+        }
+        int* tmp = prev;
+        prev = curr;
+        curr = tmp;
+    }
+    int out = prev[blen];
+    free(prev);
+    free(curr);
+    return out;
+}
+
+static void koda_suggest_table_key(ObjTable* table, const char* wanted) {
+    if (table == NULL || wanted == NULL || wanted[0] == '\0') {
+        return;
+    }
+    if (!koda_gc_debug_enabled()) {
+        return;
+    }
+    const char* best = NULL;
+    int best_dist = INT_MAX;
+    if (table->hashes != NULL && !table->is_struct_layout) {
+        for (int i = 0; i < table->capacity; i++) {
+            Value k = table->keys[i];
+            if (IS_NIL(k) || table_key_is_tombstone(k) || !IS_OBJ(k)) {
+                continue;
+            }
+            Obj* ko = AS_OBJ(k);
+            if (ko->type != OBJ_STRING) {
+                continue;
+            }
+            const char* key_name = ((ObjString*)ko)->chars;
+            int dist = koda_levenshtein_distance(wanted, key_name);
+            if (dist < best_dist) {
+                best_dist = dist;
+                best = key_name;
+            }
+        }
+    } else {
+        for (int i = 0; i < table->count; i++) {
+            Value k = table->keys[i];
+            if (!IS_OBJ(k)) {
+                continue;
+            }
+            Obj* ko = AS_OBJ(k);
+            if (ko->type != OBJ_STRING) {
+                continue;
+            }
+            const char* key_name = ((ObjString*)ko)->chars;
+            int dist = koda_levenshtein_distance(wanted, key_name);
+            if (dist < best_dist) {
+                best_dist = dist;
+                best = key_name;
+            }
+        }
+    }
+    if (best != NULL) {
+        fprintf(stderr, "koda gc debug: missing key '%s'; did you mean '%s'?\n", wanted, best);
+    }
+}
+
 static Value koda_object_get_hash(ObjTable* table, Value key) {
     uint32_t cap = (uint32_t)table->capacity;
     if (cap == 0u) {
@@ -1031,10 +1141,17 @@ Value koda_object_get(Value obj, Value key) {
     if (table->is_struct_layout) {
         return koda_object_get_linear(table, key);
     }
+    Value out = NIL_VAL;
     if (table->hashes != NULL) {
-        return koda_object_get_hash(table, key);
+        out = koda_object_get_hash(table, key);
+    } else {
+        out = koda_object_get_linear(table, key);
     }
-    return koda_object_get_linear(table, key);
+    if (IS_NIL(out) && IS_OBJ(key) && AS_OBJ(key)->type == OBJ_STRING) {
+        ObjString* wanted = (ObjString*)AS_OBJ(key);
+        koda_suggest_table_key(table, wanted->chars);
+    }
+    return out;
 }
 
 static bool table_remove_pair(ObjTable* table, Value key) {
@@ -1397,6 +1514,14 @@ void koda_array_push(Value arr, Value value) {
     array->count++;
 }
 
+Value koda_array_push_argv(int argc, Value* argv) {
+    if (argc < 2) {
+        return NIL_VAL;
+    }
+    koda_array_push(argv[0], argv[1]);
+    return argv[0];
+}
+
 Value koda_array_pop(Value arr) {
     if (!IS_OBJ(arr)) return NIL_VAL;
     Obj* obj = AS_OBJ(arr);
@@ -1408,6 +1533,13 @@ Value koda_array_pop(Value arr) {
         return array->elements[array->count];
     }
     return NIL_VAL;
+}
+
+Value koda_array_pop_argv(int argc, Value* argv) {
+    if (argc < 1) {
+        return NIL_VAL;
+    }
+    return koda_array_pop(argv[0]);
 }
 
 Value koda_array_length(Value arr) {
@@ -2750,6 +2882,78 @@ Value koda_list_dir(int arg_count, Value* args) {
     closedir(d);
 #endif
     return arr;
+}
+
+Value koda_asset_path(int argc, Value* argv) {
+    if (argc != 1 || !IS_OBJ(argv[0]) || AS_OBJ(argv[0])->type != OBJ_STRING) {
+        return NIL_VAL;
+    }
+    ObjString* name = (ObjString*)AS_OBJ(argv[0]);
+    char exe_path[4096];
+    exe_path[0] = '\0';
+#ifdef _WIN32
+    DWORD got = GetModuleFileNameA(NULL, exe_path, (DWORD)sizeof(exe_path));
+    if (got == 0 || got >= (DWORD)sizeof(exe_path)) {
+        exe_path[0] = '\0';
+    }
+#elif defined(__APPLE__)
+    uint32_t size = (uint32_t)sizeof(exe_path);
+    if (_NSGetExecutablePath(exe_path, &size) != 0) {
+        exe_path[0] = '\0';
+    }
+#else
+    ssize_t got = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
+    if (got < 0 || got >= (ssize_t)sizeof(exe_path)) {
+        exe_path[0] = '\0';
+    } else {
+        exe_path[got] = '\0';
+    }
+#endif
+    const char* fallback_prefix = "assets/";
+    if (exe_path[0] == '\0') {
+        size_t prefix_len = strlen(fallback_prefix);
+        size_t out_len = prefix_len + (size_t)name->length;
+        if (out_len > (size_t)INT_MAX) {
+            return NIL_VAL;
+        }
+        char* out = (char*)malloc(out_len + 1u);
+        if (out == NULL) {
+            return NIL_VAL;
+        }
+        memcpy(out, fallback_prefix, prefix_len);
+        memcpy(out + prefix_len, name->chars, (size_t)name->length);
+        out[out_len] = '\0';
+        Value ret = koda_copy_string(out, (int)out_len);
+        free(out);
+        return ret;
+    }
+    char* slash = strrchr(exe_path, '/');
+    char* backslash = strrchr(exe_path, '\\');
+    char* sep = slash;
+    if (backslash != NULL && (sep == NULL || backslash > sep)) {
+        sep = backslash;
+    }
+    if (sep != NULL) {
+        sep[1] = '\0';
+    } else {
+        exe_path[0] = '\0';
+    }
+    size_t base_len = strlen(exe_path);
+    size_t out_len = base_len + 7u + (size_t)name->length;
+    if (out_len > (size_t)INT_MAX) {
+        return NIL_VAL;
+    }
+    char* out = (char*)malloc(out_len + 1u);
+    if (out == NULL) {
+        return NIL_VAL;
+    }
+    memcpy(out, exe_path, base_len);
+    memcpy(out + base_len, "assets/", 7u);
+    memcpy(out + base_len + 7u, name->chars, (size_t)name->length);
+    out[out_len] = '\0';
+    Value ret = koda_copy_string(out, (int)out_len);
+    free(out);
+    return ret;
 }
 
 // Debug utilities (legacy LLVM helper; uses truthy + panic)

@@ -1,0 +1,13 @@
+#include "@color"
+#include "@easing"
+
+func main() {
+    let c = rgba(1, 0, 0, 1);
+    assert(c.r == 1, "rgba r");
+    assert(len(toHex(c)) > 0, "toHex");
+
+    assert(easeIn(0.5) == 0.25, "easeIn");
+    assert(easeOut(0) == 0, "easeOut edge");
+
+    print("PASS stdlib_modules_test");
+}

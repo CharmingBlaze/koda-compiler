@@ -56,10 +56,12 @@ type NativeDirective struct {
 }
 
 type LetDecl struct {
-	Token  lexer.Token
-	Name   lexer.Token
-	Init   Expr             // optional
-	Native *NativeDirective // from // koda:extern (legacy extern directive still accepted)
+	Token      lexer.Token
+	Name       lexer.Token
+	TypeAnnot  string           // optional explicit type, e.g. "i32", "u8"
+	IsConst    bool             // true for `const` bindings (immutable)
+	Init       Expr             // optional
+	Native     *NativeDirective // from // koda:extern (legacy extern directive still accepted)
 }
 
 func (d *LetDecl) declNode() {}
@@ -85,9 +87,10 @@ type FuncDecl struct {
 
 // StructDecl declares a named struct type with ordered fields (O(1) slot access at compile time).
 type StructDecl struct {
-	Token  lexer.Token
-	Name   lexer.Token
-	Fields []lexer.Token
+	Token   lexer.Token
+	Name    lexer.Token
+	Fields  []lexer.Token
+	Methods []*FuncDecl
 }
 
 func (s *StructDecl) declNode() {}

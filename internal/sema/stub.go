@@ -62,9 +62,27 @@ type NativeEmitContext struct {
 	IndexExprEnumConst map[*parser.IndexExpr]int64
 	// EmitDebug requests LLVM debug metadata in codegen.
 	EmitDebug bool
+	// StructMethods maps struct type -> method name -> FuncDecl.
+	StructMethods map[string]map[string]*parser.FuncDecl
+	// NumericKinds maps stack LetDecl to inferred integer/float kind (A8).
+	NumericKinds map[*parser.LetDecl]NumericKind
+	// TypedLocals maps LetDecl to explicit integer type name (P1).
+	TypedLocals map[*parser.LetDecl]string
+}
+
+// PrepareOptions configures sema passes during native bundle preparation.
+type PrepareOptions struct {
+	WarnUnused      bool
+	BeginnerLint    bool
+	EmitDebug       bool
+	WarnUnreachable bool
 }
 
 func PrepareNativeBundle(bundle *parser.ProgramBundle) (*NativeEmitContext, error) {
+	return PrepareNativeBundleWithOptions(bundle, nil)
+}
+
+func PrepareNativeBundleWithOptions(bundle *parser.ProgramBundle, opts *PrepareOptions) (*NativeEmitContext, error) {
 	if err := parser.FlattenEntryIncludes(bundle); err != nil {
 		return nil, err
 	}
@@ -76,7 +94,15 @@ func PrepareNativeBundle(bundle *parser.ProgramBundle) (*NativeEmitContext, erro
 	}
 	var analyzer *Analyzer
 	if bundle.Entry != nil {
-		analyzer = NewAnalyzer()
+		var aopts *AnalysisOptions
+		if opts != nil && (opts.WarnUnused || opts.BeginnerLint || opts.WarnUnreachable) {
+			aopts = &AnalysisOptions{
+				WarnUnused:      opts.WarnUnused,
+				BeginnerLint:    opts.BeginnerLint,
+				WarnUnreachable: opts.WarnUnreachable,
+			}
+		}
+		analyzer = NewAnalyzerWithOptions(aopts)
 		if err := analyzer.Analyze(bundle.Entry); err != nil {
 			var me *diagnostic.MultiError
 			if errors.As(err, &me) && me != nil {
@@ -107,13 +133,86 @@ func PrepareNativeBundle(bundle *parser.ProgramBundle) (*NativeEmitContext, erro
 		ShadowFuncDecl:    make(map[*parser.FuncDecl]*ShadowLayout),
 		ShadowFuncExpr: make(map[*parser.FuncExpr]*ShadowLayout),
 		EnumOrdinal:    enumOrdinalMap(bundle.Entry),
+		StructMethods:  make(map[string]map[string]*parser.FuncDecl),
+		NumericKinds:   make(map[*parser.LetDecl]NumericKind),
+		TypedLocals:    make(map[*parser.LetDecl]string),
 	}
 	if analyzer != nil {
-		ctx.StructFields, ctx.VarStruct, ctx.VarEnum, ctx.IndexExprStructSlot, ctx.IndexExprEnumConst = analyzer.ExportForCodegen()
+		ctx.StructFields, ctx.StructMethods, ctx.VarStruct, ctx.VarEnum, ctx.IndexExprStructSlot, ctx.IndexExprEnumConst = analyzer.ExportForCodegen()
+	}
+	if bundle.Entry != nil {
+		for _, d := range bundle.Entry.Declarations {
+			collectTypedLocals(d, ctx.TypedLocals)
+		}
 	}
 	prepareNativeAnalysis(ctx, bundle)
+	ctx.NumericKinds = InferNumericKinds(bundle.Entry, ctx.EscapingDecls)
+	if opts != nil {
+		ctx.EmitDebug = opts.EmitDebug
+	}
 	prepareShadowLayouts(ctx, bundle)
 	return ctx, nil
+}
+
+func collectTypedLocals(d parser.Decl, out map[*parser.LetDecl]string) {
+	switch x := d.(type) {
+	case *parser.LetDecl:
+		if x.TypeAnnot != "" && isKnownTypeAnnotation(x.TypeAnnot) {
+			out[x] = normalizeTypeName(x.TypeAnnot)
+		}
+	case *parser.FuncDecl:
+		collectTypedLocalsInBlock(x.Body, out)
+	case *parser.StructDecl:
+		for _, m := range x.Methods {
+			collectTypedLocalsInBlock(m.Body, out)
+		}
+	case parser.Stmt:
+		collectTypedLocalsInStmt(x, out)
+	}
+}
+
+func collectTypedLocalsInBlock(b *parser.BlockStmt, out map[*parser.LetDecl]string) {
+	if b == nil {
+		return
+	}
+	for _, inner := range b.Declarations {
+		collectTypedLocals(inner, out)
+	}
+}
+
+func collectTypedLocalsInStmt(s parser.Stmt, out map[*parser.LetDecl]string) {
+	if s == nil {
+		return
+	}
+	switch x := s.(type) {
+	case *parser.BlockStmt:
+		collectTypedLocalsInBlock(x, out)
+	case *parser.IfStmt:
+		collectTypedLocalsInStmt(x.Then, out)
+		collectTypedLocalsInStmt(x.Else, out)
+	case *parser.WhileStmt:
+		collectTypedLocalsInStmt(x.Body, out)
+	case *parser.DoWhileStmt:
+		collectTypedLocalsInStmt(x.Body, out)
+	case *parser.ForStmt:
+		for _, ini := range x.Inits {
+			collectTypedLocals(ini, out)
+		}
+		collectTypedLocalsInStmt(x.Body, out)
+	case *parser.ForInStmt:
+		collectTypedLocalsInStmt(x.Body, out)
+	case *parser.ForOfStmt:
+		collectTypedLocalsInStmt(x.Body, out)
+	case *parser.SwitchStmt:
+		for _, c := range x.Cases {
+			for _, cd := range c.Body {
+				collectTypedLocals(cd, out)
+			}
+		}
+		for _, cd := range x.Default {
+			collectTypedLocals(cd, out)
+		}
+	}
 }
 
 func ValidateNativeEmitSupport(ctx *NativeEmitContext) error {

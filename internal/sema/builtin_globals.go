@@ -26,7 +26,11 @@ var nativeBuiltinNames = []string{
 	"trace", "parsejson", "tojson",
 	"abs", "sqrt", "cbrt", "number", "string",
 	"gc", "gccollect", "gcdisable", "gcenable", "gcframestep", "gcstats",
+	"internclear",
 	"arena", "arenareset", "arenaallocarray", "arenaallocstruct",
+	"arraypush", "arraypop", "arrayslice", "arraysort", "arrayreverse",
+	"arrayincludes", "arrayindexof", "arrayconcat", "assetpath",
+	"replace", "replaceall",
 }
 
 func seedGlobalBuiltins(s *Scope) {

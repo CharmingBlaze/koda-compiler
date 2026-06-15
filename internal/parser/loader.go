@@ -22,6 +22,7 @@ type parseCacheEntry struct {
 
 var parseCacheMu sync.Mutex
 var parseCache = make(map[string]parseCacheEntry)
+var loadModuleMu sync.Mutex
 
 func resetParseCache() {
 	parseCacheMu.Lock()
@@ -71,28 +72,56 @@ func parseProgramSource(absPath string, src string) (*Program, error) {
 func loadModuleImports(modulePath string, prog *Program, bundle *ProgramBundle, visited map[string]bool, overlays map[string]string) error {
 	var imports []string
 	findImports(prog, &imports)
+	if len(imports) == 0 {
+		return nil
+	}
+	type result struct {
+		err error
+	}
+	results := make(chan result, len(imports))
+	var wg sync.WaitGroup
 	for _, rel := range imports {
-		abs, err := ResolveImportPath(modulePath, rel)
-		if err != nil {
-			return err
-		}
-		if err := loadModule(abs, bundle, visited, overlays); err != nil {
-			return err
+		rel := rel
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			abs, err := ResolveImportPath(modulePath, rel)
+			if err != nil {
+				results <- result{err: err}
+				return
+			}
+			if err := loadModule(abs, bundle, visited, overlays); err != nil {
+				results <- result{err: err}
+			}
+		}()
+	}
+	wg.Wait()
+	close(results)
+	for r := range results {
+		if r.err != nil {
+			return r.err
 		}
 	}
 	return nil
 }
 
 func loadModule(path string, bundle *ProgramBundle, visited map[string]bool, overlays map[string]string) error {
+	loadModuleMu.Lock()
 	if visited[path] {
 		if _, ok := bundle.Modules[path]; ok {
+			loadModuleMu.Unlock()
 			return nil
 		}
+		loadModuleMu.Unlock()
 		return fmt.Errorf("import cycle detected: %s", path)
 	}
-
 	visited[path] = true
-	defer delete(visited, path)
+	loadModuleMu.Unlock()
+	defer func() {
+		loadModuleMu.Lock()
+		delete(visited, path)
+		loadModuleMu.Unlock()
+	}()
 
 	var src string
 	hasOverlayEntry := false
@@ -127,7 +156,9 @@ func loadModule(path string, bundle *ProgramBundle, visited map[string]bool, ove
 	if err != nil {
 		return err
 	}
+	loadModuleMu.Lock()
 	bundle.Modules[path] = prog
+	loadModuleMu.Unlock()
 
 	if !hasOverlayEntry {
 		if fi, err := os.Stat(path); err == nil {

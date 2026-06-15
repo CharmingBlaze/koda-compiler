@@ -1,31 +1,10 @@
 # Chapter 6 — Objects and arrays
 
-**You will learn:** object literals, arrays, indexing, methods, and the `@array` module.
+**You will learn:** arrays for lists, and object literals for JSON-like data.
 
 **Time:** ~15 minutes.
 
----
-
-## Objects
-
-```koda
-let player = {
-    name: "Hero",
-    x: 100,
-    y: 200
-};
-
-player.x = player.x + 10;
-print(player["name"]);
-
-let copy = { name, x, y };  // shorthand when keys match variable names
-```
-
-Delete a property:
-
-```koda
-delete player["temp"];
-```
+> **Modeling a player or enemy?** Read [chapter 7 — Structs](07-structs-and-enums.md) first. Use structs for game data, not `{ x: 10, y: 20 }`.
 
 ---
 
@@ -46,6 +25,30 @@ Slice and sort:
 let part = items.slice(1, 3);
 items.sort();
 ```
+
+---
+
+## Objects — for config and JSON
+
+Object literals are flexible maps. Use them when the shape comes from a file or API:
+
+```koda
+let config = {
+    volume: 80,
+    fullscreen: true
+};
+
+print(config.volume);
+```
+
+Shorthand when keys match variable names:
+
+```koda
+let volume = 80;
+let cfg = { volume };
+```
+
+`delete` and advanced object patterns are in the [language reference](../../language.md) — not needed on day one.
 
 ---
 
@@ -71,8 +74,6 @@ let array = import "@array";
 let nums = array.range(0, 10);
 let total = array.sum(nums);
 array.shuffle(nums);
-
-let pairs = array.zip(["a", "b"], [1, 2]);
 ```
 
 | Function | Purpose |
@@ -80,9 +81,7 @@ let pairs = array.zip(["a", "b"], [1, 2]);
 | `range(from, to)` | `[from, …, to-1]` |
 | `fill(n, val)` | Array of `n` copies of `val` |
 | `sum(arr)` | Numeric sum |
-| `zip(a, b)` | Pairs of elements |
 | `shuffle(arr)` | Random reorder (in place) |
-| `sample(arr, n)` | `n` random elements |
 
 Full API: [stdlib/array](../stdlib/array.md).
 
@@ -90,7 +89,7 @@ Full API: [stdlib/array](../stdlib/array.md).
 
 ## Try it yourself
 
-Build an inventory array, push three items, shuffle it, and print each item in a `for` loop.
+Keep an inventory **array**, load settings from a JSON **object** with `import "@json"`, and store game entities as **structs** (chapter 7).
 
 ---
 

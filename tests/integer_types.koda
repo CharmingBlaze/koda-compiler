@@ -1,0 +1,13 @@
+func main() {
+    let n: i32 = 40;
+    let m: i32 = 2;
+    let sum: i32 = n + m;
+    assert(sum == 42, "i32 add");
+
+    let byte: u8 = 255;
+    let one: u8 = 1;
+    let wrapped: u8 = byte + one;
+    assert(wrapped == 0, "u8 wrap");
+
+    print("PASS integer_types");
+}

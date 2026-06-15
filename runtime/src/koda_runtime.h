@@ -34,6 +34,7 @@ void koda_gc_collect(void);
 void koda_gc_use_shadow_stack(bool enable);
 void koda_gc_frame_step(double budget_ms);
 Value koda_gc_stats(int argc, Value* argv);
+void koda_intern_clear(void);
 
 #include "shadow_stack.h"
 
@@ -81,6 +82,9 @@ Value koda_struct_set(Value obj, int64_t index, Value val);
 Value koda_object_get(Value obj, Value key);
 Value koda_object_set(Value obj, Value key, Value value);
 Value koda_object_remove(Value obj, Value key);
+Value koda_array_push_argv(int argc, Value* argv);
+Value koda_array_pop_argv(int argc, Value* argv);
+Value koda_asset_path(int argc, Value* argv);
 
 /** Native lowering for `for-in` / `for-of` over arrays and tables (slot order). */
 Value koda_forof_length(Value v);

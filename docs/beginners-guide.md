@@ -10,7 +10,7 @@ Welcome. This guide assumes you have **never used Koda** and may be new to compi
 
 ## What is Koda?
 
-Koda is a **programming language that compiles to a native executable**. You write `.koda` files, run `koda build`, and get a binary your players or users can run **without installing Koda**.
+Koda is an **easy native language for games, tools, and desktop apps**. You write `.koda` files, run `koda build`, and get a binary your players or users can run **without installing Koda**.
 
 | You write | You get |
 |-----------|---------|
@@ -87,7 +87,7 @@ This creates `koda.json`, `src/main.koda`, and `assets/`.
 |----------|---------|--------------|
 | Hello | `koda new myapp` | Minimal print program |
 | Text game | `koda new lander --template game` | Lunar lander in the terminal |
-| Graphics | `koda new bounce --template graphics` | Raylib window (needs link flags) |
+| Graphics | `koda new bounce --template graphics` | Bouncing ball with `@game` API |
 
 ---
 
@@ -99,25 +99,42 @@ let score = 42;
 let alive = true;
 let empty = null;
 
+const gravity = 900;
+const screenWidth = 800;
+
 print(type(name));   // string
 print(type(score));   // number
-print(type(alive));   // bool
-print(type(empty));   // null
+```
+
+| Keyword | Meaning |
+|---------|---------|
+| `let` | Mutable binding |
+| `const` | Immutable — cannot reassign |
+
+Optional type annotations (add when you want clarity):
+
+```koda
+let lives: int = 3;
+let dt: float = 0.016;
+let label: string = "Player";
 ```
 
 | Type | Example | Notes |
 |------|---------|-------|
-| Number | `42`, `3.14`, `0xff` | 64-bit float |
+| Number | `42`, `3.14` | Inferred as 64-bit float; use `int` when needed |
 | String | `"hello"` | Escapes: `\n`, `\t`, `\"`, `\\` |
 | Bool | `true`, `false` | |
 | Null | `null` | “No value” |
 | Array | `[1, 2, 3]` | Ordered list |
-| Object | `{ x: 1, y: 2 }` | Key/value map |
+| Struct | `Player { x: 1 }` | Named game/app data (preferred) |
+| Object | `{ x: 1 }` | JSON/config maps (not for core game state) |
 | Function | `func(x) { return x; }` | Callable value |
 
-**Case-insensitive:** `print`, `Print`, and `PRINT` are the same.
+**Equality:** use `==` and `!=` only. One obvious comparison operator.
 
-Reassign with `=`:
+**Case-insensitive:** `print`, `Print`, and `PRINT` are the same for keywords and builtins.
+
+Reassign `let` with `=`:
 
 ```koda
 let x = 1;
@@ -213,54 +230,32 @@ More: [Learn — Functions](learn/05-functions.md).
 
 ---
 
-## 6. Objects and arrays (20 minutes)
+## 6. Structs and game data (20 minutes)
 
-```koda
-let player = { x: 10, y: 20, name: "hero" };
-player.x = player.x + 5;
-print(player.name);
-
-let items = ["sword", "shield"];
-items.push("potion");
-print(len(items));
-print(items[0]);
-```
-
-**String methods:**
-
-```koda
-let s = "  Koda  ";
-print(s.trim());
-print(s.toupper());
-```
-
-**Array helpers** — `import "@array"` or `#include "stdlib/array.koda"`:
-
-```koda
-let nums = range(0, 5);   // [0,1,2,3,4]
-let total = sum(nums);
-shuffle(nums);
-```
-
-More: [Learn — Objects and arrays](learn/06-objects-and-arrays.md).
-
----
-
-## 7. Structs and enums (15 minutes)
-
-Structs group named fields with compile-time checking:
+**Structs are the main data model** for games and apps. Objects are for JSON and config — not your first choice for a player or enemy.
 
 ```koda
 struct Player {
-    x, y, speed, health
+    x, y,
+    speed,
+    health
 }
 
-let p = Player { x: 0, y: 0, speed: 200, health: 100 };
-p.x = p.x + p.speed * 0.016;
-print(p.health);
+let player = Player {
+    x: 400,
+    y: 300,
+    speed: 220,
+    health: 100
+};
+
+func updatePlayer(player, dt) {
+    if (isKeyDown(KEY_RIGHT)) {
+        player.x = player.x + player.speed * dt;
+    }
+}
 ```
 
-Enums for states:
+Enums for phases and states:
 
 ```koda
 enum State {
@@ -273,19 +268,37 @@ if (state == State.Dead) {
 }
 ```
 
-Same mental model as C structs and enums. More: [Learn — Structs and enums](learn/07-structs-and-enums.md).
+More: [Learn — Structs and enums](learn/07-structs-and-enums.md).
+
+---
+
+## 7. Arrays and JSON objects (15 minutes)
+
+Arrays hold lists. Object literals are for config and parsed JSON — not core game entities.
+
+```koda
+let items = ["sword", "shield"];
+items.push("potion");
+print(len(items));
+
+let config = { volume: 80, fullscreen: true };
+```
+
+**Array helpers** — `import "@array"`:
+
+```koda
+let nums = range(0, 5);   // [0,1,2,3,4]
+let total = sum(nums);
+shuffle(nums);
+```
+
+More: [Learn — Objects and arrays](learn/06-objects-and-arrays.md).
 
 ---
 
 ## 8. Modules and imports (15 minutes)
 
-**Include** merges another file at compile time:
-
-```koda
-#include "stdlib/timer.koda"
-```
-
-**Import** loads a module and returns its exports:
+**Import** loads a standard or local module (preferred for beginners):
 
 ```koda
 let math = import "@math";
@@ -295,17 +308,35 @@ let io = import "@io";
 let json = import "@json";
 ```
 
+Graphics projects use the `@game` wrapper:
+
+```koda
+#include "wrappers/raylib_shim/raylib.koda"
+#include "@game"
+
+func main() {
+    game.open(800, 600, "My Game");
+    game.fps(60);
+    while (game.running()) {
+        let dt = game.delta();
+        game.begin();
+        game.clear(Color.dark);
+        game.text("Hello, Koda!", 300, 280, 30, Color.white);
+        game.end();
+    }
+}
+```
+
 | Import | Provides |
 |--------|----------|
+| `@game` | `open`, `running`, `delta`, `begin`, `end`, `clear`, `text`, `rect`, … |
 | `@math` | `sin`, `lerp`, `random`, `pi`, … |
 | `@json` | `parse`, `stringify`, `try_parse` |
 | `@io` | `read`, `write`, `exists`, `list`, … |
 | `@timer` | Countdowns, cooldowns, intervals |
 | `@array` | `range`, `shuffle`, `zip`, … |
-| `@vec2`, `@vec3` | 2D/3D vector helpers |
-| `@util`, `@noise`, `@str` | Small helper libraries |
 
-Dot notation on a local binding works: `math.sin(1.0)`, `io.exists("save.dat")`.
+`#include` merges source at compile time — advanced/low-level; beginners use `import` instead.
 
 More: [Learn — Modules](learn/08-modules-and-imports.md) · [Stdlib overview](stdlib/README.md).
 
@@ -377,13 +408,16 @@ koda clean                    # remove build artifacts
 {
   "name": "mygame",
   "entry": "src/main.koda",
+  "lint": "beginner",
   "bundle": { "assets": ["assets"] },
   "native": {
     "sources": ["wrappers/raylib_shim/wrapper.c"],
-    "linkflags": ""
+    "graphics": true
   }
 }
 ```
+
+Set `"graphics": true` for Raylib projects — the compiler adds platform link flags automatically. Advanced users can still set `KODA_LINKFLAGS`.
 
 More: [Learn — Building and shipping](learn/10-building-and-shipping.md) · [CLI reference](reference/cli.md) · [Distribution](guides/distribution.md).
 
@@ -399,33 +433,50 @@ cd lander
 koda run
 ```
 
-**Graphics** — Raylib via shim:
+**Graphics** — `@game` wrapper over Raylib:
 
 ```bash
 koda new bounce --template graphics
 cd bounce
-# Set KODA_LINKFLAGS for your OS, then:
+koda doctor    # check toolchain + raylib
 koda run
 ```
 
-Game loop pattern:
+Gold-standard game loop:
 
 ```koda
-while (!windowshouldclose()) {
-    let dt = deltatime();
-    // update(dt)
-    // draw()
-    gcFrameStep(0.5);   // spread GC work across frames (~0.5 ms budget)
+#include "wrappers/raylib_shim/raylib.koda"
+#include "@game"
+
+struct Player {
+    x, y, speed, health
 }
-```
 
-For heavy per-frame allocation (particles, temp objects), use a bump arena and reset it each frame:
+func main() {
+    game.open(800, 600, "Koda Game");
+    game.fps(60);
 
-```koda
-let frameArena = arena(512 * 1024);
-let particles = arenaAllocArray(frameArena, 256);
-// ... use particles this frame ...
-arenaReset(frameArena);
+    let player = Player {
+        x: 400, y: 300, speed: 220, health: 100
+    };
+
+    while (game.running()) {
+        let dt = game.delta();
+
+        if (game.keyDown(Key.Left)) {
+            player.x = player.x - player.speed * dt;
+        }
+        if (game.keyDown(Key.Right)) {
+            player.x = player.x + player.speed * dt;
+        }
+
+        game.begin();
+        game.clear(Color.dark);
+        game.rect(player.x, player.y, 32, 32, Color.white);
+        game.end();
+        game.setGcBudget(0.5);
+    }
+}
 ```
 
 Cheatsheet: [Game development](guides/game-dev.md) · [Raylib guide](guides/raylib.md).
@@ -438,11 +489,11 @@ Cheatsheet: [Game development](guides/game-dev.md) · [Raylib guide](guides/rayl
 |---------|-----|
 | `koda` not found | Add SDK folder to PATH |
 | `stdlib` missing | Keep `stdlib/` next to `koda.exe` |
-| Link errors on graphics | Set `KODA_LINKFLAGS` / Raylib paths |
+| Link errors on graphics | Run `koda doctor` — follow FAIL lines |
 | Parse error | `koda check file.koda` |
 | Weird runtime behavior | Small repro + [FAQ](faq.md) |
 
-Run diagnostics:
+Run diagnostics first:
 
 ```bash
 koda doctor

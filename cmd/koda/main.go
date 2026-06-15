@@ -14,6 +14,7 @@ import (
 	"koda/internal/kodahome"
 	"koda/internal/nativebuild"
 	"koda/internal/parser"
+	"koda/internal/project"
 	"koda/internal/sema"
 )
 
@@ -563,11 +564,21 @@ func defaultExeName(source string) string {
 }
 
 func checkFile(path string) error {
+	return checkFileWithOptions(path, true)
+}
+
+func checkFileWithOptions(path string, warnUnused bool) error {
 	bundle, err := parser.LoadProgram(path)
 	if err != nil {
 		return err
 	}
-	_, err = sema.PrepareNativeBundle(bundle)
+	beginnerLint := false
+	warnUnreachable := false
+	if ctx, err := project.LoadContext(path); err == nil && ctx != nil {
+		warnUnused, beginnerLint, warnUnreachable = ctx.PrepareOptionsForCheck(warnUnused)
+	}
+	opts := &sema.PrepareOptions{WarnUnused: warnUnused, BeginnerLint: beginnerLint, WarnUnreachable: warnUnreachable}
+	_, err = sema.PrepareNativeBundleWithOptions(bundle, opts)
 	return err
 }
 func disasmFile(path string) error {

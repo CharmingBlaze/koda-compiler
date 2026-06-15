@@ -393,6 +393,8 @@ func (l *Lexer) lookupKeyword(text string) TokenType {
 		return TokenIn
 	case "let":
 		return TokenLet
+	case "const":
+		return TokenConst
 	case "var":
 		return TokenVar
 	case "null":

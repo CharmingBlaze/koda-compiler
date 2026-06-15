@@ -1,0 +1,68 @@
+// @game — beginner-friendly game loop API over the Raylib shim.
+// Include the Raylib shim first, then this module:
+//   #include "wrappers/raylib_shim/raylib.koda"
+//   #include "@game"
+//
+// Graphics projects: set "graphics": true in koda.json (auto link flags).
+
+let game = {
+    open: func(w, h, title) {
+        initwindow(w, h, title);
+    },
+    close: func() {
+        closewindow();
+    },
+    running: func() {
+        return !windowshouldclose();
+    },
+    delta: func() {
+        return deltatime();
+    },
+    fps: func(n) {
+        settargetfps(n);
+    },
+    begin: func() {
+        begindrawing();
+    },
+    end: func() {
+        enddrawing();
+    },
+    clear: func(color) {
+        clearbackground(color);
+    },
+    text: func(msg, x, y, size, color) {
+        drawtext(msg, x, y, size, color);
+    },
+    rect: func(x, y, w, h, color) {
+        drawrectangle(x, y, w, h, color);
+    },
+    circle: func(x, y, r, color) {
+        drawcircle(x, y, r, color);
+    },
+    keyDown: func(key) {
+        return iskeydown(key);
+    },
+    keyPressed: func(key) {
+        return iskeypressed(key);
+    },
+    setGcBudget: func(ms) {
+        gcframestep(ms);
+    }
+};
+
+let Key = {
+    Left: 263,
+    Right: 262,
+    Up: 265,
+    Down: 264,
+    Space: 32,
+    Escape: 256
+};
+
+let Color = {
+    dark: 4278190080,
+    white: 4294967295,
+    red: 4278190335,
+    green: 4278255360,
+    blue: 4294901760
+};

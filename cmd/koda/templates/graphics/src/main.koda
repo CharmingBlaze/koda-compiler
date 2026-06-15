@@ -1,52 +1,55 @@
 #include "../wrappers/raylib_shim/raylib.koda"
+#include "@game"
+
+struct Ball {
+    x, y,
+    velx, vely,
+    radius
+}
 
 func main() {
-    let width = 640;
-    let height = 480;
-    let sky = 4278190319;
-    let white = 4294967295;
-    let paddle = 4283215696;
+    game.open(640, 480, "{{name}}");
+    game.fps(60);
 
-    initwindow(width, height, "{{name}}");
-    settargetfps(60);
+    let ball = Ball {
+        x: 320.0,
+        y: 240.0,
+        velx: 140.0,
+        vely: 100.0,
+        radius: 20.0
+    };
 
-    let ballx = 320.0;
-    let bally = 240.0;
-    let velx = 140.0;
-    let vely = 100.0;
-    let radius = 20.0;
+    while (game.running()) {
+        let dt = game.delta();
 
-    while (!windowshouldclose()) {
-        let dt = deltatime();
+        ball.x = ball.x + ball.velx * dt;
+        ball.y = ball.y + ball.vely * dt;
 
-        ballx = ballx + velx * dt;
-        bally = bally + vely * dt;
-
-        if (ballx < radius) {
-            ballx = radius;
-            velx = -velx;
+        if (ball.x < ball.radius) {
+            ball.x = ball.radius;
+            ball.velx = -ball.velx;
         }
-        if (ballx > width - radius) {
-            ballx = width - radius;
-            velx = -velx;
+        if (ball.x > 640 - ball.radius) {
+            ball.x = 640 - ball.radius;
+            ball.velx = -ball.velx;
         }
-        if (bally < radius) {
-            bally = radius;
-            vely = -vely;
+        if (ball.y < ball.radius) {
+            ball.y = ball.radius;
+            ball.vely = -ball.vely;
         }
-        if (bally > height - radius) {
-            bally = height - radius;
-            vely = -vely;
+        if (ball.y > 480 - ball.radius) {
+            ball.y = 480 - ball.radius;
+            ball.vely = -ball.vely;
         }
 
-        begindrawing();
-        clearbackground(sky);
-        drawrectangle(0, height - 40, width, 40, paddle);
-        drawcircle(ballx, bally, radius, white);
-        drawtext("{{name}} — bouncing ball", 12, 12, 20, white);
-        enddrawing();
-        gcframestep();
+        game.begin();
+        game.clear(Color.dark);
+        game.rect(0, 480 - 40, 640, 40, Color.green);
+        game.circle(ball.x, ball.y, ball.radius, Color.white);
+        game.text("{{name}} — bouncing ball", 12, 12, 20, Color.white);
+        game.end();
+        game.setGcBudget(0.5);
     }
 
-    closewindow();
+    game.close();
 }

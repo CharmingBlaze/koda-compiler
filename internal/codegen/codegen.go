@@ -156,79 +156,84 @@ type Generator struct {
 	runtimeStringReplace    *ir.Func
 	runtimeStringReplaceAll *ir.Func
 	runtimeReadFile         *ir.Func
+	runtimeAssetPath        *ir.Func
 
-	runtimeWriteFile    *ir.Func
-	runtimeAppendFile   *ir.Func
-	runtimeFileExists   *ir.Func
-	runtimeDeleteFile   *ir.Func
-	runtimeIsFile       *ir.Func
-	runtimeIsDir        *ir.Func
-	runtimeFileSize     *ir.Func
-	runtimeListDir      *ir.Func
-	runtimeKeys         *ir.Func
-	runtimeAssert       *ir.Func
-	runtimeTrace        *ir.Func
-	runtimeParseJSON    *ir.Func
-	runtimeJsonParse    *ir.Func
-	runtimeJsonTryParse *ir.Func
-	runtimeToJSON       *ir.Func
-	runtimeAllocObj     *ir.Func
-	runtimeAllocStruct  *ir.Func
-	runtimeStructGet    *ir.Func
-	runtimeStructSet    *ir.Func
-	runtimeObjGet       *ir.Func
-	runtimeObjSet       *ir.Func
-	runtimeObjRemove    *ir.Func
-	runtimeUnboxNumber  *ir.Func
-	runtimeBoxNumber    *ir.Func
-	runtimeSet          *ir.Func
-	runtimeAllocStr     *ir.Func
-	runtimeAllocArray   *ir.Func
-	runtimeArrayGet     *ir.Func
-	runtimeArraySet     *ir.Func
-	runtimeArrayPush    *ir.Func
-	runtimeArrayPop     *ir.Func
-	runtimeArrayLen     *ir.Func
-	runtimeForOfLength  *ir.Func
-	runtimeForOfKeyAt   *ir.Func
-	runtimeForOfValueAt *ir.Func
-	runtimeType         *ir.Func
-	runtimeLen          *ir.Func
-	runtimeAbs          *ir.Func
-	runtimeSqrt         *ir.Func
-	runtimeCbrt         *ir.Func
-	runtimeNumber       *ir.Func
-	runtimeString       *ir.Func
-	runtimeStringConcat *ir.Func
-	runtimeRange        *ir.Func
-	runtimeAllocCell    *ir.Func
-	runtimeCellRead     *ir.Func
-	runtimeCellWrite    *ir.Func
-	runtimeGcCollect    *ir.Func
-	runtimeGcDisable    *ir.Func
-	runtimeGcEnable     *ir.Func
-	runtimeGcFrameStep  *ir.Func
-	runtimeGcStats      *ir.Func
-	runtimeArena        *ir.Func
-	runtimeArenaReset   *ir.Func
+	runtimeWriteFile        *ir.Func
+	runtimeAppendFile       *ir.Func
+	runtimeFileExists       *ir.Func
+	runtimeDeleteFile       *ir.Func
+	runtimeIsFile           *ir.Func
+	runtimeIsDir            *ir.Func
+	runtimeFileSize         *ir.Func
+	runtimeListDir          *ir.Func
+	runtimeKeys             *ir.Func
+	runtimeAssert           *ir.Func
+	runtimeTrace            *ir.Func
+	runtimeParseJSON        *ir.Func
+	runtimeJsonParse        *ir.Func
+	runtimeJsonTryParse     *ir.Func
+	runtimeToJSON           *ir.Func
+	runtimeAllocObj         *ir.Func
+	runtimeAllocStruct      *ir.Func
+	runtimeStructGet        *ir.Func
+	runtimeStructSet        *ir.Func
+	runtimeObjGet           *ir.Func
+	runtimeObjSet           *ir.Func
+	runtimeObjRemove        *ir.Func
+	runtimeUnboxNumber      *ir.Func
+	runtimeBoxNumber        *ir.Func
+	runtimeSet              *ir.Func
+	runtimeAllocStr         *ir.Func
+	runtimeAllocArray       *ir.Func
+	runtimeArrayGet         *ir.Func
+	runtimeArraySet         *ir.Func
+	runtimeArrayPush        *ir.Func
+	runtimeArrayPushArgv    *ir.Func
+	runtimeArrayPop         *ir.Func
+	runtimeArrayPopArgv     *ir.Func
+	runtimeArrayLen         *ir.Func
+	runtimeForOfLength      *ir.Func
+	runtimeForOfKeyAt       *ir.Func
+	runtimeForOfValueAt     *ir.Func
+	runtimeType             *ir.Func
+	runtimeLen              *ir.Func
+	runtimeAbs              *ir.Func
+	runtimeSqrt             *ir.Func
+	runtimeCbrt             *ir.Func
+	runtimeNumber           *ir.Func
+	runtimeString           *ir.Func
+	runtimeStringConcat     *ir.Func
+	runtimeRange            *ir.Func
+	runtimeAllocCell        *ir.Func
+	runtimeCellRead         *ir.Func
+	runtimeCellWrite        *ir.Func
+	runtimeGcCollect        *ir.Func
+	runtimeGcDisable        *ir.Func
+	runtimeGcEnable         *ir.Func
+	runtimeGcFrameStep      *ir.Func
+	runtimeGcStats          *ir.Func
+	runtimeInternClear      *ir.Func
+	runtimeArena            *ir.Func
+	runtimeArenaReset       *ir.Func
 	runtimeArenaAllocArray  *ir.Func
 	runtimeArenaAllocStruct *ir.Func
-	runtimePushFrame    *ir.Func
-	runtimePopFrame     *ir.Func
-	runtimeOk           *ir.Func
-	runtimeErr          *ir.Func
-	runtimeValuesEqual  *ir.Func
-	runtimePanic        *ir.Func
-	runtimeMatches      *ir.Func
-	runtimePushCall     *ir.Func
-	runtimePopCall      *ir.Func
-	runtimeMalloc       *ir.Func
-	sourcePath          string
-	localIsCell         map[string]bool
-	moduleGlobals       map[string]value.Value
-	moduleGlobalIsCell  map[string]bool
-	loopStack           []loopContext
-	tempN               int
+	runtimePushFrame        *ir.Func
+	runtimePopFrame         *ir.Func
+	runtimeOk               *ir.Func
+	runtimeErr              *ir.Func
+	runtimeValuesEqual      *ir.Func
+	runtimePanic            *ir.Func
+	runtimeMatches          *ir.Func
+	runtimePushCall         *ir.Func
+	runtimePopCall          *ir.Func
+	runtimeMalloc           *ir.Func
+	sourcePath              string
+	dbg                     *debugInfo
+	localIsCell             map[string]bool
+	moduleGlobals           map[string]value.Value
+	moduleGlobalIsCell      map[string]bool
+	loopStack               []loopContext
+	tempN                   int
 
 	shadowLayout     *sema.ShadowLayout
 	shadowFramePtr   value.Value
@@ -356,6 +361,7 @@ func NewGenerator(ctx *sema.NativeEmitContext) *Generator {
 		runtimeStringReplace:    runtimeFuncs["KODA_string_replace"],
 		runtimeStringReplaceAll: runtimeFuncs["KODA_string_replaceAll"],
 		runtimeReadFile:         runtimeFuncs["KODA_readFile"],
+		runtimeAssetPath:        runtimeFuncs["KODA_asset_path"],
 		runtimeWriteFile:        runtimeFuncs["KODA_writeFile"],
 		runtimeAppendFile:       runtimeFuncs["KODA_appendFile"],
 		runtimeFileExists:       runtimeFuncs["KODA_fileExists"],
@@ -386,7 +392,9 @@ func NewGenerator(ctx *sema.NativeEmitContext) *Generator {
 		runtimeArrayGet:         runtimeFuncs["KODA_array_get"],
 		runtimeArraySet:         runtimeFuncs["KODA_array_set"],
 		runtimeArrayPush:        runtimeFuncs["KODA_array_push"],
+		runtimeArrayPushArgv:    runtimeFuncs["KODA_array_push_argv"],
 		runtimeArrayPop:         runtimeFuncs["KODA_array_pop"],
+		runtimeArrayPopArgv:     runtimeFuncs["KODA_array_pop_argv"],
 		runtimeArrayLen:         runtimeFuncs["KODA_array_length"], // distinct symbol from KODA_len
 		runtimeForOfLength:      runtimeFuncs["KODA_forof_length"],
 		runtimeForOfKeyAt:       runtimeFuncs["KODA_forof_key_at"],
@@ -408,6 +416,7 @@ func NewGenerator(ctx *sema.NativeEmitContext) *Generator {
 		runtimeGcEnable:         runtimeFuncs["KODA_gc_enable"],
 		runtimeGcFrameStep:      runtimeFuncs["KODA_gc_frame_step"],
 		runtimeGcStats:          runtimeFuncs["KODA_gc_stats"],
+		runtimeInternClear:      runtimeFuncs["KODA_intern_clear"],
 		runtimeArena:            runtimeFuncs["KODA_arena"],
 		runtimeArenaReset:       runtimeFuncs["KODA_arena_reset"],
 		runtimeArenaAllocArray:  runtimeFuncs["KODA_arena_alloc_array"],
@@ -439,11 +448,17 @@ func (g *Generator) Generate(bundle *parser.ProgramBundle) (*ir.Module, error) {
 	if ep, err := parser.BundleEntryPath(bundle); err == nil {
 		g.sourcePath = ep
 	}
+	if g.ctx != nil && g.ctx.EmitDebug {
+		g.dbg = newDebugInfo(g.mod, g.sourcePath)
+	}
 	g.registerBuiltinFuncs()
 
 	// Create user_main function (implicit entry point for all top-level code)
 	userMain := g.mod.NewFunc("user_main", types.I64, ir.NewParam("this", types.I64))
 	g.funcs["user_main"] = userMain
+	if g.dbg != nil {
+		g.dbg.subprogram(userMain, "user_main", g.sourcePath, 1)
+	}
 	g.currentFn = userMain
 
 	// Start emitting into user_main's entry block
@@ -468,6 +483,10 @@ func (g *Generator) Generate(bundle *parser.ProgramBundle) (*ir.Module, error) {
 	g.emitCallTracePush("user_main", g.sourcePath, 0)
 	g.pushDeferLayer()
 	defer g.popDeferLayer()
+
+	if err := g.emitStructMethods(); err != nil {
+		return nil, err
+	}
 
 	// Emit all top-level declarations and statements
 	for _, decl := range entry.Declarations {
@@ -591,23 +610,36 @@ func (g *Generator) emitLetDecl(d *parser.LetDecl) error {
 
 	var storageSlot value.Value
 	var useStack bool
-	switch {
-	case g.ctx.StackDecls[d]:
-		useStack = true
-		storageSlot = g.entryAlloca(types.I64)
-		g.localIsCell[name] = false
-	case g.ctx.EscapingDecls[d]:
-		useStack = false
-		storageSlot = g.block.NewCall(g.runtimeAllocCell)
-		g.localIsCell[name] = true
-	default:
-		/* Conservative: heap cell if escape status unknown (must not keep stack slot past return). */
-		useStack = false
-		storageSlot = g.block.NewCall(g.runtimeAllocCell)
-		g.localIsCell[name] = true
+	var typedAnnot string
+	if g.ctx != nil && g.ctx.TypedLocals != nil {
+		if annot, ok := g.ctx.TypedLocals[d]; ok {
+			typedAnnot = annot
+			useStack = true
+			storageSlot = g.entryAlloca(llvmIntTypeForAnnot(annot))
+			g.localIsCell[name] = false
+		}
+	}
+	if typedAnnot == "" {
+		switch {
+		case g.ctx.StackDecls[d]:
+			useStack = true
+			storageSlot = g.entryAlloca(types.I64)
+			g.localIsCell[name] = false
+		case g.ctx.EscapingDecls[d]:
+			useStack = false
+			storageSlot = g.block.NewCall(g.runtimeAllocCell)
+			g.localIsCell[name] = true
+		default:
+			/* Conservative: heap cell if escape status unknown (must not keep stack slot past return). */
+			useStack = false
+			storageSlot = g.block.NewCall(g.runtimeAllocCell)
+			g.localIsCell[name] = true
+		}
 	}
 	g.locals[name] = storageSlot
-	g.shadowStoreLet(d, storageSlot)
+	if typedAnnot == "" {
+		g.shadowStoreLet(d, storageSlot)
+	}
 	if g.currentFn == g.funcs["user_main"] {
 		g.moduleGlobals[name] = storageSlot
 		g.moduleGlobalIsCell[name] = !useStack
@@ -617,7 +649,11 @@ func (g *Generator) emitLetDecl(d *parser.LetDecl) error {
 	}
 
 	if useStack {
-		g.block.NewStore(constant.NewInt(types.I64, llvmNilTagged), storageSlot)
+		if typedAnnot != "" {
+			g.storeIntLocal(storageSlot, typedAnnot, constant.NewInt(types.I64, 0))
+		} else {
+			g.block.NewStore(constant.NewInt(types.I64, llvmNilTagged), storageSlot)
+		}
 	} else {
 		g.block.NewCall(g.runtimeCellWrite, storageSlot, constant.NewInt(types.I64, llvmNilTagged))
 	}
@@ -626,6 +662,19 @@ func (g *Generator) emitLetDecl(d *parser.LetDecl) error {
 		initVal, err := g.emitExpr(d.Init)
 		if err != nil {
 			return err
+		}
+		if typedAnnot != "" {
+			if lit, ok := d.Init.(*parser.LiteralExpr); ok {
+				if iv, ok2 := literalInt64(lit); ok2 {
+					g.storeIntLocal(storageSlot, typedAnnot, g.intLiteralForAnnot(iv, typedAnnot))
+					return nil
+				}
+			}
+			boxed := g.emitAsKodaI64(initVal)
+			unboxed := g.block.NewCall(g.runtimeUnboxNumber, boxed)
+			asInt := g.block.NewFPToSI(unboxed, types.I64)
+			g.storeIntLocal(storageSlot, typedAnnot, asInt)
+			return nil
 		}
 		boxed := g.emitAsKodaI64(initVal)
 		if useStack {
@@ -930,6 +979,9 @@ func (g *Generator) emitCall(e *parser.CallExpr) (value.Value, error) {
 	}
 
 	if memberExpr != nil && objForThis != nil {
+		if v, handled, err := g.tryEmitStructMethodCall(memberExpr, objForThis, e); handled {
+			return v, err
+		}
 		if v, handled, err := g.tryEmitMethodCall(memberExpr, objForThis, e); handled {
 			return v, err
 		}
@@ -1014,6 +1066,9 @@ func (g *Generator) emitCall(e *parser.CallExpr) (value.Value, error) {
 			argvPtr = g.block.NewGetElementPtr(arrTy, slot, zero, zero)
 		}
 		call := g.block.NewCall(fn, constant.NewInt(types.I32, int64(argCount)), argvPtr)
+		if g.dbg != nil {
+			attachDbg(call, g.dbg.loc(e.Token.File, e.Token.Line))
+		}
 		if types.Equal(fn.Sig.RetType, types.Void) {
 			_ = call
 			return constant.NewInt(types.I64, 0), nil

@@ -1,0 +1,52 @@
+// Color helpers — pure Koda RGBA/HSV utilities.
+
+func rgba(r, g, b, a) {
+    return { r: r, g: g, b: b, a: a };
+}
+
+func hsv(h, s, v) {
+    let c = v * s;
+    let x = c * (1 - abs((h / 60) % 2 - 1));
+    let m = v - c;
+    let rp = 0;
+    let gp = 0;
+    let bp = 0;
+    if (h < 60) {
+        rp = c; gp = x;
+    } else if (h < 120) {
+        rp = x; gp = c;
+    } else if (h < 180) {
+        gp = c; bp = x;
+    } else if (h < 240) {
+        gp = x; bp = c;
+    } else if (h < 300) {
+        rp = x; bp = c;
+    } else {
+        rp = c; bp = x;
+    }
+    return rgba(rp + m, gp + m, bp + m, 1);
+}
+
+func lerp(a, b, t) {
+    return rgba(
+        a.r + (b.r - a.r) * t,
+        a.g + (b.g - a.g) * t,
+        a.b + (b.b - a.b) * t,
+        a.a + (b.a - a.a) * t
+    );
+}
+
+func toHex(c) {
+    let hexChars = "0123456789abcdef";
+    let r = floor(c.r * 255);
+    let g = floor(c.g * 255);
+    let b = floor(c.b * 255);
+    return format("#{}{}{}{}{}{}",
+        hexChars[floor(r / 16)],
+        hexChars[r % 16],
+        hexChars[floor(g / 16)],
+        hexChars[g % 16],
+        hexChars[floor(b / 16)],
+        hexChars[b % 16]
+    );
+}

@@ -1,0 +1,17 @@
+// Input helpers — thin wrappers; link with raylib for game builds.
+
+func keyDown(k) {
+    return false;
+}
+
+func keyPressed(k) {
+    return false;
+}
+
+func mousePos() {
+    return { x: 0, y: 0 };
+}
+
+func mouseButton(b) {
+    return false;
+}

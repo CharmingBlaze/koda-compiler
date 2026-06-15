@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
+	"sort"
 	"time"
 
 	"koda/api"
@@ -11,11 +11,11 @@ import (
 )
 
 type benchOptions struct {
-	count   int
-	warmup  int
-	noOpt   bool
-	debug   bool
-	src     string
+	count    int
+	warmup   int
+	noOpt    bool
+	debug    bool
+	src      string
 	progArgs []string
 }
 
@@ -50,7 +50,7 @@ func parseBenchArgs(args []string) (benchOptions, error) {
 		case "--debug":
 			o.debug = true
 		default:
-			if strings.HasPrefix(before[i], "-") {
+			if stringsHasPrefix(before[i], "-") {
 				return o, fmt.Errorf("unknown flag: %s", before[i])
 			}
 			if o.src != "" {
@@ -63,6 +63,10 @@ func parseBenchArgs(args []string) (benchOptions, error) {
 		return o, fmt.Errorf("usage: koda bench [--count N] [--warmup N] [--no-opt] [--debug] <file.koda> [-- <args...>]")
 	}
 	return o, nil
+}
+
+func stringsHasPrefix(s, prefix string) bool {
+	return len(s) >= len(prefix) && s[:len(prefix)] == prefix
 }
 
 func parsePositiveInt(s string) (int, error) {
@@ -91,7 +95,7 @@ func runBench(args []string) error {
 }
 
 func benchFile(path string, opts nativebuild.BuildOptions, warmup, count int, progArgs []string) error {
-	var total time.Duration
+	timings := make([]time.Duration, 0, count)
 	runs := warmup + count
 	for i := 0; i < runs; i++ {
 		start := time.Now()
@@ -101,12 +105,42 @@ func benchFile(path string, opts nativebuild.BuildOptions, warmup, count int, pr
 			return err
 		}
 		if i >= warmup {
-			total += elapsed
+			timings = append(timings, elapsed)
 			fmt.Fprintf(os.Stderr, "  run %d: %.3f ms\n", i-warmup+1, elapsed.Seconds()*1000)
 		}
 	}
-	avg := total / time.Duration(count)
-	fmt.Printf("bench: %d runs (warmup %d), avg %.3f ms, total %.3f ms\n",
-		count, warmup, avg.Seconds()*1000, total.Seconds()*1000)
+	if len(timings) == 0 {
+		return fmt.Errorf("no benchmark samples collected")
+	}
+	sorted := append([]time.Duration(nil), timings...)
+	sort.Slice(sorted, func(i, j int) bool { return sorted[i] < sorted[j] })
+	var total time.Duration
+	for _, t := range timings {
+		total += t
+	}
+	avg := total / time.Duration(len(timings))
+	p50 := percentile(sorted, 0.50)
+	p95 := percentile(sorted, 0.95)
+	p99 := percentile(sorted, 0.99)
+	fmt.Printf("bench: %d runs (warmup %d)\n", count, warmup)
+	fmt.Printf("  avg  %.3f ms\n", avg.Seconds()*1000)
+	fmt.Printf("  p50  %.3f ms\n", p50.Seconds()*1000)
+	fmt.Printf("  p95  %.3f ms\n", p95.Seconds()*1000)
+	fmt.Printf("  p99  %.3f ms\n", p99.Seconds()*1000)
+	fmt.Printf("  total %.3f ms\n", total.Seconds()*1000)
 	return nil
+}
+
+func percentile(sorted []time.Duration, p float64) time.Duration {
+	if len(sorted) == 0 {
+		return 0
+	}
+	if p <= 0 {
+		return sorted[0]
+	}
+	if p >= 1 {
+		return sorted[len(sorted)-1]
+	}
+	idx := int(float64(len(sorted)-1) * p)
+	return sorted[idx]
 }

@@ -1,6 +1,6 @@
 # Chapter 3 — Variables and types
 
-**You will learn:** Koda's types, `let`, reassignment, and `type()`.
+**You will learn:** Koda's types, `let`, `const`, reassignment, and `type()`.
 
 **Time:** ~10 minutes.
 
@@ -8,7 +8,7 @@
 
 ## Declaring variables
 
-Use `let` at the start of a statement (semicolon required after `let` lines):
+Use `let` for values that change:
 
 ```koda
 let score = 100;
@@ -17,10 +17,30 @@ let ready = true;
 let nothing = null;
 ```
 
-Reassign with `=` (not `let` again):
+Use `const` for values that never change:
+
+```koda
+const gravity = 900;
+const screenWidth = 800;
+```
+
+Reassign `let` with `=` (not `let` again). You cannot reassign `const`.
 
 ```koda
 score = score + 10;
+```
+
+---
+
+## Optional type annotations
+
+Types are usually inferred. Add them when you want clarity:
+
+```koda
+let score = 0;              // inferred number
+let lives: int = 3;         // optional
+let dt: float = 0.016;      // optional
+let name: string = "Jesse"; // optional
 ```
 
 ---
@@ -37,7 +57,21 @@ score = score + 10;
 | Object | `{ a: 1 }` | `"object"` |
 | Function | `func() {}` | `"function"` |
 
-Numbers are 64-bit floats internally — integers and fractions use the same type.
+Numbers are 64-bit floats by default. Use `int` annotations when you need integer semantics.
+
+---
+
+## Equality
+
+Use `==` and `!=` to compare values:
+
+```koda
+if (score == 100) {
+    print("perfect");
+}
+```
+
+There is one equality operator — no `===` / `!==` confusion.
 
 ---
 
@@ -46,7 +80,6 @@ Numbers are 64-bit floats internally — integers and fractions use the same typ
 ```koda
 let line = "Line one\nLine two";
 let quote = "She said \"hi\"";
-let path = "C:\\games\\save.dat";
 ```
 
 Supported escapes: `\n`, `\r`, `\t`, `\"`, `\\`, `\'`.
@@ -57,20 +90,7 @@ Supported escapes: `\n`, `\r`, `\t`, `\"`, `\\`, `\'`.
 
 In `if` conditions, these are **falsy**: `false`, `null`, `0`, `""` (empty string).
 
-Everything else is truthy, including `"0"` and empty arrays.
-
----
-
-## Operators (preview)
-
-```koda
-let a = 10 + 3 * 2;     // 16
-let ok = score >= 100;
-let both = ready && ok;
-let msg = "Score: " + string(score);
-```
-
-Full operator list: [Language reference — Operators](../language.md#5-operators).
+Everything else is truthy.
 
 ---
 
@@ -79,8 +99,8 @@ Full operator list: [Language reference — Operators](../language.md#5-operator
 Write a program that:
 
 1. Stores your name and age in variables.
-2. Prints `type()` for each.
-3. Prints whether age is 18 or older using `if`.
+2. Uses `const` for a maximum score.
+3. Prints `type()` for each binding.
 
 ---
 

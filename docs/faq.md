@@ -76,7 +76,7 @@ Next to the `koda` executable (SDK zip layout). `koda doctor` warns if missing.
 
 ### Graphics / Raylib link errors?
 
-Set `KODA_LINKFLAGS` (and install Raylib). See [Raylib guide](guides/raylib.md) and graphics template README.
+Run `koda doctor` and fix any FAIL lines. Graphics templates set `"graphics": true` in `koda.json` so link flags are applied automatically. See [Game dev guide](guides/game-dev.md).
 
 ---
 

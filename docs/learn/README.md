@@ -8,14 +8,16 @@ A **chapter-by-chapter** path from zero to shipping a small program. Each chapte
 |---------|-------|----------|
 | [01 — Welcome](01-welcome.md) | What Koda is | Understand goals and workflow |
 | [02 — Install](02-install-and-first-run.md) | Setup | Install SDK and run hello world |
-| [03 — Variables](03-variables-and-types.md) | Types | Use numbers, strings, bools, null |
+| [03 — Variables](03-variables-and-types.md) | Types | Use `let`, `const`, numbers, strings |
 | [04 — Control flow](04-control-flow.md) | Logic | Write if, while, for, switch |
 | [05 — Functions](05-functions.md) | Functions | Define, return, closures |
-| [06 — Objects & arrays](06-objects-and-arrays.md) | Data | Objects, arrays, methods |
-| [07 — Structs & enums](07-structs-and-enums.md) | Types | Structs and enums for game state |
-| [08 — Modules](08-modules-and-imports.md) | Code organization | `#include`, `import "@math"` |
+| [07 — Structs & enums](07-structs-and-enums.md) | Game data | **Structs first** — players, enemies, phases |
+| [06 — Objects & arrays](06-objects-and-arrays.md) | Lists & JSON | Arrays and config objects |
+| [08 — Modules](08-modules-and-imports.md) | Code organization | `import "@math"`, local modules |
 | [09 — Files & JSON](09-files-and-json.md) | Persistence | Read/write files, parse JSON |
 | [10 — Ship it](10-building-and-shipping.md) | CLI | build, bundle, test, clean |
+
+> **Note:** Read chapter **7 before chapter 6**. Structs model game state; objects are for JSON and config.
 
 ---
 
@@ -36,4 +38,5 @@ A **chapter-by-chapter** path from zero to shipping a small program. Each chapte
 1. Type examples yourself — do not only read.
 2. Change one line and predict the output before running.
 3. Run `koda check` when something fails to parse.
-4. Keep a `playground.koda` file for experiments.
+4. Run `koda doctor` if builds fail on your machine.
+5. Keep a `playground.koda` file for experiments.

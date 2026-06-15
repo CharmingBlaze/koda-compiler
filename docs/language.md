@@ -60,7 +60,9 @@ let { a, b } = obj;  // object destructuring
 
 **Bitwise:** `&` `|` `^` `~` `<<` `>>` `>>>`
 
-**Comparison:** `<` `<=` `>` `>=` `==` `!=` `===` `!==`
+**Comparison:** `<` `<=` `>` `>=` `==` `!=`
+
+> **Note:** `===` and `!==` are legacy aliases — they behave identically to `==` and `!=`. Use `==` / `!=` only; `koda check` warns on the legacy forms.
 
 **Logic:** `&&` `||` `!`
 

@@ -51,7 +51,19 @@ func runLint(args []string) error {
 }
 
 func runCheckAll(args []string) error {
-	paths := args
+	var paths []string
+	warnUnused := true
+	for _, a := range args {
+		if a == "--warn-unused" {
+			warnUnused = true
+			continue
+		}
+		if a == "--no-warn-unused" {
+			warnUnused = false
+			continue
+		}
+		paths = append(paths, a)
+	}
 	if len(paths) == 0 {
 		paths = []string{"./..."}
 	}
@@ -63,7 +75,7 @@ func runCheckAll(args []string) error {
 		return fmt.Errorf("koda check: no .koda files matched")
 	}
 	for _, path := range files {
-		if err := checkFile(path); err != nil {
+		if err := checkFileWithOptions(path, warnUnused); err != nil {
 			return fmt.Errorf("%s: %w", path, err)
 		}
 	}

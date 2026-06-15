@@ -19,22 +19,16 @@ cd lander
 koda run
 ```
 
-Lunar lander simulation using `print`, loops, and `randomint` — good for learning the language.
-
-### 2. Graphics project (Raylib)
+### 2. Graphics project (`@game` API)
 
 ```bash
 koda new bounce --template graphics
 cd bounce
-```
-
-The template includes `wrappers/raylib_shim/` and `koda.json` native settings. Set link flags for your platform, then:
-
-```powershell
-# Windows example
-$env:KODA_LINKFLAGS = "-lraylib -lopengl32 -lgdi32 -lwinmm"
+koda doctor
 koda run
 ```
+
+The graphics template sets `"graphics": true` in `koda.json` — platform link flags are applied automatically. No manual `KODA_LINKFLAGS` for beginners.
 
 ### 3. Study the repo examples
 
@@ -46,175 +40,129 @@ koda run
 
 ---
 
-## Minimal windowed game
+## Gold-standard windowed game
 
-The Raylib **shim** uses lowercase names matching the wrapper file:
+Use the `@game` wrapper — not raw Raylib names:
 
 ```koda
 #include "wrappers/raylib_shim/raylib.koda"
+#include "@game"
+
+struct Player {
+    x, y,
+    speed,
+    health
+}
 
 func main() {
-    let width = 800;
-    let height = 600;
-    let dark = 255;
-    let white = 4294967295;
+    game.open(800, 600, "Koda Game");
+    game.fps(60);
 
-    initwindow(width, height, "My Game");
-    settargetfps(60);
+    let player = Player {
+        x: 400,
+        y: 300,
+        speed: 220,
+        health: 100
+    };
 
-    while (!windowshouldclose()) {
-        let dt = deltatime();
+    while (game.running()) {
+        let dt = game.delta();
 
-        begindrawing();
-        clearbackground(dark);
-        drawtext("Hello, Koda!", 300, 280, 30, white);
-        enddrawing();
+        if (game.keyDown(Key.Left)) {
+            player.x = player.x - player.speed * dt;
+        }
+        if (game.keyDown(Key.Right)) {
+            player.x = player.x + player.speed * dt;
+        }
+
+        game.begin();
+        game.clear(Color.dark);
+        game.rect(player.x, player.y, 32, 32, Color.white);
+        game.end();
+        game.setGcBudget(0.5);
     }
 
-    closewindow();
+    game.close();
 }
 ```
 
-**Project workflow** — put native glue in `koda.json`:
+### `koda.json` for graphics
 
 ```json
 {
   "name": "mygame",
   "entry": "src/main.koda",
+  "lint": "beginner",
   "native": {
     "sources": ["wrappers/raylib_shim/wrapper.c"],
-    "linkflags": ""
+    "graphics": true
   }
 }
 ```
 
-Set `KODA_LINKFLAGS` in the shell or fill `linkflags` once you know your platform flags.
-
 ---
 
-## The game loop
+## Structs for game state
 
-Every Koda game follows the same pattern as C:
-
-```koda
-#include "wrappers/raylib_shim/raylib.koda"
-
-func main() {
-    initwindow(800, 600, "Game");
-    settargetfps(60);
-
-    let playerx = 400.0;
-    let playery = 300.0;
-
-    while (!windowshouldclose()) {
-        let dt = deltatime();
-
-        // Update — input, physics, AI
-        if (iskeydown(87)) {  // W
-            playery = playery - 200.0 * dt;
-        }
-
-        // Draw
-        begindrawing();
-        clearbackground(255);
-        drawrectangle(playerx - 20, playery - 20, 40, 40, 4294967295);
-        enddrawing();
-    }
-
-    closewindow();
-}
-```
-
-| Phase | Koda helpers |
-|-------|----------------|
-| Timing | `deltatime()`, `programtime()`, `sleep(ms)`, `clock()` |
-| Timers | `#include "stdlib/timer.koda"` or `import "@timer"` — countdown, cooldown, interval |
-| Random | `random()`, `randomint(min, max)`, `randomchoice(arr)`, `randomseed(n)` — OS-seeded xoshiro128** |
-| Input | Shim: `iskeydown`, `iskeypressed` — see [raylib.md](raylib.md) |
-| Arrays | `import "@array"` — `shuffle`, `sample`, `range`, `fill`, `zip` |
-| Math | `math.lerp`, `math.clamp`, `import "@math"` |
-| 2D vectors | `stdlib/vec2.koda` or `import "@vec2"` |
-| 3D vectors | `stdlib/vec3.koda` or `import "@vec3"` |
-
-### Random numbers
-
-```koda
-randomseed(12345);              // reproducible runs (optional)
-let roll = randomint(1, 7);     // integer in [1, 7)
-let bias = random(0.0, 1.0);    // float in [0, 1)
-let enemy = randomchoice(["goblin", "orc", "dragon"]);
-
-let deck = ["A", "K", "Q", "J"];
-shuffle(deck);                  // Fisher–Yates (stdlib/array.koda)
-```
-
-RNG uses **xoshiro128\*\*** seeded from OS entropy (`rand_s` on Windows, `/dev/urandom` on Unix) — not libc `rand()`.
-
-### Timers and pacing
-
-```koda
-#include "stdlib/timer.koda"
-
-let dt = deltatime();           // seconds since last frame (capped ~60 FPS default)
-let t = programtime();          // seconds since program start
-
-let fire_cd = cooldown(0.25);   // gun cooldown — call cooldown_try(fire_cd) each frame
-if (cooldown_try(fire_cd)) {
-    shoot();
-}
-
-let spawn = interval(2.0);      // spawn enemy every 2s
-if (interval_tick(spawn)) {
-    spawn_enemy();
-}
-
-let intro = create(3.0);        // 3-second countdown
-intro = update(intro, dt);
-if (done(intro)) {
-    start_gameplay();
-}
-```
-
----
-
-## Structs and enums for game state
+Structs are the main data model — not object literals:
 
 ```koda
 struct Player {
     x, y, speed, health
 }
 
-enum State {
-    Idle, Running, Dead
-}
-
 func update(player, dt) {
     player.x = player.x + player.speed * dt;
     if (player.health <= 0) {
-        return State.Dead;
+        return false;
     }
-    return State.Running;
+    return true;
 }
 ```
 
-Same mental model as C structs — field access is checked at compile time.
+Use `const` for tuning values:
+
+```koda
+const gravity = 900;
+const screenWidth = 800;
+```
+
+---
+
+## `@game` API reference
+
+| Function | Purpose |
+|----------|---------|
+| `game.open(w, h, title)` | Open window |
+| `game.close()` | Close window |
+| `game.running()` | `true` while window is open |
+| `game.delta()` | Seconds since last frame |
+| `game.fps(n)` | Target frame rate |
+| `game.begin()` / `game.end()` | Start/end drawing |
+| `game.clear(color)` | Clear background |
+| `game.text(msg, x, y, size, color)` | Draw text |
+| `game.rect(x, y, w, h, color)` | Draw rectangle |
+| `game.circle(x, y, r, color)` | Draw circle |
+| `game.keyDown(key)` | Key held this frame |
+| `game.keyPressed(key)` | Key pressed this frame |
+| `game.setGcBudget(ms)` | Incremental GC budget per frame |
+
+`Key` and `Color` constants are defined in `stdlib/game.koda`. Full detail: [stdlib/game](../stdlib/game.md).
+
+Raw Raylib shim names (`initwindow`, `drawtext`, …) remain available for advanced wrapping — see [raylib.md](raylib.md).
 
 ---
 
 ## Build, run, ship
 
 ```bash
-koda run src/main.koda       # fast iteration
-koda watch                   # rebuild on every .koda save
-koda build -o mygame         # release binary
-koda bundle -o dist/mygame   # exe + assets + README for players
+koda run src/main.koda
+koda watch
+koda build -o mygame
+koda bundle -o dist/mygame
 ```
 
-Add sprites and sounds to `assets/` and list them in `koda.json`:
-
-```json
-"bundle": { "assets": ["assets"] }
-```
+Run `koda doctor` before your first graphics build.
 
 ---
 
@@ -222,34 +170,21 @@ Add sprites and sounds to `assets/` and list them in `koda.json`:
 
 | Need | API |
 |------|-----|
-| Frame delta | `deltatime()` |
-| Elapsed time | `programtime()` |
-| Sleep | `sleep(ms)` |
-| RNG | `random()`, `randomint(a,b)`, `randomchoice(arr)`, `randomseed(n)` |
-| Cooldown / spawn timer | `import "@timer"` → `cooldown`, `interval` |
-| 2D math | `math.lerp`, `import "@vec2"` |
-| JSON config | `import "@json"` → `parse`, `stringify`, `tryparse` |
-| Files | `import "@io"` or `readfile` / `writefile` / `fileexists` |
-| Shuffle deck | `import "@array"` → `shuffle`, `sample` |
-| Utilities | `import "@util"` → `clamp01`, `pick_weighted` |
-| 1D noise | `import "@noise"` → `seed`, `value1d` |
-| Log warning | `warn("message")` |
-| Object keys | `keys(obj)` |
-| GC per frame | `gcframestep()` |
-| CLI | `koda run`, `watch`, `build`, `bundle`, `test`, `lint`, `bench`, `repl`, `eval`, `clean`, `lsp` |
-
-See `examples/keys.koda` for common Raylib key/color constants.
+| Window + loop | `import` / `#include "@game"` |
+| Frame delta | `game.delta()` |
+| Input | `game.keyDown(Key.Left)` |
+| Draw | `game.begin()`, `game.clear()`, `game.rect()`, `game.end()` |
+| RNG | `random()`, `randomint(a,b)`, `import "@math"` |
+| Timers | `import "@timer"` |
+| JSON config | `import "@json"` |
+| GC per frame | `game.setGcBudget(0.5)` |
+| Diagnostics | `koda doctor`, `koda check` |
 
 ---
 
 ## GC and performance
 
-- Call **`gcFrameStep(0.5)`** once per frame in heavy games — budget is milliseconds of incremental GC work (see `tests/incremental_gc_test.koda`).
-- Use **`arena(size)`** + **`arenaAllocArray`** / **`arenaAllocStruct`** + **`arenaReset`** for per-frame temp objects that should not pressure the nursery.
-- Use **`gcDisable()`** / **`gcEnable()`** around critical sections if needed.
-- Keep per-frame allocation low; reuse structs and arrays where possible.
-- Deep recursion: set **`KODA_STACK_DEPTH`** (default shadow-stack cap is 131072 frames).
-- Push hot math to C libraries (physics, rendering) via wrappers.
+Beginners should call `game.setGcBudget(0.5)` once per frame — the runtime spreads GC work automatically. Advanced: `arena()`, `gcDisable()`, `gcFrameStep()` — see [runtime and GC](../concepts/runtime-and-gc.md).
 
 ---
 
@@ -257,10 +192,8 @@ See `examples/keys.koda` for common Raylib key/color constants.
 
 | Document | Contents |
 |----------|----------|
-| [Beginner's guide](beginners-guide.md) | Full onboarding |
-| [raylib.md](raylib.md) | Functions, colors, keys, full Pong-style walkthrough |
+| [Beginner's guide](../beginners-guide.md) | Full onboarding |
+| [stdlib/game](../stdlib/game.md) | `@game` module |
+| [raylib.md](raylib.md) | Low-level shim (advanced) |
 | [wrappers.md](../wrappers.md) | Extending bindings with kodawrap |
 | [distribution.md](distribution.md) | Shipping builds |
-| [stdlib](stdlib/README.md) | Module reference |
-| [language.md](../../language.md) | Full syntax reference |
-| [CLI](reference/cli.md) | CLI and `koda.json` |

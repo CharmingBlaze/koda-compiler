@@ -89,6 +89,7 @@ const (
 	TokenImport
 	TokenIn
 	TokenLet
+	TokenConst
 	TokenNull
 	TokenOf
 	TokenReturn
@@ -260,6 +261,8 @@ func (t TokenType) String() string {
 		return "in"
 	case TokenLet:
 		return "let"
+	case TokenConst:
+		return "const"
 	case TokenNull:
 		return "null"
 	case TokenOf:

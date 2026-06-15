@@ -1,0 +1,6 @@
+#include "@color"
+
+func main() {
+    let c = rgba(1, 0, 0, 1);
+    print(toHex(c));
+}
