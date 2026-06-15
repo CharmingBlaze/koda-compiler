@@ -193,7 +193,8 @@ go test ./... -count=1
 
 - [x] `koda run`, `check`, `disasm`, `build`, `bundle`, `wrap`, `paths`, `doctor`, `version`, `help`.
 - [x] **wrapgen** + `koda wrap` (wrapper generation).
-- [ ] `koda watch`, `koda fmt`, REPL, `koda test`, `koda profile`, `koda debug` (if added).
+- [x] `koda watch`, `koda fmt`, `koda bench`, `koda doctor` — shipped.
+- [ ] REPL (`koda eval`), `koda test`, `koda profile`, `koda debug` (if added).
 - [ ] Package manager, LSP, etc. (roadmap).
 
 ---

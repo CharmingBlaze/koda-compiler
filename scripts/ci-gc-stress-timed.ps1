@@ -28,6 +28,14 @@ Invoke-KodaTimed 120 @("run", "--no-opt", "tests/incremental_gc_test.koda")
 
 Write-Host "==> Stress smoke (timed)"
 Invoke-KodaTimed 90 @("run", "tests/stress/stress_mixed_alloc.koda")
+Invoke-KodaTimed 90 @("run", "tests/stress/stress_deep_recursion.koda")
+Invoke-KodaTimed 90 @("run", "tests/stress/stress_string_pressure.koda")
 Invoke-KodaTimed 120 @("run", "--no-opt", "tests/stress/large_game_sim.koda")
+
+Write-Host "==> Tier-1 regression (timed)"
+Invoke-KodaTimed 60 @("run", "tests/struct_methods.koda")
+Invoke-KodaTimed 60 @("run", "tests/integer_types.koda")
+Invoke-KodaTimed 60 @("run", "tests/intern_clear_test.koda")
+Invoke-KodaTimed 60 @("run", "tests/stdlib_modules_test.koda")
 
 Write-Host "==> GC / stress timed runs OK"

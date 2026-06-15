@@ -66,14 +66,20 @@ Engineering snapshot of the language surface, LLVM codegen, C runtime, and wrapp
 
 | Feature | Status |
 |---------|--------|
-| **Methods on object literals** (`let o = { fn draw() { ... } }`) and **`this`** in that context | Supported on LLVM path -- verify with tests you rely on |
-| **Methods declared on named struct types** (`struct Rect { func area() { ... } }`) | **Not implemented** -- use free functions (`func area(r) { ... }`) today |
+| **Methods on object literals** (`let o = { fn draw() { ... } }`) and **`this`** in that context | Supported |
+| **Methods declared on named struct types** (`struct Rect { func area() { ... } }`) | **Supported** — `tests/struct_methods.koda` |
 
-Do not read "object method shorthand works" as "struct types have methods." See [positioning.md](positioning.md#gaps-worth-addressing-now).
+Both paths lower through the same struct slot access codegen.
 
 ### Numbers
 
-All runtime numbers are **64-bit floats**. Integer literals work in source; fractional and large integer semantics follow float rules. Opt-in integer types are planned -- see [ROADMAP.md](ROADMAP.md).
+Runtime values remain **64-bit floats** (`Value` NaN-boxing) unless you opt in with a type annotation:
+
+- **`let n: i32 = 0`** — native integer locals, no NaN-box round-trip in pure integer arithmetic
+- **`let b: u8 = 255`** — 8-bit modular semantics at boundaries
+- Untyped `let` bindings use **numeric type inference** (`KindInt` / `KindFloat`) for fast integer paths where provable
+
+See `tests/integer_types.koda` and [ROADMAP.md](ROADMAP.md).
 
 ### Debug symbols
 

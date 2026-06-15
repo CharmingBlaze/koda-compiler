@@ -57,6 +57,11 @@ run_out 5 "$OUT/gc_control_test$EXE"
 "$KODA" run tests/array_push_growth_test.koda
 "$KODA" run tests/multi_while_flow_test.koda
 
+"$KODA" run tests/struct_methods.koda
+"$KODA" run tests/integer_types.koda
+"$KODA" run tests/intern_clear_test.koda
+"$KODA" run tests/stdlib_modules_test.koda
+
 "$KODA" run tests/math_test.koda
 "$KODA" run tests/json_test.koda
 "$KODA" run tests/random_test.koda

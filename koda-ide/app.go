@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"sync"
 
@@ -134,6 +135,28 @@ func (a *App) GetWorkspaceRoot() string {
 	return a.workspaceRoot
 }
 
+func workspacePath(root, rel string) (string, error) {
+	if root == "" {
+		return "", fmt.Errorf("no workspace open")
+	}
+	cleanRoot, err := filepath.Abs(root)
+	if err != nil {
+		return "", err
+	}
+	full := filepath.Join(cleanRoot, filepath.FromSlash(rel))
+	cleanFull, err := filepath.Abs(full)
+	if err != nil {
+		return "", err
+	}
+	if !strings.EqualFold(cleanFull, cleanRoot) {
+		prefix := cleanRoot + string(os.PathSeparator)
+		if !strings.HasPrefix(strings.ToLower(cleanFull), strings.ToLower(prefix)) {
+			return "", fmt.Errorf("path escapes workspace")
+		}
+	}
+	return cleanFull, nil
+}
+
 // DirEntry is one row in the file tree.
 type DirEntry struct {
 	Name  string `json:"name"`
@@ -146,12 +169,9 @@ func (a *App) ListDir(rel string) ([]DirEntry, error) {
 	a.mu.RLock()
 	root := a.workspaceRoot
 	a.mu.RUnlock()
-	if root == "" {
-		return nil, fmt.Errorf("no workspace open")
-	}
-	full := filepath.Join(root, filepath.FromSlash(rel))
-	if !strings.HasPrefix(filepath.Clean(full), filepath.Clean(root)) {
-		return nil, fmt.Errorf("path escapes workspace")
+	full, err := workspacePath(root, rel)
+	if err != nil {
+		return nil, err
 	}
 	f, err := os.Open(full)
 	if err != nil {
@@ -175,6 +195,12 @@ func (a *App) ListDir(rel string) ([]DirEntry, error) {
 		}
 		out = append(out, DirEntry{Name: name, Rel: filepath.ToSlash(relChild), IsDir: st.IsDir()})
 	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].IsDir != out[j].IsDir {
+			return out[i].IsDir
+		}
+		return strings.ToLower(out[i].Name) < strings.ToLower(out[j].Name)
+	})
 	return out, nil
 }
 
@@ -183,12 +209,9 @@ func (a *App) ReadFile(rel string) (string, error) {
 	a.mu.RLock()
 	root := a.workspaceRoot
 	a.mu.RUnlock()
-	if root == "" {
-		return "", fmt.Errorf("no workspace open")
-	}
-	full := filepath.Join(root, filepath.FromSlash(rel))
-	if !strings.HasPrefix(filepath.Clean(full), filepath.Clean(root)) {
-		return "", fmt.Errorf("path escapes workspace")
+	full, err := workspacePath(root, rel)
+	if err != nil {
+		return "", err
 	}
 	b, err := os.ReadFile(full)
 	if err != nil {
@@ -202,12 +225,9 @@ func (a *App) WriteFile(rel, content string) error {
 	a.mu.RLock()
 	root := a.workspaceRoot
 	a.mu.RUnlock()
-	if root == "" {
-		return fmt.Errorf("no workspace open")
-	}
-	full := filepath.Join(root, filepath.FromSlash(rel))
-	if !strings.HasPrefix(filepath.Clean(full), filepath.Clean(root)) {
-		return fmt.Errorf("path escapes workspace")
+	full, err := workspacePath(root, rel)
+	if err != nil {
+		return err
 	}
 	if err := os.MkdirAll(filepath.Dir(full), 0755); err != nil {
 		return err
@@ -220,14 +240,7 @@ func (a *App) AbsFromWorkspace(rel string) (string, error) {
 	a.mu.RLock()
 	root := a.workspaceRoot
 	a.mu.RUnlock()
-	if root == "" {
-		return "", fmt.Errorf("no workspace open")
-	}
-	full := filepath.Join(root, filepath.FromSlash(rel))
-	if !strings.HasPrefix(filepath.Clean(full), filepath.Clean(root)) {
-		return "", fmt.Errorf("path escapes workspace")
-	}
-	return filepath.Abs(full)
+	return workspacePath(root, rel)
 }
 
 // DiagnoseFile returns load+compile diagnostics; overlay replaces on-disk content for that file when non-empty.

@@ -2,8 +2,8 @@
 
 Prioritized engineering queue for the Koda compiler and runtime. This replaces the historical week-by-week bootstrap plan with **current** ordering based on product fit, beginner impact, and runtime risk.
 
-> **Execution model:** one pipeline -- LLVM IR (`internal/codegen`) + C runtime (`runtime/src`). No bytecode VM.  
-> **Positioning context:** [positioning.md](positioning.md) · **Status today:** [status.md](status.md) · **Detailed matrix:** [MASTER_PLAN.md](MASTER_PLAN.md)
+> **Execution model:** one pipeline — LLVM IR (`internal/codegen`) + C runtime (`runtime/src`). No bytecode VM.  
+> **Positioning context:** [positioning.md](positioning.md) · **Status today:** [status.md](status.md) · **Detailed matrix:** [tests/MASTER_PLAN.md](../tests/MASTER_PLAN.md)
 
 ---
 
@@ -11,146 +11,109 @@ Prioritized engineering queue for the Koda compiler and runtime. This replaces t
 
 | Tier | Meaning |
 |------|---------|
-| **Tier 1 -- Now** | Highest impact on the "C alternative for beginners" claim; do these first |
-| **Tier 2 -- Next** | Strong beginner ROI or runtime safety; follows tier 1 |
-| **Tier 3 -- Soon** | Polish, docs, and smaller runtime gaps |
+| **Tier 1 — Now** | Production hardening and release gates |
+| **Tier 2 — Next** | Strong beginner ROI or runtime safety |
+| **Tier 3 — Soon** | Polish, docs, and smaller runtime gaps |
 | **Long-term** | Strategic; not blockers for game-maker audience |
 
 Each item lists **MASTER_PLAN** refs where they exist. Update this file when priorities shift.
 
 ---
 
-## Tier 1 -- Now
+## Shipped in v0.4.0 (do not regress)
 
-### 1.1 Opt-in integer types
+These were Tier 1 items; treat breakage as a release blocker.
 
-**Problem:** all runtime numbers are `f64`. Binary data, PNG pixels, network packets, and bitfields need real `i32` / `u64` / `u8` semantics.
-
-**Scope (minimal viable):**
-
-- Syntax: `let n: i32 = 0;` or `let byte: u8 = 255;` (exact spelling TBD in sema)
-- LLVM lowering to native integer ops -- not NaN-boxed `Value` for typed locals
-- Boundary conversions at calls to untyped / `Value` APIs
-- Document float-default behavior for beginners who never annotate
-
-**Success:** test that reads raw bytes or packs a 32-bit field without float rounding.
-
-**MASTER_PLAN ref:** new (extends **A2** type story)
+| Feature | Tests |
+|---------|-------|
+| Opt-in integer types (`i32`, `u8`, …) | `tests/integer_types.koda` |
+| Struct methods (`rect.area()`) | `tests/struct_methods.koda` |
+| `--warn-unused` on `koda check` | `tests/warn_unused.koda` |
+| Enum switch exhaustiveness warnings | `tests/enum_exhaustive.koda` |
+| Stdlib `@color`, `@easing`, `@array`, `@str`, `@pool` | `tests/stdlib_modules_test.koda` |
+| `internClear()` + `assetPath()` | `tests/intern_clear_test.koda`, bundle smoke |
+| `koda doctor`, `koda new`, `koda.json` manifest | `cmd/koda/doctor.go`, templates |
 
 ---
 
-### 1.2 Struct methods
+## Tier 1 — Now
 
-**Problem:** beginners expect `rect.area()`, not `area(rect)`. Object-literal methods exist; **named struct types** do not.
+### 1.1 ASAN CI as a release gate
+
+**Problem:** runtime complexity (nursery, arena, remembered set, heap cache, inline arrays) needs automated memory bug detection before calling releases production-ready.
 
 **Scope:**
 
-- Parser: `func` declarations inside `struct { ... }`
-- Sema: bind methods to struct layout; `this` / receiver lowering
-- Codegen: emit as functions with implicit first argument or vtable-free slot dispatch (match existing object-method path where possible)
+- Linux CI job: build runtime + tests with `-fsanitize=address,undefined` (`scripts/ci-asan-smoke.sh`)
+- Remove `continue-on-error: true` once green for two consecutive weeks on `main`
+- Document local repro in CONTRIBUTING.md
 
-**Success:** `tests/struct_method_test.koda` -- `let r = Rect { w: 3, h: 4 }; assert(r.area() == 12);`
+**Success:** ASAN job blocks merges; intentional UAF test fails the job.
 
-**MASTER_PLAN ref:** new (related **A2**)
-
----
-
-## Tier 2 -- Next
-
-### 2.1 Unused symbol warnings (`--warn-unused`)
-
-**Problem:** typos in `let` bindings fail silently at runtime.
-
-**Scope:**
-
-- Sema pass: unused locals, params, top-level `func` declarations
-- CLI: `koda build --warn-unused`, `koda check --warn-unused` (warnings, not errors by default)
-
-**Success:** misspelled variable in test program emits warning with line number.
-
-**MASTER_PLAN ref:** **E4**, **E5**
+**MASTER_PLAN ref:** **H2**, **P5**
 
 ---
 
-### 2.2 Enum switch exhaustiveness warnings
+### 1.2 Release and Windows parity
 
-**Problem:** new enum variant + incomplete `switch` → no compiler signal.
+**Problem:** Windows dev setup and CI coverage lagged Linux for tier-1 regressions.
 
-**Scope:**
+**Scope (mostly landed in v0.4.0):**
 
-- When `switch` subject is enum-typed, warn on missing cases
-- Allow `default:` to silence warning
-- Warning only -- keep beginner-friendly
+- `scripts/build-runtime.ps1` matches CI clang + llvm-ar recipe
+- `scripts/clang-gnu.cmd` env-configurable (`KODA_LLVM_BIN`, `KODA_MINGW_BIN`)
+- `scripts/ci-release-smoke.sh` in release.yml before artifact upload
+- Windows CI runs same tier-1 tests as Linux via `ci-gc-stress-timed.ps1`
 
-**Success:** `tests/enum_switch_warn.koda` triggers diagnostic; complete switch does not.
-
-**MASTER_PLAN ref:** **A3** (complete partial work)
-
----
-
-### 2.3 ASAN / Valgrind CI job
-
-**Problem:** runtime complexity (nursery, arena, remembered set, heap cache, inline arrays) needs automated memory bug detection.
-
-**Scope:**
-
-- Linux CI job: build runtime + tests with `-fsanitize=address`
-- Run `tests/arena_test.koda`, `incremental_gc_test.koda`, `gc_soak.koda`, native conformance under ASAN
-- Document local repro: `CFLAGS=-fsanitize=address make -C runtime`
-
-**Success:** CI green on main; intentional leak test fails the job.
-
-**MASTER_PLAN ref:** **H2** -- **priority bumped** after runtime hardening merge
+**Remaining:** SDK zip smoke on publish runner; optional code signing.
 
 ---
 
-### 2.4 Incremental GC game-loop validation
+## Tier 2 — Next
 
-**Problem:** `gcFrameStep` exists; budget guidance for real games is thin.
+### 2.1 Typed runtime error audit (C1)
 
-**Scope:**
+**Problem:** some argv-style / native builtins may still misbehave on bad input instead of typed panics.
 
-- Expand `tests/incremental_gc_test.koda` or add `tests/stress/` game-loop scenario
-- Document recommended budgets in [game-dev.md](guides/game-dev.md) (0.5–1.0 ms/frame)
-- Validate pauses under `--no-opt` in CI where time-bounded
+**Scope:** audit all native / argv-style builtins; ensure `koda_type_error` / `koda_null_error` on bad input.
 
-**MASTER_PLAN ref:** **B1** (partial → done)
+**Success:** API integration tests for bad-argument paths.
 
----
-
-## Tier 3 -- Soon
-
-### 3.1 String intern table policy
-
-**Problem:** lookup is O(1) after hash-map fix; **retention** until sweep can grow memory for unique-string-heavy programs.
-
-**Scope:**
-
-- Document behavior in [runtime-and-gc.md](concepts/runtime-and-gc.md)
-- Optional `koda_intern_clear()` builtin for explicit flush
-- Consider cap + LRU only if real programs hit pain
-
-**Success:** docs clear; optional API tested.
+**MASTER_PLAN ref:** **C1**
 
 ---
 
-### 3.2 `status.md` / diagnostic consistency audit
+### 2.2 Full DWARF / source-level debug info (D1)
 
-- Compound assign (`obj.x += 1`) codegen verification
-- Declare-before-use always blocked in sema
-- Align user-facing docs with struct-method distinction
+**Problem:** `--debug` emits symbols but not complete `.koda` line mapping in gdb/lldb.
 
----
+**Scope:** thread `Token.File` / `Token.Line` into `DIFile`, `DISubprogram`, `DILocation` for all statement kinds.
 
-### 3.3 ObjTable open addressing completion
-
-**MASTER_PLAN ref:** **B2** -- confirm probing, load factor, and `tests/table_hash_test.koda` coverage.
+**Success:** panic backtrace shows `main.koda:14` not `0x00401234`.
 
 ---
 
-### 3.4 Stress suite expansion
+### 2.3 Stress suite expansion (B6)
 
-**MASTER_PLAN ref:** **B6** -- grow `tests/stress/`; Linux CI timeout job.
+**Scope:** grow `tests/stress/`; keep Linux + Windows CI lists aligned.
+
+**MASTER_PLAN ref:** **B6**
+
+---
+
+## Tier 3 — Soon
+
+### 3.1 Wider constant folding (E3)
+
+Extend beyond integer literal rules: string concat of literals, bitwise folding, power-of-two detection.
+
+### 3.2 Parser fuzz corpus (H1)
+
+Extend `internal/parser/FuzzParse` corpus from real programs; longer nightly budget.
+
+### 3.3 Diagnostic consistency audit
+
+Compound assign (`obj.x += 1`) codegen verification; align user-facing docs with compiler behavior.
 
 ---
 
@@ -163,22 +126,18 @@ Each item lists **MASTER_PLAN** refs where they exist. Update this file when pri
 | **Interfaces / traits** | Structural checks on method sets | new |
 | **Package manager** | `koda install` → `packages/` | new |
 | **WASM target** | `wasm32-unknown-unknown`, slim runtime | new |
-| **Full DWARF / source DI** | `.koda` line numbers in gdb/backtraces | **D1** |
-| **`koda bench`** | Compile + runtime benchmarks in CI | **D3** |
-| **Parallel module parse** | Faster large projects | **E2** |
-| **Runtime property hints** | "did you mean?" for missing keys | **D4** |
-| **Stdlib expansion** | `color`, `input`, `easing`, `pool`, ... | **F1–F7** |
-| **Bundle asset embedding** | Ship assets in `koda bundle` | **G4** |
+| **`@app` / retained-mode UI** | Desktop apps beyond games | new |
+| **Parallel module parse tuning** | Faster very large projects | **E2** (shipped baseline) |
 
 ---
 
 ## Completed foundations (do not regress)
 
-Treat these as release blockers if they break. Detail in [MASTER_PLAN.md](MASTER_PLAN.md) § Do not regress.
+Treat these as release blockers if they break. Detail in [tests/MASTER_PLAN.md](../tests/MASTER_PLAN.md).
 
 **Pipeline:** lexer → parser → sema → LLVM → clang → binary; `PrepareNativeBundle` before codegen.
 
-**Runtime / GC (2025 review merged):**
+**Runtime / GC:**
 
 - Tri-generational GC, shadow stack, write barriers
 - O(1) remembered set; conservative root heap cache
@@ -186,9 +145,9 @@ Treat these as release blockers if they break. Detail in [MASTER_PLAN.md](MASTER
 - Tombstone sentinel; intern hash table; table `hashes[]` GC accounting
 - Loop terminator guards in while/do-while codegen
 
-**Language:** structs, enums, closures, defer, `ok`/`err`, typo hints, `for-of`, range `lo..hi`.
+**Language:** structs, enums, closures, defer, `ok`/`err`, typo hints, `for-of`, range `lo..hi`, numeric type inference.
 
-**Tooling:** `koda check`, `koda fmt`, `koda watch`, `--no-opt`, `--debug` (`-g`), CI smokes on Ubuntu/macOS/Windows.
+**Tooling:** `koda check`, `koda fmt`, `koda watch`, `koda bench`, `--no-opt`, `--debug` (`-g`), CI smokes on Ubuntu/macOS/Windows.
 
 ---
 
@@ -198,23 +157,16 @@ Treat these as release blockers if they break. Detail in [MASTER_PLAN.md](MASTER
 
 ```bash
 go test ./... -count=1
-make runtime-lib   # or equivalent compile of runtime/src
-```
-
-### Native smokes
-
-```bash
-koda run tests/native_conformance.koda
-koda run tests/incremental_gc_test.koda
-koda run tests/arena_test.koda
+powershell -File scripts/build-runtime.ps1   # Windows
+bash scripts/build-runtime.sh              # Linux / macOS
 ```
 
 ### Before release
 
-- Native conformance build + run
-- Raylib brick breaker (graphical gate)
-- `tests/gc_soak.koda` / `tests/gc_pressure_expr.koda` under load
-- ASAN job green (once **2.3** lands)
+```bash
+bash scripts/ci-release-smoke.sh ./koda
+bash scripts/ci-native-smoke.sh              # full native matrix (CI)
+```
 
 ### Benchmarks (informational)
 
@@ -228,22 +180,17 @@ koda run tests/arena_test.koda
 
 | Audience | Ready when |
 |----------|------------|
-| **Game-making beginners** | Tier 1 optional; tier 2 warnings nice-to-have; GC/arena docs clear |
-| **General app beginners** | Tier 1.2 struct methods + tier 2.1 unused warnings |
-| **C / systems learners** | Tier 1.1 integers + tier 1.2 methods + ASAN CI |
-| **Contributors** | `go test` green, MASTER_PLAN matrix updated on merge, this file reflects priorities |
-
----
-
-## Historical note
-
-An earlier version of this file contained a **week-by-week bootstrap plan** (codegen completion → runtime → linking → v1.0.0). That bootstrap phase is largely complete. This roadmap supersedes that schedule for ongoing work. Archive context lives in git history (`ROADMAP.md` pre-2025).
+| **Game-making beginners** | v0.4.0 SDK zip + `@game` + `koda doctor` OK |
+| **General app beginners** | struct methods + warn-unused + docs hub |
+| **C / systems learners** | integer types + FFI via wrapgen + ASAN CI green |
+| **Contributors** | `go test` green, tests/MASTER_PLAN updated on merge |
 
 ---
 
 ## Related
 
-- [positioning.md](positioning.md) -- honest product framing
-- [status.md](status.md) -- what works today
-- [MASTER_PLAN.md](MASTER_PLAN.md) -- full engineering matrix
-- [handoff.md](handoff.md) -- pipeline for new contributors
+- [positioning.md](positioning.md) — honest product framing
+- [status.md](status.md) — what works today
+- [tests/MASTER_PLAN.md](../tests/MASTER_PLAN.md) — full engineering matrix
+- [handoff.md](handoff.md) — pipeline for new contributors
+- [releasing.md](releasing.md) — tagging `v*` and SDK zips

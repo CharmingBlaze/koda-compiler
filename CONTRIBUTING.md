@@ -17,7 +17,19 @@ go build -o bin/koda ./cmd/koda
 Build the C runtime archive when linking native binaries (needed for **`go test`** / **`koda build`**):
 
 - Linux / macOS: `bash scripts/build-runtime.sh`
-- Windows: `powershell -File scripts/build-runtime.ps1`
+- Windows: `powershell -File scripts/build-runtime.ps1` (prefers LLVM **clang** + **llvm-ar**, same as CI)
+
+**Windows toolchain:** install one of:
+
+- **[llvm-mingw](https://github.com/mstorsjo/llvm-mingw)** (recommended): `winget install MartinStorsjo.LLVM-MinGW.UCRT`
+- **LLVM + MinGW**: `choco install llvm mingw` — set paths if not in default locations:
+
+```powershell
+$env:KODA_LLVM_BIN = "C:\Program Files\LLVM\bin"
+$env:KODA_MINGW_BIN = "C:\ProgramData\mingw64\mingw64\bin"
+powershell -File scripts/build-runtime.ps1
+go build -o bin/koda.exe ./cmd/koda
+```
 
 ## Tests
 

@@ -85,15 +85,15 @@ Legend: **Done** · **Partial** (exists but gaps remain) · **Open** (not starte
 | **A3** | `enum` + switch exhaustiveness warning | **Done** | `internal/sema/sema_struct_enum.go`; `tests/enum_exhaustive.koda` |
 | **A4** | `math` builtins (`lerp`, `clamp`, `hypot`, full suite) | **Done** | C runtime + `stdlib/math.koda` |
 | **A5** | `stdlib/timer.koda` | **Done** | `tests/timer_test.koda` |
-| **A6** | Opt-in integer types (`i32`, `u8`, …) + beginner aliases | **Done** | `int`/`float`/`bool`/`string`/`byte` + `i32` etc.; `tests/integer_types.koda` |
-| **A7** | Struct methods (`box.area()`) | **Done** | `internal/codegen/struct_methods.go`; `tests/struct_methods.koda` |
+| **A6** | Opt-in integer types (`i32`, `u8`, …) + beginner aliases | **Done** | `int`/`float`/`bool`/`string`/`byte` + `i32` etc.; `tests/integer_types.koda`; CI on Linux + Windows |
+| **A7** | Struct methods (`box.area()`) | **Done** | `internal/codegen/struct_methods.go`; `tests/struct_methods.koda`; CI on Linux + Windows |
 | **A8** | Numeric type inference (`KindInt` / `KindFloat`) | **Done** | `internal/sema/typeinfer.go` + `internal/codegen/intfast.go`; 8 unit tests pass |
 | **B1** | Incremental major GC | **Done** | `gc_collect_incremental`; `gcFrameStep`; `tests/incremental_gc_test.koda` in CI |
 | **B2** | ObjTable open addressing | **Done** | `hashes[]` open-addressing; `gc_alloc` for hash array; `tests/table_hash_test.koda` |
 | **B3** | GC pressure relief builtins | **Done** | `gcDisable`, `gcEnable`, `gcCollect`; `tests/gc_control_test.koda` |
 | **B4** | `gcStats()` builtin | **Done** | Lowercase keys; `tests/gc_stats_frame_test.koda` |
 | **B5** | Write-barrier static audit | **Done** | `internal/codegen/write_barrier_test.go` |
-| **B6** | `tests/stress/` suite + CI job | **Partial** | `tests/stress/stress_mixed_alloc.koda` + Linux CI (`timeout 90s`); expand over time |
+| **B6** | `tests/stress/` suite + CI job | **Partial** | 4 stress tests; Linux + Windows CI; expand over time |
 | **B7** | Remembered-set O(1) dedup | **Done** | `in_remembered_set` on `Obj`; `remembered_set_clear()` on all paths |
 | **B8** | Conservative scan O(heap) per collection | **Done** | Heap pointer hash set + sorted range table; `qsort` + binary search |
 | **B9** | Inline small arrays | **Done** | Capacity ≤ 64: one `gc_alloc`; `inline_elements` flag; grow copies without freeing inline storage |
@@ -117,7 +117,7 @@ Legend: **Done** · **Partial** (exists but gaps remain) · **Open** (not starte
 | **F1** | `stdlib/vec3.koda` | **Done** | `tests/vec3_test.koda` |
 | **F2–F7** | `color`, `input`, `easing`, `pool`, `str`, `array` stdlib modules | **Partial** | `color`, `easing`, `game` shipped; `tests/stdlib_modules_test.koda`; `input`/`pool`/`str`/`array` modules remain |
 | **G4** | Asset embedding in `koda bundle` | **Done** | `assetPath()` builtin + `koda-assets.txt` manifest in bundles |
-| **G5** | `koda doctor` depth | **Done** | OK/FAIL report, smoke build, runtime freshness, disk space (Unix) |
+| **G5** | `koda doctor` depth | **Done** | OK/FAIL report, smoke build, runtime freshness, disk space (all platforms) |
 | **H1** | Parser fuzzing | **Partial** | `internal/parser/FuzzParse`; Linux CI smoke `-fuzztime=5s`; extend corpus |
 | **H2** | ASAN / Valgrind CI | **Open** | Priority raised — see P5 |
 | **H3** | Integrated smoke script | **Partial** | `ci.yml` runs Ubuntu / macOS / Windows; keep aligned with this doc |

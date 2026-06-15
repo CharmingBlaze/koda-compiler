@@ -7,16 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-15
+
+Production release: beginner-native language surface, hardened toolchain, and expanded CI/release gates.
+
 ### Added
 
+- **Opt-in integer types** — `let n: i32 = 0`, `let b: u8 = 255`; native LLVM integer ops for typed locals; `tests/integer_types.koda`.
+- **Struct methods** — `struct Rect { func area() { return this.w * this.h; } }`; `tests/struct_methods.koda`.
+- **`koda check --warn-unused`** — unused `let` and top-level `func` warnings; `tests/warn_unused.koda`.
+- **Enum switch exhaustiveness warnings** — missing `case` values warn when subject is enum-typed; `tests/enum_exhaustive.koda`.
+- **Stdlib modules** — `@color`, `@easing`, `@array`, `@str`, `@pool`; `tests/stdlib_modules_test.koda`.
+- **`internClear()`** — flush string intern table; `tests/intern_clear_test.koda`.
+- **`assetPath()`** — resolve bundled assets from `koda bundle`; asset manifest in SDK zips.
 - **Documentation hub** — `docs/README.md` indexes all user guides; README positions Koda as a modern C alternative for games and apps.
 - **[Coming from C](docs/guides/from-c.md)** — side-by-side C vs Koda, migration table, FFI and project workflow.
 - **[Applications guide](docs/guides/applications.md)** — CLI tools, file I/O, JSON, shipping desktop apps.
 - **Updated [game-dev.md](docs/guides/game-dev.md)** — project templates, correct Raylib shim API, `koda.json` workflow.
 - **`koda new`** — templates: `hello`, `game` (text lunar lander), `graphics` (Raylib bouncing-ball demo with bundled shim).
 - **Project manifest (`koda.json`)** — `entry`, `bundle.assets`, and `native.sources` / `native.linkflags` are applied automatically for `run`, `build`, `watch`, `check`, and `bundle` when you omit the entry file.
+- **`koda doctor`** — OK/FAIL environment report with smoke build, runtime freshness, and disk-space check (all platforms).
+- **Release smoke script** — `scripts/ci-release-smoke.sh` runs tier-1 regressions before publishing SDK zips.
+
+### Changed
+
+- **Windows runtime build** — `scripts/build-runtime.ps1` matches CI (LLVM clang + llvm-ar, `-D_AMD64_=1`); configurable via `KODA_LLVM_BIN`.
+- **Windows linker driver** — `scripts/clang-gnu.cmd` prefers llvm-mingw when installed; discovers LLVM/MinGW via env vars and PATH.
+- **Windows CI parity** — `scripts/ci-gc-stress-timed.ps1` runs the same tier-1 tests as Linux (struct methods, integer types, stdlib modules, stress suite).
 
 ### Fixed
+
+- **`koda doctor` on Windows** — disk free-space check via `GetDiskFreeSpaceExW` (was silently skipped).
 
 ## [0.3.2] - 2026-05-13
 

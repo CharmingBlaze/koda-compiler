@@ -9,12 +9,12 @@
 3. **CI green** — **`go vet ./...`**, **`go test ./...`**, and **`koda fmt --check`** (see **[CONTRIBUTING.md](../CONTRIBUTING.md)**).
 4. **Tag** — From a **git clone** of `main` with the version bump merged:
    ```powershell
-   powershell -ExecutionPolicy Bypass -File scripts/push-release-tag.ps1 -Tag v0.3.0
+   powershell -ExecutionPolicy Bypass -File scripts/push-release-tag.ps1 -Tag v0.4.0
    git push origin main
-   git push origin v0.3.0
+   git push origin v0.4.0
    ```
-   Or manually: `git tag -a v0.3.0 -m "Release v0.3.0"` then `git push origin v0.3.0`. The workflow builds **`-tags release`** `koda` binaries with embedded Clang + **`libkoda_runtime.a`** (and **lld** on Windows).
-5. **Post-release** — Open **`[Unreleased]`** again; bump dev versions (e.g. **`0.4.0-dev`**) on `main` if you ship nightlies after **`v0.3.0`**.
+   Or manually: `git tag -a v0.4.0 -m "Release v0.4.0"` then `git push origin v0.4.0`. The workflow builds **`-tags release`** `koda` binaries with embedded Clang + **`libkoda_runtime.a`** (and **lld** on Windows). Release jobs run **`scripts/ci-release-smoke.sh`** before uploading artifacts.
+5. **Post-release** — Open **`[Unreleased]`** again; bump dev versions (e.g. **`0.5.0-dev`**) on `main` after **`v0.4.0`**.
 
 ## Windows: test the SDK layout before tagging
 
@@ -29,4 +29,4 @@ This mirrors the **`koda-*-sdk-windows-amd64`** folder inside the release zip (s
 ## Notes
 
 - **Linux CI** (**`ci.yml`**) does not embed the toolchain; **`release.yml`** repopulates **`internal/embed/...`** per job from the runner’s Clang/LLVM before **`go build -tags release`**.
-- Smoke tests in release jobs build **`tests/hello.koda`** and **`tests/gc_shadow_multi_return_pop.koda`** after each platform binary is produced.
+- Smoke tests in release jobs run **`scripts/ci-release-smoke.sh`** (hello, GC shadow, struct methods, integer types, stdlib modules, warn-unused) after each platform binary is produced.

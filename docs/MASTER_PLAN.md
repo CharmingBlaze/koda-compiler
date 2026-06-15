@@ -1,6 +1,8 @@
 # Koda — master plan to 100%
 
-Long-term roadmap for **language completeness**, **GC/runtime hardening**, **DX**, **compiler quality**, **stdlib**, and **tooling**. This document is for **people working in the Koda repository** (not end users — see **[README.md](../README.md)**). Update the **progress matrix** when you land work.
+> **Canonical engineering tracker:** [`tests/MASTER_PLAN.md`](../tests/MASTER_PLAN.md) — update the progress matrix there when you land work. This doc is a summary for docs navigation.
+
+Long-term roadmap for **language completeness**, **GC/runtime hardening**, **DX**, **compiler quality**, **stdlib**, and **tooling**. This document is for **people working in the Koda repository** (not end users — see **[README.md](../README.md)**).
 
 ---
 
