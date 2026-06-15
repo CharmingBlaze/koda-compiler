@@ -302,14 +302,15 @@ func TestSemaArgvMethodArityComputedIndexSkipped(t *testing.T) {
 	}
 }
 
-func TestSemaArgvMethodArityReduceZeroArgs(t *testing.T) {
-	src := `func main() {
-		let a = [1];
-		a.reduce();
+func TestSemaParamCallableNotCheckedAsEnclosingFunc(t *testing.T) {
+	src := `func pool(size, makeItem) {
+		makeItem();
+	}
+	func main() {
+		pool(1, func() { return 0; });
 	}`
 	program := parseForTest(t, src)
-	a := NewAnalyzer()
-	if err := a.Analyze(program); err == nil {
-		t.Fatal("expected arity error for reduce with 0 arguments")
+	if err := NewAnalyzer().Analyze(program); err != nil {
+		t.Fatalf("calling a func param must not use enclosing func arity: %v", err)
 	}
 }

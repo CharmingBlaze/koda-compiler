@@ -82,6 +82,9 @@ func (a *Analyzer) maybeCheckCallArity(call *parser.CallExpr) {
 		}
 		switch d := decl.(type) {
 		case *parser.FuncDecl:
+			if !strings.EqualFold(d.Name.Lexeme, name) {
+				return
+			}
 			if d.Native != nil {
 				a.checkCallArity(call, d.Name.Lexeme, d.Native.Arity, true, nil)
 				return

@@ -115,7 +115,7 @@ Legend: **Done** · **Partial** (exists but gaps remain) · **Open** (not starte
 | **E4** | Dead-code elimination + `--warn-unused` | **Done** | `--warn-unused` + unreachable warnings in `strict` lint |
 | **E5** | Unused binding warnings | **Done** | See P3 |
 | **F1** | `stdlib/vec3.koda` | **Done** | `tests/vec3_test.koda` |
-| **F2–F7** | `color`, `input`, `easing`, `pool`, `str`, `array` stdlib modules | **Partial** | `color`, `easing`, `game` shipped; `tests/stdlib_modules_test.koda`; `input`/`pool`/`str`/`array` modules remain |
+| **F2–F7** | `color`, `input`, `easing`, `pool`, `str`, `array` stdlib modules | **Done** | `stdlib/*.koda`; `tests/stdlib_modules_test.koda`; `@input` stubs for console builds |
 | **G4** | Asset embedding in `koda bundle` | **Done** | `assetPath()` builtin + `koda-assets.txt` manifest in bundles |
 | **G5** | `koda doctor` depth | **Done** | OK/FAIL report, smoke build, runtime freshness, disk space (all platforms) |
 | **H1** | Parser fuzzing | **Partial** | `internal/parser/FuzzParse`; Linux CI smoke `-fuzztime=5s`; extend corpus |

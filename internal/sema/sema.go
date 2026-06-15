@@ -248,7 +248,9 @@ func (a *Analyzer) analyzeFuncDecl(d *parser.FuncDecl) {
 	defer a.exitScope()
 
 	for _, param := range d.Params {
-		a.currentScope.Define(param.Name, d)
+		paramTok := d.Name
+		paramTok.Lexeme = param.Name
+		a.currentScope.Define(param.Name, &parser.LetDecl{Name: paramTok})
 		if param.Default != nil {
 			a.analyzeExpr(param.Default)
 		}
@@ -267,7 +269,9 @@ func (a *Analyzer) analyzeFuncExpr(e *parser.FuncExpr) {
 	a.enterScope()
 	defer a.exitScope()
 	for _, param := range e.Params {
-		a.currentScope.Define(param.Name, e)
+		paramTok := e.Token
+		paramTok.Lexeme = param.Name
+		a.currentScope.Define(param.Name, &parser.LetDecl{Name: paramTok})
 		if param.Default != nil {
 			a.analyzeExpr(param.Default)
 		}

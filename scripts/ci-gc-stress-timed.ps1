@@ -37,5 +37,6 @@ Invoke-KodaTimed 60 @("run", "tests/struct_methods.koda")
 Invoke-KodaTimed 60 @("run", "tests/integer_types.koda")
 Invoke-KodaTimed 60 @("run", "tests/intern_clear_test.koda")
 Invoke-KodaTimed 60 @("run", "tests/stdlib_modules_test.koda")
+Invoke-KodaTimed 60 @("run", "tests/enum_exhaustive.koda")
 
 Write-Host "==> GC / stress timed runs OK"

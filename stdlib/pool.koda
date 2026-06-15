@@ -1,20 +1,20 @@
 // Object pool — reuse instances to reduce GC pressure in hot loops.
 
-func pool(size, construct) {
+func pool(size, makeItem) {
     let items = [];
     let i = 0;
     while (i < size) {
-        arraypush(items, construct());
+        arraypush(items, makeItem());
         i = i + 1;
     }
-    return { items: items, free: [], size: size, construct: construct };
+    return { items: items, free: [], size: size, makeItem: makeItem };
 }
 
 func get(p) {
     if (len(p.free) > 0) {
         return arraypop(p.free);
     }
-    return p.construct();
+    return p.makeItem();
 }
 
 func release(p, obj) {

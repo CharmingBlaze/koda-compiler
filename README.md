@@ -39,7 +39,7 @@ func main() {
 | **[Learn path](docs/learn/README.md)** | Short chapters (structs before objects) |
 | **[Game development](docs/guides/game-dev.md)** | Graphics without manual link flags |
 
-Download **`koda`** + **`stdlib/`** from [GitHub Releases](https://github.com/CharmingBlaze/koda-compiler/releases). Run **`koda doctor`** after install.
+Download **`koda`** + **`stdlib/`** from [GitHub Releases](https://github.com/CharmingBlaze/koda-compiler/releases) (**v0.4.0** SDK zips recommended). Run **`koda doctor`** after install.
 
 ---
 

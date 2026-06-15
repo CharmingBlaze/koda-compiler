@@ -2,10 +2,6 @@ let push = arraypush;
 
 let pop = arraypop;
 
-let shift = arrayshift;
-
-let unshift = arrayunshift;
-
 let concat = arrayconcat;
 
 let reverse = arrayreverse;
@@ -18,7 +14,31 @@ let sort = arraysort;
 
 let slice = arrayslice;
 
-let flatten = func(arr) {
+func shift(arr) {
+    if (len(arr) < 1) {
+        return null;
+    }
+    let v = arr[0];
+    let i = 0;
+    while (i < len(arr) - 1) {
+        arr[i] = arr[i + 1];
+        i = i + 1;
+    }
+    arraypop(arr);
+    return v;
+}
+
+func unshift(arr, val) {
+    arraypush(arr, val);
+    let i = len(arr) - 1;
+    while (i > 0) {
+        arr[i] = arr[i - 1];
+        i = i - 1;
+    }
+    arr[0] = val;
+}
+
+func flatten(arr) {
     let out = [];
     let i = 0;
     while (i < len(arr)) {
@@ -36,7 +56,7 @@ let flatten = func(arr) {
         i = i + 1;
     }
     return out;
-};
+}
 
 let unique = func(arr) {
     let seen = {};
