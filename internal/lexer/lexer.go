@@ -407,6 +407,8 @@ func (l *Lexer) lookupKeyword(text string) TokenType {
 		return TokenSwitch
 	case "struct":
 		return TokenStruct
+	case "test":
+		return TokenTest
 	case "enum":
 		return TokenEnum
 	case "this":

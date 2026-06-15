@@ -76,7 +76,7 @@ func runNew(args []string) error {
 	fmt.Printf("  cd %s\n", name)
 	switch template {
 	case "graphics":
-		fmt.Println("  Set KODA_LINKFLAGS for Raylib (see README.md), then:")
+		fmt.Println("  koda setup raylib   # configure koda.json graphics linking")
 		fmt.Println("  koda run")
 	case "game":
 		fmt.Println("  koda run    # text lunar lander — no extra libraries")

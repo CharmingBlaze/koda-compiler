@@ -8,7 +8,7 @@ var nativeBuiltinSentinel parser.Decl = (*parser.IncludeDecl)(nil)
 // nativeBuiltinNames must stay aligned with internal/codegen/builtin_register.go pairs.
 var nativeBuiltinNames = []string{
 	"this",
-	"ok", "err", "panic", "assert", "warn",
+	"ok", "err", "panic", "assert", "expect", "warn",
 	"deltatime", "print", "len", "keys", "type", "typeof", "matches",
 	"time", "clock", "timestamp", "programtime", "sleep",
 	"random", "randomint", "randomchoice", "randomseed",

@@ -187,6 +187,8 @@ func InferNumericKinds(prog *parser.Program, escaping map[*parser.LetDecl]bool) 
 			walkExpr(x.Init)
 		case *parser.FuncDecl:
 			walkStmt(x.Body)
+		case *parser.TestDecl:
+			walkStmt(x.Body)
 		case parser.Stmt:
 			walkStmt(x)
 		}

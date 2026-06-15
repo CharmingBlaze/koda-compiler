@@ -1,0 +1,7 @@
+test "addition" {
+    expect(1 + 1 == 2, "one plus one");
+}
+
+test "string equality" {
+    expect("hi" == "hi");
+}

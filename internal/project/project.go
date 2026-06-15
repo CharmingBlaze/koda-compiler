@@ -199,3 +199,20 @@ func (c *Context) AppName(entryPath string) string {
 	}
 	return "app"
 }
+
+// Save writes koda.json under root (creates the file or overwrites).
+func Save(root string, cfg *Config) error {
+	root = filepath.Clean(root)
+	if cfg == nil {
+		return fmt.Errorf("nil project config")
+	}
+	if strings.TrimSpace(cfg.Entry) == "" {
+		return fmt.Errorf("entry is required")
+	}
+	data, err := json.MarshalIndent(cfg, "", "  ")
+	if err != nil {
+		return err
+	}
+	data = append(data, '\n')
+	return os.WriteFile(filepath.Join(root, FileName), data, 0644)
+}

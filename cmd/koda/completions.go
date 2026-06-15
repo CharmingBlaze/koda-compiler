@@ -26,7 +26,7 @@ func kodaCommandsList() string {
 	cmds := []string{
 		"new", "init", "run", "native", "watch", "check", "lint", "fmt",
 		"build", "bundle", "test", "bench", "profile", "debug", "eval", "repl",
-		"clean", "doctor", "paths", "env", "completions", "update", "doc", "lsp",
+		"clean", "doctor", "setup", "paths", "env", "completions", "update", "doc", "lsp",
 		"disasm", "wrap", "version", "help",
 	}
 	return strings.Join(cmds, " ")

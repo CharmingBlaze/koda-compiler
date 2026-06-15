@@ -70,6 +70,15 @@ func (p *Parser) parseDeclaration() ([]Decl, error) {
 		p.lastDirective = nil
 		return []Decl{decl}, nil
 	}
+	if p.check(lexer.TokenTest) && p.peekNext().Type == lexer.TokenString {
+		p.advance()
+		decl, err := p.parseTestDeclaration()
+		if err != nil {
+			return nil, err
+		}
+		p.lastDirective = nil
+		return []Decl{decl}, nil
+	}
 	if p.match(lexer.TokenStruct) {
 		decl, err := p.parseStructDeclaration()
 		if err != nil {
@@ -189,14 +198,20 @@ func (p *Parser) parseLetDeclarations(isConst bool) ([]Decl, error) {
 
 func (p *Parser) parseFuncDeclaration() (Decl, error) {
 	token := p.previous()
-	name, err := p.consume(lexer.TokenIdentifier, "expected function name")
-	if err != nil {
-		if p.check(lexer.TokenVar) {
-			tok := p.peek()
-			p.advance()
-			return nil, fmt.Errorf("%d:%d: 'var' is reserved; use 'let' to declare a variable", tok.Line, tok.Col)
+	var name lexer.Token
+	if p.check(lexer.TokenTest) {
+		name = p.advance()
+	} else {
+		var err error
+		name, err = p.consume(lexer.TokenIdentifier, "expected function name")
+		if err != nil {
+			if p.check(lexer.TokenVar) {
+				tok := p.peek()
+				p.advance()
+				return nil, fmt.Errorf("%d:%d: 'var' is reserved; use 'let' to declare a variable", tok.Line, tok.Col)
+			}
+			return nil, err
 		}
-		return nil, err
 	}
 	name = normalizeIdentLexeme(name)
 
@@ -254,6 +269,34 @@ func (p *Parser) parseFuncDeclaration() (Decl, error) {
 	}
 
 	return &FuncDecl{Token: token, Name: name, Params: params, Body: body}, nil
+}
+
+func (p *Parser) parseTestDeclaration() (Decl, error) {
+	token := p.previous()
+	display, err := p.consume(lexer.TokenString, "expected test name string")
+	if err != nil {
+		return nil, err
+	}
+	body, err := p.parseBlockStatement()
+	if err != nil {
+		return nil, err
+	}
+	seq := p.testSeq
+	p.testSeq++
+	synthLexeme := synthTestName(display.Lexeme, seq)
+	synthTok := lexer.Token{
+		Type:  lexer.TokenIdentifier,
+		Lexeme: synthLexeme,
+		Line:  token.Line,
+		Col:   token.Col,
+		File:  token.File,
+	}
+	return &TestDecl{
+		Token:     token,
+		Display:   display,
+		SynthName: synthTok,
+		Body:      body,
+	}, nil
 }
 
 func (p *Parser) parseStatement() (Stmt, error) {

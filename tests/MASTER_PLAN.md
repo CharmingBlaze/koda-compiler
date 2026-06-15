@@ -34,11 +34,12 @@ These properties are expected in the tree today. Treat regressions as release bl
 - `enum` types with ordinal constants and constant folding.
 - `defer` (LIFO; return value computed before defers run).
 - `for (let i of lo..hi)` dynamic range — counted `i64` loop, unboxed bounds.
-- Object method shorthand + `this` on **object literals** (struct methods are a separate open item — see A7).
+- Object method shorthand + `this` on **object literals** and **struct methods** (`box.area()`).
 - Integer literal folding (`+`, `-`, `*`, unary `-`/`+`, nested safe cases).
 - Call arity checks for `func` / `// koda:extern` / known argv-style methods.
 - "Did you mean?" hints on undefined identifiers (Levenshtein edit distance).
-- `ok` / `err`, `panic`, `assert`, `readFile`, `writeFile`, `parseJSON`.
+- `ok` / `err`, `panic`, `assert`, `expect`, `readFile`, `writeFile`, `parseJSON`.
+- Named test blocks: `test "name" { expect(...) }` with `PASS:` runner output.
 
 **GC and runtime**
 - Generational GC: nursery bump allocator (256 KB), young, old generations.
@@ -62,7 +63,7 @@ These properties are expected in the tree today. Treat regressions as release bl
 - 8 unit tests in `internal/sema/typeinfer_test.go` covering literals, whole floats, fractions, int+int arithmetic, division, bitwise, and escaping decls.
 
 **Tooling**
-- Raylib wrapper path; `koda wrap` / `kodawrap` for C library binding generation.
+- Raylib wrapper path; `koda wrap` / `kodawrap` for C library binding generation; `koda setup raylib` for project manifests.
 - CI: `go test ./...`, fmt check, native smoke on Ubuntu / macOS / Windows, GC soak.
 - `koda_runtime_init_ex` / `koda_runtime_shutdown` from generated `main`.
 - Shadow stack growth + hard cap panic message; `koda_shadow_stack_high_water()`.
@@ -81,11 +82,11 @@ Legend: **Done** · **Partial** (exists but gaps remain) · **Open** (not starte
 |-----|-------|--------|-------|
 | **A1** | "Did you mean?" for undefined names | **Done** | `internal/sema/levenshtein.go`; `tests/typo_suggestion.koda` |
 | **A2** | `struct` types + literals + field checks | **Done** | O(1) slot access; `tests/struct_typo_test.koda` |
-| **A3** | `enum` + switch exhaustiveness warning | **Partial** | AST + lowering done; exhaustiveness warning not yet emitted — see P4 |
+| **A3** | `enum` + switch exhaustiveness warning | **Done** | `internal/sema/sema_struct_enum.go`; `tests/enum_exhaustive.koda` |
 | **A4** | `math` builtins (`lerp`, `clamp`, `hypot`, full suite) | **Done** | C runtime + `stdlib/math.koda` |
 | **A5** | `stdlib/timer.koda` | **Done** | `tests/timer_test.koda` |
-| **A6** | Opt-in integer types (`i32`, `u8`, …) | **Open** | Type annotation syntax not yet parsed; `KindInt` inference covers pure-local arithmetic — see P1 |
-| **A7** | Struct methods (`box.area()`) | **Open** | Object-literal `this` works; struct body methods not yet — see P2 |
+| **A6** | Opt-in integer types (`i32`, `u8`, …) + beginner aliases | **Done** | `int`/`float`/`bool`/`string`/`byte` + `i32` etc.; `tests/integer_types.koda` |
+| **A7** | Struct methods (`box.area()`) | **Done** | `internal/codegen/struct_methods.go`; `tests/struct_methods.koda` |
 | **A8** | Numeric type inference (`KindInt` / `KindFloat`) | **Done** | `internal/sema/typeinfer.go` + `internal/codegen/intfast.go`; 8 unit tests pass |
 | **B1** | Incremental major GC | **Done** | `gc_collect_incremental`; `gcFrameStep`; `tests/incremental_gc_test.koda` in CI |
 | **B2** | ObjTable open addressing | **Done** | `hashes[]` open-addressing; `gc_alloc` for hash array; `tests/table_hash_test.koda` |
@@ -98,7 +99,7 @@ Legend: **Done** · **Partial** (exists but gaps remain) · **Open** (not starte
 | **B9** | Inline small arrays | **Done** | Capacity ≤ 64: one `gc_alloc`; `inline_elements` flag; grow copies without freeing inline storage |
 | **B10** | Arena builtins | **Done** | `arena`, `arenaReset`, `arenaAllocArray`, `arenaAllocStruct`; `tests/arena_test.koda` |
 | **B11** | String intern table O(1) | **Done** | Open-addressing hash map; sweep rebuilds from marked survivors |
-| **B12** | Intern table retention docs + `koda_intern_clear()` | **Open** | Retention model undocumented; builtin not yet exposed — see P6 |
+| **B12** | Intern table retention docs + `internClear()` | **Done** | `tests/intern_clear_test.koda`; docs in beginners-guide |
 | **B13** | Tombstone sentinel | **Done** | `TOMBSTONE_VAL` tag 0x05; `IS_TOMBSTONE()`; boolean keys safe |
 | **C1** | Typed runtime errors | **Partial** | `koda_type_error`, `koda_null_error`; argv/native path audit remains |
 | **C2** | OOB array/string access → panic | **Done** | `tests/array_oob_*`; `api` tests |
@@ -114,7 +115,7 @@ Legend: **Done** · **Partial** (exists but gaps remain) · **Open** (not starte
 | **E4** | Dead-code elimination + `--warn-unused` | **Done** | `--warn-unused` + unreachable warnings in `strict` lint |
 | **E5** | Unused binding warnings | **Done** | See P3 |
 | **F1** | `stdlib/vec3.koda` | **Done** | `tests/vec3_test.koda` |
-| **F2–F7** | `color`, `input`, `easing`, `pool`, `str`, `array` stdlib modules | **Open** | Pure Koda where possible; each needs a `tests/*.koda` file |
+| **F2–F7** | `color`, `input`, `easing`, `pool`, `str`, `array` stdlib modules | **Partial** | `color`, `easing`, `game` shipped; `tests/stdlib_modules_test.koda`; `input`/`pool`/`str`/`array` modules remain |
 | **G4** | Asset embedding in `koda bundle` | **Done** | `assetPath()` builtin + `koda-assets.txt` manifest in bundles |
 | **G5** | `koda doctor` depth | **Done** | OK/FAIL report, smoke build, runtime freshness, disk space (Unix) |
 | **H1** | Parser fuzzing | **Partial** | `internal/parser/FuzzParse`; Linux CI smoke `-fuzztime=5s`; extend corpus |

@@ -73,6 +73,12 @@ func shadowRegisterAllFuncDecls(d parser.Decl, ctx *NativeEmitContext) {
 			ctx.ShadowFuncDecl[x] = shadowLayoutFuncDecl(x)
 		}
 		shadowRegisterInBlock(x.Body, ctx)
+	case *parser.TestDecl:
+		fd := x.SyntheticFunc()
+		if _, ok := ctx.ShadowFuncDecl[fd]; !ok {
+			ctx.ShadowFuncDecl[fd] = shadowLayoutFuncDecl(fd)
+		}
+		shadowRegisterInBlock(x.Body, ctx)
 	case *parser.LetDecl:
 		if x.Init != nil {
 			shadowScanExprForFuncExprs(x.Init, ctx)
@@ -332,6 +338,8 @@ func shadowWalkDecl(d parser.Decl, L *ShadowLayout, next *int) {
 			shadowWalkExprLets(x.Init, L, next)
 		}
 	case *parser.FuncDecl:
+		return
+	case *parser.TestDecl:
 		return
 	case *parser.IncludeDecl:
 		return

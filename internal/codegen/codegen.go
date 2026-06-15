@@ -246,6 +246,13 @@ type Generator struct {
 
 	moduleEmitPath string
 	importSlots    map[string]value.Value
+
+	testFuncs []testEntry
+}
+
+type testEntry struct {
+	display string
+	fn      *ir.Func
 }
 
 // loopContext tracks information about the current loop for break/continue.
@@ -498,6 +505,8 @@ func (g *Generator) Generate(bundle *parser.ProgramBundle) (*ir.Module, error) {
 	// User-defined `function main()` is emitted as LLVM symbol `koda_user_main`; invoke after top-level runs.
 	if mainFn := g.funcs["main"]; mainFn != nil {
 		g.block.NewCall(mainFn, constant.NewInt(types.I64, 0))
+	} else if len(g.testFuncs) > 0 {
+		g.emitTestRunner()
 	}
 
 	// Terminate user_main
@@ -543,6 +552,8 @@ func (g *Generator) emitDecl(decl parser.Decl) error {
 	switch d := decl.(type) {
 	case *parser.FuncDecl:
 		return g.emitFuncDecl(d)
+	case *parser.TestDecl:
+		return g.emitTestDecl(d)
 	case *parser.LetDecl:
 		return g.emitLetDecl(d)
 	case *parser.IncludeDecl:

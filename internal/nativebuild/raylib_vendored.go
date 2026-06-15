@@ -8,6 +8,11 @@ import (
 	"koda/internal/kodahome"
 )
 
+// VendoredRaylibStatic reports include dir and archive when a vendored raylib stage exists.
+func VendoredRaylibStatic(rootDir string) (includeDir, archive string, ok bool) {
+	return vendoredRaylibStatic(rootDir)
+}
+
 // vendoredRaylibStatic returns include dir and a static (or import) library path when a
 // third_party/raylib_static/stage tree exists. Resolution order:
 //  1) KODA_RAYLIB_STAGE — explicit path to a stage directory with include/ + lib/

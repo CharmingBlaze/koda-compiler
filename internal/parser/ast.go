@@ -126,6 +126,28 @@ func (d *FuncDecl) String() string {
 	return prefix + fmt.Sprintf("func %s(%s) %s", d.Name.Lexeme, strings.Join(params, ", "), d.Body.String())
 }
 
+// TestDecl is a named unit test block: test "name" { ... }.
+type TestDecl struct {
+	Token     lexer.Token
+	Display   lexer.Token // string literal token
+	SynthName lexer.Token // internal function name (__koda_test_N_slug)
+	Body      *BlockStmt
+	synth     *FuncDecl
+}
+
+func (t *TestDecl) declNode() {}
+func (t *TestDecl) String() string {
+	return fmt.Sprintf("test %q %s", t.Display.Lexeme, t.Body.String())
+}
+
+// SyntheticFunc returns a FuncDecl used for sema/codegen/shadow layout.
+func (t *TestDecl) SyntheticFunc() *FuncDecl {
+	if t.synth == nil {
+		t.synth = &FuncDecl{Token: t.Token, Name: t.SynthName, Body: t.Body}
+	}
+	return t.synth
+}
+
 // Statements
 
 type BlockStmt struct {

@@ -16,6 +16,7 @@ func (g *Generator) registerBuiltinFuncs() {
 		{"err", g.runtimeErr},
 		{"panic", g.runtimePanic},
 		{"assert", g.runtimeAssert},
+		{"expect", g.runtimeAssert},
 		{"deltaTime", g.runtimeDeltaTime},
 		{"print", g.runtimePrint},
 		{"warn", g.runtimeWarn},

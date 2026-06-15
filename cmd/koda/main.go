@@ -276,6 +276,14 @@ func main() {
 			fatalErr(err)
 		}
 
+	case "setup":
+		if maybeCommandHelp(args) {
+			return
+		}
+		if err := runSetup(args[1:]); err != nil {
+			fatalErr(err)
+		}
+
 	case "clean":
 		if maybeCommandHelp(args) {
 			return
@@ -432,6 +440,7 @@ COMMANDS
   repl        Interactive compile-per-line REPL
   clean       [<dir>] [--cache]
   doctor      SDK health check
+  setup       raylib | …                            Project setup helpers
   paths       Machine-readable toolchain paths
   env         [--export]                              KODA_* environment
   completions bash|zsh|fish

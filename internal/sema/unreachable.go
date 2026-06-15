@@ -35,6 +35,9 @@ func (a *Analyzer) warnUnreachableDecl(d parser.Decl) {
 	case *parser.FuncDecl:
 		a.warn(fmt.Sprintf("%s:%d:%d: unreachable function '%s' after return/break/continue",
 			x.Name.File, x.Name.Line, x.Name.Col, x.Name.Lexeme))
+	case *parser.TestDecl:
+		a.warn(fmt.Sprintf("%s:%d:%d: unreachable test %q after return/break/continue",
+			x.Token.File, x.Token.Line, x.Token.Col, x.Display.Lexeme))
 	case parser.Stmt:
 		a.warnUnreachableStmt(x)
 	}

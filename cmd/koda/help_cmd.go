@@ -52,11 +52,11 @@ Uses koda.json entry when no file is given. Arguments after -- are passed to you
 
   koda bundle [<file.koda>] [-o <dir>]
 `,
-	"test": `Run .koda test files (assert-based).
+	"test": `Run .koda test files (assert/expect or test "name" { } blocks).
 
   koda test [--no-opt] [-v] [--failfast] [-run <pattern>] [<files...>]
 
-Default: tests/*.koda under project or repo.
+Default: tests/*.koda under project or repo. Named test blocks print PASS: lines.
 `,
 	"bench": `Time repeated runs of a program.
 
@@ -86,6 +86,14 @@ Default: tests/*.koda under project or repo.
 Removes dist/, .koda_build/, and default executables. --cache also clears temp toolchain dirs when possible.
 `,
 	"doctor": `Human-readable SDK health check (stdlib, clang, writable install).
+
+  koda doctor
+`,
+	"setup": `Configure optional project integrations.
+
+  koda setup raylib [project-dir]
+
+Writes wrappers/raylib_shim and sets koda.json native.graphics + native.sources.
 `,
 	"paths": `Machine-readable toolchain paths for scripts/CI.
 `,

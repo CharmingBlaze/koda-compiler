@@ -172,6 +172,8 @@ func walkDecl(d parser.Decl, env *envFrame, ctx *NativeEmitContext, curFunc inte
 		ctx.letOwner[x] = curFunc
 	case *parser.FuncDecl:
 		walkFuncDecl(x, env, ctx)
+	case *parser.TestDecl:
+		walkFuncDecl(x.SyntheticFunc(), env, ctx)
 	case *parser.BlockStmt:
 		blockEnv := env.pushBlock()
 		for _, inner := range x.Declarations {

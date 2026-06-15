@@ -10,6 +10,7 @@ type Parser struct {
 	current       int
 	lastDirective *NativeDirective
 	destructTmp   int
+	testSeq       int
 }
 
 func NewParser(tokens []lexer.Token) *Parser {
@@ -67,6 +68,13 @@ func (p *Parser) isAtEnd() bool {
 
 func (p *Parser) peek() lexer.Token {
 	return p.tokens[p.current]
+}
+
+func (p *Parser) peekNext() lexer.Token {
+	if p.current+1 >= len(p.tokens) {
+		return lexer.Token{Type: lexer.TokenEOF}
+	}
+	return p.tokens[p.current+1]
 }
 
 func (p *Parser) previous() lexer.Token {

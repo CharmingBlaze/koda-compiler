@@ -123,6 +123,9 @@ func (a *Analyzer) Analyze(prog *parser.Program) error {
 			if fd, ok := decl.(*parser.FuncDecl); ok && fd.Body != nil {
 				a.checkUnreachableCode(fd.Body)
 			}
+			if td, ok := decl.(*parser.TestDecl); ok && td.Body != nil {
+				a.checkUnreachableCode(td.Body)
+			}
 		}
 	}
 	switch len(a.errors) {
@@ -174,6 +177,8 @@ func (a *Analyzer) analyzeDecl(decl parser.Decl) {
 		a.analyzeLetDecl(d)
 	case *parser.FuncDecl:
 		a.analyzeFuncDecl(d)
+	case *parser.TestDecl:
+		a.analyzeTestDecl(d)
 	case *parser.FuncExpr:
 		a.analyzeFuncExpr(d)
 	case *parser.StructDecl:
@@ -249,6 +254,12 @@ func (a *Analyzer) analyzeFuncDecl(d *parser.FuncDecl) {
 		}
 	}
 
+	a.analyzeStmt(d.Body)
+}
+
+func (a *Analyzer) analyzeTestDecl(d *parser.TestDecl) {
+	a.enterScope()
+	defer a.exitScope()
 	a.analyzeStmt(d.Body)
 }
 

@@ -39,6 +39,9 @@ func (a *Analyzer) checkUnusedBindings() {
 		if strings.EqualFold(fd.Name.Lexeme, "main") {
 			continue
 		}
+		if strings.HasPrefix(fd.Name.Lexeme, "__koda_test_") {
+			continue
+		}
 		a.warn(fmt.Sprintf("%s:%d:%d: unused function '%s'", fd.Name.File, fd.Name.Line, fd.Name.Col, fd.Name.Lexeme))
 	}
 }
