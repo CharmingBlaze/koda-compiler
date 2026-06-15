@@ -1,4 +1,4 @@
-module koda-ide
+module koda/koda-ide
 
 go 1.22.0
 

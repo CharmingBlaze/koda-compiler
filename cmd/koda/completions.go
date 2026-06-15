@@ -45,7 +45,7 @@ _koda_completion() {
   fi
   case "${COMP_WORDS[1]}" in
     new|init)
-      COMPREPLY=($(compgen -W "--template hello game graphics" -- "${cur}"))
+      COMPREPLY=($(compgen -W "--template hello game graphics pong raylib" -- "${cur}"))
       ;;
     run|native|watch|build|check|bench|profile|debug|disasm|bundle|test|eval)
       COMPREPLY=($(compgen -f -X '!*.koda' -- "${cur}"))

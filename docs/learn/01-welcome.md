@@ -24,7 +24,7 @@ Unlike interpreted languages, your users receive a **single executable** (plus a
 |---------|--------|
 | Native output | Same end result as C — one binary |
 | Fast iteration | `koda run` and `koda watch` without manual link steps |
-| Familiar syntax | `struct`, `func`, `if`, `while` like C; objects like JS |
+| Familiar syntax | `struct`, `func`, `if`, `while`, `const`, `enum`, `match` like modern C; objects like JS |
 | Library access | Call C/C++ via wrappers (`kodawrap`) |
 | Batteries included | `stdlib/` — math, json, io, timers, vectors |
 

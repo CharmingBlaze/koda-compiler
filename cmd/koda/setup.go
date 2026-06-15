@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -15,7 +14,7 @@ import (
 
 func runSetup(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: koda setup <target>\n\nTargets:\n  raylib   Configure graphics linking (koda.json + raylib shim)")
+		return fmt.Errorf("usage: koda setup <target>\n\nTargets:\n  raylib [--full]   Configure graphics linking (shim or full Raylib wrapper)")
 	}
 	switch strings.ToLower(args[0]) {
 	case "raylib":
@@ -26,9 +25,20 @@ func runSetup(args []string) error {
 }
 
 func setupRaylib(args []string) error {
+	full := false
+	var positional []string
+	for _, a := range args {
+		switch strings.ToLower(a) {
+		case "--full", "-full":
+			full = true
+		default:
+			positional = append(positional, a)
+		}
+	}
+
 	root := cwd()
-	if len(args) > 0 {
-		root = args[0]
+	if len(positional) > 0 {
+		root = positional[0]
 	}
 	abs, err := filepath.Abs(root)
 	if err != nil {
@@ -45,8 +55,10 @@ func setupRaylib(args []string) error {
 		projectRoot = cfgRoot
 	}
 
-	if err := ensureRaylibShim(projectRoot); err != nil {
-		return err
+	if !full {
+		if err := ensureRaylibShim(projectRoot); err != nil {
+			return err
+		}
 	}
 
 	if cfg == nil {
@@ -64,21 +76,39 @@ func setupRaylib(args []string) error {
 	if strings.TrimSpace(cfg.Lint) == "" {
 		cfg.Lint = "beginner"
 	}
-	cfg.Native.Sources = mergeUnique(cfg.Native.Sources, "wrappers/raylib_shim/wrapper.c")
+	if full {
+		cfg.Native.Sources = []string{"wrappers/raylib/wrapper.c"}
+	} else {
+		cfg.Native.Sources = mergeUnique(stripRaylibFullSources(cfg.Native.Sources), "wrappers/raylib_shim/wrapper.c")
+	}
 	cfg.Native.Graphics = true
 
 	if err := project.Save(cfgRoot, cfg); err != nil {
 		return err
 	}
 
-	fmt.Println("Raylib setup complete.")
-	fmt.Printf("  project: %s\n", filepath.Join(cfgRoot, project.FileName))
-	fmt.Printf("  shim:    %s\n", filepath.Join(projectRoot, "wrappers", "raylib_shim"))
-	fmt.Println()
-	fmt.Println("Graphics linking is enabled via koda.json (\"graphics\": true).")
-	fmt.Println("Include the shim in your .koda file:")
-	fmt.Println(`  #include "wrappers/raylib_shim/raylib.koda"`)
-	fmt.Println("Or use @game from stdlib after importing graphics helpers.")
+	if full {
+		fmt.Println("Full Raylib setup complete.")
+		fmt.Printf("  project: %s\n", filepath.Join(cfgRoot, project.FileName))
+		fmt.Println()
+		fmt.Println("Graphics linking is enabled via koda.json (\"graphics\": true).")
+		fmt.Println("Include the full wrapper in your .koda file:")
+		fmt.Println(`  #include "@raylib"`)
+		fmt.Println()
+		fmt.Println("548 functions — see: koda doc wrapper @raylib")
+	} else {
+		fmt.Println("Raylib setup complete.")
+		fmt.Printf("  project: %s\n", filepath.Join(cfgRoot, project.FileName))
+		fmt.Printf("  shim:    %s\n", filepath.Join(projectRoot, "wrappers", "raylib_shim"))
+		fmt.Println()
+		fmt.Println("Graphics linking is enabled via koda.json (\"graphics\": true).")
+		fmt.Println("Shim files were refreshed from the SDK (overwrites stale copies).")
+		fmt.Println("Include the shim in your .koda file:")
+		fmt.Println(`  #include "wrappers/raylib_shim/raylib.koda"`)
+		fmt.Println("Or use @game from stdlib after importing graphics helpers.")
+		fmt.Println()
+		fmt.Println("For all Raylib functions: koda setup raylib --full")
+	}
 	fmt.Println()
 
 	raylibOK, detail := detectRaylibForRoot(cfgRoot)
@@ -101,33 +131,25 @@ func setupRaylib(args []string) error {
 	return nil
 }
 
+func stripRaylibFullSources(sources []string) []string {
+	out := make([]string, 0, len(sources))
+	for _, s := range sources {
+		s = strings.TrimSpace(s)
+		if s == "" {
+			continue
+		}
+		slash := filepath.ToSlash(s)
+		if strings.Contains(slash, "wrappers/raylib/wrapper.c") {
+			continue
+		}
+		out = append(out, s)
+	}
+	return out
+}
+
 func ensureRaylibShim(root string) error {
 	dest := filepath.Join(root, "wrappers", "raylib_shim")
-	tplRoot := "templates/graphics/wrappers/raylib_shim"
-	return fs.WalkDir(templateFS, tplRoot, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		rel, err := filepath.Rel(filepath.FromSlash(tplRoot), filepath.FromSlash(path))
-		if err != nil || rel == "." {
-			return err
-		}
-		out := filepath.Join(dest, rel)
-		if d.IsDir() {
-			return os.MkdirAll(out, 0755)
-		}
-		if _, err := os.Stat(out); err == nil {
-			return nil
-		}
-		data, err := templateFS.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		if err := os.MkdirAll(filepath.Dir(out), 0755); err != nil {
-			return err
-		}
-		return os.WriteFile(out, data, 0644)
-	})
+	return project.SyncRaylibShim(dest)
 }
 
 func detectRaylibForRoot(root string) (bool, string) {

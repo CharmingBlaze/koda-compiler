@@ -13,6 +13,18 @@ import (
 	"koda/internal/kodahome"
 )
 
+// logWriter adapts a log func to io.Writer (for forwarding clang stderr to IDEs).
+type logWriter struct {
+	log func(string)
+}
+
+func (w logWriter) Write(p []byte) (int, error) {
+	if w.log != nil && len(p) > 0 {
+		w.log(string(p))
+	}
+	return len(p), nil
+}
+
 func objFileName() string {
 	if runtime.GOOS == "windows" {
 		return "main.obj"
@@ -62,12 +74,12 @@ func linkWithLLDDarwin(tc *kodahome.Toolchain, objPath, outAbs string) error {
 }
 
 // runCompileAndLink compiles LLVM IR and links the Koda runtime (and system libs) in one clang invocation.
-func runCompileAndLink(tc *kodahome.Toolchain, irFile, outAbs, rootDir string, opts BuildOptions, log func(string)) error {
+func runCompileAndLink(tc *kodahome.Toolchain, irFile, outAbs, sdkRoot, projectRoot string, opts BuildOptions, log func(string)) error {
 	cc := tc.Clang
 	if strings.TrimSpace(cc) == "" {
 		cc = ClangDriver()
 	}
-	runtimeInclude := filepath.Join(rootDir, "runtime", "src")
+	runtimeInclude := filepath.Join(sdkRoot, "runtime", "src")
 	inputFile := irFile
 
 	// On Windows, direct clang compilation from LLVM IR can crash on some generated programs.
@@ -120,7 +132,7 @@ func runCompileAndLink(tc *kodahome.Toolchain, irFile, outAbs, rootDir string, o
 		linkArgs = append(linkArgs, nativeSources...)
 	}
 	linkArgs = append(linkArgs, tc.RuntimeLib)
-	if inc, arch, ok := vendoredRaylibStatic(rootDir); ok {
+	if inc, arch, ok := vendoredRaylibStatic(projectRoot); ok {
 		if log != nil {
 			log(fmt.Sprintf("  vendored raylib: %s\n", arch))
 		}
@@ -131,6 +143,9 @@ func runCompileAndLink(tc *kodahome.Toolchain, irFile, outAbs, rootDir string, o
 		linkExtra = os.Getenv("KODA_LINKFLAGS")
 	}
 	if extra := strings.Fields(linkExtra); len(extra) > 0 {
+		if _, _, vendored := vendoredRaylibStatic(projectRoot); vendored {
+			extra = omitLinkFlag(extra, "-lraylib")
+		}
 		if log != nil {
 			log(fmt.Sprintf("  link flags: %s\n\n", strings.Join(extra, " ")))
 		}
@@ -165,10 +180,13 @@ func runCompileAndLink(tc *kodahome.Toolchain, irFile, outAbs, rootDir string, o
 			args = append(args, nativeSources...)
 		}
 		args = append(args, tc.RuntimeLib)
-		if inc, arch, ok := vendoredRaylibStatic(rootDir); ok {
+		if inc, arch, ok := vendoredRaylibStatic(projectRoot); ok {
 			args = append(args, "-I", inc, arch)
 		}
 		if extra := strings.Fields(os.Getenv("KODA_LINKFLAGS")); len(extra) > 0 {
+			if _, _, vendored := vendoredRaylibStatic(projectRoot); vendored {
+				extra = omitLinkFlag(extra, "-lraylib")
+			}
 			args = append(args, extra...)
 		}
 		args = append(args, defaultSystemLinkFlags()...)
@@ -183,20 +201,28 @@ func runCompileAndLink(tc *kodahome.Toolchain, irFile, outAbs, rootDir string, o
 	runOnce = func(o BuildOptions) error {
 		cmd := exec.Command(cc, buildArgs(o)...)
 		var buf bytes.Buffer
-		cmd.Stdout = io.MultiWriter(os.Stdout, &buf)
-		cmd.Stderr = io.MultiWriter(os.Stderr, &buf)
+		var stderr io.Writer = &buf
+		if log != nil {
+			stderr = io.MultiWriter(&buf, logWriter{log})
+		}
+		cmd.Stdout = stderr
+		cmd.Stderr = stderr
 		if runtime.GOOS == "windows" && strings.TrimSpace(tc.LLD) != "" {
 			dir := filepath.Dir(tc.LLD)
 			cmd.Env = append(os.Environ(), "PATH="+dir+string(os.PathListSeparator)+os.Getenv("PATH"))
 		}
 		if err := cmd.Run(); err != nil {
-			if runtime.GOOS == "windows" && !o.NoOpt && looksLikeWindowsClangOptimizerCrash(buf.String()) {
+			detail := strings.TrimSpace(buf.String())
+			if runtime.GOOS == "windows" && !o.NoOpt && (looksLikeWindowsClangOptimizerCrash(detail) || looksLikeWindowsClangExit74(detail, err)) {
 				if log != nil {
-					log("  warning: clang -O2 crashed; retrying with --no-opt\n")
+					log("  warning: clang failed; retrying with --no-opt\n")
 				}
 				o2 := o
 				o2.NoOpt = true
 				return runOnce(o2)
+			}
+			if detail != "" {
+				return fmt.Errorf("%s: %w", detail, err)
 			}
 			return err
 		}
@@ -216,6 +242,17 @@ func looksLikeWindowsClangOptimizerCrash(out string) bool {
 		return false
 	}
 	return strings.Contains(out, "Exception Code: 0xC0000005") || strings.Contains(out, "0xC0000005")
+}
+
+func looksLikeWindowsClangExit74(detail string, err error) bool {
+	if err == nil {
+		return false
+	}
+	if !strings.Contains(err.Error(), "exit status 74") {
+		return false
+	}
+	// Empty or unhelpful clang output — often a flaky -O2 / llc path on Windows.
+	return detail == "" || strings.Contains(detail, "PLEASE submit a bug report")
 }
 
 func disableWindowsLLCFallback() bool {

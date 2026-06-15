@@ -87,7 +87,8 @@ func (cp *ClangParser) parseHeaderWithClang(headerPath string) (*API, error) {
 			inc = append(inc, "-I", d)
 		}
 	}
-	args := kodahome.ClangWrappedArgs(append(inc, "-Xclang", "-ast-dump", "-fsyntax-only", headerPath)...)
+	args := kodahome.ClangWrappedArgs(append(inc, cp.clangLangArgs(headerPath)...)...)
+	args = append(args, "-Xclang", "-ast-dump", "-fsyntax-only", headerPath)
 	cmd := exec.Command(kodahome.Clang(), args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -150,25 +151,29 @@ func (cp *ClangParser) parseASTDump(astDump, headerPath string) (*API, error) {
 
 // parseFunctionDecl extracts function declarations from AST line
 func (cp *ClangParser) parseFunctionDecl(line string) *Function {
-	// Match function declaration pattern
-	re := regexp.MustCompile(`FunctionDecl\s+0x[0-9a-f]+\s+<[^>]+>\s+(?:inline\s+)?(?:static\s+)?(\w+)\s+'([^']+)'\s*`)
-	matches := re.FindStringSubmatch(line)
-
-	if len(matches) >= 3 {
-		funcName := matches[1]
-		signature := matches[2]
-
-		function := &Function{
-			Name: funcName,
-		}
-
-		// Parse return type and parameters from signature
-		cp.parseFunctionSignature(signature, function)
-
-		return function
+	patterns := []string{
+		`FunctionDecl\s+0x[0-9a-f]+\s+<[^>]+>\s+(?:inline\s+)?(?:static\s+)?(\w+)\s+'([^']+)'\s*`,
+		`CXXMethodDecl\s+0x[0-9a-f]+\s+<[^>]+>\s+(?:[\w:]+\s+)?(\w+)\s+'([^']+)'\s*`,
 	}
-
+	for _, pat := range patterns {
+		re := regexp.MustCompile(pat)
+		matches := re.FindStringSubmatch(line)
+		if len(matches) >= 3 {
+			funcName := matches[1]
+			signature := matches[2]
+			function := &Function{Name: funcName}
+			cp.parseFunctionSignature(signature, function)
+			return function
+		}
+	}
 	return nil
+}
+
+func (cp *ClangParser) clangLangArgs(headerPath string) []string {
+	if cp.config.UseCPP || isCPPHeader(headerPath) {
+		return []string{"-x", "c++", "-std=c++17"}
+	}
+	return []string{"-x", "c"}
 }
 
 // parseStructDecl extracts struct declarations from AST line
@@ -575,10 +580,9 @@ func (cp *ClangParser) parseStructFields(fieldsContent string) []Field {
 		if len(parts) >= 2 {
 			fieldName := parts[len(parts)-1]
 			fieldType := strings.Join(parts[:len(parts)-1], " ")
-
-			// Remove array brackets for type parsing
-			if strings.Contains(fieldName, "[") {
-				fieldName = strings.Split(fieldName, "[")[0]
+			if idx := strings.Index(fieldName, "["); idx >= 0 {
+				fieldType += fieldName[idx:]
+				fieldName = fieldName[:idx]
 			}
 
 			fields = append(fields, Field{
@@ -616,10 +620,9 @@ func (cp *ClangParser) parseEnumValues(valuesContent string) []EnumValue {
 
 		var value int64 = int64(i)
 		if len(parts) > 1 {
-			// Evaluate the expression
 			valueStr := strings.TrimSpace(parts[1])
-			if val, err := cp.evaluateExpression(valueStr); err == nil {
-				value = val
+			if v, ok := evaluateIntLiteral(valueStr); ok {
+				value = v
 			}
 		}
 

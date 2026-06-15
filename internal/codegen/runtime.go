@@ -20,6 +20,9 @@ func declareRuntimeFunctions(mod *ir.Module) map[string]*ir.Func {
 	functions["KODA_runtime_init"] = mod.NewFunc("koda_runtime_init", types.Void)
 	functions["KODA_runtime_init_ex"] = mod.NewFunc("koda_runtime_init_ex", types.Void,
 		ir.NewParam("stack_base", types.NewPointer(types.I8)))
+	functions["KODA_runtime_set_argv"] = mod.NewFunc("koda_runtime_set_argv", types.Void,
+		ir.NewParam("argc", types.I32),
+		ir.NewParam("argv", types.NewPointer(types.NewPointer(types.I8))))
 	functions["KODA_runtime_shutdown"] = mod.NewFunc("koda_runtime_shutdown", types.Void)
 	functions["KODA_register_global_slot"] = mod.NewFunc("koda_register_global_slot", types.Void,
 		ir.NewParam("slot", types.NewPointer(types.I64)))
@@ -140,6 +143,21 @@ func declareRuntimeFunctions(mod *ir.Module) map[string]*ir.Func {
 	functions["KODA_writeFile"] = argvI64(mod, "koda_writeFile")
 	functions["KODA_appendFile"] = argvI64(mod, "koda_appendFile")
 	functions["KODA_asset_path"] = argvI64(mod, "koda_asset_path")
+	functions["KODA_args"] = argvI64(mod, "koda_args")
+	functions["KODA_env"] = argvI64(mod, "koda_env")
+	functions["KODA_rgb"] = argvI64(mod, "koda_rgb")
+	functions["KODA_rgba"] = argvI64(mod, "koda_rgba")
+	functions["KODA_vec2"] = argvI64(mod, "koda_vec2")
+	functions["KODA_vec3"] = argvI64(mod, "koda_vec3")
+	functions["KODA_rect"] = argvI64(mod, "koda_rect")
+	functions["KODA_box"] = argvI64(mod, "koda_box")
+	functions["KODA_color"] = argvI64(mod, "koda_color")
+	functions["KODA_value_sub"] = mod.NewFunc("koda_value_sub", types.I64,
+		ir.NewParam("a", types.I64),
+		ir.NewParam("b", types.I64))
+	functions["KODA_value_mul"] = mod.NewFunc("koda_value_mul", types.I64,
+		ir.NewParam("a", types.I64),
+		ir.NewParam("b", types.I64))
 	functions["KODA_fileExists"] = argvI64(mod, "koda_fileExists")
 	functions["KODA_deleteFile"] = argvI64(mod, "koda_deleteFile")
 	functions["KODA_isFile"] = argvI64(mod, "koda_is_file")
@@ -173,6 +191,7 @@ func declareRuntimeFunctions(mod *ir.Module) map[string]*ir.Func {
 	functions["KODA_struct_get"] = mod.NewFunc("koda_struct_get", types.I64,
 		ir.NewParam("obj", types.I64),
 		ir.NewParam("index", types.I64))
+	functions["KODA_struct_field"] = argvI64(mod, "koda_struct_field")
 	functions["KODA_struct_set"] = mod.NewFunc("koda_struct_set", types.I64,
 		ir.NewParam("obj", types.I64),
 		ir.NewParam("index", types.I64),
@@ -220,6 +239,11 @@ func declareRuntimeFunctions(mod *ir.Module) map[string]*ir.Func {
 	functions["KODA_array_pop"] = mod.NewFunc("koda_array_pop", types.I64,
 		ir.NewParam("arr", types.I64))
 	functions["KODA_array_pop_argv"] = argvI64(mod, "koda_array_pop_argv")
+	functions["KODA_array_remove_at"] = mod.NewFunc("koda_array_remove_at", types.I64,
+		ir.NewParam("arr", types.I64),
+		ir.NewParam("index", types.I64))
+	functions["KODA_array_clear"] = mod.NewFunc("koda_array_clear", types.Void,
+		ir.NewParam("arr", types.I64))
 	lenFn := mod.NewFunc("koda_len", types.I64,
 		ir.NewParam("value", types.I64))
 	functions["KODA_len"] = lenFn
@@ -247,6 +271,9 @@ func declareRuntimeFunctions(mod *ir.Module) map[string]*ir.Func {
 	functions["KODA_string"] = mod.NewFunc("koda_string", types.I64,
 		ir.NewParam("value", types.I64))
 	functions["KODA_string_concat"] = mod.NewFunc("koda_string_concat", types.I64,
+		ir.NewParam("a", types.I64),
+		ir.NewParam("b", types.I64))
+	functions["KODA_value_add"] = mod.NewFunc("koda_value_add", types.I64,
 		ir.NewParam("a", types.I64),
 		ir.NewParam("b", types.I64))
 

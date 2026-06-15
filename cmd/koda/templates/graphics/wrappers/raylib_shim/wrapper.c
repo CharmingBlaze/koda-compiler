@@ -167,3 +167,121 @@ Value koda_shim_DrawLine3D(int argCount, Value* args) {
     return NIL_VAL;
 }
 
+Value koda_shim_GetMouseX(int argCount, Value* args) {
+    (void)argCount;
+    (void)args;
+    return NUMBER_VAL((double)GetMouseX());
+}
+
+Value koda_shim_GetMouseY(int argCount, Value* args) {
+    (void)argCount;
+    (void)args;
+    return NUMBER_VAL((double)GetMouseY());
+}
+
+Value koda_shim_IsMouseButtonDown(int argCount, Value* args) {
+    if (argCount < 1) return NIL_VAL;
+    int btn = (int)AS_NUMBER(args[0]);
+    return BOOL_VAL(IsMouseButtonDown(btn));
+}
+
+Value koda_shim_IsMouseButtonPressed(int argCount, Value* args) {
+    if (argCount < 1) return NIL_VAL;
+    int btn = (int)AS_NUMBER(args[0]);
+    return BOOL_VAL(IsMouseButtonPressed(btn));
+}
+
+Value koda_shim_GetMouseWheelMove(int argCount, Value* args) {
+    (void)argCount;
+    (void)args;
+    return NUMBER_VAL((double)GetMouseWheelMove());
+}
+
+Value koda_shim_GetScreenWidth(int argCount, Value* args) {
+    (void)argCount;
+    (void)args;
+    return NUMBER_VAL((double)GetScreenWidth());
+}
+
+Value koda_shim_GetScreenHeight(int argCount, Value* args) {
+    (void)argCount;
+    (void)args;
+    return NUMBER_VAL((double)GetScreenHeight());
+}
+
+Value koda_shim_SetWindowTitle(int argCount, Value* args) {
+    if (argCount < 1) return NIL_VAL;
+    SetWindowTitle(koda_arg_cstr(args, 0));
+    return NIL_VAL;
+}
+
+Value koda_shim_GetFPS(int argCount, Value* args) {
+    (void)argCount;
+    (void)args;
+    return NUMBER_VAL((double)GetFPS());
+}
+
+Value koda_shim_DrawLine(int argCount, Value* args) {
+    if (argCount < 5) return NIL_VAL;
+    int x1 = (int)AS_NUMBER(args[0]);
+    int y1 = (int)AS_NUMBER(args[1]);
+    int x2 = (int)AS_NUMBER(args[2]);
+    int y2 = (int)AS_NUMBER(args[3]);
+    unsigned int c = (unsigned int)AS_NUMBER(args[4]);
+    DrawLine(x1, y1, x2, y2, *(Color*)&c);
+    return NIL_VAL;
+}
+
+Value koda_shim_DrawCircleLines(int argCount, Value* args) {
+    if (argCount < 4) return NIL_VAL;
+    int x = (int)AS_NUMBER(args[0]);
+    int y = (int)AS_NUMBER(args[1]);
+    float r = (float)AS_NUMBER(args[2]);
+    unsigned int c = (unsigned int)AS_NUMBER(args[3]);
+    DrawCircleLines(x, y, r, *(Color*)&c);
+    return NIL_VAL;
+}
+
+Value koda_shim_DrawRectangleLines(int argCount, Value* args) {
+    if (argCount < 5) return NIL_VAL;
+    int x = (int)AS_NUMBER(args[0]);
+    int y = (int)AS_NUMBER(args[1]);
+    int w = (int)AS_NUMBER(args[2]);
+    int h = (int)AS_NUMBER(args[3]);
+    unsigned int c = (unsigned int)AS_NUMBER(args[4]);
+    DrawRectangleLines(x, y, w, h, *(Color*)&c);
+    return NIL_VAL;
+}
+
+#define KODA_MAX_TEXTURES 256
+static Texture2D koda_textures[KODA_MAX_TEXTURES];
+static int koda_texture_count = 0;
+
+Value koda_shim_LoadTexture(int argCount, Value* args) {
+    if (argCount < 1) return NUMBER_VAL(-1);
+    if (koda_texture_count >= KODA_MAX_TEXTURES) return NUMBER_VAL(-1);
+    const char* path = koda_arg_cstr(args, 0);
+    koda_textures[koda_texture_count] = LoadTexture(path);
+    int id = koda_texture_count++;
+    return NUMBER_VAL((double)id);
+}
+
+Value koda_shim_DrawTexture(int argCount, Value* args) {
+    if (argCount < 4) return NIL_VAL;
+    int id = (int)AS_NUMBER(args[0]);
+    int x = (int)AS_NUMBER(args[1]);
+    int y = (int)AS_NUMBER(args[2]);
+    unsigned int c = (unsigned int)AS_NUMBER(args[3]);
+    if (id < 0 || id >= koda_texture_count) return NIL_VAL;
+    DrawTexture(koda_textures[id], x, y, *(Color*)&c);
+    return NIL_VAL;
+}
+
+Value koda_shim_UnloadTexture(int argCount, Value* args) {
+    if (argCount < 1) return NIL_VAL;
+    int id = (int)AS_NUMBER(args[0]);
+    if (id < 0 || id >= koda_texture_count) return NIL_VAL;
+    UnloadTexture(koda_textures[id]);
+    return NIL_VAL;
+}
+

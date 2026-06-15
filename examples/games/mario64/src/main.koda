@@ -1,0 +1,279 @@
+// Mario 64 — 3D platformer (Raylib shim)
+// Uses JS-style dot notation: player.x, camera.yaw, coin.on
+// Colors: colors.sky, colors.grass, rgb(r,g,b) — no raw hex needed.
+#include "../wrappers/raylib_shim/raylib.koda"
+#include "@camera"
+
+const sw = 1280;
+const sh = 720;
+
+const key_w = 87;
+const key_s = 83;
+const key_a = 65;
+const key_d = 68;
+const key_space = 32;
+const key_r = 82;
+
+enum GameState {
+    Playing,
+    Won,
+    GameOver
+}
+
+struct Coin { x, z, on }
+struct Mario { x, y, z, h, r, vel_y, grounded }
+struct GoombaNpc { x, z, dir }
+
+let player = Mario { x: 0.0, y: 1.0, z: 8.0, h: 1.2, r: 0.45, vel_y: 0.0, grounded: true };
+let goomba_npc = GoombaNpc { x: -4.0, z: -2.0, dir: 1.0 };
+
+let camera = OrbitCamera { target: player, distance: 13.0, pitch: 0.42, yaw: -0.55 };
+
+const speed = 8.0;
+const gravity = -22.0;
+const jump_v = 9.5;
+const goal = 5;
+let score = 0;
+let lives = 3;
+let state = GameState.Playing;
+let star_spin = 0.0;
+
+func dist2(x1, z1, x2, z2) {
+    let dx = x1 - x2;
+    let dz = z1 - z2;
+    return dx * dx + dz * dz;
+}
+
+func on_plat(px, pz, cx, cz, hw, hd) {
+    return px >= cx - hw && px <= cx + hw && pz >= cz - hd && pz <= cz + hd;
+}
+
+func floor_y(px, pz) {
+    let y = 1.0;
+    if (on_plat(px, pz, 0.0, 0.0, 14.0, 14.0)) { y = 1.0; }
+    if (on_plat(px, pz, 7.0, -5.0, 2.5, 2.5) && y < 2.8) { y = 2.8; }
+    if (on_plat(px, pz, -8.0, 3.0, 3.0, 3.0) && y < 3.3) { y = 3.3; }
+    if (on_plat(px, pz, 5.0, 7.0, 2.0, 2.0) && y < 4.3) { y = 4.3; }
+    if (on_plat(px, pz, 0.0, -9.0, 4.0, 2.0) && y < 2.3) { y = 2.3; }
+    if (on_plat(px, pz, 0.0, 0.0, 3.5, 3.5) && y < 5.8) { y = 5.8; }
+    return y;
+}
+
+func clamp(v, lo, hi) {
+    if (v < lo) { return lo; }
+    if (v > hi) { return hi; }
+    return v;
+}
+
+func respawn_player() {
+    player.x = 0.0;
+    player.z = 8.0;
+    player.y = 1.0;
+    player.vel_y = 0.0;
+    player.grounded = true;
+}
+
+func reset_game() {
+    respawn_player();
+    score = 0;
+    lives = 3;
+    state = GameState.Playing;
+    goomba_npc.x = -4.0;
+    goomba_npc.z = -2.0;
+    goomba_npc.dir = 1.0;
+    camera.reset();
+}
+
+func draw_tree(tx, tz) {
+    drawcube(tx, 1.0, tz, 0.5, 2.0, 0.5, colors.dirt);
+    drawcube(tx, 3.2, tz, 2.0, 2.0, 2.0, colors.forest);
+}
+
+func draw_castle(cx, cz) {
+    drawcube(cx, 1.5, cz, 4.0, 3.0, 4.0, colors.gray);
+    drawcube(cx, 4.0, cz, 3.0, 2.0, 3.0, colors.gray);
+    drawcube(cx, 6.2, cz, 0.3, 2.5, 0.3, colors.red);
+    drawcube(cx + 1.5, 5.5, cz + 1.5, 1.2, 1.2, 1.2, colors.blue);
+}
+
+func draw_coin(coin) {
+    if (coin.on) {
+        drawcube(coin.x, 1.5, coin.z, 0.45, 0.45, 0.12, colors.gold);
+    }
+}
+
+func try_collect(coin, pick) {
+    if (coin.on && dist2(player.x, player.z, coin.x, coin.z) < pick) {
+        coin.on = false;
+        score += 1;
+    }
+}
+
+func main() {
+    let coins = [
+        Coin { x: 7.0, z: -5.0, on: true },
+        Coin { x: -8.0, z: 3.0, on: true },
+        Coin { x: 5.0, z: 7.0, on: true },
+        Coin { x: 0.0, z: -9.0, on: true },
+        Coin { x: -6.0, z: -6.0, on: true }
+    ];
+
+    initwindow(sw, sh, "Mario 64 — Peach's Castle Grounds");
+    settargetfps(60);
+
+    while (!windowshouldclose()) {
+        let dt = deltatime();
+        if (dt > 0.05) { dt = 0.05; }
+        gcframestep(0.5);
+
+        if (iskeypressed(key_r)) {
+            reset_game();
+        }
+
+        if (state == GameState.Playing) {
+            let move_x = 0.0;
+            let move_z = 0.0;
+            if (iskeydown(key_w)) { move_z -= 1.0; }
+            if (iskeydown(key_s)) { move_z += 1.0; }
+            if (iskeydown(key_a)) { move_x -= 1.0; }
+            if (iskeydown(key_d)) { move_x += 1.0; }
+
+            let fwd_x = sin(camera.yaw);
+            let fwd_z = cos(camera.yaw);
+            let right_x = cos(camera.yaw);
+            let right_z = -sin(camera.yaw);
+            player.x += (move_z * fwd_x + move_x * right_x) * speed * dt;
+            player.z += (move_z * fwd_z + move_x * right_z) * speed * dt;
+
+            if (player.grounded && iskeypressed(key_space)) {
+                player.vel_y = jump_v;
+                player.grounded = false;
+            }
+
+            player.vel_y += gravity * dt;
+            player.y += player.vel_y * dt;
+
+            let floor = floor_y(player.x, player.z);
+            if (player.y <= floor) {
+                player.y = floor;
+                player.vel_y = 0.0;
+                player.grounded = true;
+            }
+
+            if (player.x < -14.5) { player.x = -14.5; }
+            if (player.x > 14.5) { player.x = 14.5; }
+            if (player.z < -14.5) { player.z = -14.5; }
+            if (player.z > 14.5) { player.z = 14.5; }
+
+            if (player.y < -5.0) {
+                lives -= 1;
+                respawn_player();
+                if (lives <= 0) {
+                    state = GameState.GameOver;
+                }
+            }
+
+            let pick = 1.4;
+            for coin in coins {
+                try_collect(coin, pick);
+            }
+
+            goomba_npc.x += goomba_npc.dir * 4.0 * dt;
+            if (goomba_npc.x > 6.0) { goomba_npc.x = 6.0; goomba_npc.dir = -1.0; }
+            if (goomba_npc.x < -10.0) { goomba_npc.x = -10.0; goomba_npc.dir = 1.0; }
+
+            if (dist2(player.x, player.z, goomba_npc.x, goomba_npc.z) < 1.0 && player.y < 2.5) {
+                lives -= 1;
+                respawn_player();
+                if (lives <= 0) {
+                    state = GameState.GameOver;
+                }
+            }
+
+            if (score >= goal && dist2(player.x, player.z, 0.0, 0.0) < 2.0 && player.y > 4.0) {
+                state = GameState.Won;
+            }
+        }
+
+        star_spin += dt * 120.0;
+        camera.update();
+
+        begindrawing();
+        clearbackground(colors.sky);
+
+        camera.begin();
+
+        drawcube(0.0, -0.5, 0.0, 30.0, 1.0, 30.0, colors.grass);
+        drawgrid(30, 1.0);
+
+        drawcube(7.0, 2.0, -5.0, 5.0, 1.0, 5.0, colors.dirt);
+        drawcube(-8.0, 2.5, 3.0, 6.0, 1.0, 6.0, colors.dirt);
+        drawcube(5.0, 3.5, 7.0, 4.0, 1.0, 4.0, colors.dirt);
+        drawcube(0.0, 1.5, -9.0, 8.0, 1.0, 4.0, colors.dirt);
+        drawcube(0.0, 4.5, 0.0, 7.0, 3.0, 7.0, colors.dirt);
+
+        draw_tree(-10.0, 10.0);
+        draw_tree(11.0, -8.0);
+        draw_tree(-11.0, -10.0);
+        draw_castle(12.0, 12.0);
+
+        for coin in coins {
+            draw_coin(coin);
+        }
+
+        if (score >= goal) {
+            let star_y = 6.8;
+            drawcube(0.0, star_y, 0.0, 1.2, 1.2, 1.2, colors.yellow);
+            drawcubewires(0.0, star_y, 0.0, 1.4, 1.4, 1.4, colors.white);
+        }
+
+        drawcube(goomba_npc.x, 0.7, goomba_npc.z, 0.9, 0.9, 0.9, colors.brown);
+        drawcubewires(goomba_npc.x, 0.7, goomba_npc.z, 0.9, 0.9, 0.9, colors.black);
+
+        drawcube(player.x, player.y, player.z, player.r * 2.0, player.h, player.r * 2.0, colors.red);
+        drawcube(player.x, player.y + 0.55, player.z, player.r * 1.4, 0.35, player.r * 1.4, colors.blue);
+        drawcubewires(player.x, player.y, player.z, player.r * 2.0, player.h, player.r * 2.0, colors.black);
+
+        camera.end();
+
+        drawtext("MARIO 64", 20, 16, 36, colors.white);
+        drawtext("WASD move (camera-relative)   SPACE jump   R restart", 20, 54, 20, colors.white);
+        drawtext("Right-mouse drag: orbit cam   Wheel: zoom", 20, 78, 18, colors.white);
+        drawtext("Collect 5 coins, then grab the star on the hill!", 20, 102, 18, colors.white);
+
+        let hud_x = 20;
+        let hud_y = 134;
+        for i in 0..goal {
+            let col = colors.black;
+            if (score > i) { col = colors.gold; }
+            drawrectangle(hud_x + i * 28, hud_y, 22, 22, col);
+        }
+
+        drawtext("x", 20, 169, 24, colors.white);
+        for i in 0..3 {
+            let lc = colors.black;
+            if (lives > i) { lc = colors.red; }
+            drawrectangle(50 + i * 26, 172, 18, 18, lc);
+        }
+
+        drawtext("Score: {score}   Lives: {lives}", 20, 200, 24, colors.white);
+
+        match state {
+            GameState.Won {
+                drawtext("STAR GET! Course clear!", 380, 340, 40, colors.yellow);
+            }
+            GameState.GameOver {
+                drawtext("GAME OVER - press R", 400, 340, 36, colors.red);
+            }
+            default {
+                if (score >= goal) {
+                    drawtext("Climb the hill - touch the star!", 380, 340, 28, colors.yellow);
+                }
+            }
+        }
+
+        enddrawing();
+    }
+
+    closewindow();
+}

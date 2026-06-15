@@ -19,6 +19,44 @@ For grouped APIs see [stdlib](../stdlib/README.md).
 
 ---
 
+## Process environment
+
+| Name | Purpose |
+|------|---------|
+| `args()` | Array of command-line arguments (includes program name at index 0) |
+| `env(name)` | Environment variable value, or `null` if unset |
+| `rgb(r, g, b)` | Raylib color from 0–255 channels (alpha 255) |
+| `rgba(r, g, b, a)` | Raylib color from 0–255 RGBA channels |
+| `vec2(x, y)` | 2D vector with `+`, `-`, `*`, `+=` |
+| `vec3(x, y, z)` | 3D vector with `+`, `-`, `*`, `+=` |
+| `color(r, g, b)` | RGBA color object (`.packed` for Raylib) |
+| `rect(x, y, w, h)` | Rectangle bounds |
+| `box(center, size)` | 3D AABB from two `vec3` values |
+
+Named palette colors are on the global **`colors`** object: `colors.white`, `colors.sky`, `colors.grass`, etc. See [game-types.md](../stdlib/game-types.md).
+
+```koda
+game.clear(colors.sky);
+game.rect(0, 0, 40, 40, rgb(34, 139, 34));
+let custom = rgba(255, 216, 168, 255);
+```
+
+```koda
+func main() {
+    for (let i = 0; i < len(args()); i = i + 1) {
+        print("arg", i, ":", args()[i]);
+    }
+    let home = env("USERPROFILE");  // Windows; use HOME on Unix
+    if (home != null) {
+        print("home:", home);
+    }
+}
+```
+
+Run with extra arguments: `koda run tool.koda -- input.txt output.txt`
+
+---
+
 ## Time
 
 | Name | Purpose |

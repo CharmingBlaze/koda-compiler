@@ -1,20 +1,20 @@
 #include "../../wrappers/raylib_shim/raylib.koda"
 
-let sky = 0xFFFFD8A8;
+let sky = colors.sky;
 
-let ground = 0xFF2F7F2F;
+let ground = colors.grass;
 
-let white = 0xFFFFFFFF;
+let white = colors.white;
 
-let black = 0xFF000000;
+let black = colors.black;
 
-let red = 0xFF0000FF;
+let red = colors.red;
 
-let yellow = 0xFF00FFFF;
+let yellow = colors.yellow;
 
-let blue = 0xFFFF7F00;
+let blue = colors.blue;
 
-let green = 0xFF00FF00;
+let green = colors.green;
 
 let sw = 1280;
 

@@ -55,6 +55,52 @@ require_raylib_stage() {
   esac
 }
 
+# Copy Koda Studio + platform launchers when CI built the IDE for this slug.
+bundle_studio() {
+  local slug="$1"
+  local root="$2"
+
+  case "$slug" in
+    windows-amd64)
+      local src="$ART_ROOT_ABS/windows/koda-studio-windows-amd64.exe"
+      if [[ ! -f "$src" ]]; then
+        return 0
+      fi
+      cp -a "$src" "$root/Koda Studio.exe"
+      bash "$REPO_ROOT/scripts/write-portable-launchers.sh" "$root" windows
+      ;;
+    linux-amd64)
+      local src="$ART_ROOT_ABS/linux-amd64/koda-studio-linux-amd64"
+      if [[ ! -f "$src" ]]; then
+        return 0
+      fi
+      cp -a "$src" "$root/Koda Studio"
+      chmod +x "$root/Koda Studio"
+      bash "$REPO_ROOT/scripts/write-portable-launchers.sh" "$root" unix
+      ;;
+    linux-arm64)
+      local src="$ART_ROOT_ABS/linux-arm64/koda-studio-linux-arm64"
+      if [[ ! -f "$src" ]]; then
+        return 0
+      fi
+      cp -a "$src" "$root/Koda Studio"
+      chmod +x "$root/Koda Studio"
+      bash "$REPO_ROOT/scripts/write-portable-launchers.sh" "$root" unix
+      ;;
+    darwin-amd64|darwin-arm64)
+      local src="$ART_ROOT_ABS/macos/Koda Studio.app"
+      if [[ ! -d "$src" ]]; then
+        return 0
+      fi
+      cp -a "$src" "$root/Koda Studio.app"
+      bash "$REPO_ROOT/scripts/write-portable-launchers.sh" "$root" macos
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
 zip_sdk() {
   local slug="$1"          # windows-amd64
   local fj_src="$2"        # source path to compiler binary
@@ -113,6 +159,8 @@ zip_sdk() {
     cp -a "$REPO_ROOT/examples" "$stage/$root_name/examples"
   fi
 
+  bundle_studio "$slug" "$stage/$root_name"
+
   cat >"$stage/$root_name/SDK_README.txt" <<EOF
 Koda SDK ${VERSION} (${slug})
 ==============================
@@ -123,6 +171,11 @@ No Go. No Python. No LLVM install required.
 Platforms: Windows, Linux, and macOS each have dedicated release zips (this archive is ${slug}).
 Everything offline: compiler, kodawrap, stdlib, docs, examples — unzip and run koda doctor.
 
+Each SDK zip includes Koda Studio (IDE) and one-click launchers:
+  • Windows — Start Koda Studio.bat
+  • Linux — ./start-koda-studio.sh (or koda-studio.desktop)
+  • macOS — Start Koda Studio.command (double-click in Finder)
+
 The compiler never fetches LLVM, Raylib, or other dependencies from the network. Release builds embed Clang + llc + the Koda runtime; they unpack to a local temp directory on first use only. Raylib (where included in this zip) lives under third_party/raylib_static/stage/.
 
 Quick start
@@ -130,13 +183,17 @@ Quick start
   Read START_HERE.md, then:
 
   • Windows:
-      .\koda.exe doctor
-      .\koda.exe new bounce --template graphics
+      Double-click Start Koda Studio.bat
+      — or — .\koda.exe doctor && .\koda.exe new bounce --template graphics
 
-  • Linux / macOS:
-      chmod +x koda kodawrap
-      ./koda doctor
-      ./koda new bounce --template graphics
+  • Linux:
+      chmod +x koda kodawrap start-koda-studio.sh
+      ./start-koda-studio.sh
+      — or — ./koda doctor && ./koda new bounce --template graphics
+
+  • macOS:
+      Double-click Start Koda Studio.command
+      — or — chmod +x koda kodawrap && ./koda doctor
 
   Optional PATH: scripts/install-koda.ps1 (Windows) or scripts/install-koda.sh (Unix)
 

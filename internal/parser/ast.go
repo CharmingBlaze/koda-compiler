@@ -85,11 +85,17 @@ type FuncDecl struct {
 	Native *NativeDirective
 }
 
+// StructField is one field in a struct declaration, optionally with a default value.
+type StructField struct {
+	Name    lexer.Token
+	Default Expr
+}
+
 // StructDecl declares a named struct type with ordered fields (O(1) slot access at compile time).
 type StructDecl struct {
 	Token   lexer.Token
 	Name    lexer.Token
-	Fields  []lexer.Token
+	Fields  []StructField
 	Methods []*FuncDecl
 }
 

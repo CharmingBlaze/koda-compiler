@@ -1,0 +1,38 @@
+struct Coin {
+    x = 0.0;
+    z = 0.0;
+    on = true;
+
+    func new(x, z) {
+        this.x = x;
+        this.z = z;
+    }
+
+    func value() {
+        return x + z;
+    }
+};
+
+func main() {
+    let c1 = Coin { x: 7.0, z: -5.0 };
+    assert(c1.on == true, "default on");
+    assert(c1.x == 7.0, "literal x");
+
+    let c2 = Coin(7.0, -5.0);
+    assert(c2.x == 7.0, "ctor x");
+    assert(c2.z == -5.0, "ctor z");
+    assert(c2.on == true, "ctor default on");
+
+    let coins = [
+        Coin(7.0, -5.0),
+        Coin(-8.0, 3.0)
+    ];
+
+    let total = 0.0;
+    for coin in coins {
+        total = total + coin.value();
+    }
+    assert(total == -3.0, "for-in methods");
+
+    print("PASS struct_defaults_ctor_methods");
+}

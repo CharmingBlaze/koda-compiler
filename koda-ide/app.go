@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -15,14 +14,13 @@ import (
 	"koda/api"
 )
 
-var reSafeProjectName = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9._\- ]{0,126}$`)
-
 // App is the Wails-bound API for Koda Studio.
 type App struct {
 	ctx context.Context
 	mu  sync.RWMutex
 
-	workspaceRoot string
+	workspaceRoot     string
+	initialWorkspace  string
 
 	docMu   sync.Mutex
 	lspDocs map[string]string
@@ -35,8 +33,17 @@ func NewApp() *App {
 	return &App{lspDocs: make(map[string]string)}
 }
 
+// SetInitialWorkspace opens this folder on startup (CLI / drag-drop path).
+func (a *App) SetInitialWorkspace(root string) {
+	a.initialWorkspace = strings.TrimSpace(root)
+}
+
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	a.bootstrapSDK()
+	if a.initialWorkspace != "" {
+		_ = a.OpenWorkspace(a.initialWorkspace)
+	}
 }
 
 func (a *App) shutdown(ctx context.Context) {
@@ -57,56 +64,12 @@ func (a *App) PickParentFolderForNewProject() (string, error) {
 	})
 }
 
-const newProjectMainKoda = `// main.koda — entry point for your project.
-// Press Run (F5) to execute.
-
-print("Hello from Koda!");
-`
-
-const newProjectReadme = `# Koda project
-
-- Open **main.koda** and start coding.
-- Use **File → Save** (Ctrl+S) to write changes to disk.
-- **Run** (F5) compiles and runs the current file via the native (LLVM) pipeline.
-
-Docs: see the Koda repo examples/ folder for larger samples.
-`
-
-// CreateProjectInParent creates parent/name with starter files and returns the new workspace path.
-func (a *App) CreateProjectInParent(parentDir, projectName string) (string, error) {
-	name := strings.TrimSpace(projectName)
-	if name == "" {
-		return "", fmt.Errorf("project name is empty")
+// CreateProjectInParent creates parent/name from a template and returns the new workspace path.
+func (a *App) CreateProjectInParent(parentDir, projectName, template string) (string, error) {
+	if strings.TrimSpace(template) == "" {
+		template = "hello"
 	}
-	if strings.TrimRight(name, ".") == "" || name == "." || name == ".." {
-		return "", fmt.Errorf("invalid project name")
-	}
-	if !reSafeProjectName.MatchString(name) {
-		return "", fmt.Errorf("use letters, numbers, spaces, dot, dash, or underscore only")
-	}
-	parent, err := filepath.Abs(parentDir)
-	if err != nil {
-		return "", err
-	}
-	if fi, err := os.Stat(parent); err != nil || !fi.IsDir() {
-		return "", fmt.Errorf("parent is not a directory")
-	}
-	root := filepath.Join(parent, name)
-	if _, err := os.Stat(root); err == nil {
-		return "", fmt.Errorf("folder already exists: %s", name)
-	} else if !os.IsNotExist(err) {
-		return "", err
-	}
-	if err := os.MkdirAll(root, 0755); err != nil {
-		return "", err
-	}
-	if err := os.WriteFile(filepath.Join(root, "main.koda"), []byte(newProjectMainKoda), 0644); err != nil {
-		return "", err
-	}
-	if err := os.WriteFile(filepath.Join(root, "README.md"), []byte(newProjectReadme), 0644); err != nil {
-		return "", err
-	}
-	return filepath.Abs(root)
+	return api.ScaffoldProject(parentDir, projectName, template)
 }
 
 // OpenWorkspace sets the active workspace root (must be an existing directory).
@@ -249,15 +212,20 @@ func (a *App) DiagnoseFile(absPath, overlay string) []api.Diagnostic {
 }
 
 func (a *App) runProgramImpl(path, overlay string) {
+	a.bootstrapSDK()
 	a.runMu.Lock()
 	defer a.runMu.Unlock()
 	out := &ideLineWriter{ctx: a.ctx, event: "koda:stdout"}
 	errW := &ideLineWriter{ctx: a.ctx, event: "koda:stderr"}
 	if err := api.RunWithWriters(path, overlay, out, errW); err != nil {
+		errW.flush()
+		out.flush()
 		wailsruntime.EventsEmit(a.ctx, "koda:stderr", err.Error()+"\n")
 		wailsruntime.EventsEmit(a.ctx, "koda:runDone", map[string]any{"ok": false})
 		return
 	}
+	out.flush()
+	errW.flush()
 	wailsruntime.EventsEmit(a.ctx, "koda:runDone", map[string]any{"ok": true})
 }
 
@@ -282,12 +250,21 @@ func (w *ideLineWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
+func (w *ideLineWriter) flush() {
+	if len(w.buf) == 0 {
+		return
+	}
+	wailsruntime.EventsEmit(w.ctx, w.event, string(w.buf))
+	w.buf = nil
+}
+
 // RunProgram compiles and runs path in a background goroutine; overlay may be "" to use disk.
 func (a *App) RunProgram(path, overlay string) {
 	go a.runProgramImpl(path, overlay)
 }
 
 func (a *App) buildProgramImpl(path, overlay, output string) {
+	a.bootstrapSDK()
 	log := func(s string) { wailsruntime.EventsEmit(a.ctx, "koda:stdout", s) }
 	err := api.BuildNativeHost(path, overlay, output, log)
 	if err != nil {

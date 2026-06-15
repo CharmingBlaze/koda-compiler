@@ -1,29 +1,28 @@
 # {{name}}
 
-A **windowed graphics demo** using Raylib through the bundled `wrappers/raylib_shim` bridge.
+A **windowed graphics demo** using Raylib through `@game` and the bundled `wrappers/raylib_shim` bridge.
 
-## Prerequisites
-
-You need **Raylib** available to the linker (headers + library). Common options:
-
-- Use a **Koda SDK zip** that includes a vendored Raylib stage, and set `KODA_RAYLIB_STAGE` if needed.
-- Install Raylib on your system and set linker flags (examples below).
-
-## Windows (PowerShell)
-
-```powershell
-$env:KODA_LINKFLAGS = "-lraylib -lopengl32 -lgdi32 -lwinmm"
-koda run
-```
-
-## Linux / macOS
+## Run
 
 ```bash
-export KODA_LINKFLAGS="$(pkg-config --libs --cflags raylib 2>/dev/null || echo '-lraylib')"
+koda doctor
 koda run
 ```
 
-Or add `linkflags` to `koda.json` once you know the flags for your machine.
+The project manifest sets `"graphics": true` — Koda applies platform Raylib link flags automatically. You do **not** need to set `KODA_LINKFLAGS` for a standard SDK install.
+
+## Source layout
+
+```koda
+#include "../wrappers/raylib_shim/raylib.koda"
+#include "@game"
+```
+
+`@game` requires the shim include first. If you see undefined-variable errors for `drawline`, `getmousex`, etc., refresh the shim:
+
+```bash
+koda setup raylib
+```
 
 ## Build & bundle
 
@@ -32,4 +31,4 @@ koda build -o {{name}}
 koda bundle -o dist/{{name}}
 ```
 
-See `docs/wrappers.md` and `docs/guides/raylib.md` in the Koda SDK for full Raylib setup.
+See `docs/guides/raylib.md` and `docs/stdlib/game.md` in the Koda SDK.

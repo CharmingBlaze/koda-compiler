@@ -61,6 +61,11 @@ This hub links every user-facing document.
 | `@util` | [util.md](stdlib/util.md) |
 | `@noise` | [noise.md](stdlib/noise.md) |
 | `@str` | [str.md](stdlib/str.md) |
+| `@game` | [game.md](stdlib/game.md) |
+| `@input` | [input.md](stdlib/input.md) |
+| `@color` | [color.md](stdlib/color.md) |
+| `@easing` | [easing.md](stdlib/easing.md) |
+| `@pool` | [pool.md](stdlib/pool.md) |
 
 ---
 
@@ -83,7 +88,8 @@ This hub links every user-facing document.
 | Path | Description |
 |------|-------------|
 | `examples/` | Demos and samples |
-| `examples/games/` | Brick breaker, lander, platformer sample |
+| `examples/games/` | Koda64 3D platformer, pong, brick breaker |
+| `examples/games/koda64/` | Mario 64-style demo — structs, orbit camera, dot notation |
 | `examples/keys.koda` | Raylib key/color constants |
 | `examples/release_features.koda` | Feature smoke test |
 | `cmd/koda/templates/` | `koda new` templates |

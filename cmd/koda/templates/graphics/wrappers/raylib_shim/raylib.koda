@@ -51,3 +51,48 @@ let drawcircle = 0;
 
 // koda:extern drawline3d koda_shim_DrawLine3D 7
 let drawline3d = 0;
+
+// koda:extern getmousex koda_shim_GetMouseX 0
+let getmousex = 0;
+
+// koda:extern getmousey koda_shim_GetMouseY 0
+let getmousey = 0;
+
+// koda:extern ismousebuttondown koda_shim_IsMouseButtonDown 1
+let ismousebuttondown = 0;
+
+// koda:extern ismousebuttonpressed koda_shim_IsMouseButtonPressed 1
+let ismousebuttonpressed = 0;
+
+// koda:extern getmousewheelmove koda_shim_GetMouseWheelMove 0
+let getmousewheelmove = 0;
+
+// koda:extern getscreenwidth koda_shim_GetScreenWidth 0
+let getscreenwidth = 0;
+
+// koda:extern getscreenheight koda_shim_GetScreenHeight 0
+let getscreenheight = 0;
+
+// koda:extern setwindowtitle koda_shim_SetWindowTitle 1
+let setwindowtitle = 0;
+
+// koda:extern getfps koda_shim_GetFPS 0
+let getfps = 0;
+
+// koda:extern drawline koda_shim_DrawLine 5
+let drawline = 0;
+
+// koda:extern drawcirclelines koda_shim_DrawCircleLines 4
+let drawcirclelines = 0;
+
+// koda:extern drawrectanglelines koda_shim_DrawRectangleLines 5
+let drawrectanglelines = 0;
+
+// koda:extern loadtexture koda_shim_LoadTexture 1
+let loadtexture = 0;
+
+// koda:extern drawtexture koda_shim_DrawTexture 4
+let drawtexture = 0;
+
+// koda:extern unloadtexture koda_shim_UnloadTexture 1
+let unloadtexture = 0;

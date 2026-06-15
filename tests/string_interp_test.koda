@@ -1,0 +1,9 @@
+func main() {
+    let score = 42;
+    let lives = 3;
+    let msg = "Score: {score}  Lives: {lives}";
+    assert(msg == "Score: 42  Lives: 3", "interp string");
+    let plain = "hello";
+    assert(plain == "hello", "plain string");
+    print("PASS string_interp");
+}

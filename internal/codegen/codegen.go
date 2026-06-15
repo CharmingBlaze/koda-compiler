@@ -62,12 +62,14 @@ type Generator struct {
 	mod                     *ir.Module
 	block                   *ir.Block
 	ctx                     *sema.NativeEmitContext
+	currentStructMethodType string // struct type while emitting a struct method body
 	funcs                   map[string]*ir.Func    // Function name → LLVM function
 	locals                  map[string]value.Value // Variable name → stack slot
 	globals                 map[string]*ir.Global  // Global variables
 	currentFn               *ir.Func
 	runtimeInit             *ir.Func
 	runtimeInitEx           *ir.Func
+	runtimeSetArgv          *ir.Func
 	runtimeShutdown         *ir.Func
 	runtimeRegisterGlobal   *ir.Func
 	runtimeSetStackBase     *ir.Func
@@ -157,6 +159,17 @@ type Generator struct {
 	runtimeStringReplaceAll *ir.Func
 	runtimeReadFile         *ir.Func
 	runtimeAssetPath        *ir.Func
+	runtimeArgs             *ir.Func
+	runtimeEnv              *ir.Func
+	runtimeRgb              *ir.Func
+	runtimeRgba             *ir.Func
+	runtimeVec2             *ir.Func
+	runtimeVec3             *ir.Func
+	runtimeRect             *ir.Func
+	runtimeBox              *ir.Func
+	runtimeColor            *ir.Func
+	runtimeValueSub         *ir.Func
+	runtimeValueMul         *ir.Func
 
 	runtimeWriteFile        *ir.Func
 	runtimeAppendFile       *ir.Func
@@ -176,6 +189,7 @@ type Generator struct {
 	runtimeAllocObj         *ir.Func
 	runtimeAllocStruct      *ir.Func
 	runtimeStructGet        *ir.Func
+	runtimeStructField      *ir.Func
 	runtimeStructSet        *ir.Func
 	runtimeObjGet           *ir.Func
 	runtimeObjSet           *ir.Func
@@ -191,6 +205,8 @@ type Generator struct {
 	runtimeArrayPushArgv    *ir.Func
 	runtimeArrayPop         *ir.Func
 	runtimeArrayPopArgv     *ir.Func
+	runtimeArrayRemoveAt    *ir.Func
+	runtimeArrayClear       *ir.Func
 	runtimeArrayLen         *ir.Func
 	runtimeForOfLength      *ir.Func
 	runtimeForOfKeyAt       *ir.Func
@@ -203,6 +219,7 @@ type Generator struct {
 	runtimeNumber           *ir.Func
 	runtimeString           *ir.Func
 	runtimeStringConcat     *ir.Func
+	runtimeValueAdd         *ir.Func
 	runtimeRange            *ir.Func
 	runtimeAllocCell        *ir.Func
 	runtimeCellRead         *ir.Func
@@ -280,6 +297,7 @@ func NewGenerator(ctx *sema.NativeEmitContext) *Generator {
 		globals:                 make(map[string]*ir.Global),
 		runtimeInit:             runtimeFuncs["KODA_runtime_init"],
 		runtimeInitEx:           runtimeFuncs["KODA_runtime_init_ex"],
+		runtimeSetArgv:            runtimeFuncs["KODA_runtime_set_argv"],
 		runtimeShutdown:         runtimeFuncs["KODA_runtime_shutdown"],
 		runtimeRegisterGlobal:   runtimeFuncs["KODA_register_global_slot"],
 		runtimeSetStackBase:     runtimeFuncs["KODA_runtime_set_stack_base"],
@@ -369,6 +387,17 @@ func NewGenerator(ctx *sema.NativeEmitContext) *Generator {
 		runtimeStringReplaceAll: runtimeFuncs["KODA_string_replaceAll"],
 		runtimeReadFile:         runtimeFuncs["KODA_readFile"],
 		runtimeAssetPath:        runtimeFuncs["KODA_asset_path"],
+		runtimeArgs:             runtimeFuncs["KODA_args"],
+		runtimeEnv:              runtimeFuncs["KODA_env"],
+		runtimeRgb:              runtimeFuncs["KODA_rgb"],
+		runtimeRgba:             runtimeFuncs["KODA_rgba"],
+		runtimeVec2:             runtimeFuncs["KODA_vec2"],
+		runtimeVec3:             runtimeFuncs["KODA_vec3"],
+		runtimeRect:             runtimeFuncs["KODA_rect"],
+		runtimeBox:              runtimeFuncs["KODA_box"],
+		runtimeColor:            runtimeFuncs["KODA_color"],
+		runtimeValueSub:         runtimeFuncs["KODA_value_sub"],
+		runtimeValueMul:         runtimeFuncs["KODA_value_mul"],
 		runtimeWriteFile:        runtimeFuncs["KODA_writeFile"],
 		runtimeAppendFile:       runtimeFuncs["KODA_appendFile"],
 		runtimeFileExists:       runtimeFuncs["KODA_fileExists"],
@@ -387,6 +416,7 @@ func NewGenerator(ctx *sema.NativeEmitContext) *Generator {
 		runtimeAllocObj:         runtimeFuncs["KODA_allocate_object"],
 		runtimeAllocStruct:      runtimeFuncs["KODA_allocate_struct"],
 		runtimeStructGet:        runtimeFuncs["KODA_struct_get"],
+		runtimeStructField:      runtimeFuncs["KODA_struct_field"],
 		runtimeStructSet:        runtimeFuncs["KODA_struct_set"],
 		runtimeObjGet:           runtimeFuncs["KODA_object_get"],
 		runtimeObjSet:           runtimeFuncs["KODA_object_set"],
@@ -402,6 +432,8 @@ func NewGenerator(ctx *sema.NativeEmitContext) *Generator {
 		runtimeArrayPushArgv:    runtimeFuncs["KODA_array_push_argv"],
 		runtimeArrayPop:         runtimeFuncs["KODA_array_pop"],
 		runtimeArrayPopArgv:     runtimeFuncs["KODA_array_pop_argv"],
+		runtimeArrayRemoveAt:    runtimeFuncs["KODA_array_remove_at"],
+		runtimeArrayClear:       runtimeFuncs["KODA_array_clear"],
 		runtimeArrayLen:         runtimeFuncs["KODA_array_length"], // distinct symbol from KODA_len
 		runtimeForOfLength:      runtimeFuncs["KODA_forof_length"],
 		runtimeForOfKeyAt:       runtimeFuncs["KODA_forof_key_at"],
@@ -414,6 +446,7 @@ func NewGenerator(ctx *sema.NativeEmitContext) *Generator {
 		runtimeNumber:           runtimeFuncs["KODA_number"],
 		runtimeString:           runtimeFuncs["KODA_string"],
 		runtimeStringConcat:     runtimeFuncs["KODA_string_concat"],
+		runtimeValueAdd:         runtimeFuncs["KODA_value_add"],
 		runtimeRange:            runtimeFuncs["KODA_range"],
 		runtimeAllocCell:        runtimeFuncs["KODA_alloc_cell"],
 		runtimeCellRead:         runtimeFuncs["KODA_cell_read"],
@@ -526,7 +559,9 @@ func (g *Generator) Generate(bundle *parser.ProgramBundle) (*ir.Module, error) {
 	g.currentFn = nil
 
 	// Create main function that calls the entry point
-	mainFn := g.mod.NewFunc("main", types.I32)
+	mainFn := g.mod.NewFunc("main", types.I32,
+		ir.NewParam("argc", types.I32),
+		ir.NewParam("argv", types.NewPointer(types.NewPointer(types.I8))))
 	entryBlock := mainFn.NewBlock("entry")
 	g.block = entryBlock
 	g.currentFn = mainFn
@@ -535,6 +570,7 @@ func (g *Generator) Generate(bundle *parser.ProgramBundle) (*ir.Module, error) {
 	stackBaseSlot := g.block.NewAlloca(types.I8)
 	stackBase := g.block.NewBitCast(stackBaseSlot, types.NewPointer(types.I8))
 	g.block.NewCall(g.runtimeInitEx, stackBase)
+	g.block.NewCall(g.runtimeSetArgv, mainFn.Params[0], mainFn.Params[1])
 
 	// Call the user's main function if it exists
 	if um := g.funcs["user_main"]; um != nil {
@@ -976,6 +1012,9 @@ func (g *Generator) emitIndirectI64Callee(fnVal, thisVal value.Value, args []val
 }
 
 func (g *Generator) emitCall(e *parser.CallExpr) (value.Value, error) {
+	if v, handled, err := g.tryEmitStructConstructor(e); handled {
+		return v, err
+	}
 	// Check if this is a method call (e.g., obj.method())
 	// Set this value if the function is called on an object
 	var objForThis value.Value

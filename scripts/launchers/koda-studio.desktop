@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Koda Studio
+Comment=IDE for the Koda programming language
+Exec=./start-koda-studio.sh
+Terminal=false
+Categories=Development;IDE;
+StartupNotify=true
+Keywords=Koda;IDE;Studio;

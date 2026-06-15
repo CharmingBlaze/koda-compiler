@@ -13,11 +13,87 @@ import (
 	"koda/internal/parser"
 )
 
+// storeBoxedToAssignTarget writes a NaN-boxed value to an assign target (identifier or index).
+func (g *Generator) storeBoxedToAssignTarget(left parser.Expr, boxed value.Value) error {
+	switch l := left.(type) {
+	case *parser.IdentifierExpr:
+		name := l.Name.Lexeme
+		if g.ctx != nil {
+			if slot, ok := g.ctx.ImplicitStructField[l]; ok {
+				thisSlot, ok := g.locals["this"]
+				if !ok {
+					return fmt.Errorf("implicit struct field %q used outside struct method", name)
+				}
+				thisVal := g.block.NewLoad(types.I64, thisSlot)
+				idx := constant.NewInt(types.I64, int64(slot))
+				g.block.NewCall(g.runtimeStructSet, thisVal, idx, boxed)
+				return nil
+			}
+		}
+		if slot, ok := g.locals[name]; ok {
+			if g.localIsCell != nil && g.localIsCell[name] {
+				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
+			} else {
+				g.block.NewStore(boxed, slot)
+			}
+			return nil
+		}
+		if slot, ok := g.moduleGlobals[name]; ok {
+			if g.moduleGlobalIsCell != nil && g.moduleGlobalIsCell[name] {
+				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
+			} else {
+				g.block.NewStore(boxed, slot)
+			}
+			return nil
+		}
+		if global, ok := g.globals[name]; ok {
+			g.block.NewStore(boxed, global)
+			return nil
+		}
+		return g.undefinedVarError(name, l.Name.File, l.Name.Line, l.Name.Col)
+	case *parser.IndexExpr:
+		if g.ctx != nil {
+			if slot, ok := g.ctx.IndexExprStructSlot[l]; ok {
+				obj, err := g.emitExpr(l.Object)
+				if err != nil {
+					return err
+				}
+				g.block.NewCall(g.runtimeStructSet, g.emitAsKodaI64(obj), constant.NewInt(types.I64, int64(slot)), boxed)
+				return nil
+			}
+		}
+		obj, err := g.emitExpr(l.Object)
+		if err != nil {
+			return err
+		}
+		key, err := g.emitExpr(l.Index)
+		if err != nil {
+			return err
+		}
+		g.block.NewCall(g.runtimeSet, g.emitAsKodaI64(obj), g.emitAsKodaI64(key), boxed)
+		return nil
+	default:
+		return fmt.Errorf("unsupported assignment target: %T", left)
+	}
+}
+
 // storeNaNBoxedToAssignTarget writes boxed (i64) rhs to an identifier or index assign target.
 func (g *Generator) storeNaNBoxedToAssignTarget(left parser.Expr, boxed value.Value) error {
 	switch l := left.(type) {
 	case *parser.IdentifierExpr:
 		name := l.Name.Lexeme
+		if g.ctx != nil {
+			if slot, ok := g.ctx.ImplicitStructField[l]; ok {
+				thisSlot, ok := g.locals["this"]
+				if !ok {
+					return fmt.Errorf("implicit struct field %q used outside struct method", name)
+				}
+				thisVal := g.block.NewLoad(types.I64, thisSlot)
+				idx := constant.NewInt(types.I64, int64(slot))
+				g.block.NewCall(g.runtimeStructSet, thisVal, idx, boxed)
+				return nil
+			}
+		}
 		if slot, ok := g.locals[name]; ok {
 			if g.localIsCell != nil && g.localIsCell[name] {
 				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
@@ -127,6 +203,15 @@ func (g *Generator) emitStructObject(e *parser.ObjectExpr) (value.Value, error) 
 			}
 		}
 		if val == nil {
+			if g.ctx != nil && g.ctx.StructFieldDefaults != nil {
+				if defs, ok := g.ctx.StructFieldDefaults[stName]; ok {
+					if def, ok := defs[fname]; ok {
+						val = def
+					}
+				}
+			}
+		}
+		if val == nil {
 			val = &parser.LiteralExpr{Token: e.Token, Value: nil}
 		}
 		vv, err := g.emitExpr(val)
@@ -138,6 +223,12 @@ func (g *Generator) emitStructObject(e *parser.ObjectExpr) (value.Value, error) 
 		g.block.NewCall(g.runtimeStructSet, objLive, idx, g.emitAsKodaI64(vv))
 	}
 	return g.block.NewLoad(types.I64, objSlot), nil
+}
+
+func (g *Generator) emitStructWithDefaults(stName string) (value.Value, error) {
+	tok := lexer.Token{Lexeme: stName}
+	tag := tok
+	return g.emitStructObject(&parser.ObjectExpr{Token: tok, StructTag: &tag})
 }
 
 // emitObject emits LLVM IR for object expressions.
@@ -373,11 +464,11 @@ func (g *Generator) emitCompoundAssign(e *parser.AssignExpr, op string) (value.V
 	var result value.Value
 	switch op {
 	case "+=":
-		result = g.block.NewCall(g.runtimeBoxNumber, g.block.NewFAdd(ld, rd))
+		result = g.block.NewCall(g.runtimeValueAdd, leftI, rightI)
 	case "-=":
-		result = g.block.NewCall(g.runtimeBoxNumber, g.block.NewFSub(ld, rd))
+		result = g.block.NewCall(g.runtimeValueSub, leftI, rightI)
 	case "*=":
-		result = g.block.NewCall(g.runtimeBoxNumber, g.block.NewFMul(ld, rd))
+		result = g.block.NewCall(g.runtimeValueMul, leftI, rightI)
 	case "/=":
 		result = g.block.NewCall(g.runtimeBoxNumber, g.block.NewFDiv(ld, rd))
 	case "%=":
@@ -387,54 +478,9 @@ func (g *Generator) emitCompoundAssign(e *parser.AssignExpr, op string) (value.V
 	}
 
 	// Assign result
-	switch left := e.Left.(type) {
-	case *parser.IdentifierExpr:
-		name := left.Name.Lexeme
-		if slot, ok := g.locals[name]; ok {
-			boxed := g.emitAsKodaI64(result)
-			if g.localIsCell != nil && g.localIsCell[name] {
-				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
-			} else {
-				g.block.NewStore(boxed, slot)
-			}
-			return result, nil
-		}
-		if slot, ok := g.moduleGlobals[name]; ok {
-			boxed := g.emitAsKodaI64(result)
-			if g.moduleGlobalIsCell != nil && g.moduleGlobalIsCell[name] {
-				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
-			} else {
-				g.block.NewStore(boxed, slot)
-			}
-			return result, nil
-		}
-		if global, ok := g.globals[name]; ok {
-			g.block.NewStore(g.emitAsKodaI64(result), global)
-			return result, nil
-		}
-		return nil, g.undefinedVarError(name, left.Name.File, left.Name.Line, left.Name.Col)
-	case *parser.IndexExpr:
-		if g.ctx != nil {
-			if slot, ok := g.ctx.IndexExprStructSlot[left]; ok {
-				obj, err := g.emitExpr(left.Object)
-				if err != nil {
-					return nil, err
-				}
-				idx := constant.NewInt(types.I64, int64(slot))
-				return g.block.NewCall(g.runtimeStructSet, g.emitAsKodaI64(obj), idx, g.emitAsKodaI64(result)), nil
-			}
-		}
-		obj, err := g.emitExpr(left.Object)
-		if err != nil {
-			return nil, err
-		}
-		key, err := g.emitExpr(left.Index)
-		if err != nil {
-			return nil, err
-		}
-		g.block.NewCall(g.runtimeSet, g.emitAsKodaI64(obj), g.emitAsKodaI64(key), g.emitAsKodaI64(result))
-		return result, nil
-	default:
-		return nil, fmt.Errorf("unsupported assignment target: %T", left)
+	boxed := g.emitAsKodaI64(result)
+	if err := g.storeBoxedToAssignTarget(e.Left, boxed); err != nil {
+		return nil, err
 	}
+	return result, nil
 }

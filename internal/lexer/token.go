@@ -94,6 +94,7 @@ const (
 	TokenOf
 	TokenReturn
 	TokenSwitch
+	TokenMatch
 	TokenStruct
 	TokenTest
 	TokenEnum
@@ -272,6 +273,8 @@ func (t TokenType) String() string {
 		return "return"
 	case TokenSwitch:
 		return "switch"
+	case TokenMatch:
+		return "match"
 	case TokenStruct:
 		return "struct"
 	case TokenTest:

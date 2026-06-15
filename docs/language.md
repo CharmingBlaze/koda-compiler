@@ -27,10 +27,13 @@ Statements end with **`;`**. All keywords and builtin names are **case-insensiti
 ## Variables
 
 ```koda
-let x = 10;          // declare and assign
+let x = 10;          // declare and assign (mutable)
+const gravity = -22; // immutable — cannot reassign
 let y;               // declare as null
-x = x + 1;          // reassign
+x = x + 1;          // reassign let only
 x += 1;  x++;       // shorthand
+
+let lives: int = 3;  // optional type annotation
 
 let { a, b } = obj;  // object destructuring
 ```
@@ -119,12 +122,14 @@ for (let key in obj) { /* key is string */ }
 for (let i in arr)   { /* i is numeric index */ }
 ```
 
-### `for`…`of` (values)
+### `for`…`in` (values and ranges)
 
 ```koda
-for (let v of arr)      { /* each element */ }
-for (let i of 0..10)    { /* 0,1,…,9 */ }
+for coin in coins { /* each element */ }
+for i in 0..10    { /* 0,1,…,9 half-open */ }
 ```
+
+Legacy parenthesized form still works: `for (let v of arr)`.
 
 ### `for`…`of` with pairs
 
@@ -149,6 +154,24 @@ switch (x) {
 ```
 
 Falls through unless `break` is used.
+
+### `match`
+
+```koda
+match state {
+    GameState.Playing {
+        update_game(dt);
+    }
+    GameState.Won {
+        drawtext("STAR GET!", 380, 340, 40, colors.yellow);
+    }
+    default {
+        /* ... */
+    }
+}
+```
+
+No fall-through — each arm is an isolated block. See [String interpolation](#string-interpolation) and [Match](#match) below for full examples.
 
 ### `switch` (expression)
 
@@ -211,14 +234,32 @@ func sum(...nums) { /* nums is an array */ }
 ## Struct types
 
 ```koda
-struct Point {
-    x,
-    y
+struct Coin {
+    x = 0.0;
+    z = 0.0;
+    on = true;
+
+    func new(x, z) {
+        this.x = x;
+        this.z = z;
+    }
+
+    func draw() {
+        if on {
+            draw.cube(x, 1.5, z, 0.45, 0.45, 0.12, colors.gold);
+        }
+    }
 }
 
-let p = Point { x: 3, y: 4 };
-p.y = 10;
+let c = Coin { x: 7, z: -5 };   // on defaults to true
+let c2 = Coin(7, -5);           // constructor via func new
+
+for coin in coins {
+    coin.draw();
+}
 ```
+
+Inside struct methods, bare field names (`x`, `on`) refer to `this.x`, `this.on`. Use `this.field` when you need to be explicit.
 
 ---
 
@@ -259,12 +300,99 @@ let obj = {
 
 ```koda
 let a = [1, 2, 3];
-a[0];           // read
-a[0] = 99;      // write
-len(a);         // count
-a.push(4);      // append
-a.pop();        // remove last
+a[0];              // read
+a[0] = 99;         // write
+len(a);            // count
+a.count;           // element count (property)
+a.add(4);          // append (alias for push)
+a.push(4);         // append
+a.pop();           // remove last
+a.remove_at(0);    // remove at index
+a.clear();         // remove all elements
+
+for x in a { /* each element */ }
+a.each(func(x) { /* callback per element */ });
 ```
+
+---
+
+## String interpolation
+
+Embed values in double-quoted strings with `{expression}`:
+
+```koda
+drawtext("Score: {score}", 20, 20, 24, colors.white);
+drawtext("Lives: {lives}", 20, 50, 24, colors.white);
+```
+
+Backtick templates also work: `` `Hello, ${name}!` ``.
+
+---
+
+## Core types
+
+| Type | Example |
+|------|---------|
+| `int` | `3`, `let n: int = 0` |
+| `float` | `3.14`, `let speed: float = 8.0` |
+| `bool` | `true`, `false` |
+| `string` | `"hello"`, `"Score: {score}"` |
+| `array` | `[1, 2, 3]` |
+| `map` | `{ x: 1, y: 2 }` |
+| `func` | `func(x) { return x; }` |
+| `object` | plain `{ key: val }` tables |
+
+Types are optional — beginners can omit them. Use `let` for mutable values, `const` for fixed ones.
+
+---
+
+## Constants
+
+```koda
+const sw = 1280;
+const sh = 720;
+const gravity = -22.0;
+
+let score = 0;   // changes during play
+```
+
+---
+
+## Enums
+
+```koda
+enum GameState {
+    Playing,
+    Won,
+    GameOver
+}
+
+let state = GameState.Playing;
+```
+
+Members are integers from `0` upward. Use `Type.Member` (e.g. `GameState.Won`).
+
+---
+
+## Match
+
+Cleaner than long `if` / `else if` chains for states:
+
+```koda
+match state {
+    GameState.Playing {
+        update_game(dt);
+    }
+    GameState.Won {
+        drawtext("STAR GET!", 380, 340, 40, colors.yellow);
+    }
+    GameState.GameOver {
+        drawtext("GAME OVER - press R", 400, 340, 36, colors.red);
+    }
+}
+```
+
+Classic `switch (x) { case …: … }` still works.
 
 ---
 
@@ -310,8 +438,8 @@ let bindingName;
 ## Keywords
 
 ```
-break  case  continue  default  defer  delete  do  else  enum
-false  for   func      if       import in      let null  of
+break  case  const  continue  default  defer  delete  do  else  enum
+false  for   func      if       import in      let match null  of
 return struct switch   this     true   typeof  while
 ```
 

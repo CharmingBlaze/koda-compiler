@@ -1,8 +1,25 @@
-# Coming from C
+# Coming from C and C++
 
-Koda is built for developers who want **C-level outcomes** — a single native executable, direct hardware access through C libraries, no interpreter on the player's machine — without C's ceremony around headers, build systems, and manual memory for everyday game and app logic.
+Koda is the **beginner-friendly replacement for C and C++** when you want **native games and desktop apps** — one executable for your players, no Python or VM, no Go or LLVM to install (SDK zip only).
 
-This guide explains what feels familiar, what is different, and how to think about Koda as a **modern replacement for C** when you're building games and desktop applications.
+You get **C-level outcomes** (single native binary, Raylib/SDL through thin wrappers, no interpreter on the player's machine) without C++ ceremony: headers everywhere, CMake, manual memory for everyday logic, and cryptic linker errors.
+
+This guide explains what feels familiar, what is different, and how to think about Koda vs **both C and C++** for games and applications.
+
+---
+
+## C++ vs Koda (why beginners switch)
+
+| You want… | C++ | Koda |
+|-----------|-----|------|
+| First window / game | Toolchain + CMake + vcpkg/conan | Unzip SDK, `koda new bounce --template graphics` |
+| Strings, JSON, dynamic data | std::string, nlohmann/json, or pain | Built in |
+| Memory for gameplay | new/delete, smart pointers, leaks | GC; optional arena per frame |
+| Build system | CMakeLists.txt, link flags | `koda.json` + `koda build` |
+| Ship to friends | Your `.exe` + MSVC runtime / DLLs | `koda bundle` |
+| Install to **make** things | GB of IDE + SDK | One SDK zip (~embedded compiler) |
+
+Koda is **not** a replacement for C++ in AAA engine internals or zero-overhead systems code. It **is** a replacement for the C++ beginners write in tutorials, game jams, and first apps.
 
 ---
 
@@ -95,13 +112,14 @@ No `malloc` for `Player` in typical gameplay code. No `printf` format strings un
 | `#include "foo.h"` | `#include "foo.koda"` |
 | `int main()` | Top-level code or `func main()` |
 | `struct` / `typedef` | `struct Name { fields }` |
-| `enum` | `enum Name { A, B, C }` |
+| `enum` | `enum Name { A, B, C }` — access as `Name.A` |
 | `NULL` | `null` |
 | `printf` | `print(...)` |
 | `malloc` / `free` | Rare — GC handles Koda objects; use C only in wrappers |
-| `static` globals | `let` at top level |
+| `static` globals | `const` or `let` at top level |
 | Function pointers | Functions are values; closures capture locals |
-| `#define` | `let` constants (no preprocessor) |
+| `#define` | `const` constants (no preprocessor) |
+| `switch` / state machine | `switch (x) { case …: break; }` or `match x { Case.A { … } }` |
 | Multi-file project | `koda.json` + `#include` + `koda new` |
 
 ---
@@ -109,7 +127,7 @@ No `malloc` for `Player` in typical gameplay code. No `printf` format strings un
 ## Types: what to expect
 
 - **Numbers** are 64-bit floats at runtime (like JavaScript). Integer literals and game math work naturally; use `floor`, `round`, or struct fields when you need discrete grid logic.
-- **Strings** are real objects — concatenation, `len`, methods — not `char*`.
+- **Strings** are real objects — concatenation, `len`, methods, and **`"Score: {score}"` interpolation** — not `char*`.
 - **Arrays** are growable (`push`, indexing). Out-of-bounds access panics with a clear error (safer than silent C bugs).
 - **Objects** `{ x: 1, y: 2 }` for loose data; **structs** when you want named fields with compile-time checks.
 

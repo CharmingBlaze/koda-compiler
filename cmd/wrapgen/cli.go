@@ -11,7 +11,7 @@ import (
 
 func parseAllCLI(args []string) (*WrapGenConfig, error) {
 	if len(args) == 0 {
-		return nil, fmt.Errorf("usage: %s [options] <header.h> [...]\n       %s -name <lib> -headers <a.h>[,b.h] -out <dir>  (legacy)\nRun %s --help", toolDisplayName(), toolDisplayName(), toolDisplayName())
+		return nil, fmt.Errorf("usage: %s [options] <header.h> [...]\n       %s upgrade <wrapper-dir>\n       %s check <wrapper-dir>\n       %s -name <lib> -headers <a.h>[,b.h] -out <dir>  (legacy)\nRun %s --help", toolDisplayName(), toolDisplayName(), toolDisplayName(), toolDisplayName(), toolDisplayName())
 	}
 	switch args[0] {
 	case "--version":
@@ -20,6 +20,14 @@ func parseAllCLI(args []string) (*WrapGenConfig, error) {
 	case "-h", "--help":
 		printModernUsage()
 		os.Exit(0)
+	case "upgrade":
+		return nil, fmt.Errorf("use: %s upgrade <wrapper-dir> (not combined with header args)", toolDisplayName())
+	case "check":
+		return nil, fmt.Errorf("use: %s check <wrapper-dir>", toolDisplayName())
+	case "install":
+		return nil, fmt.Errorf("use: %s install <name[@version]>", toolDisplayName())
+	case "list":
+		return nil, fmt.Errorf("use: %s list", toolDisplayName())
 	}
 	for _, a := range args {
 		if a == "-headers" {
@@ -64,8 +72,13 @@ func parseModernCLI(args []string) (*WrapGenConfig, error) {
 			cfg.NoHTML = true
 		case a == "--no-html":
 			cfg.NoHTML = true
+		case a == "--cpp":
+			cfg.UseCPP = true
 		case a == "--no-clang":
 			cfg.UseClang = false
+		case a == "--library-version" && i+1 < len(args):
+			cfg.LibraryVersion = args[i+1]
+			i++
 		case a == "-v" || a == "--verbose":
 			cfg.Verbose = true
 		case strings.HasPrefix(a, "-"):
@@ -81,6 +94,9 @@ func parseModernCLI(args []string) (*WrapGenConfig, error) {
 	base := filepath.Base(headers[0])
 	cfg.PrimaryHeader = base
 	cfg.LibraryName = strings.TrimSuffix(base, filepath.Ext(base))
+	if cfg.UseCPP || isCPPHeader(headers[0]) {
+		cfg.UseCPP = true
+	}
 	if cfg.LibraryName == "" {
 		cfg.LibraryName = "bindings"
 	}
@@ -151,6 +167,14 @@ func printModernUsage() {
 USAGE (preferred)
   %s [options] <header.h> [<more.h> ...]
 
+UPGRADE (regenerate from META.json)
+  %s upgrade <wrapper-dir|@name>
+  %s check <wrapper-dir|@name>
+
+CATALOG (known libraries)
+  %s list
+  %s install <name[@version]> [-o dir] [--project]
+
 OPTIONS
   -name <lib>   library name (default: header basename)
   -o <dir>      output directory (default: .)
@@ -158,6 +182,7 @@ OPTIONS
   -L <libdir>   linker search path (recorded in koda.json)
   -l <lib>      link library name (recorded in koda.json)
   --linkflags   extra linker flags as one string
+  --cpp         parse headers as C++ (-std=c++17)
   --no-clang    regex-only parsing (no clang AST)
   --no-docs     skip README.md, api_reference.md, examples.md
   --no-html     skip docs/index.html only
@@ -173,7 +198,7 @@ OUTPUT (organized package)
   api_reference.md  examples.md     koda.json       META.json
   docs/index.html
 
-`, me, me, me)
+`, me, me, me, me, me, me, me)
 }
 
 func validateConfig(config *WrapGenConfig) error {

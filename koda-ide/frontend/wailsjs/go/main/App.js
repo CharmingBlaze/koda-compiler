@@ -10,8 +10,12 @@ export function BuildProgram(arg1, arg2, arg3) {
   return window['go']['main']['App']['BuildProgram'](arg1, arg2, arg3);
 }
 
-export function CreateProjectInParent(arg1, arg2) {
-  return window['go']['main']['App']['CreateProjectInParent'](arg1, arg2);
+export function CheckSDK() {
+  return window['go']['main']['App']['CheckSDK']();
+}
+
+export function CreateProjectInParent(arg1, arg2, arg3) {
+  return window['go']['main']['App']['CreateProjectInParent'](arg1, arg2, arg3);
 }
 
 export function DefaultBuildOutput(arg1) {
@@ -34,6 +38,14 @@ export function ListDir(arg1) {
   return window['go']['main']['App']['ListDir'](arg1);
 }
 
+export function ListDocPages() {
+  return window['go']['main']['App']['ListDocPages']();
+}
+
+export function ListProjectTemplates() {
+  return window['go']['main']['App']['ListProjectTemplates']();
+}
+
 export function OpenWorkspace(arg1) {
   return window['go']['main']['App']['OpenWorkspace'](arg1);
 }
@@ -46,12 +58,20 @@ export function PickWorkspaceFolder() {
   return window['go']['main']['App']['PickWorkspaceFolder']();
 }
 
+export function ReadDocPage(arg1) {
+  return window['go']['main']['App']['ReadDocPage'](arg1);
+}
+
 export function ReadFile(arg1) {
   return window['go']['main']['App']['ReadFile'](arg1);
 }
 
 export function RunProgram(arg1, arg2) {
   return window['go']['main']['App']['RunProgram'](arg1, arg2);
+}
+
+export function SetInitialWorkspace(arg1) {
+  return window['go']['main']['App']['SetInitialWorkspace'](arg1);
 }
 
 export function TerminalClose(arg1) {

@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"koda/internal/wrappermeta"
 )
 
 // emitPackageArtifacts writes koda.json fragment, META.json, examples.md, and docs/.
@@ -74,34 +76,40 @@ func (wg *WrapperGenerator) emitKodaJSON(api *API) error {
 }
 
 func (wg *WrapperGenerator) emitMETA(api *API) error {
-	path := filepath.Join(wg.config.OutputDir, "META.json")
-	meta := map[string]interface{}{
-		"name":          api.Name,
-		"generator":     generatedByBrand,
-		"version":       wg.config.Version,
-		"generated_at":  wg.config.GeneratedAt,
-		"primary_header": wg.config.PrimaryHeader,
-		"headers":       api.Headers,
-		"counts": map[string]int{
+	path := filepath.Join(wg.config.OutputDir, wrappermeta.FileName)
+	hashes, err := wrappermeta.HashHeaders(api.Headers)
+	if err != nil {
+		return err
+	}
+	useClang := wg.config.UseClang
+	meta := wrappermeta.PackageMeta{
+		Name:           api.Name,
+		Generator:      generatedByBrand,
+		Version:        wg.config.Version,
+		GeneratedAt:    wg.config.GeneratedAt,
+		PrimaryHeader:  wg.config.PrimaryHeader,
+		Headers:        append([]string{}, api.Headers...),
+		IncludePaths:   append([]string{}, wg.config.IncludePaths...),
+		LinkFlags:      append([]string{}, wg.config.LinkFlags...),
+		Linkflags:      wg.linkFlagsString(),
+		UseClang:       &useClang,
+		LibraryVersion: strings.TrimSpace(wg.config.LibraryVersion),
+		HeaderHashes:   hashes,
+		Counts: map[string]int{
 			"functions": len(api.Functions),
 			"structs":   len(api.Structs),
 			"enums":     len(api.Enums),
 			"constants": len(api.Constants),
 		},
-		"import":      "@" + api.Name,
-		"linkflags":   wg.linkFlagsString(),
-		"docs": map[string]string{
+		Import: "@" + api.Name,
+		Docs: map[string]string{
 			"readme":        "README.md",
 			"api_reference": "api_reference.md",
 			"examples":      "examples.md",
 			"html":          "docs/index.html",
 		},
 	}
-	b, err := json.MarshalIndent(meta, "", "  ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(path, b, 0644)
+	return wrappermeta.Write(path, meta)
 }
 
 func (wg *WrapperGenerator) emitExamples(api *API) error {

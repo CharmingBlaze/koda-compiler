@@ -1,17 +1,24 @@
 # Koda language reference
 
-Koda is a dynamically-typed scripting language with JavaScript-like syntax. It compiles to native machine code through LLVM IR and the C runtime (`koda build`, `koda run`).
+Koda compiles to native machine code through LLVM IR and the C runtime (`koda build`, `koda run`).
+
+For the full catalog with every builtin, see **[language.md](../../language.md)**. For a learning path, see **[using-the-language.md](../using-the-language.md)**.
 
 ---
 
 ## Variables
 
 ```koda
-let x = 42;
+let x = 42;              // mutable
+const gravity = 900;     // immutable
 let name = "Player";
 let active = true;
 let nothing = null;
-let score;           // declared, value is null
+let score;               // starts as null
+
+let lives: int = 3;      // optional type annotation
+let speed: float = 8.0;
+let label: string = "Player";
 ```
 
 Assignment:
@@ -24,19 +31,35 @@ x *= 2;
 x /= 2;
 ```
 
+> `var` is reserved — use `let` or `const`.
+
 ---
 
-## Types
+## Core types
 
 | Type | Examples |
-|------|---------|
-| Number | `0`, `42`, `3.14`, `-10`, `0xFF` |
-| String | `"hello"`, `"line\n"` |
-| Boolean | `true`, `false` |
-| Null | `null` |
-| Array | `[1, 2, 3]` |
-| Object | `{x: 10, y: 20}` |
-| Function | `func(a, b) { return a + b; }` |
+|------|----------|
+| `int` | `3`, `let n: int = 0` |
+| `float` | `3.14`, `let speed: float = 8.0` |
+| `bool` | `true`, `false` |
+| `string` | `"hello"`, `"Score: {score}"` |
+| `array` | `[1, 2, 3]` |
+| `map` / object | `{ x: 10, y: 20 }` |
+| `func` | `func(a, b) { return a + b; }` |
+| `null` | `null` |
+
+Type annotations are optional. Runtime `type(x)` returns `"number"`, `"string"`, `"bool"`, etc.
+
+---
+
+## String interpolation
+
+```koda
+let score = 42;
+drawtext("Score: {score}", 20, 20, 24, colors.white);
+
+let msg = `Hello, ${name}!`;   // backtick templates also work
+```
 
 ---
 
@@ -44,13 +67,19 @@ x /= 2;
 
 ```koda
 // Arithmetic
-a + b    a - b    a * b    a / b    a % b
+a + b    a - b    a * b    a / b    a % b    a ** b
 
 // Comparison
 a == b   a != b   a < b   a > b   a <= b   a >= b
 
-// Logical
+// Logic
 a && b   a || b   !a
+
+// Nullish
+a ?? b   a ??= b
+
+// Optional chaining
+obj?.field   obj?.[key]
 
 // Prefix / postfix update
 ++x   --x   x++   x--
@@ -61,6 +90,60 @@ x += 1   x -= 1   x *= 2   x /= 2
 
 ---
 
+## Control flow
+
+Braces `{}` are **always** required around `if` / `else` bodies, loops, and `switch` / `match` arms.
+
+### if / while / for
+
+```koda
+if (x > 0) { print("positive"); }
+
+while (running) { update(); }
+
+for (let i = 0; i < n; i += 1) { print(i); }
+
+for (let item of items) { print(item); }
+for coin in coins { coin.update(); }
+for i in 0..10 { print(i); }
+```
+
+### switch (C-style)
+
+```koda
+switch (state) {
+    case State.Playing:
+        updateGame();
+        break;
+    default:
+        break;
+}
+```
+
+Cases fall through unless you `break`.
+
+### match (brace-style)
+
+```koda
+enum GameState { Playing, Won, GameOver }
+
+match state {
+    GameState.Playing {
+        update_game(dt);
+    }
+    GameState.Won {
+        draw.text("STAR GET!", 380, 340, 40, colors.yellow);
+    }
+    default {
+        /* optional */
+    }
+}
+```
+
+No fall-through — each arm is its own block.
+
+---
+
 ## Functions
 
 ```koda
@@ -68,18 +151,12 @@ func add(a, b) {
     return a + b;
 }
 
-let result = add(3, 4);   // 7
-```
-
-Anonymous function expression:
-
-```koda
 let square = func(n) {
     return n * n;
 };
 ```
 
-Closures:
+Closures capture outer variables:
 
 ```koda
 func makeCounter() {
@@ -89,86 +166,20 @@ func makeCounter() {
         return count;
     };
 }
-
-let c = makeCounter();
-print(c());   // 1
-print(c());   // 2
 ```
 
 ---
 
-## Control flow
-
-Braces `{}` are **always** required around `if` / `else` bodies, loops, and `switch` bodies — no single-statement branches without braces.
-
-You may still write a **compact single line** when the body is tiny, or spread it across **multiple lines**:
+## Structs and enums
 
 ```koda
-if (x > 0) { print("positive"); }
+struct Player { x, y, speed, health }
 
-if (x > 0) {
-    print("positive");
-}
+let p = Player { x: 100, y: 200, speed: 220, health: 100 };
 
-while (running) {
-    update();
-}
+enum State { Idle, Running, Dead }
 
-for (let i = 0; i < 10; i += 1) { print(i); }
-
-for (let i = 0; i < 10; i += 1) {
-    print(i);
-}
-```
-
----
-
-## For loops (classic C form)
-
-Counted loops use `init`, `condition`, and `step`; any part may be omitted (`for (;;)` is valid with `break`).
-
-```koda
-for (let i = 0; i < n; i += 1) {
-    print(i);
-}
-```
-
-You can mix this with `while`, `do-while`, `for-in`, and `for-of` in the same codebase—see **`docs/user_guide.md`** (“Choosing a loop style”).
-
-## For-of loops
-
-Single binding: each **value** in **insertion order** (arrays by index, tables by stored slot order).
-
-```koda
-let items = ["sword", "shield", "potion"];
-
-for (let item of items) {
-    print(item);
-}
-```
-
-Destructuring **`[indexOrKey, value]`**:
-
-```koda
-let tbl = { a: 1, b: 2 };
-
-for (let [k, v] of tbl) {
-    print(k, v);
-}
-
-let xs = ["x", "y"];
-
-for (let [i, ch] of xs) {
-    print(i, ch); // i is numeric index 0, 1 …
-}
-```
-
-For keys only on objects, **`for-in`** is enough:
-
-```koda
-for (let key in tbl) {
-    print(key, tbl[key]);
-}
+let state = State.Running;
 ```
 
 ---
@@ -177,11 +188,12 @@ for (let key in tbl) {
 
 ```koda
 let arr = [10, 20, 30];
-
 print(arr[0]);          // 10
 print(len(arr));        // 3
-
-arr[1] = 99;
+arr.add(40);            // append
+arr.remove_at(0);       // remove at index
+arr.clear();            // remove all
+print(arr.count);       // element count
 ```
 
 ---
@@ -196,25 +208,8 @@ let player = {
     y: 0
 };
 
-print(player.name);     // Hero
+print(player.name);
 player.hp = 75;
-```
-
----
-
-## Switch
-
-```koda
-switch (state) {
-    case "menu":
-        renderMenu();
-        break;
-    case "playing":
-        updateGame();
-        break;
-    default:
-        break;
-}
 ```
 
 ---
@@ -223,24 +218,28 @@ switch (state) {
 
 ```koda
 #include "math.koda"
-#include "wrappers/raylib/raylib.koda"
+#include "wrappers/raylib_shim/raylib.koda"
+#include "@game"
+
+let math = import "@math";
 ```
 
 Resolution order: local path, `KODA_PATH` directories, `KODA_WRAPPERS` directories.
 
 ---
 
-## Standard library
+## Keywords
 
-| Function | Description |
-|----------|-------------|
-| `print(...)` | Print values, space-separated |
-| `type(v)` | Return type name as string |
-| `number(v)` | Convert to number |
-| `string(v)` | Convert to string |
-| `len(v)` | Length of array or string |
-| `time()` | Current time in seconds (float) |
-| `sleep(ms)` | Sleep for milliseconds |
-| `abs(n)` | Absolute value |
-| `sqrt(n)` | Square root |
-| `random()` | Random float in [0, 1) |
+```
+break  case  const  continue  default  defer  delete  do  else  enum
+false  for   func   if       import in      let  match null  of
+return struct switch this     true   typeof  while
+```
+
+---
+
+## See also
+
+- [Language reference (full)](../language.md)
+- [Beginner's guide](../beginners-guide.md)
+- [Stdlib](../stdlib/README.md)

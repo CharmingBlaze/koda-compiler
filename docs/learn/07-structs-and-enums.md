@@ -13,19 +13,21 @@
 Declare named fields — the compiler checks field names at compile time:
 
 ```koda
-struct Player {
+struct Mario {
     x, y,
     speed,
     health
 }
 
-let player = Player {
+let player = Mario {
     x: 400,
     y: 300,
     speed: 220,
     health: 100
 };
 ```
+
+Identifiers are **case-insensitive** — `struct Player` and `let player` are the same name and cause a duplicate-binding error. Use a different type name (`Mario`, `Hero`) or variable name.
 
 Update fields in your game loop:
 
@@ -38,6 +40,51 @@ func updatePlayer(player, dt) {
 ```
 
 Structs are ideal for **hot game data** — fixed fields, fast access, helpful errors if you typo a field name.
+
+### Field defaults
+
+Omit fields in a literal when they have defaults:
+
+```koda
+struct Coin {
+    x = 0.0;
+    z = 0.0;
+    on = true;
+}
+
+let coin = Coin { x: 7, z: -5 };   // on is true automatically
+```
+
+### Constructors and methods
+
+Define `func new(...)` inside the struct, then call `Coin(7, -5)`:
+
+```koda
+struct Coin {
+    x = 0;
+    z = 0;
+    on = true;
+
+    func new(x, z) {
+        this.x = x;
+        this.z = z;
+    }
+
+    func collect(player) {
+        if on && player.distance_xz(x, z) < 1.4 {
+            on = false;
+        }
+    }
+}
+
+let coins = [Coin(7, -5), Coin(-8, 3)];
+
+for coin in coins {
+    coin.collect(player);
+}
+```
+
+Inside methods, bare names like `x` and `on` mean the struct's own fields.
 
 ---
 
@@ -68,7 +115,7 @@ let dt: float = 0.016;      // optional
 let name: string = "Jesse"; // optional
 ```
 
-Core beginner types: `int`, `float`, `bool`, `string`, `byte`.
+Core beginner types: `int`, `float`, `bool`, `string`, `array`, `map`, `func`, `object`, `byte`.
 
 ---
 
@@ -81,10 +128,20 @@ enum GamePhase {
 
 let phase = GamePhase.Play;
 
-if (phase == GamePhase.Pause) {
-    print("paused");
+match phase {
+    GamePhase.Menu {
+        draw_menu();
+    }
+    GamePhase.Play {
+        update_game(dt);
+    }
+    GamePhase.Pause {
+        draw_pause_overlay();
+    }
 }
 ```
+
+Members are integers from `0` upward. Use `Type.Member` (e.g. `GamePhase.Play`).
 
 ---
 

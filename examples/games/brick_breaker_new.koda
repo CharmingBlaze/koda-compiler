@@ -1,20 +1,20 @@
 #include "../../wrappers/raylib_shim/raylib.koda"
 
-let black = 0xFF000000;
+let black = colors.black;
 
-let white = 0xFFFFFFFF;
+let white = colors.white;
 
-let yellow = 0xFF00FFFF;
+let yellow = colors.yellow;
 
-let cyan = 0xFFFFFF00;
+let cyan = colors.cyan;
 
-let green = 0xFF00FF00;
+let green = colors.green;
 
-let blue = 0xFFFF0000;
+let blue = colors.blue;
 
-let orange = 0xFF00A5FF;
+let orange = colors.orange;
 
-let purple = 0x800080FF;
+let purple = colors.purple;
 
 let sw = 960;
 

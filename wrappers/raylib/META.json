@@ -2,22 +2,30 @@
   "name": "raylib",
   "generator": "kodawrap",
   "version": "0.4.0",
+  "generated_at": "2026-06-15T08:55:05Z",
   "primary_header": "raylib.h",
   "headers": [
-    "raylib.h"
+    "third_party/raylib_static/stage/include/raylib.h"
   ],
+  "include_paths": [
+    "third_party/raylib_static/stage/include"
+  ],
+  "linkflags": "-Ithird_party/raylib_static/stage/include",
+  "use_clang": true,
+  "header_hashes": {
+    "third_party/raylib_static/stage/include/raylib.h": "1842111e48260e62"
+  },
   "counts": {
-    "functions": 554,
-    "structs": 35,
+    "constants": 0,
     "enums": 22,
-    "constants": 0
+    "functions": 548,
+    "structs": 35
   },
   "import": "@raylib",
-  "linkflags": "Vendored SDK: automatic via third_party/raylib_static/stage. Otherwise: -I<raylib-include> -L<raylib-lib> -lraylib",
   "docs": {
-    "readme": "README.md",
     "api_reference": "api_reference.md",
     "examples": "examples.md",
-    "html": "docs/index.html"
+    "html": "docs/index.html",
+    "readme": "README.md"
   }
 }

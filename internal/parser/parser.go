@@ -6,11 +6,13 @@ import (
 )
 
 type Parser struct {
-	tokens        []lexer.Token
-	current       int
-	lastDirective *NativeDirective
-	destructTmp   int
-	testSeq       int
+	tokens              []lexer.Token
+	current             int
+	lastDirective       *NativeDirective
+	destructTmp         int
+	testSeq             int
+	inForIterableExpr   bool // suppress `Type {` after `for x in expr`
+	inMatchExpr         bool // suppress `Type {` after `match subject` / case label
 }
 
 func NewParser(tokens []lexer.Token) *Parser {

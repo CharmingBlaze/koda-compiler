@@ -112,13 +112,14 @@ No `malloc` for `Player` in typical gameplay code. No `printf` format strings un
 | `#include "foo.h"` | `#include "foo.koda"` |
 | `int main()` | Top-level code or `func main()` |
 | `struct` / `typedef` | `struct Name { fields }` |
-| `enum` | `enum Name { A, B, C }` |
+| `enum` | `enum Name { A, B, C }` — access as `Name.A` |
 | `NULL` | `null` |
 | `printf` | `print(...)` |
 | `malloc` / `free` | Rare — GC handles Koda objects; use C only in wrappers |
-| `static` globals | `let` at top level |
+| `static` globals | `const` or `let` at top level |
 | Function pointers | Functions are values; closures capture locals |
-| `#define` | `let` constants (no preprocessor) |
+| `#define` | `const` constants (no preprocessor) |
+| `switch` / state machine | `switch (x) { case …: break; }` or `match x { Case.A { … } }` |
 | Multi-file project | `koda.json` + `#include` + `koda new` |
 
 ---
@@ -126,7 +127,7 @@ No `malloc` for `Player` in typical gameplay code. No `printf` format strings un
 ## Types: what to expect
 
 - **Numbers** are 64-bit floats at runtime (like JavaScript). Integer literals and game math work naturally; use `floor`, `round`, or struct fields when you need discrete grid logic.
-- **Strings** are real objects — concatenation, `len`, methods — not `char*`.
+- **Strings** are real objects — concatenation, `len`, methods, and **`"Score: {score}"` interpolation** — not `char*`.
 - **Arrays** are growable (`push`, indexing). Out-of-bounds access panics with a clear error (safer than silent C bugs).
 - **Objects** `{ x: 1, y: 2 }` for loose data; **structs** when you want named fields with compile-time checks.
 

@@ -40,7 +40,7 @@ func TestFormatRangeExpr(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := "for (let i of lo..hi) {\n    print(i);\n}\n"
+	want := "for i in lo..hi {\n    print(i);\n}\n"
 	if out != want {
 		t.Fatalf("got:\n%q\nwant:\n%q", out, want)
 	}

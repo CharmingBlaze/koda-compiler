@@ -14,3 +14,13 @@ func defaultSystemLinkFlags() []string {
 		return nil
 	}
 }
+
+func omitLinkFlag(flags []string, flag string) []string {
+	out := make([]string, 0, len(flags))
+	for _, f := range flags {
+		if f != flag {
+			out = append(out, f)
+		}
+	}
+	return out
+}

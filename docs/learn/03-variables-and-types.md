@@ -45,17 +45,20 @@ let name: string = "Jesse"; // optional
 
 ---
 
-## The seven types
+## The core types
 
-| Type | Example | `type()` result |
-|------|---------|-----------------|
-| Number | `42`, `3.14`, `0xff`, `1e3` | `"number"` |
-| String | `"hello"` | `"string"` |
-| Bool | `true`, `false` | `"bool"` |
-| Null | `null` | `"null"` |
-| Array | `[1, 2]` | `"array"` |
-| Object | `{ a: 1 }` | `"object"` |
-| Function | `func() {}` | `"function"` |
+| Type | Example | Notes |
+|------|---------|-------|
+| `int` | `3`, `let n: int = 0` | Integer semantics |
+| `float` | `3.14`, `let speed: float = 8.0` | Default for number literals |
+| `bool` | `true`, `false` | |
+| `string` | `"hello"`, `"Score: {score}"` | See interpolation below |
+| `array` | `[1, 2, 3]` | |
+| `map` / object | `{ x: 1, y: 2 }` | Plain tables |
+| `func` | `func(x) { return x; }` | |
+| `null` | `null` | |
+
+Use `type(x)` at runtime — it returns `"number"`, `"string"`, `"bool"`, etc.
 
 Numbers are 64-bit floats by default. Use `int` annotations when you need integer semantics.
 
@@ -80,7 +83,10 @@ There is one equality operator — no `===` / `!==` confusion.
 ```koda
 let line = "Line one\nLine two";
 let quote = "She said \"hi\"";
+let msg = "Score: {score}   Lives: {lives}";
 ```
+
+Embed values in double-quoted strings with `{expression}` — no manual `"Score: " + score` building.
 
 Supported escapes: `\n`, `\r`, `\t`, `\"`, `\\`, `\'`.
 

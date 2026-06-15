@@ -18,7 +18,11 @@ Terms used in Koda documentation.
 | **`koda.json`** | Project manifest (entry, bundle, native link settings) |
 | **Argv native** | Runtime function called with argument array (most builtins) |
 | **Struct** | Fixed-field record type (`struct Player { x, y }`) |
-| **Enum** | Named constant group (`enum State { Idle, Run }`) |
+| **Enum** | Named constant group (`enum State { Idle, Run }`); access as `State.Idle` |
+| **`match`** | Brace-style dispatch on a value (`match state { GameState.Won { … } }`) |
+| **`const`** | Immutable binding — cannot reassign after initialization |
+| **String interpolation** | Embed expressions in strings: `"Score: {score}"` or `` `Hi ${name}` `` |
+| **`draw`** | `@game` alias object — `draw.text`, `draw.rect`, `draw.line` |
 | **Closure** | Function capturing outer variables |
 | **GC** | Garbage collector in `libkoda_runtime` |
 | **`deltatime()`** | Seconds since previous frame (games) |

@@ -79,17 +79,20 @@ let x = 1; // comment at end of line
 
 ## 3. Values and types
 
-Koda has seven types. Everything is a value — you can pass any of these to functions, store them in variables, and put them in arrays.
+Koda has eight core types. Everything is a value — you can pass any of these to functions, store them in variables, and put them in arrays.
 
 | Type | Example | Notes |
 |------|---------|-------|
-| **Number** | `42`, `3.14`, `0xff`, `0b1010`, `1e3` | All numbers are 64-bit floats |
-| **String** | `"hello"` | UTF-8; use `\n`, `\t`, `\"`, `\\` for escapes |
-| **Bool** | `true`, `false` | |
-| **Null** | `null` | Means "no value" |
-| **Array** | `[1, 2, 3]` | Ordered list of any values |
-| **Object** | `{ x: 1, y: 2 }` | Key/value pairs |
-| **Function** | `func(x) { return x; }` | First-class |
+| **`int`** | `3`, `let n: int = 0` | Integer semantics when annotated |
+| **`float`** | `3.14`, `let speed: float = 8.0` | Default for number literals (64-bit) |
+| **`bool`** | `true`, `false` | |
+| **`string`** | `"hello"`, `"Score: {score}"` | UTF-8; see [§17](#17-template-strings) |
+| **`array`** | `[1, 2, 3]` | Ordered list |
+| **`map` / object** | `{ x: 1, y: 2 }` | Key/value tables (JSON, config) |
+| **`func`** | `func(x) { return x; }` | First-class functions |
+| **`null`** | `null` | Means "no value" |
+
+Type annotations are **optional** — beginners can omit them. Add `int`, `float`, or `string` when you want clarity or integer math.
 
 Check the type of a value at runtime:
 
@@ -378,6 +381,37 @@ switch (direction) {
 ```
 
 Cases **fall through** unless you use `break`. Use `break` at the end of each branch you want to stop at.
+
+### `match`
+
+Brace-style dispatch for game states and enums — **no fall-through**:
+
+```koda
+enum GameState {
+    Playing,
+    Won,
+    GameOver
+}
+
+let state = GameState.Playing;
+
+match state {
+    GameState.Playing {
+        update_game(dt);
+    }
+    GameState.Won {
+        draw.text("STAR GET!", 380, 340, 40, colors.yellow);
+    }
+    GameState.GameOver {
+        draw.text("GAME OVER - press R", 400, 340, 36, colors.red);
+    }
+    default {
+        /* optional catch-all */
+    }
+}
+```
+
+Each arm is a block `{ … }`. Classic `switch (x) { case …: … }` still works when you want C-style fall-through.
 
 **`switch` as an expression** — arms use `=>`:
 
@@ -719,7 +753,7 @@ print(d == Dir.Up);    // true
 print(r == 3);         // true
 ```
 
-Use enums in `switch`:
+Use enums in `switch` or `match`:
 
 ```koda
 enum State {
@@ -741,9 +775,21 @@ switch (current) {
         print("game over");
         break;
 }
+
+match current {
+    State.Playing {
+        update_game(dt);
+    }
+    State.Paused {
+        draw_pause_overlay();
+    }
+    State.GameOver {
+        draw.text("GAME OVER", 400, 340, 36, colors.red);
+    }
+}
 ```
 
-See `tests/enum_test.koda` for more examples.
+See `tests/enum_test.koda` and `tests/match_test.koda` for more examples.
 
 ---
 
@@ -993,7 +1039,21 @@ if (matches(body, "error")) {
 
 ---
 
-## 17. Template strings
+## 17. Template strings and interpolation
+
+### Double-quoted interpolation — `{expression}`
+
+Embed values directly in `"..."` strings — no manual concatenation:
+
+```koda
+let score = 42;
+let lives = 3;
+
+drawtext("Score: {score}", 20, 20, 24, colors.white);
+drawtext("Lives: {lives}", 20, 50, 24, colors.white);
+```
+
+### Backtick templates — `${expression}`
 
 Use backticks. Embed any expression with `${ }`:
 
@@ -1118,8 +1178,9 @@ All keywords are **case-insensitive**.
 break    case     continue  default   defer
 delete   do       else      enum      false
 for      func     if        import    in
-const    let      null     of        return    struct
-switch   this     true      typeof    while
+const    let      match     null      of
+return   struct   switch    this      true
+typeof   while
 ```
 
 Directive: `#include "path.koda"`

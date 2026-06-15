@@ -52,9 +52,9 @@ func FindToolchain() (*Toolchain, error) {
 }
 
 func findSystemToolchain() (*Toolchain, error) {
-	root, err := filepath.Abs(".")
+	install, err := InstallDir()
 	if err != nil {
-		return nil, fmt.Errorf("project root: %w", err)
+		return nil, err
 	}
 	clang, err := resolveDevClang()
 	if err != nil {
@@ -76,7 +76,7 @@ func findSystemToolchain() (*Toolchain, error) {
 		LLC:        llc,
 		LLD:        lld,
 		Clang:      clang,
-		RuntimeLib: filepath.Join(root, "runtime", "libkoda_runtime.a"),
+		RuntimeLib: filepath.Join(install, "runtime", "libkoda_runtime.a"),
 		LinkMode:   LinkClang,
 	}, nil
 }
@@ -133,8 +133,8 @@ func resolveDevClang() (string, error) {
 		return cc, nil
 	}
 	if runtime.GOOS == "windows" {
-		if root, err := filepath.Abs("."); err == nil {
-			gnuShim := filepath.Join(root, "scripts", "clang-gnu.cmd")
+		if dir, err := InstallDir(); err == nil {
+			gnuShim := filepath.Join(dir, "scripts", "clang-gnu.cmd")
 			if fi, err := os.Stat(gnuShim); err == nil && !fi.IsDir() {
 				return gnuShim, nil
 			}

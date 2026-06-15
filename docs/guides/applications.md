@@ -95,12 +95,48 @@ See [reference.md](../reference.md) for `stdlib/json.koda` helpers.
 
 ---
 
-## Example: batch mode CLI
+## Example: CLI with arguments
 
-Process arguments via environment or a simple config file (full `argv` parsing is on the roadmap):
+`args()` returns an array of command-line strings. Index `0` is the program name; arguments after `--` follow:
 
 ```koda
 func main() {
+    let a = args();
+    if (len(a) < 3) {
+        print("Usage: mytool <input> <output>");
+        return;
+    }
+    let inputPath = a[1];
+    let outputPath = a[2];
+    if (!fileExists(inputPath)) {
+        print("Missing:", inputPath);
+        return;
+    }
+    writeFile(outputPath, readFile(inputPath).toUpper());
+    print("Wrote", outputPath);
+}
+```
+
+```bash
+koda run src/main.koda -- data/input.txt data/output.txt
+```
+
+Read environment variables with `env("VAR_NAME")` — returns `null` when unset.
+
+---
+
+## Example: batch mode CLI
+
+Process a config file when no arguments are passed:
+
+```koda
+func main() {
+    let a = args();
+    if (len(a) > 1) {
+        print("Processing", a[1]);
+        writeFile("output.log", readFile(a[1]));
+        return;
+    }
     let cfg = parseJSON(readFile("config.json"));
     print("Running", cfg.name, "version", cfg.version);
     writeFile("output.log", "done\n");

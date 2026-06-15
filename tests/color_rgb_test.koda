@@ -1,0 +1,11 @@
+func main() {
+    let c = rgb(255, 0, 0);
+    assert(c == rgba(255, 0, 0, 255), "rgb packs red with full alpha");
+
+    let sky = colors.sky;
+    let grass = rgb(34, 139, 34);
+    assert(sky == rgba(255, 216, 168, 255), "colors.sky");
+    assert(grass == colors.grass, "rgb matches colors.grass");
+
+    print("color rgb test ok");
+}

@@ -1,6 +1,6 @@
 # Chapter 4 — Control flow
 
-**You will learn:** `if`, loops, `switch`, `break`, and `continue`.
+**You will learn:** `if`, loops, `switch`, `match`, `break`, and `continue`.
 
 **Time:** ~10 minutes.
 
@@ -88,6 +88,32 @@ switch (weapon) {
         print("fists");
 }
 ```
+
+---
+
+## Match (game states)
+
+Brace-style dispatch — cleaner than long `if` / `else if` chains:
+
+```koda
+enum GameState { Playing, Won, GameOver }
+
+let state = GameState.Playing;
+
+match state {
+    GameState.Playing {
+        update_game(dt);
+    }
+    GameState.Won {
+        draw.text("STAR GET!", 380, 340, 40, colors.yellow);
+    }
+    GameState.GameOver {
+        draw.text("GAME OVER - press R", 400, 340, 36, colors.red);
+    }
+}
+```
+
+Each arm is its own block — no fall-through. Classic `switch (x) { case …: … }` still works.
 
 ---
 

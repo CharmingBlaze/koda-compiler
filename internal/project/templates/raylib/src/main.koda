@@ -1,0 +1,23 @@
+// Full Raylib API — 548 functions via #include "@raylib"
+// API reference: wrappers/raylib/api_reference.md (in the Koda SDK)
+
+#include "@raylib"
+
+let DARKGRAY = colors.dark;
+let RAYWHITE = colors.white;
+
+func main() {
+    InitWindow(800, 600, "{{name}}");
+    SetTargetFPS(60);
+
+    while (!WindowShouldClose()) {
+        BeginDrawing();
+        ClearBackground(DARKGRAY);
+        DrawText("Full Raylib — audio, 3D, shaders, textures, and more", 80, 280, 20, RAYWHITE);
+        DrawText("See wrappers/raylib/api_reference.md in the SDK", 180, 310, 18, RAYWHITE);
+        DrawFPS(10, 10);
+        EndDrawing();
+    }
+
+    CloseWindow();
+}

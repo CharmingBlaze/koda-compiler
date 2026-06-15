@@ -8,15 +8,32 @@ Runs anywhere **`koda`** runs:
 koda run examples/games/lunar_lander_text.koda
 ```
 
-## Raylib (graphics)
+## Koda64 / Mario 64 (Mario 64-style 3D)
 
-Raylib samples need generated bindings plus linker flags. See **`tests/raylib_wrapgen_smoke.koda`** and **`scripts/ci-wrapgen-raylib.sh`** for the usual **`KODA_WRAPPERS`**, **`KODA_NATIVE_SOURCES`**, and **`KODA_LINKFLAGS`** setup.
-
-After wrappers are built:
+| Project | Path |
+|---------|------|
+| **Mario 64** (new) | `examples/games/mario64/` |
+| Koda64 (original) | `examples/games/koda64/` |
 
 ```bash
-export KODA_WRAPPERS=/path/to/wrappers/raylib
-export KODA_NATIVE_SOURCES=/path/to/wrappers/raylib/wrapper.c
-export KODA_LINKFLAGS="$(pkg-config --libs --cflags raylib)"   # platform-specific
-koda run demos/demo_3d.koda    # or another raylib-backed demo under demos/
+cd examples/games/mario64
+koda run
 ```
+
+Open in **Koda Studio**: run `koda-ide/run-koda-studio.ps1` with the project path, or pass the folder as the first argument after build.
+
+## Graphics with `@game` (beginner)
+
+```bash
+koda new bounce --template graphics
+cd bounce
+koda run
+```
+
+Uses `wrappers/raylib_shim` + `@game`. Refresh stale shims with **`koda setup raylib`**.
+
+## Raylib (full wrapper / advanced)
+
+For hundreds of Raylib functions, use **`koda setup raylib --full`** or **`koda wrap install raylib --project`**, then `#include "@raylib"`.
+
+See **`docs/guides/raylib.md`** and **`docs/guides/wrapping-libraries.md`**.

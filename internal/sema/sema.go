@@ -19,10 +19,17 @@ type Analyzer struct {
 	structMethods map[string]map[string]*parser.FuncDecl
 	varStructType map[string]string   // variable name -> struct type name
 	varEnumType   map[string]string   // variable name -> enum type name
+	// funcParamStruct maps function name -> parameter name -> struct type (from call sites).
+	funcParamStruct   map[string]map[string]string
+	activeParamStruct map[string]string // param struct types while refining a function body
 	warnings      []string
 
 	indexExprStructSlot map[*parser.IndexExpr]int
 	indexExprEnumConst  map[*parser.IndexExpr]int64
+
+	structFieldDefaults   map[string]map[string]parser.Expr // struct -> field -> default expr
+	implicitStructField   map[*parser.IdentifierExpr]int    // bare field refs in struct methods
+	varArrayElementStruct map[string]string                 // array var -> element struct type
 
 	letReads  map[*parser.LetDecl]int
 	funcReads map[*parser.FuncDecl]int
@@ -96,6 +103,9 @@ func NewAnalyzerWithOptions(opts *AnalysisOptions) *Analyzer {
 		varEnumType:         make(map[string]string),
 		indexExprStructSlot: make(map[*parser.IndexExpr]int),
 		indexExprEnumConst:  make(map[*parser.IndexExpr]int64),
+		structFieldDefaults:   make(map[string]map[string]parser.Expr),
+		implicitStructField:   make(map[*parser.IdentifierExpr]int),
+		varArrayElementStruct: make(map[string]string),
 		letReads:            make(map[*parser.LetDecl]int),
 		funcReads:           make(map[*parser.FuncDecl]int),
 	}
@@ -109,14 +119,20 @@ func (a *Analyzer) Analyze(prog *parser.Program) error {
 	a.structMethods = make(map[string]map[string]*parser.FuncDecl)
 	a.varStructType = make(map[string]string)
 	a.varEnumType = make(map[string]string)
+	a.funcParamStruct = make(map[string]map[string]string)
+	a.activeParamStruct = nil
 	a.indexExprStructSlot = make(map[*parser.IndexExpr]int)
 	a.indexExprEnumConst = make(map[*parser.IndexExpr]int64)
+	a.structFieldDefaults = make(map[string]map[string]parser.Expr)
+	a.implicitStructField = make(map[*parser.IdentifierExpr]int)
+	a.varArrayElementStruct = make(map[string]string)
 	a.letReads = make(map[*parser.LetDecl]int)
 	a.funcReads = make(map[*parser.FuncDecl]int)
 	a.currentStructType = ""
 	for _, decl := range prog.Declarations {
 		a.analyzeDecl(decl)
 	}
+	a.refineStructFieldAccessFromCalls(prog)
 	a.checkUnusedBindings()
 	if a.opts != nil && a.opts.WarnUnreachable {
 		for _, decl := range prog.Declarations {
@@ -327,6 +343,11 @@ func (a *Analyzer) analyzeStmt(stmt parser.Stmt) {
 		a.analyzeExpr(s.Iterable)
 		a.enterScope()
 		a.currentScope.Define(s.VarName.Lexeme, s)
+		if id, ok := s.Iterable.(*parser.IdentifierExpr); ok {
+			if st, ok := a.varArrayElementStruct[id.Name.Lexeme]; ok {
+				a.varStructType[s.VarName.Lexeme] = st
+			}
+		}
 		if s.ValueVar != nil {
 			a.currentScope.Define(s.ValueVar.Lexeme, s)
 		}
@@ -421,6 +442,18 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 		name := e.Name.Lexeme
 		if decl, ok := a.currentScope.Resolve(name); ok {
 			a.noteBindingRead(decl)
+		} else if a.currentStructType != "" {
+			if a.tryBindImplicitStructField(e, name) {
+				return
+			}
+			hint := a.suggestName(name)
+			a.record(&diagnostic.DiagnosticError{
+				File:    e.Name.File,
+				Line:    e.Name.Line,
+				Col:     e.Name.Col,
+				Message: fmt.Sprintf("undefined variable '%s'", name),
+				Hint:    hint,
+			})
 		} else {
 			hint := a.suggestName(name)
 			a.record(&diagnostic.DiagnosticError{
@@ -454,6 +487,9 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 		if id, ok := e.Function.(*parser.IdentifierExpr); ok {
 			if decl, ok2 := a.currentScope.Resolve(id.Name.Lexeme); ok2 {
 				a.noteBindingRead(decl)
+				if sd, ok3 := decl.(*parser.StructDecl); ok3 {
+					a.checkStructConstructorCall(e, sd)
+				}
 			}
 		}
 		if ix, ok := e.Function.(*parser.IndexExpr); ok {
@@ -462,6 +498,7 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 		for _, arg := range e.Arguments {
 			a.analyzeExpr(arg)
 		}
+		a.recordParamStructFromCall(e)
 		a.maybeCheckCallArity(e)
 	case *parser.AssignExpr:
 		a.analyzeExpr(e.Value)
@@ -480,6 +517,9 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 				}
 			}
 			if _, ok := a.currentScope.Resolve(name); !ok {
+				if a.currentStructType != "" && a.tryBindImplicitStructField(ident, name) {
+					return
+				}
 				hint := a.suggestName(name)
 				a.record(&diagnostic.DiagnosticError{
 					File:    ident.Name.File,
@@ -544,6 +584,11 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 		a.analyzeExpr(e.From)
 		a.analyzeExpr(e.To)
 	case *parser.UpdateExpr:
+		if id, ok := e.Operand.(*parser.IdentifierExpr); ok {
+			if _, ok := a.currentScope.Resolve(id.Name.Lexeme); !ok && a.currentStructType != "" {
+				a.tryBindImplicitStructField(id, id.Name.Lexeme)
+			}
+		}
 		a.analyzeExpr(e.Operand)
 	case *parser.TupleExpr:
 		for _, el := range e.Elements {

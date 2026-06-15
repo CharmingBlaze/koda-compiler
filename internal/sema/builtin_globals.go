@@ -29,7 +29,8 @@ var nativeBuiltinNames = []string{
 	"internclear",
 	"arena", "arenareset", "arenaallocarray", "arenaallocstruct",
 	"arraypush", "arraypop", "arrayslice", "arraysort", "arrayreverse",
-	"arrayincludes", "arrayindexof", "arrayconcat", "assetpath",
+	"arrayincludes", "arrayindexof", "arrayconcat", "assetpath", "args", "env", "rgb", "rgba",
+	"vec2", "vec3", "rect", "box", "color", "structfield",
 	"replace", "replaceall",
 }
 

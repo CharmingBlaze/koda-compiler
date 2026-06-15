@@ -22,9 +22,9 @@ Koda can call C libraries by linking them into your binary. The wrapper has two 
 | File | What it is |
 |------|------------|
 | `wrappers/raylib_shim/raylib.koda` | Koda-side declarations — binds Koda names to C symbols |
-| `wrappers/raylib_min/raylib_bridge.c` | C glue — converts Koda values to C types and calls raylib |
+| `wrappers/raylib_shim/wrapper.c` | C glue — converts Koda values to C types and calls raylib |
 
-When you run `koda build`, you point it at the C glue file with the `KODA_NATIVE_SOURCES` environment variable. The compiler includes it in the same clang link step as your program — no separate compilation needed.
+When you run `koda build`, the compiler links the C glue from your project's `koda.json` (`native.sources`) or infers it from the `koda:extern` symbols you include. You can still override with the `KODA_NATIVE_SOURCES` environment variable.
 
 The Koda side uses `// koda:extern` directives. Each line wires a Koda name to a C function and declares the argument count:
 
@@ -53,23 +53,63 @@ Adjust the path to be relative to your file. If your game is in the project root
 #include "wrappers/raylib_shim/raylib.koda"
 ```
 
-### Step 2 — Set the bridge file
+### Step 2 — Configure native sources (recommended: `koda.json`)
 
-Before running, tell Koda where the C glue is. Do this once in your terminal session:
+Graphics projects should set `"graphics": true` and point at the shim wrapper in `koda.json`:
 
-**Windows (PowerShell):**
+```json
+{
+  "native": {
+    "sources": ["wrappers/raylib_shim/wrapper.c"],
+    "graphics": true
+  }
+}
+```
+
+Koda applies platform link flags automatically. You do **not** need to set `KODA_LINKFLAGS` for a standard graphics project.
+
+**Refresh shim in existing projects:**
+
+```bash
+koda setup raylib
+```
+
+This overwrites stale `wrappers/raylib_shim/` files. Required when `@game` errors mention undefined symbols like `drawline` or `getmousex`.
+
+**Beginner path — use `@game` instead of raw Raylib names:**
+
+```koda
+#include "wrappers/raylib_shim/raylib.koda"
+#include "@game"
+
+func main() {
+    game.open(800, 450, "Hello from Koda!");
+    game.fps(60);
+    while (game.running()) {
+        game.begin();
+        game.clear(colors.dark);
+        game.text("Hello, Koda!", 300, 200, 30, colors.white);
+        game.end();
+    }
+    game.close();
+}
+```
+
+See [stdlib/game.md](../stdlib/game.md) for the full `@game` API.
+
+**Manual override (optional):** set the C glue path in your terminal session:
 ```powershell
-$env:KODA_NATIVE_SOURCES = "wrappers\raylib_min\raylib_bridge.c"
+$env:KODA_NATIVE_SOURCES = "wrappers\raylib_shim\wrapper.c"
 ```
 
 **Windows (cmd):**
 ```cmd
-set KODA_NATIVE_SOURCES=wrappers\raylib_min\raylib_bridge.c
+set KODA_NATIVE_SOURCES=wrappers\raylib_shim\wrapper.c
 ```
 
 **Linux / macOS:**
 ```bash
-export KODA_NATIVE_SOURCES=wrappers/raylib_min/raylib_bridge.c
+export KODA_NATIVE_SOURCES=wrappers/raylib_shim/wrapper.c
 ```
 
 ### Step 3 — Run or build
@@ -90,8 +130,8 @@ func main() {
 
     while (!WindowShouldClose()) {
         BeginDrawing();
-        ClearBackground(0x181818FF);
-        DrawText("Hello, Koda!", 300, 200, 30, 0xFFFFFFFF);
+        ClearBackground(colors.dark);
+        DrawText("Hello, Koda!", 300, 200, 30, colors.white);
         EndDrawing();
     }
 
@@ -113,6 +153,10 @@ All names are **case-insensitive** when called from Koda.
 | `CloseWindow()` | — | Close and clean up |
 | `WindowShouldClose()` | — | Returns `true` when the user closes the window or presses Escape |
 | `SetTargetFPS(fps)` | number | Cap the frame rate (60 is standard) |
+| `GetScreenWidth()` | — | Window width in pixels |
+| `GetScreenHeight()` | — | Window height in pixels |
+| `SetWindowTitle(title)` | string | Change the window title |
+| `GetFPS()` | — | Current frames per second |
 
 ### Drawing
 
@@ -125,7 +169,13 @@ Call these **between** `BeginDrawing()` and `EndDrawing()` every frame.
 | `ClearBackground(color)` | color as hex int | Fill the screen with a color |
 | `DrawRectangle(x, y, w, h, color)` | all numbers | Draw a filled rectangle |
 | `DrawCircle(x, y, radius, color)` | all numbers | Draw a filled circle |
+| `DrawCircleLines(x, y, radius, color)` | all numbers | Draw a circle outline |
+| `DrawLine(x1, y1, x2, y2, color)` | 5 numbers | Draw a 2D line |
+| `DrawRectangleLines(x, y, w, h, color)` | all numbers | Draw a rectangle outline |
 | `DrawText(text, x, y, size, color)` | string + numbers | Draw text on screen |
+| `LoadTexture(path)` | string | Load an image; returns a texture handle |
+| `DrawTexture(tex, x, y, color)` | handle + numbers | Draw a loaded texture |
+| `UnloadTexture(tex)` | handle | Free a texture |
 | `DrawLine3D(x1,y1,z1, x2,y2,z2, color)` | 7 numbers | Draw a line in 3D space |
 
 ### 3D
@@ -145,34 +195,42 @@ Call these **between** `BeginDrawing()` and `EndDrawing()` every frame.
 | `IsKeyDown(key)` | key code number | `true` while the key is held |
 | `IsKeyPressed(key)` | key code number | `true` for one frame when the key is first pressed |
 
+### Mouse input
+
+| Function | Arguments | What it does |
+|----------|-----------|--------------|
+| `GetMouseX()` | — | Mouse X in window coordinates |
+| `GetMouseY()` | — | Mouse Y in window coordinates |
+| `IsMouseButtonDown(btn)` | button index | `true` while the button is held (0=left, 1=right, 2=middle) |
+| `IsMouseButtonPressed(btn)` | button index | `true` for one frame when first pressed |
+| `GetMouseWheelMove()` | — | Scroll wheel delta this frame |
+
 ---
 
 ## 4. Colors
 
-Colors are passed as a single **hex integer** in `0xRRGGBBAA` format (red, green, blue, alpha — all 0–255).
+Use the built-in **`color`** palette and **`rgb()` / `rgba()`** helpers — no hex required for beginners.
 
 ```koda
-let black   = 0x000000FF;
-let white   = 0xFFFFFFFF;
-let red     = 0xFF0000FF;
-let green   = 0x00FF00FF;
-let blue    = 0x0000FFFF;
-let yellow  = 0xFFFF00FF;
-let orange  = 0xFFA500FF;
-let purple  = 0x800080FF;
-let gray    = 0x808080FF;
-let darkgray = 0x303030FF;
+let sky = colors.sky;
+let grass = colors.grass;
+let white = colors.white;
+
+let custom = rgb(34, 139, 34);
+let fade = rgba(255, 255, 255, 128);
 ```
 
-Build a color from individual components (0–255 each):
+| Name | Typical use |
+|------|-------------|
+| `colors.white`, `colors.black` | Text, outlines |
+| `colors.red`, `colors.green`, `colors.blue` | Player, UI, accents |
+| `colors.yellow`, `colors.gold`, `colors.orange` | Coins, stars |
+| `colors.sky`, `colors.grass`, `colors.dirt` | Outdoor scenes |
+| `colors.gray`, `colors.dark` | Backgrounds, panels |
 
-```koda
-func rgba(r, g, b, a) {
-    return ((r & 255) << 24) | ((g & 255) << 16) | ((b & 255) << 8) | (a & 255);
-}
+With `@game`, `colors.white` aliases the same palette as `colors.white`.
 
-let myColor = rgba(100, 200, 50, 255);
-```
+**Advanced:** colors can still be passed as hex integers in `0xRRGGBBAA` format (red, green, blue, alpha — all 0–255). Import `@color` for `hsv()`, `lerp()`, and `toHex()`.
 
 ---
 
@@ -212,33 +270,29 @@ let KEY_P = 80;
 
 ---
 
-## 6. Mouse input
+## 6. Mouse input (via `@game`)
 
-The raylib shim doesn't currently expose mouse functions. If you need mouse position, add them to `wrappers/raylib_min/raylib_bridge.c` using the same pattern as the existing functions:
-
-```c
-KodaValue rl_get_mouse_x(int argCount, KodaValue* args) {
-    return NUMBER_VAL(GetMouseX());
-}
-KodaValue rl_get_mouse_y(int argCount, KodaValue* args) {
-    return NUMBER_VAL(GetMouseY());
-}
-KodaValue rl_is_mouse_button_down(int argCount, KodaValue* args) {
-    if (argCount < 1) return BOOL_VAL(false);
-    return BOOL_VAL(IsMouseButtonDown(knum(args[0])));
-}
-```
-
-Then declare them in your `.koda` file:
+The shim exposes low-level mouse functions (see [section 3](#3-available-raylib-functions)). For games, use the `@game` helpers:
 
 ```koda
-// koda:extern getmousex rl_get_mouse_x 0
-let getmousex = 0;
-// koda:extern getmousey rl_get_mouse_y 0
-let getmousey = 0;
-// koda:extern ismousebuttondown rl_is_mouse_button_down 1
-let ismousebuttondown = 0;
+#include "wrappers/raylib_shim/raylib.koda"
+#include "@game"
+
+func main() {
+    game.open(800, 600, "Click demo");
+    while (game.running()) {
+        if (game.mouseDown(Mouse.Left)) {
+            game.setTitle("Clicked at " + string(game.mouseX()) + "," + string(game.mouseY()));
+        }
+        game.begin();
+        game.clear(colors.dark);
+        game.circle(game.mouseX(), game.mouseY(), 8, colors.white);
+        game.end();
+    }
+}
 ```
+
+Or `#include "@input"` for standalone helpers (`mousePos()`, `mouseButton()`, …).
 
 ---
 
@@ -268,10 +322,10 @@ let SW = 800;
 let SH = 600;
 
 // ── Colors ────────────────────────────────────────────────────
-let BLACK  = 0x000000FF;
-let WHITE  = 0xFFFFFFFF;
-let GRAY   = 0x555555FF;
-let GREEN  = 0x00FF88FF;
+let BLACK  = colors.black;
+let WHITE  = colors.white;
+let GRAY   = colors.gray;
+let GREEN  = colors.green;
 
 // ── Key codes ─────────────────────────────────────────────────
 let KEY_W      = 87;
@@ -446,22 +500,22 @@ func main() {
 
 ### Running it
 
-Set the bridge (once per terminal session):
+Set the bridge (once per terminal session) if not using `koda.json`:
 
 ```powershell
-$env:KODA_NATIVE_SOURCES = "wrappers\raylib_min\raylib_bridge.c"
+$env:KODA_NATIVE_SOURCES = "wrappers\raylib_shim\wrapper.c"
 koda run mygame\pong.koda
 ```
 
 ```bash
-export KODA_NATIVE_SOURCES=wrappers/raylib_min/raylib_bridge.c
+export KODA_NATIVE_SOURCES=wrappers/raylib_shim/wrapper.c
 koda run mygame/pong.koda
 ```
 
 ### Building a distributable binary
 
 ```powershell
-$env:KODA_NATIVE_SOURCES = "wrappers\raylib_min\raylib_bridge.c"
+$env:KODA_NATIVE_SOURCES = "wrappers\raylib_shim\wrapper.c"
 koda build mygame\pong.koda -o dist\pong.exe
 ```
 
@@ -516,7 +570,7 @@ The full generated wrapper (`wrappers/raylib/raylib.koda`) is already included i
 
 | Variable | What it does |
 |----------|-------------|
-| `KODA_NATIVE_SOURCES` | Path to the C bridge file to compile and link. Set to `wrappers\raylib_min\raylib_bridge.c` for the shim, or `wrappers\raylib\wrapper.c` for the full wrapper. |
+| `KODA_NATIVE_SOURCES` | Path to the C bridge file to compile and link. Defaults from `koda.json` or inferred from `koda:extern` symbols. Shim: `wrappers\raylib_shim\wrapper.c`. Full wrapper: `wrappers\raylib\wrapper.c`. |
 | `KODA_LINKFLAGS` | Extra flags passed to clang when linking. Use for custom raylib installs: `-L/path/to/lib -lraylib` |
 | `KODA_RAYLIB_STAGE` | Override path to a prebuilt raylib `stage/` directory (`include/` + `lib/`). |
 | `KODA_USE_VENDORED_RAYLIB` | Set to `0` to skip auto-detected vendored raylib (useful on Linux ARM64 or custom builds). |
@@ -529,7 +583,7 @@ The full generated wrapper (`wrappers/raylib/raylib.koda`) is already included i
 ## See also
 
 - **`wrappers/raylib_shim/raylib.koda`** — the shim declarations used by all examples
-- **`wrappers/raylib_min/raylib_bridge.c`** — the C bridge source you can extend
+- **`wrappers/raylib_shim/wrapper.c`** — the C bridge source you can extend
 - **`wrappers/raylib/raylib.koda`** — the full auto-generated wrapper
 - **`examples/games/brick_breaker.koda`** — a complete brick breaker game using this system
 - **`docs/wrappers.md`** — wrapper system internals and `KODA_LINKFLAGS` details

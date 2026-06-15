@@ -82,14 +82,24 @@ func (e *emitter) emitDeclCore(d parser.Decl) error {
 	case *parser.StructDecl:
 		e.write("struct ")
 		e.write(n.Name.Lexeme)
-		e.write(" { ")
-		for i, f := range n.Fields {
-			if i > 0 {
-				e.write(", ")
+		e.write(" {\n")
+		for _, f := range n.Fields {
+			e.write("    ")
+			e.write(f.Name.Lexeme)
+			if f.Default != nil {
+				e.write(" = ")
+				if err := e.emitExpr(f.Default, precLowest); err != nil {
+					return err
+				}
 			}
-			e.write(f.Lexeme)
+			e.write("\n")
 		}
-		e.write(" }\n")
+		for _, m := range n.Methods {
+			if err := e.emitDeclCore(m); err != nil {
+				return err
+			}
+		}
+		e.write("}\n")
 		return nil
 	case *parser.EnumDecl:
 		e.write("enum ")
@@ -315,22 +325,25 @@ func (e *emitter) emitStmt(s parser.Stmt) error {
 		e.write(") ")
 		return e.emitStmtAsChild(n.Body)
 	case *parser.ForOfStmt:
-		e.write("for (let ")
 		if n.ValueVar != nil {
-			e.write("[")
+			e.write("for (let [")
 			e.write(n.VarName.Lexeme)
 			e.write(", ")
 			e.write(n.ValueVar.Lexeme)
-			e.write("] ")
-		} else {
-			e.write(n.VarName.Lexeme)
-			e.write(" ")
+			e.write("] of ")
+			if err := e.emitExpr(n.Iterable, precLowest); err != nil {
+				return err
+			}
+			e.write(") ")
+			return e.emitStmtAsChild(n.Body)
 		}
-		e.write("of ")
+		e.write("for ")
+		e.write(n.VarName.Lexeme)
+		e.write(" in ")
 		if err := e.emitExpr(n.Iterable, precLowest); err != nil {
 			return err
 		}
-		e.write(") ")
+		e.write(" ")
 		return e.emitStmtAsChild(n.Body)
 	case *parser.BreakStmt:
 		e.write("break;\n")
@@ -339,6 +352,49 @@ func (e *emitter) emitStmt(s parser.Stmt) error {
 		e.write("continue;\n")
 		return nil
 	case *parser.SwitchStmt:
+		if n.Token.Type == lexer.TokenMatch {
+			e.write("match ")
+			if err := e.emitExpr(n.Subject, precLowest); err != nil {
+				return err
+			}
+			e.write(" {\n")
+			e.indent++
+			for _, c := range n.Cases {
+				e.lineStart()
+				if err := e.emitExpr(c.Value, precLowest); err != nil {
+					return err
+				}
+				e.write(" {\n")
+				e.indent++
+				for _, bd := range c.Body {
+					e.lineStart()
+					if err := e.emitDeclCore(bd); err != nil {
+						return err
+					}
+				}
+				e.indent--
+				e.lineStart()
+				e.write("}\n")
+			}
+			if len(n.Default) > 0 {
+				e.lineStart()
+				e.write("default {\n")
+				e.indent++
+				for _, bd := range n.Default {
+					e.lineStart()
+					if err := e.emitDeclCore(bd); err != nil {
+						return err
+					}
+				}
+				e.indent--
+				e.lineStart()
+				e.write("}\n")
+			}
+			e.indent--
+			e.lineStart()
+			e.write("}\n")
+			return nil
+		}
 		e.write("switch (")
 		if err := e.emitExpr(n.Subject, precLowest); err != nil {
 			return err

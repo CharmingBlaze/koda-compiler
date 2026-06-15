@@ -299,9 +299,17 @@ automatically converted to a string.
 "Pi is " + 3.14              // "Pi is 3.14"
 ```
 
-### Template literals (string interpolation)
+### Template literals and interpolation
 
-Use backticks and `${}` to embed expressions:
+**Double-quoted strings** — embed values with `{expression}`:
+
+```koda
+let score = 100;
+let msg = "Score: {score}";
+print(msg);   // Score: 100
+```
+
+**Backtick templates** — use `${}`:
 
 ```koda
 let name = "Alice";
@@ -572,6 +580,28 @@ switch (day) {
 Each `case` runs its body and **does not fall through** — no `break` needed.
 The `default` branch runs when no case matches.
 
+### match statement
+
+Brace-style dispatch for enums and game states — each arm is an isolated block:
+
+```koda
+enum GameState { Playing, Won, GameOver }
+
+let state = GameState.Playing;
+
+match state {
+    GameState.Playing {
+        update_game(dt);
+    }
+    GameState.Won {
+        draw.text("STAR GET!", 380, 340, 40, colors.yellow);
+    }
+    GameState.GameOver {
+        draw.text("GAME OVER - press R", 400, 340, 36, colors.red);
+    }
+}
+```
+
 ### switch as an expression
 
 ```koda
@@ -617,8 +647,9 @@ You can mix **classic C-style loops** with Koda’s **JavaScript-flavored** form
 |-------|-----------|
 | **`for (init; cond; step)`** | You want initialization, test, and step written together (counted loops). |
 | **`while` / `do-while`** | The condition is simpler than a three-part header, or the step is uneven. |
-| **`for-in`** | You iterate **keys** (object fields or array indices as values). |
-| **`for-of`** | You iterate **array elements** in order (half-open `[0, len)` indexing). |
+| **`for x in expr`** | You iterate **values** (array elements) or a **range** (`0..goal`). |
+| **`for (let key in obj)`** | You iterate **keys** (object fields or array indices). |
+| **`for (let [k, v] of obj)`** | You need **both** key and value per slot. |
 
 Nothing forces one style: pick whichever reads best.
 
@@ -646,6 +677,25 @@ for (let i = 0, let j = 10; i < j; i += 1, j -= 1) {
     print(i, j);
 }
 ```
+
+### for-in loop (values and ranges)
+
+The preferred game-loop form — no parentheses, no `let`:
+
+```koda
+for coin in coins {
+    try_collect(coin, pick);
+}
+
+for i in 0..goal {
+    drawrectangle(hud_x + i * 28, hud_y, 22, 22, coin_gold);
+}
+```
+
+- **`for x in array`** — each **element** (same as legacy `for (let x of array)`).
+- **`for i in lo..hi`** — integers from `lo` up to but **not including** `hi` (half-open range).
+
+Parenthesized **`for (let x of …)`** still works. Use **`for (let key in obj)`** when you need **keys** only.
 
 ### for-in loop (iterate over keys)
 
@@ -1356,7 +1406,7 @@ print(r);    // [0, 1, 2, 3, 4]   — exclusive end
 Ranges are useful with for loops:
 
 ```koda
-for (let i in 0..10) {
+for i in 0..10 {
     print(i);
 }
 ```
@@ -1449,7 +1499,7 @@ setTargetFPS(60);
 
 while (!windowShouldClose()) {
     beginDrawing();
-    clearBackground(0x181818FF);
+    clearBackground(colors.dark);
 
     // draw here
 
@@ -1462,12 +1512,12 @@ closeWindow();
 ### 2D drawing
 
 ```koda
-drawText("Hello!", 100, 100, 24, 0xFFFFFFFF);
+drawText("Hello!", 100, 100, 24, colors.white);
 drawRectangle(x, y, width, height, color);
 drawCircle(cx, cy, radius, color);
 ```
 
-Colors are 32-bit RGBA hex integers: `0xRRGGBBAA`.
+Colors use the built-in `color` palette or `rgb()` / `rgba()` — hex (`0xRRGGBBAA`) still works for advanced use.
 
 ### 3D drawing
 
@@ -1482,9 +1532,9 @@ let camera = {
 beginMode3D(camera);
 
 drawGrid(20, 1.0);
-drawCube(0, 1, 0, 2, 2, 2, 0x00AAFFFF);
-drawCubeWires(0, 1, 0, 2.1, 2.1, 2.1, 0xFFFFFFFF);
-drawLine3D(0, 0, 0, 5, 0, 0, 0xFF0000FF);
+drawCube(0, 1, 0, 2, 2, 2, rgb(0, 170, 255));
+drawCubeWires(0, 1, 0, 2.1, 2.1, 2.1, colors.white);
+drawLine3D(0, 0, 0, 5, 0, 0, colors.red);
 
 endMode3D();
 ```
@@ -1511,15 +1561,15 @@ while (!windowShouldClose()) {
     camera.pz = 10 * cos(angle);
 
     beginDrawing();
-    clearBackground(0x181818FF);
+    clearBackground(colors.dark);
     beginMode3D(camera);
 
     drawGrid(20, 1.0);
-    drawCube(0, 1, 0, 2, 2, 2, 0x00AAFFFF);
+    drawCube(0, 1, 0, 2, 2, 2, rgb(0, 170, 255));
 
     endMode3D();
 
-    drawText("Koda 3D", 10, 10, 20, 0xFFFFFFFF);
+    drawText("Koda 3D", 10, 10, 20, colors.white);
     endDrawing();
 }
 

@@ -1,8 +1,8 @@
 #include "../wrappers/raylib_shim/raylib.koda"
 
-let black = 0xFF000000;
+let black = colors.black;
 
-let white = 0xFFFFFFFF;
+let white = colors.white;
 
 initwindow(640, 360, "Koda Raylib Min Loop");
 settargetfps(60);

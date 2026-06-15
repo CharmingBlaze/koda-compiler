@@ -22,7 +22,7 @@ Every `koda` subcommand. Run `koda help` or `koda <command> --help` for inline h
 | `koda eval` | One-line snippet |
 | `koda repl` | Interactive REPL |
 | `koda clean` | Remove build artifacts (`--cache`) |
-| `koda doctor` | SDK health check |
+| `koda doctor` | SDK health check (`--fix` refreshes stale raylib shim) |
 | `koda paths` | Machine-readable paths |
 | `koda env` | Print `KODA_*` (`--export`) |
 | `koda completions` | Shell completion scripts |
@@ -30,7 +30,8 @@ Every `koda` subcommand. Run `koda help` or `koda <command> --help` for inline h
 | `koda doc` | Doc path helpers |
 | `koda lsp` | Language server (stdio) |
 | `koda disasm` | Print LLVM IR |
-| `koda wrap` | Forward to `kodawrap` |
+| `koda wrap` | Forward to `kodawrap` (generate, upgrade, install wrappers) |
+| `koda setup` | Configure Raylib shim or full wrapper in a project |
 | `koda version` | Version string |
 | `koda help` | Help (`help <command>`) |
 
@@ -194,9 +195,56 @@ koda bundle [<file.koda>] [-o <dir>]
 ## `koda new` / `init`
 
 ```bash
-koda new <name> [--template hello|game|graphics]
+koda new <name> [--template hello|game|graphics|raylib]
 koda init <name>   # alias
 ```
+
+| Template | Contents |
+|----------|----------|
+| **hello** | Console print demo |
+| **game** | Text lunar lander |
+| **graphics** | `@game` bouncing ball + Raylib shim |
+| **raylib** | Full Raylib wrapper project |
+
+---
+
+## `koda setup raylib`
+
+```bash
+koda setup raylib [--full] [project-dir]
+```
+
+Refreshes `wrappers/raylib_shim/` (overwrites stale files), sets `"graphics": true` in `koda.json`. Use when `@game` reports undefined shim symbols.
+
+| Flag | Result |
+|------|--------|
+| (default) | Beginner shim (~33 functions) + `@game` |
+| `--full` | Full wrapper (548 functions) + `#include "@raylib"` |
+
+---
+
+## `koda wrap`
+
+```bash
+koda wrap -name mylib -headers ./include/mylib.h -out ./wrappers/mylib
+koda wrap upgrade wrappers/mylib
+koda wrap check wrappers/mylib
+koda wrap list
+koda wrap install raylib --project
+```
+
+See [Wrapping libraries](../guides/wrapping-libraries.md).
+
+---
+
+## `koda doctor`
+
+```bash
+koda doctor
+koda doctor --fix
+```
+
+Checks SDK toolchain, raylib, wrapper header drift, and **project raylib_shim** drift (missing `@game` symbols). `--fix` copies the canonical shim from the SDK into the current project.
 
 ---
 
@@ -205,11 +253,13 @@ koda init <name>   # alias
 | Field | Purpose |
 |-------|---------|
 | `entry` | Main `.koda` file |
+| `lint` | `"beginner"` or `"strict"` |
 | `bundle.assets` | Dirs copied into bundle |
 | `native.sources` | C/C++ glue |
-| `native.linkflags` | Linker flags |
+| `native.graphics` | Auto Raylib link flags when `true` |
+| `native.linkflags` | Extra linker flags |
 
-Environment: `KODA_NATIVE_SOURCES`, `KODA_LINKFLAGS` override manifest.
+Environment: `KODA_NATIVE_SOURCES`, `KODA_LINKFLAGS` override manifest when set. Graphics projects in `koda.json` clear mismatched stale env.
 
 ---
 

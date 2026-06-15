@@ -5,15 +5,16 @@
 No Go. No Python. No LLVM to install. No Visual Studio required to get started. Release builds embed the compiler; you unzip and run `koda`.
 
 ```koda
+#include "wrappers/raylib_shim/raylib.koda"
 #include "@game"
 
-struct Player { x, y, speed, health }
+struct Mario { x, y, speed, health }
 
 func main() {
     game.open(800, 600, "My Game");
     game.fps(60);
 
-    let player = Player { x: 400, y: 300, speed: 220, health: 100 };
+    let player = Mario { x: 400, y: 300, speed: 220, health: 100 };
 
     while (game.running()) {
         let dt = game.delta();
@@ -21,8 +22,8 @@ func main() {
             player.x = player.x + player.speed * dt;
         }
         game.begin();
-        game.clear(Color.dark);
-        game.rect(player.x, player.y, 32, 32, Color.white);
+        game.clear(colors.dark);
+        game.rect(player.x, player.y, 32, 32, colors.white);
         game.end();
     }
 }
@@ -96,8 +97,10 @@ koda check --warn-unused ./...
 |---------|-------|
 | **Structs + methods** | `struct Rect { func area() { return this.w * this.h; } }` |
 | **`const`** | Immutable bindings |
-| **Integer types** | `let n: i32 = 0` when you need real integers |
-| **`import "@game"`** | Beginner game API (Raylib underneath) |
+| **`enum` + `match`** | Game states without boolean soup |
+| **String interpolation** | `"Score: {score}"` and `` `Hi ${name}` `` |
+| **Core types** | `int`, `float`, `bool`, `string`, `array`, `map`, `func` (annotations optional) |
+| **`import "@game"`** | Beginner game API (`game.*`, `draw.*`) over Raylib |
 | **`koda doctor`** | OK/FAIL report when setup breaks |
 | **`assetPath("x.png")`** | Bundle assets with your game |
 

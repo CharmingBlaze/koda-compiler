@@ -8,8 +8,8 @@ A **chapter-by-chapter** path from zero to shipping a small program. Each chapte
 |---------|-------|----------|
 | [01 — Welcome](01-welcome.md) | What Koda is | Understand goals and workflow |
 | [02 — Install](02-install-and-first-run.md) | Setup | Install SDK and run hello world |
-| [03 — Variables](03-variables-and-types.md) | Types | Use `let`, `const`, numbers, strings |
-| [04 — Control flow](04-control-flow.md) | Logic | Write if, while, for, switch |
+| [03 — Variables](03-variables-and-types.md) | Types | Use `let`, `const`, types, string interpolation |
+| [04 — Control flow](04-control-flow.md) | Logic | Write if, while, for, switch, match |
 | [05 — Functions](05-functions.md) | Functions | Define, return, closures |
 | [07 — Structs & enums](07-structs-and-enums.md) | Game data | **Structs first** — players, enemies, phases |
 | [06 — Objects & arrays](06-objects-and-arrays.md) | Lists & JSON | Arrays and config objects |

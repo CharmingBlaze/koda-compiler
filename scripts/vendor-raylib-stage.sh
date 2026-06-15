@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Download official raylib 5.0 prebuilt SDKs and normalize to third_party/raylib_static/stage layout
+# Download official raylib 6.0 prebuilt SDKs and normalize to third_party/raylib_static/stage layout
 # (include/, lib/) for Koda [vendoredRaylibStatic] + offline zips. Run from repo root in CI before SDK packaging.
 #
 # Usage: vendor-raylib-stage.sh <OUT_BASE>
@@ -7,12 +7,12 @@
 #   OUT_BASE/linux-amd64/...
 #   ...
 #
-# Linux ARM64: upstream does not publish raylib-5.0 prebuilds; we write NOTES-linux-arm64.txt only.
+# Linux ARM64: upstream does not publish raylib-6.0 prebuilds; we write NOTES-linux-arm64.txt only.
 #
 set -euo pipefail
 
 OUT_BASE="${1:?OUT_BASE directory (e.g. .raylib-vendor)}"
-RAYLIB_VER="5.0"
+RAYLIB_VER="6.0"
 RAYLIB_URL="https://github.com/raysan5/raylib/releases/download/${RAYLIB_VER}"
 
 mkdir -p "$OUT_BASE"
@@ -99,7 +99,7 @@ write_stage() {
     linux-arm64)
       mkdir -p "$dest"
       cat >"$dest/README-Koda.txt" <<'EOF'
-Raylib 5.0 prebuilt binaries are not published by upstream for Linux ARM64.
+Raylib 6.0 prebuilt binaries are not published by upstream for Linux ARM64.
 
 Options:
   • Install system raylib (e.g. Debian/Ubuntu: libraylib-dev) and set KODA_LINKFLAGS to your

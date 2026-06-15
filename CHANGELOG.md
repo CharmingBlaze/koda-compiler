@@ -7,8 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **String interpolation** — `"Score: {score}"` in double-quoted strings (alongside backtick `` `${expr}` `` templates).
+- **`match`** — brace-style dispatch for enums and game states; no fall-through.
+- **`draw` object on `@game`** — `draw.text`, `draw.rect`, `draw.line` aliases.
+- **Core type names in sema** — `int`, `float`, `bool`, `string`, `array`, `map`, `func`, `object` as optional annotations.
+- **Documentation** — language reference, learn path, game-dev guide, stdlib, glossary, and status docs updated for the above.
+
 ### Changed
 
+- **Switch codegen** — separate compare/body blocks and unique LLVM labels (fixes multi-`match` functions).
+- **Match parser** — suppresses struct-literal parsing after `match subject` and case labels.
+
+### Added (prior unreleased)
+
+- **Extended Raylib shim** — mouse, window metrics, lines, textures, FPS; required by `@game`.
+- **`koda setup raylib`** — refreshes project shim (overwrites stale files); `--full` for 548-function wrapper.
+- **`koda wrap upgrade` / `check` / `install` / `list`** — wrapper regeneration, drift detection, catalog installs.
+- **`args()` / `env()`** — runtime builtins for CLI tools and games.
+- **Koda64 example** — `examples/games/koda64/` 3D platformer with orbit camera and dot notation.
+- **`koda doctor --fix`** — auto-refresh stale project `raylib_shim` from SDK.
+- **`CheckRaylibShim` / `RefreshRaylibShimIfStale`** — detects missing `@game` symbols and file drift.
+
+### Changed
+
+- **Graphics template** — full shim synced; README documents `@game` + `koda setup raylib`.
+- **Documentation** — troubleshooting for stale shim / `@game` errors; dot notation and struct naming guides; cleaned `docs/commands.md`.
 - **Product positioning** — README, START_HERE.md, and docs frame Koda as the beginner-friendly **C/C++ replacement** for native games and apps; one SDK zip, no Go/Python/LLVM for end users.
 - **Install helpers** — `scripts/install-koda.ps1` and `scripts/install-koda.sh` ship in SDK zips for optional PATH setup.
 

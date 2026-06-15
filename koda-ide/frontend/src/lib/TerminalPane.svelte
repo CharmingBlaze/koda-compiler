@@ -6,7 +6,7 @@
   import { TerminalStart, TerminalWrite, TerminalResize, TerminalClose } from '../../wailsjs/go/main/App.js'
   import { EventsOn } from '../../wailsjs/runtime/runtime.js'
 
-  let { active = false } = $props()
+  let { active = false, fontSize = 13 } = $props()
 
   let el = $state(null)
   let term = null
@@ -27,7 +27,7 @@
         cursor: '#c6a0f6',
       },
       fontFamily: "'JetBrains Mono Variable', ui-monospace, Cascadia Code, Consolas, monospace",
-      fontSize: 13,
+      fontSize: Number(fontSize) || 13,
     })
     fit = new FitAddon()
     term.loadAddon(fit)

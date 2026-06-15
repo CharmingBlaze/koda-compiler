@@ -43,31 +43,34 @@ func RunWithWritersOpts(path, overlay string, stdout, stderr io.Writer, opts Bui
 
 // RunWithWritersOptsProgram is like [RunWithWritersOpts] but forwards programArgs to the built executable.
 func RunWithWritersOptsProgram(path, overlay string, stdout, stderr io.Writer, opts BuildOptions, programArgs []string) error {
-	absEntry, err := filepath.Abs(path)
-	if err != nil {
-		return err
-	}
-	overlays := map[string]string{}
-	if overlay != "" {
-		overlays[absEntry] = overlay
-	}
-	tmp, err := tempExecutablePath()
-	if err != nil {
-		return err
-	}
-	defer func() { _ = os.Remove(tmp) }()
+	EnsureSDKFromExecutable()
+	return withProjectScope(path, func() error {
+		absEntry, err := filepath.Abs(path)
+		if err != nil {
+			return err
+		}
+		overlays := map[string]string{}
+		if overlay != "" {
+			overlays[absEntry] = overlay
+		}
+		tmp, err := tempExecutablePath()
+		if err != nil {
+			return err
+		}
+		defer func() { _ = os.Remove(tmp) }()
 
-	log := func(s string) {
-		_, _ = io.WriteString(stdout, s)
-	}
-	if err := nativebuild.BuildWithOverlaysOpts(path, overlays, tmp, log, opts); err != nil {
-		return err
-	}
-	cmd := exec.Command(tmp, programArgs...)
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
-	cmd.Stdin = os.Stdin
-	return cmd.Run()
+		log := func(s string) {
+			_, _ = io.WriteString(stdout, s)
+		}
+		if err := nativebuild.BuildWithOverlaysOpts(path, overlays, tmp, log, opts); err != nil {
+			return err
+		}
+		cmd := exec.Command(tmp, programArgs...)
+		cmd.Stdout = stdout
+		cmd.Stderr = stderr
+		cmd.Stdin = os.Stdin
+		return cmd.Run()
+	})
 }
 
 func tempExecutablePath() (string, error) {

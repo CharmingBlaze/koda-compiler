@@ -1,17 +1,30 @@
-// Input helpers — thin wrappers; link with raylib for game builds.
+// @input — keyboard/mouse helpers over the Raylib shim.
+// Include the shim before this module (same as @game):
+//   #include "wrappers/raylib_shim/raylib.koda"
+//   #include "@input"
+//
+// Prefer @game for windowed games; use @input when you want input without the game object.
 
 func keyDown(k) {
-    return false;
+    return iskeydown(k);
 }
 
 func keyPressed(k) {
-    return false;
+    return iskeypressed(k);
 }
 
 func mousePos() {
-    return { x: 0, y: 0 };
+    return { x: getmousex(), y: getmousey() };
 }
 
 func mouseButton(b) {
-    return false;
+    return ismousebuttondown(b);
+}
+
+func mousePressed(b) {
+    return ismousebuttonpressed(b);
+}
+
+func mouseWheel() {
+    return getmousewheelmove();
 }

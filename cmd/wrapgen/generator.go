@@ -165,6 +165,7 @@ func (wg *WrapperGenerator) ParseHeaders() (*API, error) {
 		clang := NewClangParser(wg.config)
 		api, err := clang.ParseWithClang(wg.config.InputHeaders)
 		if err == nil && len(api.Functions) > 0 {
+			wg.enrichAPIFromHeaders(api)
 			api.Functions = filterAndDedupeFunctions(api.Functions)
 			wg.analyzeDependencies(api)
 			if wg.config.Verbose {
@@ -225,41 +226,8 @@ func (wg *WrapperGenerator) parseHeader(headerPath string) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	raw := string(content)
-	headerContent := raw
-	// Strip all comments for reliable regex matching
-	reMulti := regexp.MustCompile(`(?s)/\*.*?\*/`)
-	headerContent = reMulti.ReplaceAllString(headerContent, "")
-	reSingle := regexp.MustCompile(`//.*`)
-	headerContent = reSingle.ReplaceAllString(headerContent, "")
-
-	api := &API{}
-
-	// Extract functions
-	api.Functions = wg.extractFunctions(headerContent, headerPath)
-	for i := range api.Functions {
-		if doc := strings.TrimSpace(docCommentBeforeFunction(raw, api.Functions[i].Name)); doc != "" {
-			api.Functions[i].Documentation = doc
-		}
-	}
-
-	// Extract structs
-	api.Structs = wg.extractStructs(headerContent, headerPath)
-
-	// Extract enums
-	api.Enums = wg.extractEnums(headerContent, headerPath)
-
-	// Extract macros
-	api.Macros = wg.extractMacros(headerContent, headerPath)
-
-	// Extract typedefs
-	api.Typedefs = wg.extractTypedefs(headerContent, headerPath)
-
-	// Extract constants
-	api.Constants = wg.extractConstants(headerContent, headerPath)
-
-	return api, nil
+	return wg.parseHeaderContent(stripCComments(raw), raw, headerPath)
 }
 
 // extractFunctions extracts function declarations from header content
@@ -441,23 +409,33 @@ func (wg *WrapperGenerator) extractTypedefs(content, headerPath string) []Typede
 	var typedefs []Typedef
 
 	// Typedef regex pattern (excluding function pointers and complex blocks for now)
-	// Supports: typedef TargetType NewName;
-	typedefPattern := regexp.MustCompile(`typedef\s+([a-zA-Z_][a-zA-Z0-9_\s\*]+)\s+([a-zA-Z_][a-zA-Z0-9_]+);`)
+	// Supports: typedef TargetType NewName;  and  typedef Type *NewName;
+	typedefPattern := regexp.MustCompile(`typedef\s+([a-zA-Z_][a-zA-Z0-9_\s\*]+?)\s+([a-zA-Z_][a-zA-Z0-9_]+)\s*;`)
+	typedefPtrPattern := regexp.MustCompile(`typedef\s+([a-zA-Z_][a-zA-Z0-9_\s]+)\s*\*\s*([a-zA-Z_][a-zA-Z0-9_]+)\s*;`)
 
-	matches := typedefPattern.FindAllStringSubmatch(content, -1)
+	patterns := []*regexp.Regexp{typedefPtrPattern, typedefPattern}
+	seen := make(map[string]struct{})
 
-	for _, match := range matches {
-		if len(match) >= 3 {
-			targetType := strings.TrimSpace(match[1])
-			typeName := strings.TrimSpace(match[2])
+	for _, pattern := range patterns {
+		matches := pattern.FindAllStringSubmatch(content, -1)
+		for _, match := range matches {
+			if len(match) >= 3 {
+				targetType := strings.TrimSpace(match[1])
+				typeName := strings.TrimSpace(match[2])
+				if pattern == typedefPtrPattern {
+					targetType = strings.TrimSpace(targetType + " *")
+				}
+				if _, ok := seen[typeName]; ok {
+					continue
+				}
+				seen[typeName] = struct{}{}
 
-			typedef := Typedef{
-				Name:       typeName,
-				TargetType: targetType,
-				Header:     headerPath,
+				typedefs = append(typedefs, Typedef{
+					Name:       typeName,
+					TargetType: targetType,
+					Header:     headerPath,
+				})
 			}
-
-			typedefs = append(typedefs, typedef)
 		}
 	}
 
@@ -533,14 +511,14 @@ func (wg *WrapperGenerator) parseParameters(paramsStr string) []Parameter {
 		parts := strings.Fields(param)
 		if len(parts) >= 2 {
 			paramName := parts[len(parts)-1]
-			// Handle pointer attached to name: char *name, char **name
+			paramTypeParts := parts[:len(parts)-1]
 			for strings.HasPrefix(paramName, "*") {
 				paramName = paramName[1:]
-				if len(parts) >= 2 {
-					parts[len(parts)-2] += "*"
+				if len(paramTypeParts) > 0 {
+					paramTypeParts[len(paramTypeParts)-1] += "*"
 				}
 			}
-			paramType := strings.Join(parts[:len(parts)-1], " ")
+			paramType := strings.Join(paramTypeParts, " ")
 
 			// Handle default values
 			if strings.Contains(paramName, "=") {
@@ -578,14 +556,18 @@ func (wg *WrapperGenerator) parseStructFields(fieldsContent string) []Field {
 		parts := strings.Fields(line)
 		if len(parts) >= 2 {
 			fieldName := parts[len(parts)-1]
-			// Handle pointer fields: char *name, char **name
+			fieldTypeParts := parts[:len(parts)-1]
 			for strings.HasPrefix(fieldName, "*") {
 				fieldName = fieldName[1:]
-				if len(parts) >= 2 {
-					parts[len(parts)-2] += "*"
+				if len(fieldTypeParts) > 0 {
+					fieldTypeParts[len(fieldTypeParts)-1] += "*"
 				}
 			}
-			fieldType := strings.Join(parts[:len(parts)-1], " ")
+			fieldType := strings.Join(fieldTypeParts, " ")
+			if idx := strings.Index(fieldName, "["); idx >= 0 {
+				fieldType += fieldName[idx:]
+				fieldName = fieldName[:idx]
+			}
 
 			fields = append(fields, Field{
 				Name: fieldName,
@@ -664,10 +646,8 @@ func (wg *WrapperGenerator) parseEnumValues(valuesContent string) []EnumValue {
 
 		if len(parts) > 1 {
 			valueStr := strings.TrimSpace(parts[1])
-			if strings.HasPrefix(valueStr, "0x") {
-				fmt.Sscanf(valueStr, "%x", &currentValue)
-			} else {
-				fmt.Sscanf(valueStr, "%d", &currentValue)
+			if v, ok := evaluateIntLiteral(valueStr); ok {
+				currentValue = v
 			}
 		}
 
@@ -675,7 +655,7 @@ func (wg *WrapperGenerator) parseEnumValues(valuesContent string) []EnumValue {
 			Name:  valueName,
 			Value: currentValue,
 		})
-		currentValue++
+		currentValue = currentValue + 1
 	}
 
 	return values
@@ -749,6 +729,17 @@ func (wg *WrapperGenerator) generateKodaWrapper(api *API) error {
 		w("// ------------------------------------------------------------\n\n")
 		for _, constant := range api.Constants {
 			wg.writeKodaConstant(file, constant)
+		}
+		w("\n")
+	}
+
+	emitMacros := wg.emitableMacros(api.Macros)
+	if len(emitMacros) > 0 {
+		w("// ------------------------------------------------------------\n")
+		w("//  Macros (object-like #define)\n")
+		w("// ------------------------------------------------------------\n\n")
+		for _, macro := range emitMacros {
+			wg.writeKodaMacro(file, macro)
 		}
 		w("\n")
 	}
@@ -955,11 +946,7 @@ func (wg *WrapperGenerator) skipGlueFunction(function Function) bool {
 	if n == "" || strings.ContainsAny(n, "() ") {
 		return true
 	}
-	// Regex parser sometimes emits bogus decls (e.g. typedefs mistaken for functions).
-	if n == "void" || n == "bool" || n == "const" {
-		return true
-	}
-	return false
+	return !isValidWrapgenBindingName(n)
 }
 
 func (wg *WrapperGenerator) writeCGlueFunction(file *os.File, api *API, function Function) {
@@ -1033,25 +1020,27 @@ func (wg *WrapperGenerator) cParamList(function Function) string {
 
 func (wg *WrapperGenerator) cTypeForParam(t string) string {
 	t = strings.TrimSpace(t)
-	if strings.Contains(t, "unsigned") && strings.Contains(t, "char") && strings.Contains(t, "*") {
-		return "unsigned char*"
-	}
-	if strings.Contains(t, "char") && strings.Contains(t, "*") {
-		return "const char*"
-	}
-	if strings.Contains(t, "float") {
-		return "float"
-	}
-	if strings.Contains(t, "double") {
-		return "double"
+	if strings.Contains(t, "*") {
+		if strings.Contains(t, "char") && strings.Count(t, "*") >= 2 {
+			return t
+		}
+		if strings.Contains(t, "char") {
+			if strings.Contains(t, "unsigned") {
+				return "unsigned char*"
+			}
+			return "const char*"
+		}
+		return t
 	}
 	if strings.Contains(t, "bool") {
 		return "int"
 	}
-	if strings.Contains(t, "*") {
-		return "void*"
+	if strings.Contains(t, "double") {
+		return "double"
 	}
-	// Default to the type name itself, assuming it's a known struct or typedef
+	if strings.Contains(t, "float") {
+		return "float"
+	}
 	return t
 }
 
@@ -1066,15 +1055,23 @@ func (wg *WrapperGenerator) cTypeForReturn(t string) string {
 	return wg.cTypeForParam(t)
 }
 
+func (wg *WrapperGenerator) resolveTypedef(api *API, t string) (string, bool) {
+	t = strings.TrimSpace(t)
+	for _, td := range api.Typedefs {
+		if td.Name == t {
+			return strings.TrimSpace(td.TargetType), true
+		}
+	}
+	return t, false
+}
+
 func (wg *WrapperGenerator) isPointerType(api *API, t string) bool {
 	t = strings.TrimSpace(t)
 	if strings.Contains(t, "*") {
 		return true
 	}
-	for _, td := range api.Typedefs {
-		if td.Name == t {
-			return wg.isPointerType(api, td.TargetType)
-		}
+	if resolved, ok := wg.resolveTypedef(api, t); ok {
+		return wg.isPointerType(api, resolved)
 	}
 	return false
 }
@@ -1099,6 +1096,9 @@ func (wg *WrapperGenerator) cArgExprKoda(api *API, t string, valExpr string) str
 		return fmt.Sprintf(`((unsigned char*)(void*)(IS_OBJ(%s) && AS_OBJ(%s)->type == OBJ_STRING ? ((ObjString*)AS_OBJ(%s))->chars : (const char*)""))`, valExpr, valExpr, valExpr)
 	}
 	if strings.Contains(t, "char") && strings.Contains(t, "*") {
+		if strings.Count(t, "*") >= 2 {
+			return "(" + t + ")NULL"
+		}
 		return fmt.Sprintf(`(IS_OBJ(%s) && AS_OBJ(%s)->type == OBJ_STRING ? ((ObjString*)AS_OBJ(%s))->chars : "")`, valExpr, valExpr, valExpr)
 	}
 	if strings.Contains(t, "bool") {
@@ -1113,6 +1113,10 @@ func (wg *WrapperGenerator) cArgExprKoda(api *API, t string, valExpr string) str
 			if i > 0 {
 				fields += ", "
 			}
+			if strings.Contains(field.Type, "[") {
+				fields += "{0}"
+				continue
+			}
 			fieldValExpr := fmt.Sprintf("koda_get_index(%s, koda_copy_string(\"%s\", %d))", valExpr, field.Name, len(field.Name))
 			fields += wg.cArgExprKoda(api, field.Type, fieldValExpr)
 		}
@@ -1120,7 +1124,16 @@ func (wg *WrapperGenerator) cArgExprKoda(api *API, t string, valExpr string) str
 	}
 
 	if wg.isPointerType(api, t) {
-		return "NULL"
+		pt := t
+		if resolved, ok := wg.resolveTypedef(api, t); ok && strings.Contains(resolved, "*") {
+			pt = resolved
+		} else if !strings.Contains(pt, "*") {
+			pt = pt + "*"
+		}
+		return "(" + pt + ")NULL"
+	}
+	if resolved, ok := wg.resolveTypedef(api, t); ok && wg.isPointerType(api, resolved) {
+		return "(" + resolved + ")NULL"
 	}
 	if strings.Contains(t, "float") || strings.Contains(t, "double") {
 		return fmt.Sprintf("(IS_NUMBER(%s) ? (double)AS_NUMBER(%s) : 0.0)", valExpr, valExpr)
@@ -1187,6 +1200,10 @@ func (wg *WrapperGenerator) cReturnStructExpr(api *API, st *Struct, valExpr stri
 		var fieldValCode string
 		if nestedSt != nil {
 			fieldValCode = wg.cReturnStructExpr(api, nestedSt, fValExpr)
+		} else if strings.Contains(fType, "[") {
+			fieldValCode = "NULL_VAL"
+		} else if strings.Contains(fType, "**") || strings.Count(fType, "*") >= 2 {
+			fieldValCode = "NULL_VAL"
 		} else if strings.Contains(fType, "char") && strings.Contains(fType, "*") {
 			fieldValCode = fmt.Sprintf("%s ? koda_copy_string(%s, (int)strlen(%s)) : NULL_VAL", fValExpr, fValExpr, fValExpr)
 		} else if strings.Contains(fType, "*") {
@@ -1234,10 +1251,62 @@ func (wg *WrapperGenerator) writeKodaStructDefinition(file *os.File, structDef S
 
 func (wg *WrapperGenerator) writeKodaEnumDefinition(file *os.File, enum Enum) {
 	fmt.Fprintf(file, "// Enum: %s\n", enum.Name)
+	seen := make(map[string]struct{})
 	for _, value := range enum.Values {
-		fmt.Fprintf(file, "let %s_%s = %d;\n", enum.Name, value.Name, value.Value)
+		if !isValidWrapgenBindingName(value.Name) {
+			continue
+		}
+		if _, dup := seen[value.Name]; dup {
+			continue
+		}
+		seen[value.Name] = struct{}{}
+		fmt.Fprintf(file, "let %s = %s; // %s\n", value.Name, formatIntLiteral(value.Value), enum.Name)
 	}
 	fmt.Fprintf(file, "\n")
+}
+
+var skipMacroNames = map[string]struct{}{
+	"bool": {}, "true": {}, "false": {}, "NULL": {}, "RLAPI": {}, "CLITERAL": {},
+	"RAYLIB_H": {}, "RLGL_H": {}, "RAYMATH_H": {},
+}
+
+func (wg *WrapperGenerator) emitableMacros(macros []Macro) []Macro {
+	var out []Macro
+	seen := make(map[string]struct{})
+	for _, m := range macros {
+		if len(m.Parameters) > 0 {
+			continue
+		}
+		if _, skip := skipMacroNames[m.Name]; skip {
+			continue
+		}
+		if !isValidWrapgenBindingName(m.Name) {
+			continue
+		}
+		if _, dup := seen[m.Name]; dup {
+			continue
+		}
+		val := strings.TrimSpace(m.Value)
+		if val == "" || strings.ContainsAny(val, "{(\\") {
+			continue
+		}
+		if strings.HasPrefix(val, "CLITERAL") {
+			continue
+		}
+		if _, ok := evaluateIntLiteral(val); !ok {
+			continue
+		}
+		seen[m.Name] = struct{}{}
+		out = append(out, m)
+	}
+	return out
+}
+
+func (wg *WrapperGenerator) writeKodaMacro(file *os.File, macro Macro) {
+	val := strings.TrimSpace(macro.Value)
+	if v, ok := evaluateIntLiteral(val); ok {
+		fmt.Fprintf(file, "let %s = %s; // #define\n", macro.Name, formatIntLiteral(v))
+	}
 }
 
 func (wg *WrapperGenerator) writeKodaConstant(file *os.File, constant Constant) {

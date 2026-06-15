@@ -14,6 +14,7 @@
     BuildProgram,
     DefaultBuildOutput,
     LSPMessage,
+    CheckSDK,
   } from '../wailsjs/go/main/App.js'
   import { EventsOn } from '../wailsjs/runtime/runtime.js'
   import CodeEditor from './lib/CodeEditor.svelte'
@@ -24,7 +25,22 @@
   import StatusBar from './lib/StatusBar.svelte'
   import DiagnosticToast from './lib/DiagnosticToast.svelte'
   import FileMenuBar from './lib/FileMenuBar.svelte'
+  import ThemePicker from './lib/ThemePicker.svelte'
+  import WelcomeScreen from './lib/WelcomeScreen.svelte'
+  import { defaultTheme, safeTheme } from './lib/themes.js'
+  import HelpPanel from './lib/HelpPanel.svelte'
   import { pathToFileURI, rpcInitialize, notifyInitialized, notifyDidOpen, notifyDidChange } from './lib/lspUtil.js'
+
+  const defaultStudioSettings = {
+    theme: defaultTheme,
+    editorFontSize: 15,
+    editorLineHeight: 1.65,
+    editorTabSize: 4,
+    terminalFontSize: 13,
+    panelOpacity: 92,
+    compactMode: false,
+    showHeaderThemePicker: true,
+  }
 
   let workspace = $state('')
   let tree = $state([])
@@ -33,27 +49,129 @@
   let zen = $state(false)
   let outputOpen = $state(false)
   let outputText = $state('')
+  let outputEl = $state(null)
   let paletteOpen = $state(false)
   let showTerminal = $state(false)
   let showPreview = $state(false)
+  let theme = $state(defaultTheme)
+  let themeReady = $state(false)
   let themeNudge = $state(0)
+  let editorFontSize = $state(defaultStudioSettings.editorFontSize)
+  let editorLineHeight = $state(defaultStudioSettings.editorLineHeight)
+  let editorTabSize = $state(defaultStudioSettings.editorTabSize)
+  let terminalFontSize = $state(defaultStudioSettings.terminalFontSize)
+  let panelOpacity = $state(defaultStudioSettings.panelOpacity)
+  let compactMode = $state(defaultStudioSettings.compactMode)
+  let showHeaderThemePicker = $state(defaultStudioSettings.showHeaderThemePicker)
+  let openSettingsToken = $state(0)
   let sidebarPinned = $state(false)
   let activeAbsPath = $state('')
   let diagErrors = $state(0)
   let diagWarnings = $state(0)
+  let cursorLine = $state(1)
+  let cursorCol = $state(1)
   /** @type { { line: number, col: number, token: number } | null } */
   let jumpTarget = $state(null)
   let newProjectOpen = $state(false)
   let newProjectParent = $state('')
   let newProjectName = $state('my-koda-project')
+  let newProjectTemplate = $state('hello')
   let newProjectErr = $state('')
+  /** @type {{ ok: boolean, version?: string, installDir?: string, stdlibDir?: string, lines?: { ok: boolean, label: string, detail: string, fix?: string }[] }} */
+  let sdkStatus = $state({ ok: false, lines: [] })
+  let startupError = $state('')
   let newFileOpen = $state(false)
   let newFileRel = $state('hello.koda')
   let newFileErr = $state('')
+  let helpOpen = $state(false)
+  let helpPage = $state('START_HERE.md')
   let unsubOut = []
   let lspTimer = 0
 
   const active = $derived(activeIndex >= 0 ? tabs[activeIndex] : null)
+  const dirtyCount = $derived(tabs.filter((t) => t.dirty).length)
+  const shellStyle = $derived(
+    `${themeNudge ? 'filter: contrast(1.06);' : ''}` +
+      `--editor-font-size:${clampNumber(editorFontSize, 12, 22, defaultStudioSettings.editorFontSize)}px;` +
+      `--editor-line-height:${clampNumber(editorLineHeight, 1.35, 2, defaultStudioSettings.editorLineHeight)};` +
+      `--terminal-font-size:${clampNumber(terminalFontSize, 11, 20, defaultStudioSettings.terminalFontSize)}px;` +
+      `--panel-opacity:${clampNumber(panelOpacity, 76, 100, defaultStudioSettings.panelOpacity)}%;`,
+  )
+
+  function clampNumber(value, min, max, fallback) {
+    const n = Number(value)
+    if (!Number.isFinite(n)) return fallback
+    return Math.min(max, Math.max(min, n))
+  }
+
+  function boolValue(value, fallback) {
+    return typeof value === 'boolean' ? value : fallback
+  }
+
+  function readStudioSettings() {
+    let raw = null
+    try {
+      raw = JSON.parse(localStorage.getItem('koda-studio-settings') || 'null')
+    } catch {
+      raw = null
+    }
+    return {
+      theme: safeTheme(raw?.theme || localStorage.getItem('koda-studio-theme') || defaultStudioSettings.theme),
+      editorFontSize: clampNumber(raw?.editorFontSize, 12, 22, defaultStudioSettings.editorFontSize),
+      editorLineHeight: clampNumber(raw?.editorLineHeight, 1.35, 2, defaultStudioSettings.editorLineHeight),
+      editorTabSize: [2, 4, 8].includes(Number(raw?.editorTabSize)) ? Number(raw.editorTabSize) : defaultStudioSettings.editorTabSize,
+      terminalFontSize: clampNumber(raw?.terminalFontSize, 11, 20, defaultStudioSettings.terminalFontSize),
+      panelOpacity: clampNumber(raw?.panelOpacity, 76, 100, defaultStudioSettings.panelOpacity),
+      compactMode: boolValue(raw?.compactMode, defaultStudioSettings.compactMode),
+      showHeaderThemePicker: boolValue(raw?.showHeaderThemePicker, defaultStudioSettings.showHeaderThemePicker),
+    }
+  }
+
+  function applyStudioSettings(settings) {
+    theme = safeTheme(settings.theme)
+    editorFontSize = settings.editorFontSize
+    editorLineHeight = settings.editorLineHeight
+    editorTabSize = settings.editorTabSize
+    terminalFontSize = settings.terminalFontSize
+    panelOpacity = settings.panelOpacity
+    compactMode = settings.compactMode
+    showHeaderThemePicker = settings.showHeaderThemePicker
+  }
+
+  function resetStudioSettings() {
+    applyStudioSettings(defaultStudioSettings)
+  }
+
+  function openSettings() {
+    openSettingsToken += 1
+    sidebarPinned = true
+  }
+
+  $effect(() => {
+    if (!outputEl || !outputOpen) return
+    outputText
+    queueMicrotask(() => {
+      if (outputEl) outputEl.scrollTop = outputEl.scrollHeight
+    })
+  })
+
+  $effect(() => {
+    if (!themeReady || typeof localStorage === 'undefined') return
+    localStorage.setItem('koda-studio-theme', theme)
+    localStorage.setItem(
+      'koda-studio-settings',
+      JSON.stringify({
+        theme,
+        editorFontSize: clampNumber(editorFontSize, 12, 22, defaultStudioSettings.editorFontSize),
+        editorLineHeight: clampNumber(editorLineHeight, 1.35, 2, defaultStudioSettings.editorLineHeight),
+        editorTabSize: [2, 4, 8].includes(Number(editorTabSize)) ? Number(editorTabSize) : defaultStudioSettings.editorTabSize,
+        terminalFontSize: clampNumber(terminalFontSize, 11, 20, defaultStudioSettings.terminalFontSize),
+        panelOpacity: clampNumber(panelOpacity, 76, 100, defaultStudioSettings.panelOpacity),
+        compactMode,
+        showHeaderThemePicker,
+      }),
+    )
+  })
 
   function norm(p) {
     return (p || '').replace(/\\/g, '/').toLowerCase()
@@ -117,19 +235,39 @@
     return window['go']?.['main']?.['App'] ?? null
   }
 
+  function confirmDiscardDirty(message = 'You have unsaved files. Continue without saving?') {
+    if (dirtyCount === 0) return true
+    return window.confirm(message)
+  }
+
   async function refreshTree() {
     if (!workspace) {
       tree = []
       return
     }
     try {
-      tree = await ListDir('')
+      tree = await loadTree('')
     } catch {
       tree = []
     }
   }
 
+  async function loadTree(rel) {
+    const entries = await ListDir(rel)
+    return Promise.all(
+      entries.map(async (entry) => {
+        if (!entry.isDir) return entry
+        try {
+          return { ...entry, children: await loadTree(entry.rel) }
+        } catch {
+          return { ...entry, children: [] }
+        }
+      }),
+    )
+  }
+
   async function openWorkspaceFlow() {
+    if (!confirmDiscardDirty('Open another workspace and discard unsaved tab changes?')) return
     const app = wailsAppBinding()
     if (!app || typeof app.PickWorkspaceFolder !== 'function') {
       outputOpen = true
@@ -159,8 +297,10 @@
     }
   }
 
-  async function startNewProjectWizard() {
+  async function startNewProjectWizard(template = 'hello') {
+    if (!confirmDiscardDirty('Create a new project and discard unsaved tab changes?')) return
     newProjectErr = ''
+    newProjectTemplate = template || 'hello'
     const app = wailsAppBinding()
     if (!app || typeof app.PickParentFolderForNewProject !== 'function') {
       newProjectParent = ''
@@ -184,11 +324,26 @@
     newProjectOpen = true
   }
 
+  async function openProjectEntry() {
+    for (const rel of ['src/main.koda', 'main.koda']) {
+      try {
+        await openRel(rel)
+        return
+      } catch {
+        /* try next */
+      }
+    }
+  }
+
   async function confirmNewProject() {
     newProjectErr = ''
     if (!newProjectParent.trim()) return
     try {
-      const root = await CreateProjectInParent(newProjectParent, newProjectName.trim())
+      const root = await CreateProjectInParent(
+        newProjectParent,
+        newProjectName.trim(),
+        newProjectTemplate || 'hello',
+      )
       await OpenWorkspace(root)
       workspace = await GetWorkspaceRoot()
       tabs = []
@@ -196,7 +351,7 @@
       outputText = ''
       await refreshTree()
       newProjectOpen = false
-      await openRel('main.koda')
+      await openProjectEntry()
     } catch (err) {
       newProjectErr = err instanceof Error ? err.message : String(err)
     }
@@ -233,6 +388,7 @@
 
   function closeActiveTab() {
     if (activeIndex < 0 || tabs.length === 0) return
+    if (tabs[activeIndex]?.dirty && !window.confirm(`Close ${tabs[activeIndex].name} without saving?`)) return
     jumpTarget = null
     const next = tabs.filter((_, i) => i !== activeIndex)
     const nextIndex = next.length === 0 ? -1 : activeIndex >= next.length ? next.length - 1 : activeIndex
@@ -248,7 +404,7 @@
       return
     }
     const text = await ReadFile(rel)
-    tabs = [...tabs, { rel, name: rel.split('/').pop() || rel, text }]
+    tabs = [...tabs, { rel, name: rel.split('/').pop() || rel, text, savedText: text, dirty: false }]
     activeIndex = tabs.length - 1
     const abs = await AbsFromWorkspace(rel)
     void LSPMessage(notifyDidOpen(pathToFileURI(abs), text))
@@ -257,12 +413,16 @@
   async function saveActive() {
     if (!active) return
     await WriteFile(active.rel, active.text)
+    const idx = activeIndex
+    tabs = tabs.map((tab, i) => (i === idx ? { ...tab, savedText: tab.text, dirty: false } : tab))
     outputText = outputText + `Saved ${active.rel}\n`
   }
 
   async function runActive() {
     if (!active) return
     const abs = await AbsFromWorkspace(active.rel)
+    outputOpen = true
+    outputText = outputText + `\n> koda run ${active.rel}\n`
     RunProgram(abs, active.text)
   }
 
@@ -270,6 +430,8 @@
     if (!active) return
     const abs = await AbsFromWorkspace(active.rel)
     const out = await DefaultBuildOutput(abs)
+    outputOpen = true
+    outputText = outputText + `\n> koda build ${active.rel}\n`
     BuildProgram(abs, active.text, out)
   }
 
@@ -298,8 +460,16 @@
     }
   }
 
+  function openHelp(page = 'START_HERE.md') {
+    helpPage = page
+    helpOpen = true
+  }
+
   async function collectPaletteItems() {
     const cmds = [
+      { id: 'c:help', label: 'Help & documentation', hint: 'help', shortcut: 'F1' },
+      { id: 'c:help-begin', label: 'Beginner\'s guide', hint: 'help', shortcut: '' },
+      { id: 'c:help-faq', label: 'FAQ', hint: 'help', shortcut: '' },
       { id: 'c:open', label: 'Open workspace folder…', hint: 'workspace', shortcut: '' },
       { id: 'c:new-project', label: 'New project…', hint: 'workspace', shortcut: '⌃⇧N' },
       { id: 'c:new-file', label: 'New file…', hint: 'file', shortcut: '' },
@@ -308,11 +478,11 @@
       { id: 'c:out', label: 'Toggle output panel', hint: 'view', shortcut: '' },
       { id: 'c:term', label: 'Toggle integrated terminal', hint: 'view', shortcut: '⌃J' },
       { id: 'c:pv', label: 'Toggle 3D preview pane', hint: 'view', shortcut: '' },
-      { id: 'c:run', label: 'Run current file (VM)', hint: 'koda', shortcut: 'F5' },
+      { id: 'c:run', label: 'Run current file', hint: 'koda', shortcut: 'F5' },
       { id: 'c:build', label: 'Build native executable', hint: 'koda', shortcut: '⌃⇧B' },
       { id: 'c:sidebar', label: 'Pin / toggle file drawer (rail hover)', hint: 'view', shortcut: '⌃B' },
       { id: 'c:save', label: 'Save current file', hint: 'file', shortcut: '⌃S' },
-      { id: 'c:settings', label: 'Settings (placeholder)', hint: 'settings', shortcut: '⌃,' },
+      { id: 'c:settings', label: 'Open settings', hint: 'settings', shortcut: '⌃,' },
     ]
     const files = []
     async function walk(rel) {
@@ -341,7 +511,10 @@
   }
 
   function onPalettePick(it) {
-    if (it.id === 'c:open') void openWorkspaceFlow()
+    if (it.id === 'c:help') openHelp('START_HERE.md')
+    else if (it.id === 'c:help-begin') openHelp('docs/beginners-guide.md')
+    else if (it.id === 'c:help-faq') openHelp('docs/faq.md')
+    else if (it.id === 'c:open') void openWorkspaceFlow()
     else if (it.id === 'c:new-project') void startNewProjectWizard()
     else if (it.id === 'c:new-file') {
       if (workspace) openNewFileDialog()
@@ -354,9 +527,8 @@
     else if (it.id === 'c:build') void buildActive()
     else if (it.id === 'c:sidebar') sidebarPinned = !sidebarPinned
     else if (it.id === 'c:save') void saveActive()
-    else if (it.id === 'c:settings') {
-      /* placeholder — wire to settings route later */
-    } else if (it.rel) void openRel(it.rel)
+    else if (it.id === 'c:settings') openSettings()
+    else if (it.rel) void openRel(it.rel)
   }
 
   async function onDiagnosticJump(absPath, line, col) {
@@ -377,6 +549,16 @@
       sidebarPinned = !sidebarPinned
       return
     }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      e.preventDefault()
+      void saveActive()
+      return
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
+      e.preventDefault()
+      closeActiveTab()
+      return
+    }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
       e.preventDefault()
       void openPalette()
@@ -394,7 +576,12 @@
     }
     if ((e.ctrlKey || e.metaKey) && e.key === ',') {
       e.preventDefault()
-      /* settings placeholder */
+      openSettings()
+      return
+    }
+    if (e.key === 'F1') {
+      e.preventDefault()
+      openHelp('START_HERE.md')
       return
     }
     if (e.key === 'F5' && !e.ctrlKey && !e.metaKey) {
@@ -412,12 +599,28 @@
   }
 
   onMount(async () => {
-    workspace = await GetWorkspaceRoot()
-    await refreshTree()
-    const init = await LSPMessage(rpcInitialize(1))
-    void init
-    void LSPMessage(notifyInitialized())
-    void tryAmbientContrast()
+    try {
+      applyStudioSettings(readStudioSettings())
+    } catch {
+      applyStudioSettings(defaultStudioSettings)
+    }
+    themeReady = true
+    try {
+      workspace = await GetWorkspaceRoot()
+      await refreshTree()
+      if (workspace) await openProjectEntry()
+      try {
+        sdkStatus = await CheckSDK()
+      } catch {
+        sdkStatus = { ok: false, lines: [{ ok: false, label: 'SDK', detail: 'Could not check SDK', fix: 'Run Koda Studio from the SDK folder.' }] }
+      }
+      const init = await LSPMessage(rpcInitialize(1))
+      void init
+      void LSPMessage(notifyInitialized())
+      void tryAmbientContrast()
+    } catch (err) {
+      startupError = err instanceof Error ? err.message : String(err)
+    }
 
     unsubOut.push(
       EventsOn('koda:stdout', (line) => {
@@ -446,29 +649,35 @@
     )
 
     window.addEventListener('keydown', onGlobalKey)
+    window.addEventListener('beforeunload', onBeforeUnload)
   })
 
   onDestroy(() => {
     window.removeEventListener('keydown', onGlobalKey)
+    window.removeEventListener('beforeunload', onBeforeUnload)
     for (const u of unsubOut) {
       if (typeof u === 'function') u()
     }
     unsubOut = []
     clearTimeout(lspTimer)
   })
+
+  function onBeforeUnload(e) {
+    if (dirtyCount === 0) return
+    e.preventDefault()
+    e.returnValue = ''
+  }
 </script>
 
-<div class="relative h-full text-[var(--color-text)]" style={themeNudge ? 'filter: contrast(1.06);' : ''}>
-<div
-  class="void-app h-full"
-  class:void-app--zen={zen}
-  class:void-app--preview={showPreview && !zen}
->
-  {#if !zen}
-    <header
-      class="void-header glass flex h-8 shrink-0 items-center gap-2 border-b border-[var(--color-surface0)] px-3 text-sm"
-    >
-      <span class="font-semibold tracking-tight text-[var(--color-accent)]">Koda</span>
+<div class="studio-shell" data-theme={theme} class:studio-shell--compact={compactMode} style={shellStyle}>
+  <div
+    class="void-app"
+    class:void-app--zen={zen}
+    class:void-app--preview={showPreview && !zen}
+  >
+    {#if !zen}
+      <header class="void-header">
+        <span class="studio-title">Koda Studio</span>
       <FileMenuBar
         {zen}
         hasWorkspace={!!workspace}
@@ -480,6 +689,10 @@
         canSave={!!active}
         canCloseTab={!!active}
       />
+      <button
+        type="button"
+        class="rounded-md px-2 py-0.5 text-[var(--color-subtext)] hover:bg-[var(--color-surface0)]"
+        onclick={() => openHelp()}>Help <kbd class="font-sans text-[10px] text-[var(--color-overlay0)]">F1</kbd></button>
       <button
         type="button"
         class="rounded-md px-2 py-0.5 text-[var(--color-subtext)] hover:bg-[var(--color-surface0)]"
@@ -502,8 +715,10 @@
         class="rounded-md px-2 py-0.5 text-[var(--color-subtext)] hover:bg-[var(--color-surface0)]"
         onclick={() => void buildActive()}
         disabled={!active}>Build</button>
-      <span class="ml-auto truncate text-xs text-[var(--color-overlay0)]" title={workspace || ''}
-        >{workspace || 'No folder open'}</span>
+      {#if showHeaderThemePicker}
+        <ThemePicker bind:value={theme} />
+      {/if}
+      <span class="studio-spacer" title={workspace || ''}>{workspace || 'No folder open'}</span>
     </header>
   {/if}
 
@@ -513,16 +728,30 @@
     {tree}
     activeRel={active?.rel ?? ''}
     bind:drawerPinned={sidebarPinned}
+    {openSettingsToken}
+    bind:theme
+    bind:editorFontSize
+    bind:editorLineHeight
+    bind:editorTabSize
+    bind:terminalFontSize
+    bind:panelOpacity
+    bind:compactMode
+    bind:showHeaderThemePicker
+    bind:showTerminal
+    bind:showPreview
+    bind:outputOpen
     onOpenFile={(rel) => void openRel(rel)}
     onOpenWorkspace={() => void openWorkspaceFlow()}
     onRun={() => void runActive()}
     onOpenPalette={() => void openPalette()}
+    onOpenHelp={(page) => openHelp(page)}
+    onResetSettings={resetStudioSettings}
   />
 
-  <main class="void-main flex min-h-0 flex-col">
+  <main class="void-main">
     {#if !zen}
       <div
-        class="flex shrink-0 gap-0.5 border-b border-[var(--color-surface0)] bg-[var(--color-mantle)] px-2 py-0.5 text-xs"
+        class="flex shrink-0 gap-0.5 border-b border-[var(--color-surface0)] bg-[var(--color-mantle)] px-2 py-1 text-sm"
       >
         {#each tabs as t, i (t.rel)}
           <button
@@ -535,15 +764,25 @@
             onclick={() => {
               jumpTarget = null
               activeIndex = i
-            }}>{t.name}</button>
+            }}>
+              <span class="mr-1 text-[var(--color-accent)]">{t.dirty ? '●' : ''}</span>{t.name}
+            </button>
         {/each}
       </div>
     {/if}
 
-    <div class="flex min-h-0 flex-1 flex-col">
-      <section class="flex min-h-0 min-w-0 flex-1 flex-col p-2">
-        {#if active}
-          {#key active.rel}
+    <div class="void-main-body">
+      <section class="void-main-editor p-2">
+        {#if startupError}
+          <div class="welcome">
+            <h1>Startup error</h1>
+            <p class="welcome-lead text-[var(--color-red)]">{startupError}</p>
+            <div class="welcome-actions">
+              <button type="button" onclick={() => void openWorkspaceFlow()}>Open workspace…</button>
+            </div>
+          </div>
+        {:else if active}
+          {#key `${active.rel}:${editorTabSize}`}
             {#await AbsFromWorkspace(active.rel)}
               <p class="p-4 text-sm text-[var(--color-subtext)]">Loading editor…</p>
             {:then abs}
@@ -552,9 +791,16 @@
                 relPath={active.rel}
                 seed={active.text}
                 {jumpTarget}
+                tabSize={editorTabSize}
                 onTextChange={(t) => {
                   const idx = activeIndex
-                  tabs = tabs.map((tab, i) => (i === idx ? { ...tab, text: t } : tab))
+                  tabs = tabs.map((tab, i) =>
+                    i === idx ? { ...tab, text: t, dirty: t !== tab.savedText } : tab,
+                  )
+                }}
+                onCursorChange={(pos) => {
+                  cursorLine = pos.line
+                  cursorCol = pos.col
                 }}
                 onLspNotify={(p, txt) => pushLsp(p, txt)}
                 onSave={() => void saveActive()}
@@ -564,63 +810,71 @@
               <p class="p-4 text-sm text-[var(--color-red)]">Could not resolve file path.</p>
             {/await}
           {/key}
+        {:else if !workspace}
+          <WelcomeScreen
+            sdk={sdkStatus}
+            onNewProject={(template) => void startNewProjectWizard(template)}
+            onOpenWorkspace={() => void openWorkspaceFlow()}
+            onOpenHelp={(page) => openHelp(page)}
+          />
         {:else}
           <div
             class="flex flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-[var(--color-surface1)] bg-[var(--color-mantle)]/50 p-8 text-center text-[var(--color-subtext)]"
           >
             <p class="max-w-md text-sm">
-              Start a <strong class="text-[var(--color-text)]">new project</strong> (starter <code class="text-[var(--color-accent)]">main.koda</code>) or open an existing folder. Then edit, save with
+              Open a <code class="text-[var(--color-cyan)]">.koda</code> file from the sidebar, or start with
+              <code class="text-[var(--color-cyan)]">src/main.koda</code>. Save with
               <kbd class="rounded bg-[var(--color-surface0)] px-1">⌃S</kbd>, run with <kbd class="rounded bg-[var(--color-surface0)] px-1">F5</kbd>.
             </p>
-            <div class="flex flex-wrap items-center justify-center gap-2">
-              <button
-                type="button"
-                class="rounded-lg bg-[var(--color-accent)] px-4 py-2 font-medium text-[var(--color-crust)]"
-                onclick={() => void startNewProjectWizard()}>New project…</button>
-              <button
-                type="button"
-                class="rounded-lg border border-[var(--color-surface1)] px-4 py-2 font-medium text-[var(--color-text)] hover:bg-[var(--color-surface0)]"
-                onclick={() => void openWorkspaceFlow()}>Open workspace…</button>
-            </div>
+            <button
+              type="button"
+              class="rounded-lg border border-[var(--color-surface1)] px-4 py-2 font-medium text-[var(--color-text)] hover:bg-[var(--color-surface0)]"
+              onclick={() => void openProjectEntry()}>Open main.koda</button>
           </div>
         {/if}
       </section>
 
       {#if showTerminal && !zen}
         <div class="h-56 shrink-0 border-t border-[var(--color-surface0)] p-2">
-          <TerminalPane active={showTerminal} />
+          {#key `${theme}:${terminalFontSize}`}
+            <TerminalPane active={showTerminal} fontSize={terminalFontSize} />
+          {/key}
         </div>
+      {/if}
+
+      {#if outputOpen && !zen}
+        <aside class="output-dock">
+          <div class="output-dock-header">
+            <span>Output</span>
+            <button type="button" onclick={() => (outputText = '')}>Clear</button>
+            <button type="button" onclick={() => (outputOpen = false)}>Close</button>
+          </div>
+          <pre class="output-panel" bind:this={outputEl}>{outputText || 'No output yet.'}</pre>
+        </aside>
       {/if}
     </div>
   </main>
 
   {#if showPreview && !zen}
     <aside class="void-preview glass min-h-0 overflow-y-auto border-l border-[var(--color-surface0)] p-2">
-      <div class="mb-2 text-xs font-medium text-[var(--color-overlay0)]">Preview</div>
+      <div class="mb-2 text-sm font-medium text-[var(--color-overlay0)]">Preview</div>
       <PreviewViewport />
     </aside>
   {/if}
 
-  <StatusBar {zen} scope={active ? active.rel : ''} diagErrors={diagErrors} diagWarnings={diagWarnings} />
-</div>
+  <StatusBar
+    {zen}
+    scope={active ? active.rel : ''}
+    {diagErrors}
+    {diagWarnings}
+    {dirtyCount}
+    line={cursorLine}
+    col={cursorCol}
+  />
+  </div>
 
+  <div class="studio-overlays">
   <DiagnosticToast activeAbsPath={activeAbsPath} onJump={onDiagnosticJump} />
-
-  {#if outputOpen}
-    <aside
-      class="glass fixed bottom-[22px] right-0 top-8 z-40 flex w-[min(480px,92vw)] min-h-0 flex-col border-l border-[var(--color-surface0)] shadow-2xl"
-    >
-      <div class="flex h-8 shrink-0 items-center justify-between border-b border-[var(--color-surface0)] px-3 text-sm">
-        <span>Output</span>
-        <button
-          type="button"
-          class="text-[var(--color-overlay0)] hover:text-[var(--color-text)]"
-          onclick={() => (outputOpen = false)}>Close</button>
-      </div>
-      <pre
-        class="h-[calc(100vh-2rem-22px-2rem)] min-h-0 flex-1 overflow-auto p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap text-[var(--color-subtext)]">{outputText}</pre>
-    </aside>
-  {/if}
 
   {#if newProjectOpen}
     <div
@@ -644,22 +898,43 @@
       >
         <h2 id="np-title" class="mb-1 text-base font-semibold text-[var(--color-text)]">New project</h2>
         {#if newProjectParent}
-          <p class="mb-4 text-xs text-[var(--color-subtext)]">
+          <p class="mb-4 text-sm text-[var(--color-subtext)]">
             Folder will be created inside:
             <span class="break-all font-mono text-[var(--color-overlay0)]">{newProjectParent}</span>
           </p>
-          <label class="mb-1 block text-xs font-medium text-[var(--color-subtext)]" for="np-name">Project folder name</label>
+          <label class="mb-1 block text-sm font-medium text-[var(--color-subtext)]" for="np-name">Project folder name</label>
           <input
             id="np-name"
             class="mb-3 w-full rounded-md border border-[var(--color-surface0)] bg-[var(--color-crust)] px-3 py-2 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-accent)]"
             bind:value={newProjectName}
             autocomplete="off"
           />
+          <fieldset class="mb-3">
+            <legend class="mb-2 text-sm font-medium text-[var(--color-subtext)]">Template</legend>
+            <div class="flex flex-col gap-1.5 text-sm">
+              <label class="flex cursor-pointer items-center gap-2">
+                <input type="radio" bind:group={newProjectTemplate} value="hello" />
+                <span>Hello app — console output</span>
+              </label>
+              <label class="flex cursor-pointer items-center gap-2">
+                <input type="radio" bind:group={newProjectTemplate} value="game" />
+                <span>Text game — lunar lander in the terminal</span>
+              </label>
+              <label class="flex cursor-pointer items-center gap-2">
+                <input type="radio" bind:group={newProjectTemplate} value="graphics" />
+                <span>Bouncing ball — Raylib window</span>
+              </label>
+              <label class="flex cursor-pointer items-center gap-2">
+                <input type="radio" bind:group={newProjectTemplate} value="pong" />
+                <span>Pong — two-player paddle game</span>
+              </label>
+            </div>
+          </fieldset>
         {:else}
-          <p class="mb-4 whitespace-pre-wrap text-xs text-[var(--color-red)]">{newProjectErr}</p>
+          <p class="mb-4 whitespace-pre-wrap text-sm text-[var(--color-red)]">{newProjectErr}</p>
         {/if}
         {#if newProjectParent && newProjectErr}
-          <p class="mb-3 whitespace-pre-wrap text-xs text-[var(--color-red)]">{newProjectErr}</p>
+          <p class="mb-3 whitespace-pre-wrap text-sm text-[var(--color-red)]">{newProjectErr}</p>
         {/if}
         <div class="flex justify-end gap-2">
           <button
@@ -669,7 +944,7 @@
           {#if newProjectParent}
             <button
               type="button"
-              class="rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-sm font-medium text-[var(--color-crust)]"
+              class="rounded-md btn-primary px-3 py-1.5 text-sm font-medium"
               onclick={() => void confirmNewProject()}>Create &amp; open</button>
           {/if}
         </div>
@@ -698,8 +973,8 @@
         onkeydown={(e) => e.stopPropagation()}
       >
         <h2 id="nf-title" class="mb-1 text-base font-semibold text-[var(--color-text)]">New file</h2>
-        <p class="mb-4 text-xs text-[var(--color-subtext)]">Path relative to workspace (use <code class="text-[var(--color-accent)]">/</code>). Example: <code class="text-[var(--color-accent)]">src/app.koda</code></p>
-        <label class="mb-1 block text-xs font-medium text-[var(--color-subtext)]" for="nf-rel">File path</label>
+        <p class="mb-4 text-sm text-[var(--color-subtext)]">Path relative to workspace (use <code class="text-[var(--color-accent)]">/</code>). Example: <code class="text-[var(--color-accent)]">src/app.koda</code></p>
+        <label class="mb-1 block text-sm font-medium text-[var(--color-subtext)]" for="nf-rel">File path</label>
         <input
           id="nf-rel"
           class="mb-3 w-full rounded-md border border-[var(--color-surface0)] bg-[var(--color-crust)] px-3 py-2 font-mono text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-accent)]"
@@ -707,7 +982,7 @@
           autocomplete="off"
         />
         {#if newFileErr}
-          <p class="mb-3 text-xs text-[var(--color-red)]">{newFileErr}</p>
+          <p class="mb-3 text-sm text-[var(--color-red)]">{newFileErr}</p>
         {/if}
         <div class="flex justify-end gap-2">
           <button
@@ -716,7 +991,7 @@
             onclick={() => (newFileOpen = false)}>Cancel</button>
           <button
             type="button"
-            class="rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-sm font-medium text-[var(--color-crust)]"
+            class="rounded-md btn-primary px-3 py-1.5 text-sm font-medium"
             onclick={() => void confirmNewFile()}>Create &amp; open</button>
         </div>
       </div>
@@ -724,4 +999,7 @@
   {/if}
 
   <CommandPalette bind:open={paletteOpen} items={paletteItems} onPick={onPalettePick} />
+
+  <HelpPanel bind:open={helpOpen} initialPage={helpPage} />
+  </div>
 </div>

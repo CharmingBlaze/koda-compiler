@@ -22,14 +22,45 @@ type WrapGenConfig struct {
 	NoHTML         bool
 	Verbose        bool
 	UseClang       bool // try clang AST first (default true)
+	UseCPP         bool // parse as C++ (-x c++ -std=c++17)
 	// Legacy flags (still accepted when -name is used):
 	Documentation bool
 	BuildSystem     bool
 	IncludeTests    bool
 	ComplexCPP      bool
+	LibraryVersion  string // upstream library version (optional, stored in META)
 }
 
 func main() {
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "upgrade":
+			if err := runUpgradeCLI(os.Args[2:]); err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			return
+		case "check":
+			if err := runCheckCLI(os.Args[2:]); err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			return
+		case "install":
+			if err := runInstallCLI(os.Args[2:]); err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			return
+		case "list":
+			if err := runListCLI(os.Args[2:]); err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			return
+		}
+	}
+
 	config, err := parseAllCLI(os.Args[1:])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)

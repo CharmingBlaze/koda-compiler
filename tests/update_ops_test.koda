@@ -1,0 +1,32 @@
+let score = 0;
+let i = 0;
+
+score += 1;
+score += 2;
+score -= 1;
+assert(score == 2, "+=");
+
+let n = 10;
+n *= 2;
+n /= 4;
+assert(n == 5, "*= /=");
+
+i++;
+assert(i == 1, "postfix ++");
+++i;
+assert(i == 2, "prefix ++");
+i--;
+assert(i == 1, "postfix --");
+--i;
+assert(i == 0, "prefix --");
+
+let obj = { x: 5 };
+obj.x += 3;
+obj.x++;
+assert(obj.x == 9, "field += and ++");
+
+let arr = [1, 2, 3];
+arr[1] += 10;
+assert(arr[1] == 12, "index +=");
+
+print("PASS update ops");

@@ -1,0 +1,245 @@
+#include "../wrappers/raylib_shim/raylib.koda"
+#include "@game"
+
+struct Paddle {
+    x, y,
+    w, h,
+    speed,
+    score
+}
+
+struct Ball {
+    x, y,
+    vx, vy,
+    radius
+}
+
+const SCREEN_W = 800;
+const SCREEN_H = 600;
+const WIN_SCORE = 11;
+const PADDLE_W = 14;
+const PADDLE_H = 96;
+const BALL_R = 10;
+const BALL_SPEED = 360;
+
+const ST_SERVE = 0;
+const ST_PLAY = 1;
+const ST_WON = 2;
+
+const KEY_W = 87;
+const KEY_S = 83;
+const KEY_UP = 265;
+const KEY_DOWN = 264;
+const KEY_SPACE = 32;
+
+func clamp(v, lo, hi) {
+    if (v < lo) {
+        return lo;
+    }
+    if (v > hi) {
+        return hi;
+    }
+    return v;
+}
+
+func nextPaddleY(y, h, speed, dir, dt) {
+    let ny = y + dir * speed * dt;
+    let margin = 16;
+    return clamp(ny, margin, SCREEN_H - h - margin);
+}
+
+func serveBall(ball, towardRight) {
+    ball.x = SCREEN_W / 2;
+    ball.y = SCREEN_H / 2;
+    let dir = 1;
+    if (!towardRight) {
+        dir = -1;
+    }
+    ball.vx = BALL_SPEED * dir;
+    ball.vy = BALL_SPEED * 0.35;
+}
+
+func tryPaddleHit(ball, px, py, pw, ph, fromLeft) {
+    let hitX = false;
+    if (fromLeft) {
+        hitX = ball.vx < 0 && ball.x - ball.radius <= px + pw;
+    } else {
+        hitX = ball.vx > 0 && ball.x + ball.radius >= px;
+    }
+    if (!hitX) {
+        return false;
+    }
+    if (ball.y + ball.radius < py) {
+        return false;
+    }
+    if (ball.y - ball.radius > py + ph) {
+        return false;
+    }
+
+    let center = py + ph / 2;
+    let offset = (ball.y - center) / (ph / 2);
+    ball.vx = -ball.vx;
+    ball.vy = offset * BALL_SPEED * 0.85;
+
+    if (fromLeft) {
+        ball.x = px + pw + ball.radius;
+    } else {
+        ball.x = px - ball.radius;
+    }
+    return true;
+}
+
+func drawCenterLine() {
+    let segment = 18;
+    let gap = 14;
+    let x = SCREEN_W / 2 - 2;
+    let y = 0;
+    while (y < SCREEN_H) {
+        game.rect(x, y, 4, segment, colors.white);
+        y = y + segment + gap;
+    }
+}
+
+func main() {
+    game.open(SCREEN_W, SCREEN_H, "Koda Pong");
+    game.fps(60);
+
+    let left = Paddle {
+        x: 28,
+        y: SCREEN_H / 2 - PADDLE_H / 2,
+        w: PADDLE_W,
+        h: PADDLE_H,
+        speed: 420,
+        score: 0
+    };
+
+    let right = Paddle {
+        x: SCREEN_W - 28 - PADDLE_W,
+        y: SCREEN_H / 2 - PADDLE_H / 2,
+        w: PADDLE_W,
+        h: PADDLE_H,
+        speed: 420,
+        score: 0
+    };
+
+    let ball = Ball {
+        x: SCREEN_W / 2,
+        y: SCREEN_H / 2,
+        vx: 0,
+        vy: 0,
+        radius: BALL_R
+    };
+
+    let phase = ST_SERVE;
+    let serveRight = true;
+    let winMessage = "";
+
+    while (game.running()) {
+        let dt = game.delta();
+        if (isnull(dt)) {
+            dt = 0.016;
+        } else if (dt <= 0) {
+            dt = 0.016;
+        }
+
+        if (phase == ST_WON) {
+            if (game.keyPressed(KEY_SPACE)) {
+                left.score = 0;
+                right.score = 0;
+                winMessage = "";
+                phase = ST_SERVE;
+                serveRight = true;
+                ball.x = SCREEN_W / 2;
+                ball.y = SCREEN_H / 2;
+                ball.vx = 0;
+                ball.vy = 0;
+            }
+        } else if (phase == ST_SERVE) {
+            ball.x = SCREEN_W / 2;
+            ball.y = SCREEN_H / 2;
+            ball.vx = 0;
+            ball.vy = 0;
+            if (game.keyPressed(KEY_SPACE)) {
+                phase = ST_PLAY;
+                serveBall(ball, serveRight);
+            }
+        } else {
+            ball.x = ball.x + ball.vx * dt;
+            ball.y = ball.y + ball.vy * dt;
+
+            if (ball.y - ball.radius <= 0) {
+                ball.y = ball.radius;
+                ball.vy = -ball.vy;
+            }
+            if (ball.y + ball.radius >= SCREEN_H) {
+                ball.y = SCREEN_H - ball.radius;
+                ball.vy = -ball.vy;
+            }
+
+            tryPaddleHit(ball, left.x, left.y, left.w, left.h, true);
+            tryPaddleHit(ball, right.x, right.y, right.w, right.h, false);
+
+            if (ball.x < -ball.radius) {
+                right.score = right.score + 1;
+                serveRight = false;
+                phase = ST_SERVE;
+                if (right.score >= WIN_SCORE) {
+                    winMessage = "Right player wins!";
+                    phase = ST_WON;
+                }
+            }
+            if (ball.x > SCREEN_W + ball.radius) {
+                left.score = left.score + 1;
+                serveRight = true;
+                phase = ST_SERVE;
+                if (left.score >= WIN_SCORE) {
+                    winMessage = "Left player wins!";
+                    phase = ST_WON;
+                }
+            }
+        }
+
+        let moveLeft = 0;
+        let moveRight = 0;
+        if (game.keyDown(KEY_W)) {
+            moveLeft = moveLeft - 1;
+        }
+        if (game.keyDown(KEY_S)) {
+            moveLeft = moveLeft + 1;
+        }
+        if (game.keyDown(KEY_UP)) {
+            moveRight = moveRight - 1;
+        }
+        if (game.keyDown(KEY_DOWN)) {
+            moveRight = moveRight + 1;
+        }
+        left.y = nextPaddleY(left.y, left.h, left.speed, moveLeft, dt);
+        right.y = nextPaddleY(right.y, right.h, right.speed, moveRight, dt);
+
+        game.begin();
+        game.clear(colors.dark);
+        drawCenterLine();
+        game.rect(left.x, left.y, left.w, left.h, colors.white);
+        game.rect(right.x, right.y, right.w, right.h, colors.white);
+        game.circle(ball.x, ball.y, ball.radius, colors.green);
+
+        let scoreText = string(left.score) + "  -  " + string(right.score);
+        game.text(scoreText, SCREEN_W / 2 - 36, 24, 40, colors.white);
+
+        if (phase == ST_SERVE) {
+            game.text("SPACE to serve", SCREEN_W / 2 - 110, SCREEN_H / 2 + 40, 22, colors.white);
+        }
+        if (phase == ST_WON) {
+            game.text(winMessage, SCREEN_W / 2 - 140, SCREEN_H / 2 - 16, 32, colors.red);
+            game.text("SPACE — play again", SCREEN_W / 2 - 130, SCREEN_H / 2 + 28, 22, colors.white);
+        }
+        if (phase == ST_PLAY) {
+            game.text("W/S vs Up/Down — first to 11", 12, SCREEN_H - 32, 18, colors.white);
+        }
+
+        game.end();
+        game.setGcBudget(0.5);
+    }
+
+    game.close();
+}

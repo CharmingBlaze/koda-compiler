@@ -1,17 +1,18 @@
 {
   "comment": "Merge native section into your project koda.json for raylib",
   "native": {
-    "sources": "wrapper.c",
-    "linkflags": "Vendored SDK: automatic via third_party/raylib_static/stage. Otherwise: -I<raylib-include> -L<raylib-lib> -lraylib"
+    "linkflags": "-Ithird_party/raylib_static/stage/include",
+    "sources": "wrapper.c"
   },
   "wrap": {
-    "library": "raylib",
+    "generated": "2026-06-15T08:55:05Z",
+    "generator": "kodawrap",
+    "headers": [
+      "third_party/raylib_static/stage/include/raylib.h"
+    ],
     "import": "@raylib",
     "include": "#include \"@raylib\"",
-    "headers": [
-      "raylib.h"
-    ],
-    "generator": "kodawrap",
+    "library": "raylib",
     "version": "0.4.0"
   }
 }

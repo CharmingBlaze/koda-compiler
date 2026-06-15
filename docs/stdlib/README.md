@@ -20,7 +20,15 @@ Built-in `@math`, `@json`, and `@io` objects are optimized in the compiler; file
 | `@util` | [util.koda](util.md) | clamp01, pick_weighted, pingpong |
 | `@noise` | [noise.koda](noise.md) | 1D value noise |
 | `@str` | [str.koda](str.md) | String helper aliases |
-| `@game` | [game.koda](game.md) | Beginner game loop API over Raylib |
+| `@game` | [game.koda](game.md) | Beginner game loop API over Raylib (`game.*` and `draw.*`) |
+| `@camera` | [camera.koda](camera.md) | Orbit camera for 3D games |
+| `@input` | [input.koda](input.md) | Keyboard/mouse helpers (requires Raylib shim) |
+| `@color` | [color.koda](color.md) | RGBA/HSV color utilities (pure Koda) |
+| *(built-in)* | [game-types.md](game-types.md) | `vec2`, `vec3`, `color`, `rect`, `box` |
+| `@easing` | [easing.koda](easing.md) | Animation easing curves |
+| `@pool` | [pool.koda](pool.md) | Object pool for hot loops |
+
+**Graphics note:** For windowed games use `@game` (not `@input` alone). `@input` is for lower-level input when you call shim functions directly.
 
 ---
 
@@ -44,13 +52,25 @@ let cd = cooldown(0.5);
 
 ---
 
-## Dot notation
+## Dot notation (JavaScript-style)
+
+Koda supports field and method access like JavaScript:
 
 ```koda
+player.x = player.x + speed * dt;
+game.circle(ball.x, ball.y, r, colors.white);
+
 let m = import "@math";
-m.sin(m.pi / 2);     // works
-math.sin(1.0);       // if binding is named `math`
+m.sin(m.pi / 2);
+
+let cam = {
+    yaw: 0.0,
+    update: func() { this.yaw = this.yaw + 0.01; }
+};
+cam.update();
 ```
+
+Optional chaining: `obj?.field`. Struct type names are case-insensitive with variable names — `struct Player` conflicts with `let player`.
 
 The compiler routes `math.*`, `json.*`, and `io.*` on identifier bindings to native argv functions.
 

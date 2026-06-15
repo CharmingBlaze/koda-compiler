@@ -27,6 +27,13 @@ func BuildWithOptions(bundle *parser.ProgramBundle, output, sourceDisplay string
 	if err := kodahome.EnsureEnvironment(log); err != nil {
 		return err
 	}
+	projectRoot, err := filepath.Abs(".")
+	if err != nil {
+		return fmt.Errorf("project root: %w", err)
+	}
+	if err := ApplyNativeSourcesForBundle(bundle, projectRoot); err != nil {
+		return err
+	}
 	ctx, err := sema.PrepareNativeBundleWithOptions(bundle, &sema.PrepareOptions{
 		EmitDebug: opts.Debug,
 	})
@@ -64,9 +71,9 @@ func BuildWithOptions(bundle *parser.ProgramBundle, output, sourceDisplay string
 		return fmt.Errorf("output path: %w", err)
 	}
 
-	rootDir, err := filepath.Abs(".")
+	sdkRoot, err := kodahome.InstallDir()
 	if err != nil {
-		return fmt.Errorf("project root: %w", err)
+		return fmt.Errorf("sdk root: %w", err)
 	}
 
 	tc, err := kodahome.FindToolchain()
@@ -93,6 +100,10 @@ func BuildWithOptions(bundle *parser.ProgramBundle, output, sourceDisplay string
 	}
 	log(fmt.Sprintf("  driver     %s\n\n", driverLabel))
 
+	if fi, err := os.Stat(tc.RuntimeLib); err != nil || fi.IsDir() {
+		return fmt.Errorf("runtime library not found at %s\nPlace Koda Studio next to stdlib/ and runtime/, or set KODA_HOME to the SDK root (run koda doctor)", tc.RuntimeLib)
+	}
+
 	if tc.LinkMode == kodahome.LinkLLDGNU || tc.LinkMode == kodahome.LinkLLDDarwin {
 		if err := runLLC(tc.LLC, irPath, objPath, opts.llcOptFlag(), opts.Debug); err != nil {
 			return fmt.Errorf("llc failed: %w", err)
@@ -109,7 +120,7 @@ func BuildWithOptions(bundle *parser.ProgramBundle, output, sourceDisplay string
 			return fmt.Errorf("lld darwin link: %w", err)
 		}
 	default:
-		if err := runCompileAndLink(tc, irPath, outAbs, rootDir, opts, log); err != nil {
+		if err := runCompileAndLink(tc, irPath, outAbs, sdkRoot, projectRoot, opts, log); err != nil {
 			return fmt.Errorf("clang failed: %w", err)
 		}
 	}

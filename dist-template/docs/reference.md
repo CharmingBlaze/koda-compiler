@@ -59,7 +59,10 @@ Unary **`delete`** applies only to **`obj[stringKey]`** on objects (not array sl
 | Construct | Status | Notes |
 |-----------|--------|--------|
 | `if (e) stmt [else stmt]` | Implemented | `else if` is expressed as `else { if (…) … }` |
-| `switch` / `case` / `default` | Implemented | **C-style:** execution falls through from one `case` into the next unless you use `break` (or `return`). `default` runs after the last `case` body when control falls through or when no `case` matched. |
+| `switch` / `case` / `default` | Implemented | **C-style:** execution falls through from one `case` into the next unless you use `break` (or `return`). |
+| `match` | Implemented | Brace-style arms (`match x { Case.A { … } }`); no fall-through; each arm is a block |
+| `const` | Implemented | Immutable bindings |
+| String interpolation `{expr}` | Implemented | In double-quoted strings; lowers via `koda_format` |
 | `while` | Implemented | |
 | `do … while` | Implemented | |
 | `for (…; …; …)` | Implemented | Classic C-style `for` |

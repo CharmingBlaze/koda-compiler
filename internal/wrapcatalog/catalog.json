@@ -1,0 +1,66 @@
+{
+  "libraries": [
+    {
+      "name": "raylib",
+      "description": "Games, graphics, audio (full API)",
+      "default_version": "5.0",
+      "versions": [
+        {
+          "version": "5.0",
+          "library_version": "5.0",
+          "graphics": true,
+          "prebuilt": "{sdk}/wrappers/raylib",
+          "headers": ["{sdk}/third_party/raylib_static/stage/include/raylib.h"],
+          "include_paths": ["{sdk}/third_party/raylib_static/stage/include"],
+          "link_flags": []
+        }
+      ]
+    },
+    {
+      "name": "sqlite3",
+      "description": "Embedded SQL database",
+      "default_version": "3",
+      "versions": [
+        {
+          "version": "3",
+          "library_version": "3.45",
+          "headers": [
+            "/usr/include/sqlite3.h",
+            "/usr/local/include/sqlite3.h",
+            "C:/msys64/ucrt64/include/sqlite3.h",
+            "C:/msys64/mingw64/include/sqlite3.h"
+          ],
+          "include_paths": [
+            "/usr/include",
+            "/usr/local/include",
+            "C:/msys64/ucrt64/include",
+            "C:/msys64/mingw64/include"
+          ],
+          "link_flags": ["-lsqlite3"]
+        }
+      ]
+    },
+    {
+      "name": "sdl2",
+      "description": "Cross-platform window/input/audio",
+      "default_version": "2",
+      "versions": [
+        {
+          "version": "2",
+          "library_version": "2.30",
+          "headers": [
+            "/usr/include/SDL2/SDL.h",
+            "/usr/local/include/SDL2/SDL.h",
+            "C:/msys64/ucrt64/include/SDL2/SDL.h"
+          ],
+          "include_paths": [
+            "/usr/include/SDL2",
+            "/usr/local/include/SDL2",
+            "C:/msys64/ucrt64/include/SDL2"
+          ],
+          "link_flags": ["-lSDL2"]
+        }
+      ]
+    }
+  ]
+}

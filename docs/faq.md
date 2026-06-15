@@ -56,7 +56,13 @@ Use **structs** + functions, or **objects** with methods. No `class` keyword.
 
 ### String escapes?
 
-`\"`, `\\`, `\n`, `\t`, `\r`, `\'` in double-quoted strings.
+`\"`, `\\`, `\n`, `\t`, `\r`, `\'` in double-quoted strings. Embed values with `{expression}`:
+
+```koda
+drawtext("Score: {score}", 20, 20, 24, colors.white);
+```
+
+Backtick templates `` `Hello ${name}` `` also work.
 
 ---
 
@@ -85,6 +91,14 @@ Next to the `koda` executable (SDK zip layout). `koda doctor` warns if missing.
 ### Graphics / Raylib link errors?
 
 Run `koda doctor` and fix any FAIL lines. Graphics templates set `"graphics": true` in `koda.json` so link flags are applied automatically. See [Game dev guide](guides/game-dev.md).
+
+### `@game` says undefined `drawline`, `getmousex`, …?
+
+Your project's Raylib shim is out of date. Run **`koda setup raylib`** in the project folder, then `koda run` again. Always `#include` the shim before `@game`.
+
+### Does Koda support JavaScript-style dot notation?
+
+Yes — `player.x`, `game.delta()`, `cam.update()`, `import "@math"` then `math.sin()`. Object methods use `this`. Struct type names must not collide with variable names (`struct Mario` + `let player`, not `struct Player` + `let player`). See [Game dev guide](guides/game-dev.md).
 
 ---
 

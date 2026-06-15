@@ -50,6 +50,18 @@ let cfg = { volume };
 
 `delete` and advanced object patterns are in the [language reference](../../language.md) — not needed on day one.
 
+**Methods** — functions inside objects use `this`:
+
+```koda
+let cam = {
+    yaw: 0.0,
+    update: func() { this.yaw = this.yaw + 0.01; }
+};
+cam.update();
+```
+
+For game entities with fixed fields, prefer [structs in chapter 7](07-structs-and-enums.md).
+
 ---
 
 ## String methods

@@ -39,14 +39,71 @@ let game = {
     circle: func(x, y, r, color) {
         drawcircle(x, y, r, color);
     },
+    line: func(x1, y1, x2, y2, color) {
+        drawline(x1, y1, x2, y2, color);
+    },
+    circleLines: func(x, y, r, color) {
+        drawcirclelines(x, y, r, color);
+    },
+    rectLines: func(x, y, w, h, color) {
+        drawrectanglelines(x, y, w, h, color);
+    },
+    loadImage: func(path) {
+        return loadtexture(path);
+    },
+    drawImage: func(tex, x, y, color) {
+        drawtexture(tex, x, y, color);
+    },
+    unloadImage: func(tex) {
+        unloadtexture(tex);
+    },
     keyDown: func(key) {
         return iskeydown(key);
     },
     keyPressed: func(key) {
         return iskeypressed(key);
     },
+    mouseX: func() {
+        return getmousex();
+    },
+    mouseY: func() {
+        return getmousey();
+    },
+    mouseDown: func(btn) {
+        return ismousebuttondown(btn);
+    },
+    mousePressed: func(btn) {
+        return ismousebuttonpressed(btn);
+    },
+    mouseWheel: func() {
+        return getmousewheelmove();
+    },
+    width: func() {
+        return getscreenwidth();
+    },
+    height: func() {
+        return getscreenheight();
+    },
+    setTitle: func(title) {
+        setwindowtitle(title);
+    },
+    fpsCounter: func() {
+        return getfps();
+    },
     setGcBudget: func(ms) {
         gcframestep(ms);
+    }
+};
+
+let draw = {
+    text: func(msg, x, y, size, color) {
+        drawtext(msg, x, y, size, color);
+    },
+    rect: func(x, y, w, h, color) {
+        drawrectangle(x, y, w, h, color);
+    },
+    line: func(x1, y1, x2, y2, color) {
+        drawline(x1, y1, x2, y2, color);
     }
 };
 
@@ -59,10 +116,22 @@ let Key = {
     Escape: 256
 };
 
+let Mouse = {
+    Left: 0,
+    Right: 1,
+    Middle: 2
+};
+
 let Color = {
-    dark: 4278190080,
-    white: 4294967295,
-    red: 4278190335,
-    green: 4278255360,
-    blue: 4294901760
+    dark: colors.dark,
+    white: colors.white,
+    red: colors.red,
+    green: colors.green,
+    blue: colors.blue,
+    yellow: colors.yellow,
+    gold: colors.gold,
+    sky: colors.sky,
+    grass: colors.grass,
+    brown: colors.brown,
+    gray: colors.gray
 };

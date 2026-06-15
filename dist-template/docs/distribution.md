@@ -84,7 +84,7 @@ $env:KODA_LINKFLAGS = '-I..\native -L..\native\build -lmylib'
 For Raylib on Windows with the current local source tree:
 
 ```powershell
-$env:KODA_NATIVE_SOURCES = '..\wrappers\raylib_min\raylib_bridge.c'
+$env:KODA_NATIVE_SOURCES = '..\wrappers\raylib_shim\wrapper.c'
 $env:KODA_LINKFLAGS = '-I..\temp_raylib\src -L..\temp_raylib\src -lraylib -lopengl32 -lgdi32 -lwinmm'
 .\koda.exe build .\raylib_brick_breaker.koda -o .\raylib_brick_breaker.exe
 ```

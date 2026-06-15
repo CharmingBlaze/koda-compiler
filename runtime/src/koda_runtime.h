@@ -19,6 +19,7 @@ extern int koda_global_slots_capacity;
 void koda_runtime_set_stack_base(void* base);
 void koda_runtime_init_ex(void* stack_base);
 void koda_runtime_init(void);
+void koda_runtime_set_argv(int argc, char** argv);
 
 // Runtime cleanup
 void koda_runtime_shutdown(void);
@@ -85,6 +86,18 @@ Value koda_object_remove(Value obj, Value key);
 Value koda_array_push_argv(int argc, Value* argv);
 Value koda_array_pop_argv(int argc, Value* argv);
 Value koda_asset_path(int argc, Value* argv);
+Value koda_args(int argc, Value* argv);
+Value koda_env(int argc, Value* argv);
+Value koda_rgb(int argc, Value* argv);
+Value koda_rgba(int argc, Value* argv);
+Value koda_vec2(int argc, Value* argv);
+Value koda_vec3(int argc, Value* argv);
+Value koda_rect(int argc, Value* argv);
+Value koda_box(int argc, Value* argv);
+Value koda_color(int argc, Value* argv);
+Value koda_value_add(Value a, Value b);
+Value koda_value_sub(Value a, Value b);
+Value koda_value_mul(Value a, Value b);
 
 /** Native lowering for `for-in` / `for-of` over arrays and tables (slot order). */
 Value koda_forof_length(Value v);

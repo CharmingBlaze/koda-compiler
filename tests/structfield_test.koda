@@ -1,0 +1,9 @@
+struct Point { x, y, z }
+
+func main() {
+    let p = Point { x: 7.0, y: 2.0, z: -5.0 };
+    assert(structfield(p, 0) == 7.0, "slot 0");
+    assert(structfield(p, 1) == 2.0, "slot 1");
+    assert(structfield(p, 2) == -5.0, "slot 2");
+    print("PASS structfield");
+}

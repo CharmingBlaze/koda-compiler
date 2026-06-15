@@ -314,3 +314,47 @@ func TestSemaParamCallableNotCheckedAsEnclosingFunc(t *testing.T) {
 		t.Fatalf("calling a func param must not use enclosing func arity: %v", err)
 	}
 }
+
+func TestSemaStructParamFieldAccess(t *testing.T) {
+	src := `struct Point {
+		x, y
+	}
+	func move(p) {
+		p.x = p.x + 1;
+		p.y = p.y + 2;
+	}
+	func main() {
+		let p = Point { x: 0, y: 0 };
+		move(p);
+	}`
+	program := parseForTest(t, src)
+	a := NewAnalyzer()
+	if err := a.Analyze(program); err != nil {
+		t.Fatalf("sema: %v", err)
+	}
+	_, _, _, _, indexStruct, _, _, _ := a.ExportForCodegen()
+	if len(indexStruct) < 2 {
+		t.Fatalf("expected struct field slots for param p.x/p.y, got %d", len(indexStruct))
+	}
+}
+
+func TestSemaStructParamMutateInHelper(t *testing.T) {
+	src := `struct Ball { x, vx }
+	func serve(b) {
+		b.x = 400;
+		b.vx = 360;
+	}
+	func main() {
+		let ball = Ball { x: 0, vx: 0 };
+		serve(ball);
+	}`
+	program := parseForTest(t, src)
+	a := NewAnalyzer()
+	if err := a.Analyze(program); err != nil {
+		t.Fatalf("sema: %v", err)
+	}
+	_, _, _, _, indexStruct, _, _, _ := a.ExportForCodegen()
+	if len(indexStruct) < 2 {
+		t.Fatalf("expected struct field slots inside serve(), got %d", len(indexStruct))
+	}
+}

@@ -1,0 +1,40 @@
+func main() {
+    let coins = [
+        1,
+        2,
+        3
+    ];
+
+    assert(coins.count == 3, "count property");
+    assert(coins.length() == 3, "length method");
+    assert(len(coins) == 3, "len builtin");
+
+    coins.add(4);
+    assert(coins.count == 4, "add");
+    assert(coins[3] == 4, "add value");
+
+    let removed = coins.remove_at(1);
+    assert(removed == 2, "remove_at return");
+    assert(coins.count == 3, "remove_at count");
+    assert(coins[0] == 1, "remove_at shift 0");
+    assert(coins[1] == 3, "remove_at shift 1");
+    assert(coins[2] == 4, "remove_at shift 2");
+
+    let seen = 0;
+    for coin in coins {
+        seen = seen + coin;
+    }
+    assert(seen == 8, "for coin in coins");
+
+    let sum = 0;
+    coins.each(func(coin) {
+        sum = sum + coin;
+    });
+    assert(sum == 8, "each callback");
+
+    coins.clear();
+    assert(coins.count == 0, "clear");
+    assert(coins.length() == 0, "clear length");
+
+    print("PASS array_methods");
+}

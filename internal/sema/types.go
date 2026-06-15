@@ -12,6 +12,7 @@ var IntegerTypeNames = map[string]bool{
 // BeginnerTypeNames are optional type annotations for learners and FFI prep.
 var BeginnerTypeNames = map[string]bool{
 	"int": true, "float": true, "bool": true, "string": true, "byte": true,
+	"array": true, "map": true, "func": true, "object": true,
 }
 
 func normalizeTypeName(name string) string {

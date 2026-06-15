@@ -45,7 +45,7 @@ func (g *Generator) tryEmitMethodCall(member *parser.IndexExpr, recvVal value.Va
 		v, err := g.emitStringMethod(name, recvVal, call.Arguments)
 		return v, true, err
 
-	case "join", "sort", "reverse", "push", "pop":
+	case "join", "sort", "reverse", "push", "pop", "add", "remove_at", "clear":
 		v, err := g.emitArrayOnlyMethod(name, recvVal, call.Arguments)
 		return v, true, err
 
@@ -55,11 +55,14 @@ func (g *Generator) tryEmitMethodCall(member *parser.IndexExpr, recvVal value.Va
 	case "indexof", "includes":
 		v, err := g.emitIndexOrIncludesAmbiguous(name, recvVal, call.Arguments)
 		return v, true, err
-	case "length":
+	case "length", "count":
 		if len(call.Arguments) != 0 {
-			return nil, true, fmt.Errorf("length expects 0 arguments")
+			return nil, true, fmt.Errorf("%s expects 0 arguments", name)
 		}
 		return g.block.NewCall(g.runtimeLen, g.emitAsKodaI64(recvVal)), true, nil
+
+	case "each", "foreach":
+		return g.emitArrayMethodEach(recvVal, call.Arguments)
 
 	case "map":
 		return g.emitArrayMethodMap(recvVal, call.Arguments)
@@ -337,15 +340,32 @@ func (g *Generator) emitArrayOnlyMethod(name string, recv value.Value, args []pa
 		return g.emitArgvRuntime(g.runtimeArraySort, []value.Value{loadRecv()}), nil
 	case "reverse":
 		return g.emitArgvRuntime(g.runtimeArrayReverse, []value.Value{loadRecv()}), nil
-	case "push":
+	case "push", "add":
 		if len(args) != 1 {
-			return nil, fmt.Errorf("push expects 1 argument")
+			return nil, fmt.Errorf("%s expects 1 argument", name)
 		}
 		a0, err := g.emitExpr(args[0])
 		if err != nil {
 			return nil, err
 		}
 		g.block.NewCall(g.runtimeArrayPush, loadRecv(), g.emitAsKodaI64(a0))
+		return loadRecv(), nil
+	case "remove_at":
+		if len(args) != 1 {
+			return nil, fmt.Errorf("remove_at expects 1 argument (index)")
+		}
+		a0, err := g.emitExpr(args[0])
+		if err != nil {
+			return nil, err
+		}
+		idxF := g.block.NewCall(g.runtimeUnboxNumber, g.emitAsKodaI64(a0))
+		idx := g.block.NewFPToSI(idxF, types.I64)
+		return g.block.NewCall(g.runtimeArrayRemoveAt, loadRecv(), idx), nil
+	case "clear":
+		if len(args) != 0 {
+			return nil, fmt.Errorf("clear expects 0 arguments")
+		}
+		g.block.NewCall(g.runtimeArrayClear, loadRecv())
 		return loadRecv(), nil
 	case "pop":
 		if len(args) != 0 {
@@ -579,6 +599,61 @@ func (g *Generator) emitArrayMethodFilter(recv value.Value, args []parser.Expr) 
 
 	g.block = done
 	return g.block.NewLoad(types.I64, outSlot), true, nil
+}
+
+func (g *Generator) emitArrayMethodEach(recv value.Value, args []parser.Expr) (value.Value, bool, error) {
+	if len(args) != 1 {
+		return nil, true, fmt.Errorf("each expects 1 callback")
+	}
+	recvSlot := g.entryAlloca(types.I64)
+	g.shadowStoreTemp(recvSlot)
+	g.block.NewStore(g.emitAsKodaI64(recv), recvSlot)
+
+	fnVal, err := g.emitExpr(args[0])
+	if err != nil {
+		return nil, true, err
+	}
+	nThis := constant.NewInt(types.I64, 0)
+
+	recvLive := g.block.NewLoad(types.I64, recvSlot)
+	lenF := g.emitArrayLenAsDouble(recvLive)
+
+	g.tempN++
+	suf := fmt.Sprintf(".each%d", g.tempN)
+	hdr := g.currentFn.NewBlock("each.hdr" + suf)
+	body := g.currentFn.NewBlock("each.body" + suf)
+	step := g.currentFn.NewBlock("each.step" + suf)
+	done := g.currentFn.NewBlock("each.done" + suf)
+
+	idx := g.entryAlloca(types.Double)
+	g.block.NewStore(constant.NewFloat(types.Double, 0), idx)
+	g.block.NewBr(hdr)
+
+	g.block = hdr
+	idxNow := g.block.NewLoad(types.Double, idx)
+	ok := g.block.NewFCmp(enum.FPredOLT, idxNow, lenF)
+	g.block.NewCondBr(ok, body, done)
+
+	g.block = body
+	idxBox := g.block.NewCall(g.runtimeBoxNumber, idxNow)
+	el := g.block.NewCall(g.runtimeArrayGet, recvLive, g.emitAsKodaI64(idxBox))
+	elSlot := g.entryAlloca(types.I64)
+	g.shadowStoreTemp(elSlot)
+	g.block.NewStore(g.emitAsKodaI64(el), elSlot)
+	elLive := g.block.NewLoad(types.I64, elSlot)
+	if _, err := g.emitIndirectI64Callee(fnVal, nThis, []value.Value{elLive}); err != nil {
+		return nil, true, err
+	}
+	g.block.NewBr(step)
+
+	g.block = step
+	one := constant.NewFloat(types.Double, 1)
+	next := g.block.NewFAdd(g.block.NewLoad(types.Double, idx), one)
+	g.block.NewStore(next, idx)
+	g.block.NewBr(hdr)
+
+	g.block = done
+	return g.block.NewLoad(types.I64, recvSlot), true, nil
 }
 
 func (g *Generator) emitArrayMethodFind(recv value.Value, args []parser.Expr) (value.Value, bool, error) {

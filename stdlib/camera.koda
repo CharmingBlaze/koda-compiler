@@ -1,0 +1,95 @@
+// @camera — orbit camera for 3D games over the Raylib shim.
+// Include the shim first, then this module:
+//   #include "wrappers/raylib_shim/raylib.koda"
+//   #include "@camera"
+//
+// Follows entities with x, y, z as the first three struct fields (slot 0, 1, 2).
+
+struct OrbitCamera {
+    target = null;
+    yaw = -0.55;
+    pitch = 0.42;
+    distance = 13.0;
+    sensitivity = 0.005;
+    orbit_button = 1;
+    look_offset = 0.5;
+    min_distance = 5.0;
+    max_distance = 24.0;
+    min_pitch = 0.12;
+    max_pitch = 1.35;
+    fovy = 50.0;
+    prev_mx = -1.0;
+    prev_my = -1.0;
+    slot_x = 0;
+    slot_y = 1;
+    slot_z = 2;
+
+    func new(target, distance, pitch, yaw) {
+        if (target != null) {
+            this.target = target;
+        }
+        if (distance != null) {
+            this.distance = distance;
+        }
+        if (pitch != null) {
+            this.pitch = pitch;
+        }
+        if (yaw != null) {
+            this.yaw = yaw;
+        }
+    }
+
+    func reset() {
+        this.yaw = -0.55;
+        this.pitch = 0.42;
+        this.distance = 13.0;
+        this.prev_mx = -1.0;
+        this.prev_my = -1.0;
+    }
+
+    func update() {
+        let mx = getmousex();
+        let my = getmousey();
+        if (this.prev_mx >= 0.0 && ismousebuttondown(this.orbit_button)) {
+            let dx = mx - this.prev_mx;
+            let dy = my - this.prev_my;
+            this.yaw += dx * this.sensitivity;
+            this.pitch -= dy * this.sensitivity;
+            this.pitch = clamp(this.pitch, this.min_pitch, this.max_pitch);
+        }
+        this.prev_mx = mx;
+        this.prev_my = my;
+        let wheel = getmousewheelmove();
+        if (wheel != 0) {
+            this.distance -= wheel * 1.5;
+            this.distance = clamp(this.distance, this.min_distance, this.max_distance);
+        }
+    }
+
+    func begin() {
+        let t = this.target;
+        let px = structfield(t, this.slot_x);
+        let py = structfield(t, this.slot_y);
+        let pz = structfield(t, this.slot_z);
+        let ty = py + this.look_offset;
+        let cp = cos(this.pitch);
+        let sp = sin(this.pitch);
+        let sy = sin(this.yaw);
+        let ccy = cos(this.yaw);
+        let ex = px + this.distance * cp * sy;
+        let ey = ty + this.distance * sp;
+        let ez = pz + this.distance * cp * ccy;
+        beginmode3d(ex, ey, ez, px, ty, pz, 0.0, 1.0, 0.0, this.fovy);
+    }
+
+    func end() {
+        endmode3d();
+    }
+};
+
+func orbit(cfg) {
+    if (cfg == null) {
+        return OrbitCamera(null, null, null, null);
+    }
+    return OrbitCamera(cfg.target, cfg.distance, cfg.pitch, cfg.yaw);
+}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"os"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -13,6 +14,9 @@ var assets embed.FS
 
 func main() {
 	app := NewApp()
+	if len(os.Args) > 1 {
+		app.SetInitialWorkspace(os.Args[1])
+	}
 
 	err := wails.Run(&options.App{
 		Title:            "Koda Studio",
@@ -20,7 +24,10 @@ func main() {
 		Height:           800,
 		MinWidth:         900,
 		MinHeight:        560,
-		BackgroundColour: &options.RGBA{R: 30, G: 30, B: 46, A: 1},
+		BackgroundColour: &options.RGBA{R: 19, G: 25, B: 32, A: 1},
+		Debug: options.Debug{
+			OpenInspectorOnStartup: os.Getenv("KODA_STUDIO_DEVTOOLS") == "1",
+		},
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

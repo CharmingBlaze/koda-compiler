@@ -1,0 +1,33 @@
+enum Phase {
+    Playing,
+    Won,
+    GameOver
+}
+
+func main() {
+    let state = Phase.Playing;
+    let seen = "";
+
+    match state {
+        Phase.Playing {
+            seen = "play";
+        }
+        Phase.Won {
+            seen = "won";
+        }
+        default {
+            seen = "other";
+        }
+    }
+
+    assert(seen == "play", "match playing");
+
+    match Phase.Won {
+        Phase.Won {
+            seen = "star";
+        }
+    }
+
+    assert(seen == "star", "match won");
+    print("PASS match");
+}

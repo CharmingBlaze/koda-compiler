@@ -10,12 +10,12 @@
     lineNumbers,
   } from '@codemirror/view'
   import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands'
-  import { bracketMatching, foldGutter, indentOnInput } from '@codemirror/language'
-  import { closeBrackets, autocompletion, closeBracketsKeymap } from '@codemirror/autocomplete'
+  import { bracketMatching, foldGutter, indentOnInput, indentUnit } from '@codemirror/language'
+  import { closeBrackets, autocompletion, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete'
   import { searchKeymap, highlightSelectionMatches } from '@codemirror/search'
   import { linter } from '@codemirror/lint'
   import { DiagnoseFile } from '../../wailsjs/go/main/App.js'
-  import { kodaLanguage } from './kodaLang.js'
+  import { kodaCompletionSource, kodaHover, kodaLanguage } from './kodaLang.js'
   import { kodaSyntax } from './cmKodaTheme.js'
   import { breadcrumbsPanel } from './cmBreadcrumbsPanel.js'
 
@@ -25,9 +25,11 @@
     seed = '',
     jumpTarget = null,
     onTextChange = () => {},
+    onCursorChange = () => {},
     onLspNotify = () => {},
     onSave = () => {},
     onJumpConsumed = () => {},
+    tabSize = 4,
   } = $props()
 
   let host = $state(null)
@@ -45,9 +47,28 @@
   }
 
   const voidCmTheme = EditorView.theme({
+    '&': {
+      backgroundColor: 'var(--color-editor-bg)',
+      color: 'var(--color-text)',
+    },
+    '.cm-content': {
+      caretColor: 'var(--color-accent)',
+      padding: '12px 8px',
+      fontSize: 'var(--editor-font-size)',
+      lineHeight: 'var(--editor-line-height)',
+    },
+    '.cm-activeLine': {
+      backgroundColor: 'var(--color-editor-active-line) !important',
+    },
+    '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': {
+      backgroundColor: 'var(--color-editor-selection) !important',
+    },
+    '&.cm-focused .cm-cursor': {
+      borderLeftColor: 'var(--color-accent) !important',
+    },
     '.cm-cursor, .cm-dropCursor': {
-      borderLeft: '2px solid var(--color-accent) !important',
-      animation: 'kodaPulse 1.1s ease-in-out infinite',
+      borderLeft: '2.5px solid var(--color-accent) !important',
+      marginLeft: '-1px',
     },
     '.cm-lintRange.cm-lintRange-error': {
       background: 'transparent',
@@ -82,7 +103,10 @@
   })
 
   function makeExtensions(pathForLint, relForCrumb) {
+    const safeTabSize = [2, 4, 8].includes(Number(tabSize)) ? Number(tabSize) : 4
     return [
+      EditorState.tabSize.of(safeTabSize),
+      indentUnit.of(' '.repeat(safeTabSize)),
       breadcrumbsPanel(relForCrumb),
       lineNumbers(),
       highlightActiveLineGutter(),
@@ -92,7 +116,15 @@
       indentOnInput(),
       bracketMatching(),
       closeBrackets(),
-      autocompletion(),
+      autocompletion({
+        override: [kodaCompletionSource],
+        activateOnTyping: true,
+        maxRenderedOptions: 25,
+        defaultKeymap: true,
+        icons: true,
+        closeOnBlur: true,
+      }),
+      kodaHover,
       highlightActiveLine(),
       highlightSelectionMatches(),
       history(),
@@ -115,6 +147,7 @@
         ...defaultKeymap,
         ...searchKeymap,
         ...historyKeymap,
+        ...completionKeymap,
         indentWithTab,
       ]),
       linter(
@@ -165,6 +198,11 @@
           onTextChange(u.state.doc.toString())
           onLspNotify(pathForLint, u.state.doc.toString())
         }
+        if (u.selectionSet || u.docChanged) {
+          const head = u.state.selection.main.head
+          const line = u.state.doc.lineAt(head)
+          onCursorChange({ line: line.number, col: head - line.from + 1 })
+        }
       }),
     ]
   }
@@ -180,6 +218,7 @@
       extensions: makeExtensions(absPath, relPath),
     })
     view = new EditorView({ state, parent: host })
+    onCursorChange({ line: 1, col: 1 })
   }
 
   $effect(() => {
@@ -209,6 +248,6 @@
 </script>
 
 <div
-  class="h-full min-h-[200px] w-full overflow-hidden rounded-md border border-[var(--color-surface0)] bg-[var(--color-crust)]"
+  class="h-full min-h-[200px] w-full overflow-hidden rounded-lg border border-[var(--color-surface0)] bg-[var(--color-editor-bg)] shadow-inner"
   bind:this={host}
 ></div>

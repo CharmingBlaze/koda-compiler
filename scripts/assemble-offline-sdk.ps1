@@ -1,6 +1,6 @@
 # Assemble a self-contained Koda SDK folder (and optional .zip) matching GitHub Release SDK layout
 # for Windows amd64: koda.exe, kodawrap.exe, stdlib/, docs/, root *.md, wrappers/, examples/,
-# third_party/raylib_static/stage (raylib 5.0 headers + libraylib.a + raylib.dll).
+# third_party/raylib_static/stage (raylib 6.0 headers + libraylib.a + raylib.dll).
 #
 # Prerequisites:
 #   • Release builds of koda and kodawrap (embedded Clang + llc + lld + runtime). Build with:
@@ -23,7 +23,9 @@ param(
     [string]$OutputRoot = "dist",
     [switch]$SkipRaylib,
     [string]$RaylibZipPath = "",
-    [switch]$Zip
+    [switch]$Zip,
+    [switch]$IncludeStudio = $true,
+    [string]$StudioExe = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -68,6 +70,31 @@ New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 Copy-Item -Force $KodaExe (Join-Path $outDir "koda.exe")
 Copy-Item -Force $KodawrapExe (Join-Path $outDir "kodawrap.exe")
 
+function Resolve-StudioExe {
+    if (-not [string]::IsNullOrWhiteSpace($StudioExe) -and (Test-Path $StudioExe)) {
+        return (Resolve-Path $StudioExe).Path
+    }
+    foreach ($rel in @(
+        "koda-ide\build\bin\Koda Studio.exe",
+        "koda-ide\build\bin\koda-ide.exe"
+    )) {
+        $full = Join-Path $RepoRoot $rel
+        if (Test-Path $full) { return (Resolve-Path $full).Path }
+    }
+    return $null
+}
+
+if ($IncludeStudio) {
+    $studioSrc = Resolve-StudioExe
+    if ($studioSrc) {
+        Copy-Item -Force $studioSrc (Join-Path $outDir "Koda Studio.exe")
+        & (Join-Path $PSScriptRoot "write-portable-launchers.ps1") -SdkDir $outDir
+        Write-Host "Bundled Koda Studio.exe + launchers"
+    } else {
+        Write-Warning "Koda Studio not found — build with: powershell -File scripts\make-portable-sdk.ps1 -SkipRelease"
+    }
+}
+
 foreach ($d in @("stdlib", "docs", "wrappers", "examples")) {
     $src = Join-Path $RepoRoot $d
     if (Test-Path $src) {
@@ -96,7 +123,7 @@ if (-not $SkipRaylib) {
         $zipLocal = $true
     }
     if (-not $zipLocal) {
-        $raylibVer = "5.0"
+        $raylibVer = "6.0"
         $url = "https://github.com/raysan5/raylib/releases/download/$raylibVer/raylib-${raylibVer}_win64_mingw-w64.zip"
         $downloadTmp = Join-Path ([System.IO.Path]::GetTempPath()) ("koda-raylib-" + [Guid]::NewGuid().ToString("n"))
         New-Item -ItemType Directory -Force -Path $downloadTmp | Out-Null
@@ -155,14 +182,23 @@ Koda SDK $Version (windows-amd64)
 ==============================
 
 Offline layout: compiler, kodawrap (C header -> .koda + wrapper.c), stdlib, docs, examples,
-wrappers (raylib + glue), and (unless -SkipRaylib) third_party/raylib_static/stage with raylib 5.0.
+wrappers (raylib + glue), and (unless -SkipRaylib) third_party/raylib_static/stage with raylib 6.0.
 
 End users: koda does not download LLVM, Raylib, or anything else at compile time. Embedded Clang/llc/runtime unpack to a local temp directory on first use only.
 
 You do NOT need Go, Python, LLVM, Visual Studio, or CMake to use this SDK.
 
-Quick start
------------
+Easiest start (no terminal)
+---------------------------
+  • Windows — double-click **Start Koda Studio.bat**
+  • Linux — run **./start-koda-studio.sh** (chmod +x first)
+  • macOS — double-click **Start Koda Studio.command**
+
+  In Studio: pick a template, edit src/main.koda, press F5 to run.
+  Press F1 for all documentation and help.
+
+Quick start (terminal)
+----------------------
   Read START_HERE.md in this folder, then:
 
     .\koda.exe doctor

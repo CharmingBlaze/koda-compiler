@@ -1,3 +1,10 @@
 build/bin
-node_modules
+/node_modules/
+frontend/node_modules/*
+!frontend/node_modules/go.mod
 frontend/dist
+.gocache/
+.gomodcache/
+.gopath/
+.runlogs/
+frontend/.npm-cache/

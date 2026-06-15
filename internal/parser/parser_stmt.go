@@ -338,6 +338,9 @@ func (p *Parser) parseStatement() (Stmt, error) {
 	if p.match(lexer.TokenSwitch) {
 		return p.parseSwitchStatement()
 	}
+	if p.match(lexer.TokenMatch) {
+		return p.parseMatchStatement()
+	}
 	if p.check(lexer.TokenLBrace) {
 		return p.parseBlockStatement()
 	}
@@ -511,9 +514,94 @@ func (p *Parser) parseSwitchStatement() (Stmt, error) {
 	return &SwitchStmt{Token: token, Subject: subject, Cases: cases, Default: def}, nil
 }
 
+func (p *Parser) parseMatchStatement() (Stmt, error) {
+	token := p.previous()
+	subject, err := p.parseMatchExpr()
+	if err != nil {
+		return nil, err
+	}
+	if _, err := p.consume(lexer.TokenLBrace, "expected '{' after match subject"); err != nil {
+		return nil, err
+	}
+
+	var cases []SwitchCase
+	var def []Decl
+
+	for !p.check(lexer.TokenRBrace) && !p.isAtEnd() {
+		if p.match(lexer.TokenDefault) {
+			if _, err := p.consume(lexer.TokenLBrace, "expected '{' after default"); err != nil {
+				return nil, err
+			}
+			body, err := p.parseMatchCaseBody()
+			if err != nil {
+				return nil, err
+			}
+			def = append(def, body...)
+			continue
+		}
+		val, err := p.parseMatchExpr()
+		if err != nil {
+			return nil, err
+		}
+		if _, err := p.consume(lexer.TokenLBrace, "expected '{' after match case"); err != nil {
+			return nil, err
+		}
+		body, err := p.parseMatchCaseBody()
+		if err != nil {
+			return nil, err
+		}
+		cases = append(cases, SwitchCase{Value: val, Body: body})
+	}
+
+	if _, err := p.consume(lexer.TokenRBrace, "expected '}' after match"); err != nil {
+		return nil, err
+	}
+	return &SwitchStmt{Token: token, Subject: subject, Cases: cases, Default: def}, nil
+}
+
+func (p *Parser) parseMatchCaseBody() ([]Decl, error) {
+	var body []Decl
+	for !p.check(lexer.TokenRBrace) && !p.isAtEnd() {
+		decls, err := p.parseDeclaration()
+		if err != nil {
+			return nil, err
+		}
+		for _, decl := range decls {
+			if _, ok := decl.(Stmt); !ok {
+				return nil, p.error(p.previous(), "expected statement in match case")
+			}
+			body = append(body, decl)
+		}
+	}
+	if _, err := p.consume(lexer.TokenRBrace, "expected '}' after match case body"); err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
 func (p *Parser) parseForStatement() (Stmt, error) {
 	token := p.previous()
-	if _, err := p.consume(lexer.TokenLParen, "expected '(' after 'for'"); err != nil {
+	// Brace-style: for name in iterable { … }  (values or half-open range a..b)
+	if p.check(lexer.TokenIdentifier) {
+		name, err := p.consume(lexer.TokenIdentifier, "expected loop variable name after 'for'")
+		if err != nil {
+			return nil, err
+		}
+		name = normalizeIdentLexeme(name)
+		if p.match(lexer.TokenIn) {
+			iter, err := p.parseForIterable()
+			if err != nil {
+				return nil, err
+			}
+			body, err := p.parseStatement()
+			if err != nil {
+				return nil, err
+			}
+			return &ForOfStmt{Token: token, VarName: name, Iterable: iter, Body: body}, nil
+		}
+		return nil, p.error(p.peek(), "expected 'in' after loop variable in for-loop")
+	}
+	if _, err := p.consume(lexer.TokenLParen, "expected '(' or loop variable after 'for'"); err != nil {
 		return nil, err
 	}
 	// for-in / for-of: for (let name in/of …) or for (let [k, v] of …)
@@ -730,7 +818,7 @@ func (p *Parser) parseStructDeclaration() (Decl, error) {
 	if _, err := p.consume(lexer.TokenLBrace, "expected '{' before struct fields"); err != nil {
 		return nil, err
 	}
-	var fields []lexer.Token
+	var fields []StructField
 	var methods []*FuncDecl
 	for !p.check(lexer.TokenRBrace) {
 		if p.match(lexer.TokenFunc) {
@@ -747,7 +835,14 @@ func (p *Parser) parseStructDeclaration() (Decl, error) {
 			return nil, err
 		}
 		f = normalizeIdentLexeme(f)
-		fields = append(fields, f)
+		var defaultExpr Expr
+		if p.match(lexer.TokenEqual) {
+			defaultExpr, err = p.parseExpression(PrecedenceAssign)
+			if err != nil {
+				return nil, err
+			}
+		}
+		fields = append(fields, StructField{Name: f, Default: defaultExpr})
 		if p.check(lexer.TokenRBrace) {
 			break
 		}

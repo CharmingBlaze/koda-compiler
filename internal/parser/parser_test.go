@@ -62,6 +62,37 @@ func TestParseForOfDestructuring(t *testing.T) {
 	}
 }
 
+func TestParseForInBrace(t *testing.T) {
+	src := `func main() {
+		for coin in coins { print(coin); }
+		for i in 0..goal { print(i); }
+	}`
+	l := lexer.NewLexer(src, "")
+	tokens, err := l.Tokenize()
+	if err != nil {
+		t.Fatal(err)
+	}
+	prog, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatal(err)
+	}
+	fn := prog.Declarations[0].(*FuncDecl)
+	forCoin := fn.Body.Declarations[0].(*ForOfStmt)
+	if forCoin.VarName.Lexeme != "coin" {
+		t.Fatalf("coin loop var: got %q", forCoin.VarName.Lexeme)
+	}
+	if _, ok := forCoin.Iterable.(*IdentifierExpr); !ok {
+		t.Fatalf("coin iterable: want ident, got %T", forCoin.Iterable)
+	}
+	forRange := fn.Body.Declarations[1].(*ForOfStmt)
+	if forRange.VarName.Lexeme != "i" {
+		t.Fatalf("range loop var: got %q", forRange.VarName.Lexeme)
+	}
+	if _, ok := forRange.Iterable.(*RangeExpr); !ok {
+		t.Fatalf("range iterable: want RangeExpr, got %T", forRange.Iterable)
+	}
+}
+
 func TestParseClassicForInfinite(t *testing.T) {
 	src := `func main() { for (;;) { break; } }`
 	l := lexer.NewLexer(src, "")
@@ -394,6 +425,35 @@ func TestParseNotPropertyAccess(t *testing.T) {
 	}
 }
 
+func TestParsePostfixUpdateOnField(t *testing.T) {
+	src := `let obj = { x: 1 };
+obj.x++;
+++i;
+`
+	l := lexer.NewLexer(src, "")
+	tokens, err := l.Tokenize()
+	if err != nil {
+		t.Fatal(err)
+	}
+	prog, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	es := prog.Declarations[1].(*ExpressionStmt)
+	up, ok := es.Expr.(*UpdateExpr)
+	if !ok {
+		t.Fatalf("want UpdateExpr, got %T", es.Expr)
+	}
+	if _, ok := up.Operand.(*IndexExpr); !ok {
+		t.Fatalf("operand: got %T", up.Operand)
+	}
+	es2 := prog.Declarations[2].(*ExpressionStmt)
+	up2, ok := es2.Expr.(*UpdateExpr)
+	if !ok || !up2.IsPrefix {
+		t.Fatalf("want prefix UpdateExpr, got %T prefix=%v", es2.Expr, up2.IsPrefix)
+	}
+}
+
 func TestParseCompoundAssignStatement(t *testing.T) {
 	src := `let x = 10;
 x += 3;
@@ -448,5 +508,33 @@ func TestParseDeferStatement(t *testing.T) {
 	}
 	if _, ok := ds.Expr.(*CallExpr); !ok {
 		t.Fatalf("defer expr: want *CallExpr, got %T", ds.Expr)
+	}
+}
+
+func TestParseMatchEnumCase(t *testing.T) {
+	src := `enum Phase { Playing, Won, GameOver }
+func main() {
+	match state {
+		Phase.Playing {
+			seen = "play";
+		}
+		default {
+			seen = "other";
+		}
+	}
+}`
+	l := lexer.NewLexer(src, "test.koda")
+	tokens, err := l.Tokenize()
+	if err != nil {
+		t.Fatal(err)
+	}
+	prog, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatal(err)
+	}
+	fn := prog.Declarations[1].(*FuncDecl)
+	matchStmt := fn.Body.Declarations[0].(*SwitchStmt)
+	if len(matchStmt.Cases) != 1 {
+		t.Fatalf("cases: want 1, got %d", len(matchStmt.Cases))
 	}
 }

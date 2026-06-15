@@ -28,22 +28,22 @@
 <svelte:window onclick={onDocClick} />
 
 {#if !zen}
-  <div class="relative flex items-center" bind:this={wrapEl}>
+  <div class="menu-wrap relative flex items-center" bind:this={wrapEl}>
     <button
       type="button"
-      class="rounded-md px-2.5 py-0.5 text-[var(--color-subtext)] hover:bg-[var(--color-surface0)] hover:text-[var(--color-text)]"
-      class:bg-[var(--color-surface0)]={menuOpen}
+      class="menu-trigger"
+      class:menu-trigger-open={menuOpen}
       aria-expanded={menuOpen}
       aria-haspopup="true"
       onclick={() => (menuOpen = !menuOpen)}>File</button>
     {#if menuOpen}
       <div
-        class="glass absolute left-0 top-full z-50 mt-0.5 min-w-[14rem] overflow-hidden rounded-lg border border-[var(--color-surface0)] py-1 text-sm shadow-xl"
+        class="menu-dropdown"
         role="menu"
       >
         <button
           type="button"
-          class="flex w-full items-center justify-between gap-6 px-3 py-1.5 text-left text-[var(--color-text)] hover:bg-[var(--color-surface0)]"
+          class="menu-item"
           role="menuitem"
           onclick={() => {
             closeMenu()
@@ -51,16 +51,16 @@
           }}>New project…</button>
         <button
           type="button"
-          class="flex w-full items-center justify-between gap-6 px-3 py-1.5 text-left text-[var(--color-text)] hover:bg-[var(--color-surface0)]"
+          class="menu-item"
           role="menuitem"
           onclick={() => {
             closeMenu()
             onOpenWorkspace()
           }}>Open workspace…</button>
-        <div class="my-1 h-px bg-[var(--color-surface0)]"></div>
+        <div class="menu-separator"></div>
         <button
           type="button"
-          class="flex w-full items-center justify-between gap-6 px-3 py-1.5 text-left text-[var(--color-text)] hover:bg-[var(--color-surface0)] disabled:opacity-40"
+          class="menu-item"
           role="menuitem"
           disabled={!hasWorkspace}
           title={!hasWorkspace ? 'Open or create a workspace first' : ''}
@@ -71,7 +71,7 @@
           }}>New file…</button>
         <button
           type="button"
-          class="flex w-full items-center justify-between gap-6 px-3 py-1.5 text-left text-[var(--color-text)] hover:bg-[var(--color-surface0)] disabled:opacity-40"
+          class="menu-item"
           role="menuitem"
           disabled={!canSave}
           onclick={() => {
@@ -83,10 +83,10 @@
           <span>Save</span>
           <kbd class="font-sans text-[10px] text-[var(--color-overlay0)]">⌃S</kbd>
         </button>
-        <div class="my-1 h-px bg-[var(--color-surface0)]"></div>
+        <div class="menu-separator"></div>
         <button
           type="button"
-          class="flex w-full items-center justify-between gap-6 px-3 py-1.5 text-left text-[var(--color-text)] hover:bg-[var(--color-surface0)] disabled:opacity-40"
+          class="menu-item"
           role="menuitem"
           disabled={!canCloseTab}
           onclick={() => {

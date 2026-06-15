@@ -1,7 +1,14 @@
-// Color helpers — pure Koda RGBA/HSV utilities.
+// @color — Raylib-ready colors for games and graphics.
+// rgb/rgba are global builtins; `color` is injected automatically (see parser prelude).
+//
+// Beginners:
+//   game.clear(colors.sky);
+//   game.rect(0, 0, 100, 100, rgb(34, 139, 34));
+//
+// Advanced: hex literals still work (0xRRGGBBAA) when you need them.
 
-func rgba(r, g, b, a) {
-    return { r: r, g: g, b: b, a: a };
+func fromBytes(r, g, b, a) {
+    return rgba(r, g, b, a);
 }
 
 func hsv(h, s, v) {
@@ -24,23 +31,31 @@ func hsv(h, s, v) {
     } else {
         rp = c; bp = x;
     }
-    return rgba(rp + m, gp + m, bp + m, 1);
+    return rgba(floor((rp + m) * 255), floor((gp + m) * 255), floor((bp + m) * 255), 255);
 }
 
 func lerp(a, b, t) {
+    let ar = floor(a / 16777216) % 256;
+    let ag = floor(a / 65536) % 256;
+    let ab = floor(a / 256) % 256;
+    let aa = floor(a) % 256;
+    let br = floor(b / 16777216) % 256;
+    let bg = floor(b / 65536) % 256;
+    let bb = floor(b / 256) % 256;
+    let ba = floor(b) % 256;
     return rgba(
-        a.r + (b.r - a.r) * t,
-        a.g + (b.g - a.g) * t,
-        a.b + (b.b - a.b) * t,
-        a.a + (b.a - a.a) * t
+        ar + (br - ar) * t,
+        ag + (bg - ag) * t,
+        ab + (bb - ab) * t,
+        aa + (ba - aa) * t
     );
 }
 
 func toHex(c) {
+    let r = floor(c / 16777216) % 256;
+    let g = floor(c / 65536) % 256;
+    let b = floor(c / 256) % 256;
     let hexChars = "0123456789abcdef";
-    let r = floor(c.r * 255);
-    let g = floor(c.g * 255);
-    let b = floor(c.b * 255);
     return format("#{}{}{}{}{}{}",
         hexChars[floor(r / 16)],
         hexChars[r % 16],

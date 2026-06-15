@@ -103,6 +103,15 @@ func (p *Parser) parseExpression(precedence int) (Expr, error) {
 
 	for !p.isAtEnd() && precedence < p.peekPrecedence() {
 		token = p.peek()
+		// `TypeName { … }` only — `{` after other expressions starts a block elsewhere.
+		if token.Type == lexer.TokenLBrace {
+			if p.inForIterableExpr || p.inMatchExpr {
+				break
+			}
+			if _, ok := leftExpr.(*IdentifierExpr); !ok {
+				break
+			}
+		}
 		infix := p.getInfixFn(token.Type)
 		if infix == nil {
 			return leftExpr, nil
@@ -112,6 +121,10 @@ func (p *Parser) parseExpression(precedence int) (Expr, error) {
 		leftExpr, err = infix(leftExpr)
 		if err != nil {
 			return nil, err
+		}
+		for (p.check(lexer.TokenPlusPlus) || p.check(lexer.TokenMinusMinus)) && precedence < PrecedenceCall {
+			opTok := p.advance()
+			leftExpr = &UpdateExpr{Token: opTok, Operator: opTok, Operand: leftExpr, IsPrefix: false}
 		}
 	}
 
@@ -139,6 +152,8 @@ func (p *Parser) getPrefixFn(typ lexer.TokenType) prefixParseFn {
 		return p.parseNullLiteral
 	case lexer.TokenBang, lexer.TokenPlus, lexer.TokenMinus:
 		return p.parsePrefixExpression
+	case lexer.TokenPlusPlus, lexer.TokenMinusMinus:
+		return p.parseUpdatePrefixExpression
 	case lexer.TokenTypeof:
 		return p.parseTypeofExpression
 	case lexer.TokenTemplateStart:
@@ -197,6 +212,19 @@ func (p *Parser) getInfixFn(typ lexer.TokenType) infixParseFn {
 	}
 }
 
+// parseForIterable parses the RHS of `for x in expr` without treating `{` as a struct literal.
+func (p *Parser) parseForIterable() (Expr, error) {
+	p.inForIterableExpr = true
+	defer func() { p.inForIterableExpr = false }()
+	return p.parseExpression(PrecedenceLowest)
+}
+
+func (p *Parser) parseMatchExpr() (Expr, error) {
+	p.inMatchExpr = true
+	defer func() { p.inMatchExpr = false }()
+	return p.parseExpression(PrecedenceLowest)
+}
+
 func (p *Parser) parseRangeExpression(left Expr) (Expr, error) {
 	token := p.previous()
 	right, err := p.parseExpression(PrecedenceEquals)
@@ -216,7 +244,14 @@ func (p *Parser) parseNumberLiteral() (Expr, error) {
 	token := p.advance()
 	lex := token.Lexeme
 	var value float64
-	if strings.ContainsAny(lex, "eE.") {
+	lower := strings.ToLower(lex)
+	if strings.HasPrefix(lower, "0x") || strings.HasPrefix(lower, "0b") {
+		i, err := strconv.ParseInt(lex, 0, 64)
+		if err != nil {
+			return nil, p.error(token, "could not parse number literal")
+		}
+		value = float64(i)
+	} else if strings.ContainsAny(lex, "eE.") {
 		v, err := strconv.ParseFloat(lex, 64)
 		if err != nil {
 			return nil, p.error(token, "could not parse number literal")
@@ -267,7 +302,59 @@ func (p *Parser) parseStringLiteral() (Expr, error) {
 		s = s[1 : len(s)-1]
 	}
 	s = unescapeString(s)
-	return &LiteralExpr{Token: token, Value: s}, nil
+	if strings.IndexByte(s, '{') < 0 {
+		return &LiteralExpr{Token: token, Value: s}, nil
+	}
+	parts, err := p.parseStringInterpolationParts(s, token.File)
+	if err != nil {
+		return nil, err
+	}
+	if len(parts) == 1 {
+		if lit, ok := parts[0].(*LiteralExpr); ok {
+			lit.Token = token
+			return lit, nil
+		}
+	}
+	return &TemplateExpr{Token: token, Parts: parts}, nil
+}
+
+func (p *Parser) parseStringInterpolationParts(s, file string) ([]Expr, error) {
+	var parts []Expr
+	var lit strings.Builder
+	for i := 0; i < len(s); i++ {
+		if s[i] == '{' {
+			if lit.Len() > 0 {
+				parts = append(parts, &LiteralExpr{Value: lit.String()})
+				lit.Reset()
+			}
+			j := i + 1
+			for j < len(s) && s[j] != '}' {
+				j++
+			}
+			if j >= len(s) {
+				return nil, fmt.Errorf("unclosed '{' in string")
+			}
+			exprSrc := strings.TrimSpace(s[i+1 : j])
+			if exprSrc == "" {
+				return nil, fmt.Errorf("empty interpolation in string")
+			}
+			ex, err := p.parseEmbeddedExpression(exprSrc, file)
+			if err != nil {
+				return nil, err
+			}
+			parts = append(parts, ex)
+			i = j
+			continue
+		}
+		lit.WriteByte(s[i])
+	}
+	if lit.Len() > 0 {
+		parts = append(parts, &LiteralExpr{Value: lit.String()})
+	}
+	if len(parts) == 0 {
+		parts = append(parts, &LiteralExpr{Value: ""})
+	}
+	return parts, nil
 }
 
 func (p *Parser) parseBooleanLiteral() (Expr, error) {
@@ -296,6 +383,15 @@ func (p *Parser) parsePrefixExpression() (Expr, error) {
 		return nil, err
 	}
 	return &PrefixExpr{Token: token, Operator: token.Lexeme, Right: right}, nil
+}
+
+func (p *Parser) parseUpdatePrefixExpression() (Expr, error) {
+	token := p.advance()
+	right, err := p.parseExpression(PrecedencePrefix)
+	if err != nil {
+		return nil, err
+	}
+	return &UpdateExpr{Token: token, Operator: token, Operand: right, IsPrefix: true}, nil
 }
 
 func (p *Parser) parseGroupedExpression() (Expr, error) {

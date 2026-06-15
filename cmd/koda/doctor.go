@@ -14,6 +14,7 @@ import (
 	fujembed "koda/internal/embed"
 	"koda/internal/kodahome"
 	"koda/internal/project"
+	"koda/internal/wrappermeta"
 )
 
 type doctorLine struct {
@@ -24,7 +25,13 @@ type doctorLine struct {
 }
 
 // runDoctor prints a beginner-friendly SDK health report.
-func runDoctor() error {
+func runDoctor(args []string) error {
+	fix := false
+	for _, a := range args {
+		if a == "--fix" {
+			fix = true
+		}
+	}
 	var lines []doctorLine
 	var failures int
 
@@ -113,6 +120,32 @@ func runDoctor() error {
 			ok: false, label: "raylib", detail: raylibDetail,
 			fix: "For graphics: build third_party/raylib_static (make raylib-lib) or set KODA_LINKFLAGS manually. Console games work without raylib.",
 		})
+	}
+
+	if stale, err := doctorWrapperDrift(); err == nil {
+		for _, r := range stale {
+			lines = append(lines, doctorLine{
+				ok: false, label: "wrapper " + r.Meta.Import, detail: "native headers changed since last koda wrap",
+				fix: fmt.Sprintf("koda wrap upgrade %s", r.Dir),
+			})
+			failures++
+		}
+	}
+
+	if shimReport, err := doctorRaylibShim(fix); err == nil && shimReport.ShimDir != "" {
+		if shimReport.Stale {
+			lines = append(lines, doctorLine{
+				ok: false, label: "raylib shim", detail: shimReport.Detail(),
+				fix: "koda setup raylib   (or: koda doctor --fix)",
+			})
+			failures++
+		} else {
+			detail := shimReport.Detail()
+			if fix {
+				detail = "up to date (refreshed if needed)"
+			}
+			lines = append(lines, doctorLine{ok: true, label: "raylib shim", detail: detail})
+		}
 	}
 
 	tmpDir := os.TempDir()
@@ -266,4 +299,47 @@ func doctorSmokeBuild(kodaExe, kind string) error {
 	}
 	_ = kind
 	return nil
+}
+
+func doctorWrapperDrift() ([]wrappermeta.DriftReport, error) {
+	ctx, err := project.LoadContext(cwd())
+	if err != nil || ctx == nil || ctx.Cfg == nil {
+		return nil, err
+	}
+	var abs []string
+	for _, src := range ctx.Cfg.Native.Sources {
+		src = strings.TrimSpace(src)
+		if src == "" {
+			continue
+		}
+		p := filepath.Join(ctx.Root, filepath.FromSlash(src))
+		abs = append(abs, p)
+	}
+	if inst, err := kodahome.InstallDir(); err == nil {
+		for _, src := range ctx.Cfg.Native.Sources {
+			src = strings.TrimSpace(src)
+			if src == "" {
+				continue
+			}
+			p := filepath.Join(inst, filepath.FromSlash(src))
+			if fi, err := os.Stat(p); err == nil && !fi.IsDir() {
+				abs = append(abs, p)
+			}
+		}
+	}
+	return wrappermeta.CheckProjectSources(abs)
+}
+
+func doctorRaylibShim(fix bool) (project.RaylibShimReport, error) {
+	root := cwd()
+	if fix {
+		after, refreshed, err := project.RefreshRaylibShimIfStale(root)
+		if err != nil {
+			return after, err
+		}
+		if refreshed {
+			return after, nil
+		}
+	}
+	return project.CheckRaylibShim(root)
 }

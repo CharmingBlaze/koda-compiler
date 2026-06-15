@@ -21,10 +21,22 @@ func (a *Analyzer) analyzeStructDecl(d *parser.StructDecl) {
 	}
 	a.currentScope.Define(name, d)
 	fields := make([]string, len(d.Fields))
-	for i, t := range d.Fields {
-		fields[i] = t.Lexeme
+	defaults := make(map[string]parser.Expr)
+	for i, f := range d.Fields {
+		fields[i] = f.Name.Lexeme
+		if f.Default != nil {
+			defaults[f.Name.Lexeme] = f.Default
+		}
 	}
 	a.structLayouts[name] = fields
+	if len(defaults) > 0 {
+		a.structFieldDefaults[name] = defaults
+	}
+	for _, f := range d.Fields {
+		if f.Default != nil {
+			a.analyzeExpr(f.Default)
+		}
+	}
 	methods := make(map[string]*parser.FuncDecl)
 	for _, m := range d.Methods {
 		mname := m.Name.Lexeme
@@ -63,9 +75,94 @@ func (a *Analyzer) analyzeEnumDecl(d *parser.EnumDecl) {
 	a.currentScope.Define(name, d)
 }
 
+func (a *Analyzer) structFieldSlot(stName, field string) (int, bool) {
+	fields, ok := a.structLayouts[stName]
+	if !ok {
+		return 0, false
+	}
+	if methods, ok := a.structMethods[stName]; ok {
+		if _, isMethod := methods[field]; isMethod {
+			return 0, false
+		}
+	}
+	for i, f := range fields {
+		if f == field {
+			return i, true
+		}
+	}
+	return 0, false
+}
+
+func (a *Analyzer) tryBindImplicitStructField(id *parser.IdentifierExpr, name string) bool {
+	slot, ok := a.structFieldSlot(a.currentStructType, name)
+	if !ok {
+		return false
+	}
+	a.implicitStructField[id] = slot
+	return true
+}
+
+func (a *Analyzer) structConstructorType(name string) string {
+	decl, ok := a.currentScope.Resolve(name)
+	if !ok {
+		return ""
+	}
+	sd, ok := decl.(*parser.StructDecl)
+	if !ok {
+		return ""
+	}
+	methods, ok := a.structMethods[sd.Name.Lexeme]
+	if !ok {
+		return ""
+	}
+	if _, ok := methods["new"]; !ok {
+		return ""
+	}
+	return sd.Name.Lexeme
+}
+
+func (a *Analyzer) checkStructConstructorCall(call *parser.CallExpr, sd *parser.StructDecl) {
+	stName := sd.Name.Lexeme
+	methods, ok := a.structMethods[stName]
+	if !ok {
+		a.record(&diagnostic.DiagnosticError{
+			File:    call.Token.File,
+			Line:    call.Token.Line,
+			Col:     call.Token.Col,
+			Message: fmt.Sprintf("struct %s has no constructor; add func new(...) inside the struct body", stName),
+		})
+		return
+	}
+	newFn, ok := methods["new"]
+	if !ok {
+		a.record(&diagnostic.DiagnosticError{
+			File:    call.Token.File,
+			Line:    call.Token.Line,
+			Col:     call.Token.Col,
+			Message: fmt.Sprintf("struct %s has no constructor; add func new(...) inside the struct body", stName),
+		})
+		return
+	}
+	a.checkCallArity(call, stName, 0, false, newFn.Params)
+}
+
 func (a *Analyzer) recordVarTypesFromInit(varName string, init parser.Expr) {
 	if oe, ok := init.(*parser.ObjectExpr); ok && oe.StructTag != nil {
 		a.varStructType[varName] = oe.StructTag.Lexeme
+		return
+	}
+	if call, ok := init.(*parser.CallExpr); ok {
+		if id, ok := call.Function.(*parser.IdentifierExpr); ok {
+			if st := a.structConstructorType(id.Name.Lexeme); st != "" {
+				a.varStructType[varName] = st
+				return
+			}
+		}
+	}
+	if ae, ok := init.(*parser.ArrayExpr); ok && len(ae.Elements) > 0 {
+		if st := a.structTypeOfExpr(ae.Elements[0]); st != "" {
+			a.varArrayElementStruct[varName] = st
+		}
 		return
 	}
 	if ix, ok := init.(*parser.IndexExpr); ok {
@@ -106,7 +203,7 @@ func (a *Analyzer) validateStructLiteral(e *parser.ObjectExpr) {
 	}
 	want := make(map[string]bool, len(sd.Fields))
 	for _, f := range sd.Fields {
-		want[f.Lexeme] = true
+		want[f.Name.Lexeme] = true
 	}
 	for _, k := range e.Keys {
 		if !want[k.Lexeme] {
@@ -165,6 +262,9 @@ func (a *Analyzer) checkStructFieldAccess(e *parser.IndexExpr) {
 		return
 	}
 	stName, ok := a.varStructType[idObj.Name.Lexeme]
+	if !ok && a.activeParamStruct != nil {
+		stName, ok = a.activeParamStruct[idObj.Name.Lexeme]
+	}
 	if !ok {
 		return
 	}
@@ -263,7 +363,16 @@ func (a *Analyzer) enumCaseOrdinal(val parser.Expr, enumName string) (int, bool)
 }
 
 // ExportForCodegen copies struct/enum binding maps for LLVM emission.
-func (a *Analyzer) ExportForCodegen() (structFields map[string][]string, structMethods map[string]map[string]*parser.FuncDecl, varStruct map[string]string, varEnum map[string]string, indexStruct map[*parser.IndexExpr]int, indexEnum map[*parser.IndexExpr]int64) {
+func (a *Analyzer) ExportForCodegen() (
+	structFields map[string][]string,
+	structMethods map[string]map[string]*parser.FuncDecl,
+	varStruct map[string]string,
+	varEnum map[string]string,
+	indexStruct map[*parser.IndexExpr]int,
+	indexEnum map[*parser.IndexExpr]int64,
+	fieldDefaults map[string]map[string]parser.Expr,
+	implicitField map[*parser.IdentifierExpr]int,
+) {
 	structFields = make(map[string][]string)
 	for k, v := range a.structLayouts {
 		cp := make([]string, len(v))
@@ -277,6 +386,18 @@ func (a *Analyzer) ExportForCodegen() (structFields map[string][]string, structM
 			cp[k] = v
 		}
 		structMethods[st] = cp
+	}
+	fieldDefaults = make(map[string]map[string]parser.Expr)
+	for st, defs := range a.structFieldDefaults {
+		cp := make(map[string]parser.Expr)
+		for k, v := range defs {
+			cp[k] = v
+		}
+		fieldDefaults[st] = cp
+	}
+	implicitField = make(map[*parser.IdentifierExpr]int)
+	for k, v := range a.implicitStructField {
+		implicitField[k] = v
 	}
 	varStruct = make(map[string]string)
 	for k, v := range a.varStructType {
@@ -294,7 +415,7 @@ func (a *Analyzer) ExportForCodegen() (structFields map[string][]string, structM
 	for k, v := range a.indexExprEnumConst {
 		indexEnum[k] = v
 	}
-	return structFields, structMethods, varStruct, varEnum, indexStruct, indexEnum
+	return structFields, structMethods, varStruct, varEnum, indexStruct, indexEnum, fieldDefaults, implicitField
 }
 
 func enumOrdinalMap(entry *parser.Program) map[string]int {

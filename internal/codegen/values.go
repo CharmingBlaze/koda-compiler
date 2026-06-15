@@ -41,6 +41,18 @@ func (g *Generator) emitLiteral(e *parser.LiteralExpr) (value.Value, error) {
 func (g *Generator) emitIdentifier(e *parser.IdentifierExpr) (value.Value, error) {
 	name := e.Name.Lexeme
 
+	if g.ctx != nil {
+		if slot, ok := g.ctx.ImplicitStructField[e]; ok {
+			thisSlot, ok := g.locals["this"]
+			if !ok {
+				return nil, fmt.Errorf("implicit struct field %q used outside struct method", name)
+			}
+			thisVal := g.block.NewLoad(types.I64, thisSlot)
+			idx := constant.NewInt(types.I64, int64(slot))
+			return g.block.NewCall(g.runtimeStructGet, thisVal, idx), nil
+		}
+	}
+
 	if slot, ok := g.locals[name]; ok {
 		if g.localIsCell != nil && g.localIsCell[name] {
 			return g.block.NewCall(g.runtimeCellRead, slot), nil
@@ -224,17 +236,11 @@ func (g *Generator) emitInfix(e *parser.InfixExpr) (value.Value, error) {
 
 	switch e.Operator {
 	case "+":
-		ld := g.block.NewCall(g.runtimeUnboxNumber, leftI)
-		rd := g.block.NewCall(g.runtimeUnboxNumber, rightI)
-		return g.block.NewCall(g.runtimeBoxNumber, g.block.NewFAdd(ld, rd)), nil
+		return g.block.NewCall(g.runtimeValueAdd, leftI, rightI), nil
 	case "-":
-		ld := g.block.NewCall(g.runtimeUnboxNumber, leftI)
-		rd := g.block.NewCall(g.runtimeUnboxNumber, rightI)
-		return g.block.NewCall(g.runtimeBoxNumber, g.block.NewFSub(ld, rd)), nil
+		return g.block.NewCall(g.runtimeValueSub, leftI, rightI), nil
 	case "*":
-		ld := g.block.NewCall(g.runtimeUnboxNumber, leftI)
-		rd := g.block.NewCall(g.runtimeUnboxNumber, rightI)
-		return g.block.NewCall(g.runtimeBoxNumber, g.block.NewFMul(ld, rd)), nil
+		return g.block.NewCall(g.runtimeValueMul, leftI, rightI), nil
 	case "/":
 		ld := g.block.NewCall(g.runtimeUnboxNumber, leftI)
 		rd := g.block.NewCall(g.runtimeUnboxNumber, rightI)
@@ -635,16 +641,8 @@ func (g *Generator) emitUpdate(e *parser.UpdateExpr) (value.Value, error) {
 	}
 	result := g.block.NewCall(g.runtimeBoxNumber, rd)
 
-	if ident, ok := e.Operand.(*parser.IdentifierExpr); ok {
-		name := ident.Name.Lexeme
-		if slot, ok := g.locals[name]; ok {
-			boxed := g.emitAsKodaI64(result)
-			if g.localIsCell != nil && g.localIsCell[name] {
-				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
-			} else {
-				g.block.NewStore(boxed, slot)
-			}
-		}
+	if err := g.storeBoxedToAssignTarget(e.Operand, g.emitAsKodaI64(result)); err != nil {
+		return nil, err
 	}
 
 	if e.IsPrefix {

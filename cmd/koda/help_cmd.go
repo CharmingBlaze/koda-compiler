@@ -8,16 +8,18 @@ import (
 var commandHelp = map[string]string{
 	"new": `Create a project directory with koda.json and src/main.koda.
 
-  koda new <name> [--template hello|game|graphics]
+  koda new <name> [--template hello|game|graphics|pong|raylib]
 
 Templates:
   hello     Minimal print program (default)
   game      Text lunar lander
-  graphics  Raylib bouncing ball (needs KODA_LINKFLAGS)
+  graphics  Raylib bouncing ball (@game + shim)
+  raylib    Full Raylib API (548 functions, #include "@raylib")
+  pong      Two-player Pong with @game
 `,
 	"init": `Alias for koda new.
 
-  koda init <name> [--template hello|game|graphics]
+  koda init <name> [--template hello|game|graphics|pong|raylib]
 `,
 	"run": `Compile to a native binary and run it (temporary executable).
 
@@ -85,15 +87,19 @@ Default: tests/*.koda under project or repo. Named test blocks print PASS: lines
 
 Removes dist/, .koda_build/, and default executables. --cache also clears temp toolchain dirs when possible.
 `,
-	"doctor": `Human-readable SDK health check (stdlib, clang, writable install).
+	"doctor": `Human-readable SDK health check (stdlib, clang, writable install, raylib shim drift).
 
-  koda doctor
+  koda doctor [--fix]
+
+  --fix   Refresh an outdated project raylib_shim from the SDK (when safe).
 `,
 	"setup": `Configure optional project integrations.
 
-  koda setup raylib [project-dir]
+  koda setup raylib [--full] [project-dir]
 
-Writes wrappers/raylib_shim and sets koda.json native.graphics + native.sources.
+Writes koda.json native.graphics + native.sources.
+  Default: copies raylib_shim into the project (@game / beginner API).
+  --full:  links the full SDK wrapper (548 functions, #include "@raylib").
 `,
 	"paths": `Machine-readable toolchain paths for scripts/CI.
 `,
@@ -134,6 +140,18 @@ Supports initialize, textDocument/didOpen, didChange, and publishDiagnostics.
 
   koda wrap -name mylib -headers ./include/mylib.h -I ./include -L ./lib -l mylib -out ./wrappers/mylib
   koda wrap -name mylib -I ./include -l mylib -o wrappers/mylib ./include/mylib.h
+
+Regenerate after upgrading a native library:
+  koda wrap upgrade wrappers/mylib
+  koda wrap upgrade @raylib
+  koda wrap check wrappers/mylib
+
+Install from the built-in catalog (known link flags + headers):
+  koda wrap list
+  koda wrap install raylib --project
+  koda wrap install sqlite3@3 -o wrappers/sqlite3
+
+C++ headers: add --cpp or use .hpp (wrapgen uses -std=c++17).
 
 Output: .koda, wrapper.c, README, api_reference, examples, koda.json, META.json, docs/index.html
 See docs/guides/wrapping-libraries.md

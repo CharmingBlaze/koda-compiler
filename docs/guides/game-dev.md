@@ -28,15 +28,20 @@ koda doctor
 koda run
 ```
 
-The graphics template sets `"graphics": true` in `koda.json` — platform link flags are applied automatically. No manual `KODA_LINKFLAGS` for beginners.
+The graphics template sets `"graphics": true` in `koda.json` — platform link flags and the Raylib shim wrapper are applied automatically. No manual `KODA_LINKFLAGS` or `KODA_NATIVE_SOURCES` for beginners.
+
+Koda also infers the correct C glue from your `#include` (`koda_shim_*` → shim, `koda_wrap_raylib_*` → full wrapper), so stale shell environment variables are overridden when they do not match.
 
 ### 3. Study the repo examples
 
 | File | Description |
 |------|-------------|
+| `examples/games/koda64/` | Mario 64-style 3D platformer (orbit camera, structs, dot notation) |
 | `examples/games/brick_breaker.koda` | Full brick breaker |
 | `examples/raylib_shim_demo.koda` | 3D camera + cube |
 | `examples/games/lunar_lander_text.koda` | Text lander (standalone file) |
+
+Refresh an older project's shim with **`koda setup raylib`** before using `@game`.
 
 ---
 
@@ -48,7 +53,7 @@ Use the `@game` wrapper — not raw Raylib names:
 #include "wrappers/raylib_shim/raylib.koda"
 #include "@game"
 
-struct Player {
+struct Mario {
     x, y,
     speed,
     health
@@ -58,7 +63,7 @@ func main() {
     game.open(800, 600, "Koda Game");
     game.fps(60);
 
-    let player = Player {
+    let player = Mario {
         x: 400,
         y: 300,
         speed: 220,
@@ -74,10 +79,14 @@ func main() {
         if (game.keyDown(Key.Right)) {
             player.x = player.x + player.speed * dt;
         }
+        if (game.mouseDown(Mouse.Left)) {
+            player.x = game.mouseX();
+            player.y = game.mouseY();
+        }
 
         game.begin();
-        game.clear(Color.dark);
-        game.rect(player.x, player.y, 32, 32, Color.white);
+        game.clear(colors.dark);
+        game.rect(player.x, player.y, 32, 32, colors.white);
         game.end();
         game.setGcBudget(0.5);
     }
@@ -104,13 +113,41 @@ func main() {
 
 ## Structs for game state
 
-Structs are the main data model — not object literals:
+Structs are the main data model — use **dot notation** like JavaScript:
 
 ```koda
-struct Player {
+struct Mario {
     x, y, speed, health
 }
 
+let player = Mario {
+    x: 400,
+    y: 300,
+    speed: 220,
+    health: 100
+};
+
+player.x = player.x + player.speed * dt;
+```
+
+**Naming:** the struct type name is a binding in the same scope — do not reuse it as a variable (`struct Player` + `let player` causes a duplicate-binding error). Use `struct Mario` / `let player` or `struct GoombaNpc` / `let goomba_npc`.
+
+Object literals with methods also work (good for cameras and subsystems):
+
+```koda
+let cam = {
+    yaw: 0.0,
+    dist: 12.0,
+    update: func() {
+        this.yaw = this.yaw + getmousex() * 0.001;
+    }
+};
+cam.update();
+```
+
+Pass structs to functions by reference (fields mutate in place):
+
+```koda
 func update(player, dt) {
     player.x = player.x + player.speed * dt;
     if (player.health <= 0) {
@@ -127,6 +164,32 @@ const gravity = 900;
 const screenWidth = 800;
 ```
 
+Use **`enum`** and **`match`** for game phases instead of many booleans:
+
+```koda
+enum GameState { Playing, Won, GameOver }
+
+let state = GameState.Playing;
+
+match state {
+    GameState.Playing {
+        update_game(dt);
+    }
+    GameState.Won {
+        draw.text("STAR GET!", 380, 340, 40, colors.yellow);
+    }
+    GameState.GameOver {
+        draw.text("GAME OVER - press R", 400, 340, 36, colors.red);
+    }
+}
+```
+
+Draw HUD text with string interpolation — no manual concatenation:
+
+```koda
+draw.text("Score: {score}   Lives: {lives}", 20, 20, 24, colors.white);
+```
+
 ---
 
 ## `@game` API reference
@@ -141,13 +204,24 @@ const screenWidth = 800;
 | `game.begin()` / `game.end()` | Start/end drawing |
 | `game.clear(color)` | Clear background |
 | `game.text(msg, x, y, size, color)` | Draw text |
+| `draw.text(msg, x, y, size, color)` | Same (alias on `draw` object) |
 | `game.rect(x, y, w, h, color)` | Draw rectangle |
 | `game.circle(x, y, r, color)` | Draw circle |
+| `game.line(x1, y1, x2, y2, color)` | Draw line |
+| `game.circleLines(x, y, r, color)` | Circle outline |
+| `game.rectLines(x, y, w, h, color)` | Rectangle outline |
+| `game.loadImage(path)` / `game.drawImage(tex, x, y, color)` / `game.unloadImage(tex)` | Textures |
 | `game.keyDown(key)` | Key held this frame |
 | `game.keyPressed(key)` | Key pressed this frame |
+| `game.mouseX()` / `game.mouseY()` | Cursor position |
+| `game.mouseDown(btn)` / `game.mousePressed(btn)` | Mouse buttons (`Mouse.Left`, …) |
+| `game.mouseWheel()` | Scroll delta |
+| `game.width()` / `game.height()` | Window size |
+| `game.setTitle(title)` | Window title |
+| `game.fpsCounter()` | Current FPS |
 | `game.setGcBudget(ms)` | Incremental GC budget per frame |
 
-`Key` and `Color` constants are defined in `stdlib/game.koda`. Full detail: [stdlib/game](../stdlib/game.md).
+`Key`, `Mouse`, and `Color` constants are defined in `stdlib/game.koda`. Full detail: [stdlib/game](../stdlib/game.md).
 
 Raw Raylib shim names (`initwindow`, `drawtext`, …) remain available for advanced wrapping — see [raylib.md](raylib.md).
 
@@ -172,7 +246,7 @@ Run `koda doctor` before your first graphics build.
 |------|-----|
 | Window + loop | `import` / `#include "@game"` |
 | Frame delta | `game.delta()` |
-| Input | `game.keyDown(Key.Left)` |
+| Input | `game.keyDown(Key.Left)`, `game.mouseX()`, `game.mouseDown(Mouse.Left)` |
 | Draw | `game.begin()`, `game.clear()`, `game.rect()`, `game.end()` |
 | RNG | `random()`, `randomint(a,b)`, `import "@math"` |
 | Timers | `import "@timer"` |

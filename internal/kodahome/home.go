@@ -9,10 +9,27 @@ import (
 	"runtime"
 )
 
-// InstallDir returns the directory containing the running koda or kodawrap executable.
-// EvalSymlinks follows macOS/Linux shim symlinks (e.g. /usr/local/bin) to the real binary
-// so bundled stdlib/ and toolchain/ next to that binary resolve correctly.
+// InstallDir returns the SDK root directory (stdlib/, wrappers/, toolchain siblings).
+// Honors KODA_HOME when set; otherwise the executable directory, or a parent folder
+// that contains stdlib/ (e.g. Koda Studio in build/bin/ with SDK at repo root).
 func InstallDir() (string, error) {
+	if root, ok := sdkRootFromEnv(); ok {
+		return root, nil
+	}
+	exeDir, err := executableDir()
+	if err != nil {
+		return "", err
+	}
+	if hasStdlibRoot(exeDir) {
+		return exeDir, nil
+	}
+	if root, ok := BootstrapSDKRoot(exeDir); ok {
+		return root, nil
+	}
+	return exeDir, nil
+}
+
+func executableDir() (string, error) {
 	exe, err := os.Executable()
 	if err != nil {
 		return "", err

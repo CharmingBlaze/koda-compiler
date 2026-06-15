@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"koda/internal/kodahome"
 )
 
 const FileName = "koda.json"
@@ -138,33 +140,62 @@ func LoadContext(from string) (*Context, error) {
 	return &Context{Root: root, Cfg: cfg}, nil
 }
 
-// ApplyNativeEnv sets KODA_NATIVE_SOURCES and KODA_LINKFLAGS from the project when unset.
+// ApplyNativeEnv sets KODA_NATIVE_SOURCES and KODA_LINKFLAGS from koda.json for this build.
+// Project settings override stale shell env (e.g. KODA_NATIVE_SOURCES left from wrapgen).
+// When the manifest has no native section, KODA_NATIVE_SOURCES is cleared so inference can run.
 func (c *Context) ApplyNativeEnv() error {
 	if c == nil || c.Cfg == nil {
 		return nil
 	}
-	if os.Getenv("KODA_NATIVE_SOURCES") == "" && len(c.Cfg.Native.Sources) > 0 {
+	sources := c.Cfg.Native.Sources
+	if len(sources) == 0 && c.Cfg.Native.Graphics {
+		sources = []string{"wrappers/raylib_shim/wrapper.c"}
+	}
+	if len(sources) > 0 {
 		var abs []string
-		for _, src := range c.Cfg.Native.Sources {
-			abs = append(abs, filepath.Join(c.Root, filepath.FromSlash(src)))
+		for _, src := range sources {
+			p := filepath.Join(c.Root, filepath.FromSlash(src))
+			if _, err := os.Stat(p); err != nil {
+				if alt, ok := sdkNativeSourceFallback(src); ok {
+					p = alt
+				}
+			}
+			abs = append(abs, p)
 		}
 		if err := os.Setenv("KODA_NATIVE_SOURCES", strings.Join(abs, string(os.PathListSeparator))); err != nil {
 			return err
 		}
+	} else if err := os.Unsetenv("KODA_NATIVE_SOURCES"); err != nil {
+		return err
 	}
+
 	link := strings.TrimSpace(c.Cfg.Native.Linkflags)
-	if os.Getenv("KODA_LINKFLAGS") == "" {
-		if link != "" {
-			if err := os.Setenv("KODA_LINKFLAGS", link); err != nil {
-				return err
-			}
-		} else if c.Cfg.Native.Graphics {
-			if err := os.Setenv("KODA_LINKFLAGS", DefaultGraphicsLinkFlags()); err != nil {
-				return err
-			}
+	if link != "" {
+		if err := os.Setenv("KODA_LINKFLAGS", link); err != nil {
+			return err
+		}
+	} else if c.Cfg.Native.Graphics {
+		if err := os.Setenv("KODA_LINKFLAGS", DefaultGraphicsLinkFlags()); err != nil {
+			return err
 		}
 	}
 	return nil
+}
+
+func sdkNativeSourceFallback(rel string) (string, bool) {
+	rel = filepath.FromSlash(strings.TrimSpace(rel))
+	if rel == "" {
+		return "", false
+	}
+	install, err := kodahome.InstallDir()
+	if err != nil {
+		return "", false
+	}
+	p := filepath.Join(install, rel)
+	if st, err := os.Stat(p); err == nil && !st.IsDir() {
+		return p, true
+	}
+	return "", false
 }
 
 // BundleExtraPaths returns asset and extra paths relative to root for copying into bundles.

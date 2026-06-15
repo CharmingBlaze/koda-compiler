@@ -11,6 +11,21 @@
 
 ---
 
+## Instance methods (on array values)
+
+| Method / property | Description |
+|-------------------|-------------|
+| `arr.add(x)` | Append an element (alias for `push`) |
+| `arr.remove_at(i)` | Remove element at index `i`, return it |
+| `arr.clear()` | Remove all elements |
+| `arr.count` | Number of elements (property; also `arr.length()`) |
+| `for x in arr { … }` | Loop over elements (preferred for beginners) |
+| `arr.each(fn)` | Call `fn(element)` for each element |
+
+Also available: `push`, `pop`, `map`, `filter`, `find`, `reduce`, `slice`, `sort`, `reverse`, `join`, `includes`, `indexof`.
+
+---
+
 ## Helper functions
 
 | Function | Description |

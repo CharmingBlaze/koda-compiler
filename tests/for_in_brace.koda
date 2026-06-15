@@ -1,0 +1,31 @@
+let sum = 0;
+
+for i in 0..5 {
+    sum = sum + i;
+}
+
+assert(sum == 10, "0..5 half-open sum");
+
+let items = [1, 2, 3];
+
+let total = 0;
+
+for item in items {
+    total = total + item;
+}
+
+assert(total == 6, "for item in items");
+
+let lo = 2;
+
+let hi = 6;
+
+let dyn = 0;
+
+for j in lo..hi {
+    dyn = dyn + j;
+}
+
+assert(dyn == 14, "dynamic range 2+3+4+5");
+
+print("PASS: for-in brace syntax");

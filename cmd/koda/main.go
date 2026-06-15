@@ -85,6 +85,7 @@ func parseRunCommandArgs(args []string) (src string, noOpt bool, debug bool, pro
 var version = "0.4.0"
 
 func main() {
+	kodahome.EnsureSDKFromExecutable()
 	args := os.Args[1:]
 	if len(args) == 0 {
 		printHelp()
@@ -272,7 +273,10 @@ func main() {
 		}
 
 	case "doctor":
-		if err := runDoctor(); err != nil {
+		if maybeCommandHelp(args) {
+			return
+		}
+		if err := runDoctor(args[1:]); err != nil {
 			fatalErr(err)
 		}
 
@@ -424,7 +428,7 @@ USAGE
   koda <command> [arguments]
 
 COMMANDS
-  new, init   <name> [--template hello|game|graphics]   Create a project
+  new, init   <name> [--template hello|game|graphics|pong|raylib]   Create a project
   run, native [--no-opt] [--debug] [<file.koda>] [-- <program args>]
   watch       [--no-opt] [--debug] [<file.koda>] [-- <program args>]
   check       [<file.koda> | ./...]                     Parse + sema

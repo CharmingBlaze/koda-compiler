@@ -64,6 +64,27 @@ jobs:
       - name: Build kodawrap.exe
         run: go build -trimpath -tags release -ldflags="-s -w" -o kodawrap-windows-amd64.exe ./cmd/wrapgen
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Build Koda Studio
+        run: |
+          cd koda-ide/frontend
+          npm ci
+          npm run build
+          cd ..
+          go install github.com/wailsapp/wails/v2/cmd/wails@v2.12.0
+          wails build -s -m -nopackage -tags native_webview2loader
+          $bin = "build\bin"
+          if (Test-Path "$bin\Koda Studio.exe") {
+            Copy-Item "$bin\Koda Studio.exe" koda-studio-windows-amd64.exe
+          } elseif (Test-Path "$bin\koda-ide.exe") {
+            Copy-Item "$bin\koda-ide.exe" koda-studio-windows-amd64.exe
+          } else {
+            throw "Koda Studio build output not found under $bin"
+          }
+
       - name: Test
         shell: bash
         env:
@@ -76,6 +97,7 @@ jobs:
           path: |
             koda-windows-amd64.exe
             kodawrap-windows-amd64.exe
+            koda-studio-windows-amd64.exe
 
   linux-amd64:
     runs-on: ubuntu-latest
@@ -136,6 +158,16 @@ jobs:
       - name: Build kodawrap
         run: go build -trimpath -tags release -ldflags="-s -w" -o kodawrap-linux-amd64 ./cmd/wrapgen
 
+      - name: Install Koda Studio Linux deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev pkg-config
+
+      - name: Build Koda Studio
+        run: |
+          chmod +x scripts/ci-build-koda-studio.sh
+          bash scripts/ci-build-koda-studio.sh koda-studio-linux-amd64
+
       - name: Test
         shell: bash
         env:
@@ -151,6 +183,7 @@ jobs:
           path: |
             koda-linux-amd64
             kodawrap-linux-amd64
+            koda-studio-linux-amd64
 
   linux-arm64:
     runs-on: ubuntu-24.04-arm
@@ -211,6 +244,16 @@ jobs:
       - name: Build kodawrap
         run: go build -trimpath -tags release -ldflags="-s -w" -o kodawrap-linux-arm64 ./cmd/wrapgen
 
+      - name: Install Koda Studio Linux deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev pkg-config
+
+      - name: Build Koda Studio
+        run: |
+          chmod +x scripts/ci-build-koda-studio.sh
+          bash scripts/ci-build-koda-studio.sh koda-studio-linux-arm64
+
       - name: Test
         shell: bash
         env:
@@ -226,6 +269,7 @@ jobs:
           path: |
             koda-linux-arm64
             kodawrap-linux-arm64
+            koda-studio-linux-arm64
 
   macos:
     runs-on: macos-latest
@@ -285,6 +329,11 @@ jobs:
       - name: Build kodawrap — amd64 (cross)
         run: GOOS=darwin GOARCH=amd64 go build -trimpath -tags release -ldflags="-s -w" -o kodawrap-darwin-amd64 ./cmd/wrapgen
 
+      - name: Build Koda Studio
+        run: |
+          chmod +x scripts/ci-build-koda-studio.sh
+          bash scripts/ci-build-koda-studio.sh "Koda Studio.app"
+
       - name: Test
         shell: bash
         env:
@@ -302,6 +351,7 @@ jobs:
             koda-darwin-arm64
             kodawrap-darwin-amd64
             kodawrap-darwin-arm64
+            Koda Studio.app
 
   publish:
     needs: [windows, linux-amd64, linux-arm64, macos]
@@ -318,7 +368,7 @@ jobs:
       - name: Install zip
         run: sudo apt-get update && sudo apt-get install -y zip
 
-      - name: Vendor raylib 5.0 (per platform) for SDK zips
+      - name: Vendor raylib 6.0 (per platform) for SDK zips
         run: |
           chmod +x scripts/vendor-raylib-stage.sh
           bash scripts/vendor-raylib-stage.sh "${GITHUB_WORKSPACE}/.raylib-vendor"
@@ -338,6 +388,7 @@ jobs:
           files: |
             artifacts/windows/koda-windows-amd64.exe
             artifacts/windows/kodawrap-windows-amd64.exe
+            artifacts/windows/koda-studio-windows-amd64.exe
             artifacts/linux-amd64/koda-linux-amd64
             artifacts/linux-amd64/kodawrap-linux-amd64
             artifacts/linux-arm64/koda-linux-arm64
@@ -356,11 +407,11 @@ jobs:
 
             | Archive | Contents |
             |---------|----------|
-            | **`koda-${{ github.ref_name }}-sdk-windows-amd64.zip`** | `koda.exe`, `kodawrap.exe`, `stdlib/`, `docs/`, root `*.md`, **full `wrappers/` (raylib + glue)**, **`third_party/raylib_static/stage`** (headers, `libraylib.a`, `raylib.dll`), `examples/`, `SDK_README.txt` |
-            | **`koda-${{ github.ref_name }}-sdk-linux-amd64.zip`** | same layout (POSIX binaries) |
-            | **`koda-${{ github.ref_name }}-sdk-linux-arm64.zip`** | same toolchain + docs + wrappers; **no upstream raylib ARM64 prebuild** — see `third_party/raylib_static/stage/README-Koda.txt` and install system raylib or build from source |
-            | **`koda-${{ github.ref_name }}-sdk-darwin-amd64.zip`** | Intel macOS |
-            | **`koda-${{ github.ref_name }}-sdk-darwin-arm64.zip`** | Apple Silicon |
+            | **`koda-${{ github.ref_name }}-sdk-windows-amd64.zip`** | `koda.exe`, `kodawrap.exe`, **`Koda Studio.exe`**, launchers, `stdlib/`, `docs/`, `examples/`, Raylib stage |
+            | **`koda-${{ github.ref_name }}-sdk-linux-amd64.zip`** | `koda`, **`Koda Studio`**, **`start-koda-studio.sh`**, same SDK layout |
+            | **`koda-${{ github.ref_name }}-sdk-linux-arm64.zip`** | same (ARM64); raylib stage may be README-only on ARM64 Linux |
+            | **`koda-${{ github.ref_name }}-sdk-darwin-amd64.zip`** | Intel `koda` + **`Koda Studio.app`** (Apple Silicon build; runs on Intel via Rosetta when available) |
+            | **`koda-${{ github.ref_name }}-sdk-darwin-arm64.zip`** | Apple Silicon native |
 
             Extract anywhere; keep **`stdlib/`** next to **`koda`**. Embedded **Clang + llc + runtime** (and Windows `lld`) ship **inside** the `koda` binary — **no LLVM install** and **`koda` does not download anything from the internet** when you compile; tools unpack from the binary to a **local temp directory** on first use only. Raylib (where included in the zip) is already on disk under **`third_party/raylib_static/stage/`**. Wrapping/linking **other** external C libs still uses libraries you provide (see `docs/wrappers.md` in the zip).
 

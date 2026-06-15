@@ -75,7 +75,7 @@ ensure_raylib_for_link() {
       ;;
     MINGW* | MSYS* | CYGWIN*)
       echo "==> Windows MSYS: stage official raylib MinGW prebuild for link"
-      RAYLIB_VER="5.0"
+      RAYLIB_VER="6.0"
       RAYLIB_URL="https://github.com/raysan5/raylib/releases/download/${RAYLIB_VER}"
       st="${RUNNER_TEMP:-${TMP:-/tmp}}/koda-raylib-stage-$$"
       mkdir -p "$st"

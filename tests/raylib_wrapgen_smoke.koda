@@ -1,6 +1,6 @@
 #include "@raylib"
 
 func main() {
-    initwindow(320, 240, "wrapgen smoke");
-    closewindow();
+    InitWindow(320, 240, "wrapgen smoke");
+    CloseWindow();
 }

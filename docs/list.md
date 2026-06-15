@@ -25,7 +25,7 @@ go test ./... -count=1
 - [x] Single native backend: LLVM IR + C runtime (`koda run` / `koda build` / `koda bundle`).
 - [x] Access to C libraries via generated glue (`// koda:extern` + `wrapper.c` from **wrapgen**, not `#native` / `#ffi` syntax).
 - [ ] `#native` / `#ffi` directives as in spec grammar — use **wrapgen** + extern lines instead.
-- [ ] Optional static type hints (`x: number`) — spec “future”; not in parser.
+- [ ] Optional static type hints (`x: number`) — spec “future”; **partial:** beginner types `int`, `float`, `bool`, `string`, `array`, `map`, `func`, `object` in parser/sema.
 
 ---
 
@@ -37,6 +37,7 @@ go test ./... -count=1
 - [~] `///` doc comments — treated as ordinary `//` (no **kodadoc** tool).
 - [x] Double-quoted and single-quoted strings with escapes (`\n`, `\t`, `\r`, `\\`, `\"`, `\'`, `\xNN`, `\uNNNN`, `\u{...}`).
 - [x] `` `template ${expr}` `` template literals.
+- [x] Double-quoted string interpolation `{expr}` (e.g. `"Score: {score}"`).
 - [x] `"""` … `"""` multi-line strings.
 - [x] `r"…"` raw strings (lexer path via `r` + `"`).
 - [x] Numbers: decimal, float, scientific, `0x` hex, `0b` binary, `0o` octal, `_` separators.
@@ -47,8 +48,8 @@ go test ./... -count=1
 
 ## Keywords & operators (core language)
 
-- [x] Control: `if`, `else`, `for`, `while`, `do`/`while`, `switch`, `case`, `default`, `break`, `continue`, `return`.
-- [x] Declarations: `let`, `func`.
+- [x] Control: `if`, `else`, `for`, `while`, `do`/`while`, `switch`, `case`, `default`, **`match`**, `break`, `continue`, `return`.
+- [x] Declarations: `let`, **`const`**, `func`, `struct`, `enum`.
 - [x] `import` as **expression** `import "path"` (see modules).
 - [x] `in` and `of` in `for (let x in/of iterable)`.
 - [ ] `this` as a dedicated keyword / `TokenThis` — **not** reserved; object methods use identifiers per [KODA_PROGRAMMER_REFERENCE.md](KODA_PROGRAMMER_REFERENCE.md) §6.

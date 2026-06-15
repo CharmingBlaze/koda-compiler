@@ -64,6 +64,10 @@ type NativeEmitContext struct {
 	EmitDebug bool
 	// StructMethods maps struct type -> method name -> FuncDecl.
 	StructMethods map[string]map[string]*parser.FuncDecl
+	// StructFieldDefaults maps struct type -> field name -> default expression.
+	StructFieldDefaults map[string]map[string]parser.Expr
+	// ImplicitStructField maps bare field identifiers in struct methods to slot indices.
+	ImplicitStructField map[*parser.IdentifierExpr]int
 	// NumericKinds maps stack LetDecl to inferred integer/float kind (A8).
 	NumericKinds map[*parser.LetDecl]NumericKind
 	// TypedLocals maps LetDecl to explicit integer type name (P1).
@@ -87,6 +91,7 @@ func PrepareNativeBundleWithOptions(bundle *parser.ProgramBundle, opts *PrepareO
 		return nil, err
 	}
 	parser.InjectNativeMathPrelude(bundle)
+	parser.InjectColorPrelude(bundle)
 
 	entryPath := "<entry>"
 	if p, err := parser.BundleEntryPath(bundle); err == nil {
@@ -134,11 +139,13 @@ func PrepareNativeBundleWithOptions(bundle *parser.ProgramBundle, opts *PrepareO
 		ShadowFuncExpr: make(map[*parser.FuncExpr]*ShadowLayout),
 		EnumOrdinal:    enumOrdinalMap(bundle.Entry),
 		StructMethods:  make(map[string]map[string]*parser.FuncDecl),
+		StructFieldDefaults: make(map[string]map[string]parser.Expr),
+		ImplicitStructField: make(map[*parser.IdentifierExpr]int),
 		NumericKinds:   make(map[*parser.LetDecl]NumericKind),
 		TypedLocals:    make(map[*parser.LetDecl]string),
 	}
 	if analyzer != nil {
-		ctx.StructFields, ctx.StructMethods, ctx.VarStruct, ctx.VarEnum, ctx.IndexExprStructSlot, ctx.IndexExprEnumConst = analyzer.ExportForCodegen()
+		ctx.StructFields, ctx.StructMethods, ctx.VarStruct, ctx.VarEnum, ctx.IndexExprStructSlot, ctx.IndexExprEnumConst, ctx.StructFieldDefaults, ctx.ImplicitStructField = analyzer.ExportForCodegen()
 	}
 	if bundle.Entry != nil {
 		for _, d := range bundle.Entry.Declarations {

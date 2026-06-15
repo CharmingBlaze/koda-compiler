@@ -1,22 +1,22 @@
 #include "../../wrappers/raylib_shim/raylib.koda"
 
-let black = 0x000000FF;
+let black = colors.black;
 
-let white = 0xFFFFFFFF;
+let white = colors.white;
 
-let red = 0xFF0000FF;
+let red = colors.red;
 
-let green = 0x00FF00FF;
+let green = colors.green;
 
-let blue = 0x0000FFFF;
+let blue = colors.blue;
 
-let yellow = 0xFFFF00FF;
+let yellow = colors.yellow;
 
-let orange = 0xFFA500FF;
+let orange = colors.orange;
 
-let purple = 0x800080FF;
+let purple = colors.purple;
 
-let gray = 0x808080FF;
+let gray = colors.gray;
 
 let key_left = 263;
 

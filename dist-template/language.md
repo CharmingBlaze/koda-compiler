@@ -1,11 +1,14 @@
 # Koda Language Reference
 
-> **Quick reference** — this is the compact single-page catalog. For the full tutorial walkthrough, see [`docs/using-the-language.md`](docs/using-the-language.md).
+> **Quick reference** — compact catalog of every syntax form. For learning path and guides, see **[docs/README.md](docs/README.md)**.
 
-Koda is a small, fast language for making games and applications. It feels like JavaScript but compiles to a native binary — no VM, no interpreter. This page covers **everything you can write** with working examples next to each feature.
+Koda is a **modern language for games and applications** that compiles to a **native binary** — a practical alternative to C for gameplay logic, tools, and desktop apps when you want one executable and optional C library interop without a VM.
 
-> **New to Koda?** Start with **`docs/using-the-language.md`** for a gentle walkthrough, then come back here as a reference.  
-> **CLI commands** (`koda run`, `koda build`, …): see **`docs/commands.md`**.
+It combines **C-style** structs, enums, and control flow with **JavaScript-style** objects and closures. This page covers **everything you can write** with examples.
+
+> **New to Koda?** [Beginner's guide](docs/beginners-guide.md) · [Learn path](docs/learn/README.md) · [Using the language](docs/using-the-language.md) · this page as lookup.  
+> **From C?** [Coming from C](docs/guides/from-c.md).  
+> **CLI:** [CLI reference](docs/reference/cli.md) · [commands.md](docs/commands.md).
 
 **Case-insensitive:** all keywords and builtin names are case-insensitive. `Print`, `PRINT`, and `print` all work.
 
@@ -76,17 +79,20 @@ let x = 1; // comment at end of line
 
 ## 3. Values and types
 
-Koda has seven types. Everything is a value — you can pass any of these to functions, store them in variables, and put them in arrays.
+Koda has eight core types. Everything is a value — you can pass any of these to functions, store them in variables, and put them in arrays.
 
 | Type | Example | Notes |
 |------|---------|-------|
-| **Number** | `42`, `3.14`, `0xff`, `0b1010`, `1e3` | All numbers are 64-bit floats |
-| **String** | `"hello"` | UTF-8; use `\n`, `\t`, `\"`, `\\` for escapes |
-| **Bool** | `true`, `false` | |
-| **Null** | `null` | Means "no value" |
-| **Array** | `[1, 2, 3]` | Ordered list of any values |
-| **Object** | `{ x: 1, y: 2 }` | Key/value pairs |
-| **Function** | `func(x) { return x; }` | First-class |
+| **`int`** | `3`, `let n: int = 0` | Integer semantics when annotated |
+| **`float`** | `3.14`, `let speed: float = 8.0` | Default for number literals (64-bit) |
+| **`bool`** | `true`, `false` | |
+| **`string`** | `"hello"`, `"Score: {score}"` | UTF-8; see [§17](#17-template-strings) |
+| **`array`** | `[1, 2, 3]` | Ordered list |
+| **`map` / object** | `{ x: 1, y: 2 }` | Key/value tables (JSON, config) |
+| **`func`** | `func(x) { return x; }` | First-class functions |
+| **`null`** | `null` | Means "no value" |
+
+Type annotations are **optional** — beginners can omit them. Add `int`, `float`, or `string` when you want clarity or integer math.
 
 Check the type of a value at runtime:
 
@@ -104,33 +110,35 @@ print(type(print));    // function
 
 ## 4. Variables
 
-Declare with `let`. Variables must be declared before use.
+Declare mutable bindings with `let`. Immutable bindings with `const`:
 
 ```koda
 let name = "Koda";
 let score = 0;
+const gravity = 900;
+const screenWidth = 800;
 let active = true;
 let nothing = null;
 let uninit;           // starts as null
 ```
 
-**Reassign** at any time:
+**Reassign** `let` at any time (`const` cannot be reassigned):
 
 ```koda
 score = score + 10;
 score += 10;   // same thing
 score++;       // increment by 1
-score--;       // decrement by 1
 ```
 
-**Destructuring** — pull fields out of an object into individual variables:
+**Optional type annotations:**
 
 ```koda
-let player = { x: 10, y: 20, name: "Ada" };
-let { x, y } = player;   // x = 10, y = 20
+let lives: int = 3;
+let dt: float = 0.016;
+let label: string = "Player";
 ```
 
-> `var` is **reserved** — always use `let`.
+> `var` is **reserved** — use `let` or `const`.
 
 ---
 
@@ -154,11 +162,11 @@ let f = 2 ** 8;   // 256 (power)
 1 <= 1    // true
 2 > 1     // true
 1 >= 1    // true
-1 == 1    // true   (loose equal)
+1 == 1    // true
 1 != 2    // true
-1 === 1   // true   (strict equal)
-1 !== 2   // true
 ```
+
+Use `==` and `!=` for equality. Legacy `===` / `!==` are identical but deprecated — `koda check` warns when you use them.
 
 ### Logic
 
@@ -374,6 +382,37 @@ switch (direction) {
 
 Cases **fall through** unless you use `break`. Use `break` at the end of each branch you want to stop at.
 
+### `match`
+
+Brace-style dispatch for game states and enums — **no fall-through**:
+
+```koda
+enum GameState {
+    Playing,
+    Won,
+    GameOver
+}
+
+let state = GameState.Playing;
+
+match state {
+    GameState.Playing {
+        update_game(dt);
+    }
+    GameState.Won {
+        draw.text("STAR GET!", 380, 340, 40, colors.yellow);
+    }
+    GameState.GameOver {
+        draw.text("GAME OVER - press R", 400, 340, 36, colors.red);
+    }
+    default {
+        /* optional catch-all */
+    }
+}
+```
+
+Each arm is a block `{ … }`. Classic `switch (x) { case …: … }` still works when you want C-style fall-through.
+
 **`switch` as an expression** — arms use `=>`:
 
 ```koda
@@ -575,6 +614,22 @@ let rect = {
 print(rect.area());   // 5000
 ```
 
+### Dot notation on values
+
+Property access uses `.field` (or `?.field` for optional chaining when the receiver may be `null`):
+
+```koda
+let math = import "@math";
+print(math.pi);
+print(math.sin(math.pi / 2));
+
+let json = import "@json";
+let text = json.stringify({ score: 10 });
+let data = json.parse(text);
+```
+
+Namespace calls like `math.lerp(a, b, t)` and `json.parse(text)` work without an import when the name is a known stdlib namespace.
+
 ### `len` on objects
 
 ```koda
@@ -698,7 +753,7 @@ print(d == Dir.Up);    // true
 print(r == 3);         // true
 ```
 
-Use enums in `switch`:
+Use enums in `switch` or `match`:
 
 ```koda
 enum State {
@@ -720,9 +775,21 @@ switch (current) {
         print("game over");
         break;
 }
+
+match current {
+    State.Playing {
+        update_game(dt);
+    }
+    State.Paused {
+        draw_pause_overlay();
+    }
+    State.GameOver {
+        draw.text("GAME OVER", 400, 340, 36, colors.red);
+    }
+}
 ```
 
-See `tests/enum_test.koda` for more examples.
+See `tests/enum_test.koda` and `tests/match_test.koda` for more examples.
 
 ---
 
@@ -972,7 +1039,21 @@ if (matches(body, "error")) {
 
 ---
 
-## 17. Template strings
+## 17. Template strings and interpolation
+
+### Double-quoted interpolation — `{expression}`
+
+Embed values directly in `"..."` strings — no manual concatenation:
+
+```koda
+let score = 42;
+let lives = 3;
+
+drawtext("Score: {score}", 20, 20, 24, colors.white);
+drawtext("Lives: {lives}", 20, 50, 24, colors.white);
+```
+
+### Backtick templates — `${expression}`
 
 Use backticks. Embed any expression with `${ }`:
 
@@ -1003,9 +1084,25 @@ The included file's declarations become available as if they were written in the
 
 ### `import()` — expression form
 
+Load a module as an object. Exported top-level `let` and `func` names become properties:
+
 ```koda
+let math = import "@math";
+print(math.sqrt(16));
+
 let utils = import("./lib/utils.koda");
+utils.helper();
 ```
+
+**Stdlib `@` modules** (shipped next to `koda`, or under `KODA_PATH`):
+
+| Module | Properties (examples) |
+|--------|------------------------|
+| `@math` | `pi`, `sin`, `cos`, `sqrt`, `lerp`, `clamp`, … |
+| `@json` | `parse`, `stringify`, `tryparse` |
+| `@vec2` | `vec2`, `add`, `dot`, `normalize`, … |
+
+The builtin `parseJSON(text)` returns `ok(value)` or `err(message)`; `json.parse` returns the value directly (or `null` on failure).
 
 ---
 
@@ -1061,7 +1158,7 @@ From highest (evaluated first) to lowest:
 | | `+` `-` |
 | | `<<` `>>` `>>>` |
 | | `<` `<=` `>` `>=` |
-| | `==` `!=` `===` `!==` |
+| | `==` `!=` |
 | | `&` |
 | | `^` |
 | | `\|` |
@@ -1081,8 +1178,9 @@ All keywords are **case-insensitive**.
 break    case     continue  default   defer
 delete   do       else      enum      false
 for      func     if        import    in
-let      null     of        return    struct
-switch   this     true      typeof    while
+const    let      match     null      of
+return   struct   switch    this      true
+typeof   while
 ```
 
 Directive: `#include "path.koda"`

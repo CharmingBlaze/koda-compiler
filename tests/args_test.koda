@@ -1,0 +1,5 @@
+func main() {
+    let a = args();
+    assert(len(a) >= 1, "expected program name in args");
+    print("args test ok");
+}

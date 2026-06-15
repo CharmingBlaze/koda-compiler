@@ -65,26 +65,38 @@ Both styles work the same way.
 
 ## 4. Variables
 
-Use `let` to create a variable. Every statement ends with `;`.
+Use `let` for values that change and `const` for values that do not. Every statement ends with `;`.
 
 ```koda
 let name = "Ada";
 let score = 0;
+const gravity = 900;
+const screenWidth = 800;
 let alive = true;
 let nothing = null;   // null means "no value"
 let later;            // also null until you assign it
 ```
 
-Change a variable's value any time:
+Change a `let` binding any time (`const` cannot be reassigned):
 
 ```koda
-score = score + 10;
-score += 10;   // same thing
+score += 10;   // preferred
 score++;       // add 1
 score--;       // subtract 1
+score = score + 10;   // still valid
 ```
 
-> **Note:** `var` is not allowed in Koda. Always use `let`.
+Compound operators work on fields and indices too: `player.x += speed * dt;`, `arr[i] += 1;`, `obj.count++`.
+
+> **Note:** `var` is not allowed in Koda. Always use `let` or `const`.
+
+Optional type annotations (add when you want clarity):
+
+```koda
+let lives: int = 3;
+let speed: float = 8.0;
+let label: string = "Player";
+```
 
 Keywords and names are **case-insensitive** — `Let`, `LET`, and `let` all work.
 
@@ -94,13 +106,16 @@ Keywords and names are **case-insensitive** — `Let`, `LET`, and `let` all work
 
 | Type | Example |
 |------|---------|
-| Number | `42`, `3.14`, `0xff`, `0b1010`, `1e3` |
-| String | `"hello"` |
-| Bool | `true` or `false` |
-| Null | `null` |
-| Array | `[1, 2, 3]` |
-| Object | `{ x: 1, y: 2 }` |
-| Function | `func(x) { return x; }` |
+| `int` | `3`, `let n: int = 0` |
+| `float` | `3.14`, `let speed: float = 8.0` |
+| `bool` | `true`, `false` |
+| `string` | `"hello"`, `"Score: {score}"` |
+| `array` | `[1, 2, 3]` |
+| `map` / object | `{ x: 1, y: 2 }` |
+| `func` | `func(x) { return x; }` |
+| `null` | `null` |
+
+Types are optional — beginners can omit annotations.
 
 You can ask Koda what type a value is:
 
@@ -168,11 +183,17 @@ print(words[0]);   // one
 print(len(words)); // 3
 ```
 
-**Template strings** — embed expressions directly into a string:
+**String interpolation** — embed values in double-quoted strings:
 
 ```koda
 let name = "player";
 let lives = 3;
+print("Score: {score}   Lives: {lives}");
+```
+
+**Template strings** — backticks with `${}`:
+
+```koda
 print(`${name} has ${lives} lives left`);
 // player has 3 lives left
 ```
@@ -291,14 +312,14 @@ for (let i = 0; i < 5; i += 1) {
     print(i);
 }
 
-// Loop over a range
-for (let i of 0..5) {
-    print(i);   // 0, 1, 2, 3, 4
+// Loop over a range (half-open: 0, 1, 2, 3, 4)
+for i in 0..5 {
+    print(i);
 }
 
 // Loop over array values
 let fruits = ["apple", "banana", "cherry"];
-for (let fruit of fruits) {
+for fruit in fruits {
     print(fruit);
 }
 ```
@@ -322,10 +343,36 @@ switch (day) {
 
 Use `break` to stop at the end of each case. Without `break`, it falls through to the next case.
 
+### `match`
+
+Brace-style dispatch for enums and game states — each arm is its own block, **no fall-through**:
+
+```koda
+enum State {
+    Start,
+    Playing,
+    GameOver
+}
+
+let current = State.Playing;
+
+match current {
+    State.Start {
+        print("Press SPACE to begin");
+    }
+    State.Playing {
+        update_game(dt);
+    }
+    State.GameOver {
+        draw.text("GAME OVER", 400, 340, 36, colors.red);
+    }
+}
+```
+
 ### `break` and `continue`
 
 ```koda
-for (let i of 0..10) {
+for i in 0..10 {
     if (i == 3) { continue; }   // skip 3
     if (i == 7) { break; }      // stop at 7
     print(i);
@@ -411,8 +458,9 @@ let p = Point { x: 10, y: 20 };
 print(p.x);   // 10
 
 p.y = 99;
-print(p.y);   // 99
 ```
+
+**Case-insensitive names:** `struct Player` and `let player` are the same binding — use `struct Mario` with `let player = Mario { ... }` instead.
 
 ```koda
 struct Bullet {
@@ -453,7 +501,7 @@ if (current == State.Playing) {
 }
 ```
 
-Use them in `switch` statements for clean logic:
+Use them in `switch` or `match`:
 
 ```koda
 switch (current) {
@@ -463,12 +511,18 @@ switch (current) {
     case State.Playing:
         print("Playing...");
         break;
-    case State.Paused:
-        print("Paused");
-        break;
     case State.GameOver:
         print("Game Over!");
         break;
+}
+
+match current {
+    State.Playing {
+        update_game(dt);
+    }
+    State.GameOver {
+        draw.text("GAME OVER", 400, 340, 36, colors.red);
+    }
 }
 ```
 
@@ -553,8 +607,8 @@ while (!WindowShouldClose()) {
 
     // Draw
     BeginDrawing();
-    ClearBackground(0x181818FF);
-    DrawCircle(x, y, 20, 0xFF4444FF);
+    ClearBackground(colors.dark);
+    DrawCircle(x, y, 20, colors.red);
     EndDrawing();
 }
 

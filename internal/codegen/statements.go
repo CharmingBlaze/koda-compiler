@@ -9,6 +9,7 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
+	"koda/internal/lexer"
 	"koda/internal/parser"
 )
 
@@ -529,6 +530,15 @@ func (g *Generator) emitForInStmt(s *parser.ForInStmt) error {
 	if s.KeyVar == nil {
 		return fmt.Errorf("native codegen: for-in missing loop variable")
 	}
+	if r, ok := s.Iterable.(*parser.RangeExpr); ok {
+		fake := &parser.ForOfStmt{
+			Token:    s.Token,
+			VarName:  *s.KeyVar,
+			Iterable: r,
+			Body:     s.Body,
+		}
+		return g.emitForOfStmt(fake)
+	}
 	iterable, err := g.emitExpr(s.Iterable)
 	if err != nil {
 		return err
@@ -607,9 +617,8 @@ func (g *Generator) emitContinueStmt(_ *parser.ContinueStmt) error {
 	return nil
 }
 
-// emitSwitchStmt emits LLVM IR for switch statements.
+// emitSwitchStmt emits LLVM IR for switch/match statements.
 func (g *Generator) emitSwitchStmt(s *parser.SwitchStmt) error {
-	// Lower switch to compare/branch chain (NaN-boxed Koda values compared as i64).
 	subject, err := g.emitExpr(s.Subject)
 	if err != nil {
 		return err
@@ -617,63 +626,71 @@ func (g *Generator) emitSwitchStmt(s *parser.SwitchStmt) error {
 	subjI := g.emitAsKodaI64(subject)
 	g.shadowRewindTemps()
 
-	// Create merge block
-	mergeBlock := g.block.Parent.NewBlock("switch.merge")
+	g.tempN++
+	suf := fmt.Sprintf(".%d", g.tempN)
+	mergeBlock := g.block.Parent.NewBlock("switch.merge" + suf)
+	isMatch := s.Token.Type == lexer.TokenMatch
 
 	swCtx := loopContext{condBlock: mergeBlock, incBlock: mergeBlock, afterBlock: mergeBlock}
 	g.loopStack = append(g.loopStack, swCtx)
 	defer func() { g.loopStack = g.loopStack[:len(g.loopStack)-1] }()
 
-	// For each case, create a conditional branch
-	caseBlocks := make([]*ir.Block, len(s.Cases)+1)
-	caseBlocks[len(s.Cases)] = g.block.Parent.NewBlock("switch.default")
-
+	caseBodyBlocks := make([]*ir.Block, len(s.Cases))
 	for i := range s.Cases {
-		caseBlocks[i] = g.block.Parent.NewBlock(fmt.Sprintf("switch.case.%d", i))
+		caseBodyBlocks[i] = g.block.Parent.NewBlock(fmt.Sprintf("switch.case.%d.body%s", i, suf))
 	}
 
-	// Emit comparisons and branches
-	for i, caseStmt := range s.Cases {
+	var defaultBodyBlock *ir.Block
+	if len(s.Default) > 0 || len(s.Cases) == 0 {
+		defaultBodyBlock = g.block.Parent.NewBlock("switch.default.body" + suf)
+	} else {
+		defaultBodyBlock = mergeBlock
+	}
+
+	if len(s.Cases) == 0 {
+		g.block.NewBr(defaultBodyBlock)
+	} else {
+		cmpBlock := g.block
+		for i, caseStmt := range s.Cases {
+			caseVal, err := g.emitExpr(caseStmt.Value)
+			if err != nil {
+				return err
+			}
+			cmp := cmpBlock.NewICmp(enum.IPredEQ, subjI, g.emitAsKodaI64(caseVal))
+			var failBlock *ir.Block
+			if i < len(s.Cases)-1 {
+				failBlock = cmpBlock.Parent.NewBlock(fmt.Sprintf("switch.cmp.%d%s", i+1, suf))
+			} else {
+				failBlock = defaultBodyBlock
+			}
+			cmpBlock.NewCondBr(cmp, caseBodyBlocks[i], failBlock)
+			cmpBlock = failBlock
+		}
+	}
+
+	if defaultBodyBlock != mergeBlock {
+		g.block = defaultBodyBlock
 		g.shadowRewindTemps()
-		caseVal, err := g.emitExpr(caseStmt.Value)
-		if err != nil {
-			return err
+		for _, decl := range s.Default {
+			if err := g.emitDecl(decl); err != nil {
+				return err
+			}
 		}
-
-		cmp := g.block.NewICmp(enum.IPredEQ, subjI, g.emitAsKodaI64(caseVal))
-		nextBlock := caseBlocks[i+1]
-		if i == len(s.Cases)-1 {
-			nextBlock = caseBlocks[len(s.Cases)]
-		}
-		g.block.NewCondBr(cmp, caseBlocks[i], nextBlock)
-		g.block = nextBlock
+		g.block.NewBr(mergeBlock)
 	}
 
-	// Emit default case
-	g.block = caseBlocks[len(s.Cases)]
-	g.shadowRewindTemps()
-	for _, decl := range s.Default {
-		if err := g.emitDecl(decl); err != nil {
-			return err
-		}
-	}
-	g.block.NewBr(mergeBlock)
-
-	// Emit case blocks
 	for i, caseStmt := range s.Cases {
-		g.block = caseBlocks[i]
+		g.block = caseBodyBlocks[i]
 		g.shadowRewindTemps()
-
-		// Emit case body declarations
 		for _, decl := range caseStmt.Body {
 			if err := g.emitDecl(decl); err != nil {
 				return err
 			}
 		}
-
-		// Fall-through to next case or merge (classic C behavior)
-		if i < len(s.Cases)-1 {
-			g.block.NewBr(caseBlocks[i+1])
+		if isMatch {
+			g.block.NewBr(mergeBlock)
+		} else if i < len(s.Cases)-1 {
+			g.block.NewBr(caseBodyBlocks[i+1])
 		} else {
 			g.block.NewBr(mergeBlock)
 		}

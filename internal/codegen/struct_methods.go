@@ -29,9 +29,13 @@ func (g *Generator) emitStructMethods() error {
 		for mname, fd := range methods {
 			llvmName := structMethodLLVMName(stName, mname)
 			clone := cloneFuncDeclName(fd, llvmName)
+			prev := g.currentStructMethodType
+			g.currentStructMethodType = stName
 			if err := g.emitFuncDecl(clone); err != nil {
+				g.currentStructMethodType = prev
 				return err
 			}
+			g.currentStructMethodType = prev
 			key := stName + "." + mname
 			if fn, ok := g.funcs[llvmName]; ok {
 				g.funcs[key] = fn
@@ -42,16 +46,68 @@ func (g *Generator) emitStructMethods() error {
 	return nil
 }
 
+func (g *Generator) structTypeForMethodReceiver(member *parser.IndexExpr) (string, bool) {
+	switch obj := member.Object.(type) {
+	case *parser.IdentifierExpr:
+		if g.ctx == nil {
+			return "", false
+		}
+		stName, ok := g.ctx.VarStruct[obj.Name.Lexeme]
+		return stName, ok
+	case *parser.ThisExpr:
+		if g.currentStructMethodType != "" {
+			return g.currentStructMethodType, true
+		}
+	}
+	return "", false
+}
+
+// tryEmitStructConstructor lowers Coin(7, -5) to alloc-with-defaults + new(...).
+func (g *Generator) tryEmitStructConstructor(call *parser.CallExpr) (value.Value, bool, error) {
+	id, ok := call.Function.(*parser.IdentifierExpr)
+	if !ok || g.ctx == nil || g.ctx.StructMethods == nil {
+		return nil, false, nil
+	}
+	stName := id.Name.Lexeme
+	methods, ok := g.ctx.StructMethods[stName]
+	if !ok {
+		return nil, false, nil
+	}
+	if _, ok := methods["new"]; !ok {
+		return nil, false, nil
+	}
+	obj, err := g.emitStructWithDefaults(stName)
+	if err != nil {
+		return nil, true, err
+	}
+	key := stName + ".new"
+	fn, ok := g.funcs[key]
+	if !ok {
+		fn, ok = g.funcs[strings.ToLower(key)]
+	}
+	if !ok {
+		return nil, true, fmt.Errorf("constructor %s.new not emitted", stName)
+	}
+	thisVal := g.emitAsKodaI64(obj)
+	var args []value.Value
+	for _, arg := range call.Arguments {
+		v, err := g.emitExpr(arg)
+		if err != nil {
+			return nil, true, err
+		}
+		args = append(args, v)
+	}
+	finalArgs := append([]value.Value{thisVal}, args...)
+	g.block.NewCall(fn, finalArgs...)
+	return obj, true, nil
+}
+
 // tryEmitStructMethodCall dispatches rect.area() on struct-typed receivers.
 func (g *Generator) tryEmitStructMethodCall(member *parser.IndexExpr, recvVal value.Value, call *parser.CallExpr) (value.Value, bool, error) {
 	if g.ctx == nil || g.ctx.StructMethods == nil {
 		return nil, false, nil
 	}
-	id, ok := member.Object.(*parser.IdentifierExpr)
-	if !ok {
-		return nil, false, nil
-	}
-	stName, ok := g.ctx.VarStruct[id.Name.Lexeme]
+	stName, ok := g.structTypeForMethodReceiver(member)
 	if !ok {
 		return nil, false, nil
 	}

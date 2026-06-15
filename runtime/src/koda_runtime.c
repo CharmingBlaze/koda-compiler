@@ -973,6 +973,17 @@ Value koda_struct_get(Value obj, int64_t index) {
     return t->values[(int)index];
 }
 
+Value koda_struct_field(int argc, Value* argv) {
+    if (argc != 2) {
+        return NIL_VAL;
+    }
+    if (!IS_NUMBER(argv[1])) {
+        return NIL_VAL;
+    }
+    int64_t idx = (int64_t)AS_NUMBER(argv[1]);
+    return koda_struct_get(argv[0], idx);
+}
+
 Value koda_struct_set(Value obj, int64_t index, Value val) {
     if (!IS_OBJ(obj)) {
         return NIL_VAL;
@@ -1404,12 +1415,29 @@ Value koda_box_number(double d) {
     return NUMBER_VAL(d);
 }
 
+static bool koda_key_is_array_count(Value key) {
+	if (!IS_OBJ(key) || AS_OBJ(key)->type != OBJ_STRING) {
+		return false;
+	}
+	ObjString* s = (ObjString*)AS_OBJ(key);
+	if (s->length == 5 && memcmp(s->chars, "count", 5) == 0) {
+		return true;
+	}
+	if (s->length == 6 && memcmp(s->chars, "length", 6) == 0) {
+		return true;
+	}
+	return false;
+}
+
 Value koda_get(Value obj, Value key) {
 	if (!IS_OBJ(obj)) {
 		koda_type_error("[]", "object", obj);
 	}
 	Obj* o = AS_OBJ(obj);
 	if (o->type == OBJ_ARRAY) {
+		if (koda_key_is_array_count(key)) {
+			return NUMBER_VAL((double)((ObjArray*)o)->count);
+		}
 		if (!IS_NUMBER(key)) {
 			koda_type_error("array index", "number", key);
 		}
@@ -1462,6 +1490,78 @@ void koda_array_set(Value arr, int64_t index, Value value) {
 	if ((int64_t)index + 1 > (int64_t)array->count) {
 		array->count = (int)index + 1;
 	}
+}
+
+static Value koda_program_args = NIL_VAL;
+
+void koda_runtime_set_argv(int argc, char** argv) {
+    if (argc < 0) {
+        argc = 0;
+    }
+    Value arr = koda_allocate_array(argc);
+    for (int i = 0; i < argc; i++) {
+        const char* s = (argv && argv[i]) ? argv[i] : "";
+        int len = (int)strlen(s);
+        koda_array_set(arr, (int64_t)i, koda_copy_string(s, len));
+    }
+    koda_program_args = arr;
+}
+
+Value koda_args(int argc, Value* argv) {
+    (void)argc;
+    (void)argv;
+    return koda_program_args;
+}
+
+Value koda_env(int argc, Value* argv) {
+    if (argc < 1 || !IS_OBJ(argv[0]) || AS_OBJ(argv[0])->type != OBJ_STRING) {
+        return NIL_VAL;
+    }
+    ObjString* name = (ObjString*)AS_OBJ(argv[0]);
+    if (name->length <= 0) {
+        return NIL_VAL;
+    }
+    char* key = (char*)malloc((size_t)name->length + 1u);
+    if (key == NULL) {
+        return NIL_VAL;
+    }
+    memcpy(key, name->chars, (size_t)name->length);
+    key[name->length] = '\0';
+    const char* val = getenv(key);
+    free(key);
+    if (val == NULL) {
+        return NIL_VAL;
+    }
+    return koda_copy_string(val, (int)strlen(val));
+}
+
+static uint32_t koda_pack_rgba(int r, int g, int b, int a) {
+    r &= 255;
+    g &= 255;
+    b &= 255;
+    a &= 255;
+    return ((uint32_t)r << 24) | ((uint32_t)g << 16) | ((uint32_t)b << 8) | (uint32_t)a;
+}
+
+Value koda_rgb(int argc, Value* argv) {
+    if (argc < 3) return NUMBER_VAL(0);
+    if (!IS_NUMBER(argv[0]) || !IS_NUMBER(argv[1]) || !IS_NUMBER(argv[2])) return NUMBER_VAL(0);
+    int r = (int)AS_NUMBER(argv[0]);
+    int g = (int)AS_NUMBER(argv[1]);
+    int b = (int)AS_NUMBER(argv[2]);
+    return NUMBER_VAL((double)koda_pack_rgba(r, g, b, 255));
+}
+
+Value koda_rgba(int argc, Value* argv) {
+    if (argc < 4) return NUMBER_VAL(0);
+    if (!IS_NUMBER(argv[0]) || !IS_NUMBER(argv[1]) || !IS_NUMBER(argv[2]) || !IS_NUMBER(argv[3])) {
+        return NUMBER_VAL(0);
+    }
+    int r = (int)AS_NUMBER(argv[0]);
+    int g = (int)AS_NUMBER(argv[1]);
+    int b = (int)AS_NUMBER(argv[2]);
+    int a = (int)AS_NUMBER(argv[3]);
+    return NUMBER_VAL((double)koda_pack_rgba(r, g, b, a));
 }
 
 Value koda_set(Value obj, Value key, Value val) {
@@ -1540,6 +1640,40 @@ Value koda_array_pop_argv(int argc, Value* argv) {
         return NIL_VAL;
     }
     return koda_array_pop(argv[0]);
+}
+
+Value koda_array_remove_at(Value arr, int64_t index) {
+    if (!IS_OBJ(arr)) {
+        koda_type_error("remove_at", "array", arr);
+    }
+    Obj* obj = AS_OBJ(arr);
+    if (obj->type != OBJ_ARRAY) {
+        koda_type_error("remove_at", "array", arr);
+    }
+    ObjArray* array = (ObjArray*)obj;
+    if (index < 0 || index >= (int64_t)array->count) {
+        char msg[256];
+        snprintf(msg, sizeof(msg), "remove_at index %lld out of bounds (array length %d)",
+            (long long)index, array->count);
+        koda_panic_str(msg);
+    }
+    Value removed = array->elements[(int)index];
+    for (int i = (int)index; i < array->count - 1; i++) {
+        array->elements[i] = array->elements[i + 1];
+    }
+    array->count--;
+    return removed;
+}
+
+void koda_array_clear(Value arr) {
+    if (!IS_OBJ(arr)) {
+        koda_type_error("clear", "array", arr);
+    }
+    Obj* obj = AS_OBJ(arr);
+    if (obj->type != OBJ_ARRAY) {
+        koda_type_error("clear", "array", arr);
+    }
+    ((ObjArray*)obj)->count = 0;
 }
 
 Value koda_array_length(Value arr) {
@@ -1737,15 +1871,175 @@ Value koda_string(Value value) {
     return NIL_VAL;
 }
 
-Value koda_string_concat(Value a, Value b) {
-    /* Intermediate strings live in C stack slots; conservative stack scan keeps them
-     * rooted across chained allocations. Precise shadow-stack mode does not scan C
-     * locals — runtime helpers that chain allocations must not run with shadow stack on. */
-    if (gc_uses_shadow_stack()) {
-        koda_panic_str("internal error: koda_string_concat called with precise GC active");
+static bool value_is_koda_string(Value v) {
+    return IS_OBJ(v) && AS_OBJ(v)->type == OBJ_STRING;
+}
+
+/* ── Game value types (vec2, vec3, rect, box, color) ───────────────────── */
+
+static Value koda_gt_key(const char* s, int n) {
+    return koda_copy_string(s, n);
+}
+
+static int koda_gt_kind(Value v) {
+    if (!IS_OBJ(v) || AS_OBJ(v)->type != OBJ_TABLE) {
+        return 0;
     }
-    Value sa = koda_string(a);
-    Value sb = koda_string(b);
+    Value t = koda_object_get(v, koda_gt_key("__ktype", 7));
+    if (!IS_OBJ(t) || AS_OBJ(t)->type != OBJ_STRING) {
+        return 0;
+    }
+    ObjString* s = (ObjString*)AS_OBJ(t);
+    if (s->length == 4 && memcmp(s->chars, "vec2", 4) == 0) return 2;
+    if (s->length == 4 && memcmp(s->chars, "vec3", 4) == 0) return 3;
+    if (s->length == 4 && memcmp(s->chars, "rect", 4) == 0) return 4;
+    if (s->length == 3 && memcmp(s->chars, "box", 3) == 0) return 5;
+    if (s->length == 5 && memcmp(s->chars, "color", 5) == 0) return 6;
+    return 0;
+}
+
+static double koda_gt_num(Value v) {
+    return koda_unbox_number(v);
+}
+
+static double koda_gt_field(Value v, const char* name) {
+    return koda_gt_num(koda_object_get(v, koda_gt_key(name, (int)strlen(name))));
+}
+
+static Value koda_gt_set_tag(Value obj, const char* tag, int tag_len) {
+    koda_object_set(obj, koda_gt_key("__ktype", 7), koda_gt_key(tag, tag_len));
+    return obj;
+}
+
+static Value koda_make_vec2(double x, double y) {
+    Value obj = koda_allocate_object(4);
+    koda_gt_set_tag(obj, "vec2", 4);
+    koda_object_set(obj, koda_gt_key("x", 1), NUMBER_VAL(x));
+    koda_object_set(obj, koda_gt_key("y", 1), NUMBER_VAL(y));
+    return obj;
+}
+
+static Value koda_make_vec3(double x, double y, double z) {
+    Value obj = koda_allocate_object(5);
+    koda_gt_set_tag(obj, "vec3", 4);
+    koda_object_set(obj, koda_gt_key("x", 1), NUMBER_VAL(x));
+    koda_object_set(obj, koda_gt_key("y", 1), NUMBER_VAL(y));
+    koda_object_set(obj, koda_gt_key("z", 1), NUMBER_VAL(z));
+    return obj;
+}
+
+static Value koda_vec_scale(Value v, double s, int kind) {
+    if (kind == 2) {
+        return koda_make_vec2(koda_gt_field(v, "x") * s, koda_gt_field(v, "y") * s);
+    }
+    return koda_make_vec3(koda_gt_field(v, "x") * s, koda_gt_field(v, "y") * s, koda_gt_field(v, "z") * s);
+}
+
+static Value koda_vec_add(Value a, Value b, int kind) {
+    if (kind == 2) {
+        return koda_make_vec2(koda_gt_field(a, "x") + koda_gt_field(b, "x"),
+                              koda_gt_field(a, "y") + koda_gt_field(b, "y"));
+    }
+    return koda_make_vec3(koda_gt_field(a, "x") + koda_gt_field(b, "x"),
+                          koda_gt_field(a, "y") + koda_gt_field(b, "y"),
+                          koda_gt_field(a, "z") + koda_gt_field(b, "z"));
+}
+
+static Value koda_vec_sub(Value a, Value b, int kind) {
+    if (kind == 2) {
+        return koda_make_vec2(koda_gt_field(a, "x") - koda_gt_field(b, "x"),
+                              koda_gt_field(a, "y") - koda_gt_field(b, "y"));
+    }
+    return koda_make_vec3(koda_gt_field(a, "x") - koda_gt_field(b, "x"),
+                          koda_gt_field(a, "y") - koda_gt_field(b, "y"),
+                          koda_gt_field(a, "z") - koda_gt_field(b, "z"));
+}
+
+Value koda_vec2(int argc, Value* argv) {
+    if (argc < 2 || !IS_NUMBER(argv[0]) || !IS_NUMBER(argv[1])) {
+        return koda_make_vec2(0.0, 0.0);
+    }
+    return koda_make_vec2(AS_NUMBER(argv[0]), AS_NUMBER(argv[1]));
+}
+
+Value koda_vec3(int argc, Value* argv) {
+    if (argc < 3 || !IS_NUMBER(argv[0]) || !IS_NUMBER(argv[1]) || !IS_NUMBER(argv[2])) {
+        return koda_make_vec3(0.0, 0.0, 0.0);
+    }
+    return koda_make_vec3(AS_NUMBER(argv[0]), AS_NUMBER(argv[1]), AS_NUMBER(argv[2]));
+}
+
+Value koda_rect(int argc, Value* argv) {
+    double x = (argc > 0 && IS_NUMBER(argv[0])) ? AS_NUMBER(argv[0]) : 0.0;
+    double y = (argc > 1 && IS_NUMBER(argv[1])) ? AS_NUMBER(argv[1]) : 0.0;
+    double w = (argc > 2 && IS_NUMBER(argv[2])) ? AS_NUMBER(argv[2]) : 0.0;
+    double h = (argc > 3 && IS_NUMBER(argv[3])) ? AS_NUMBER(argv[3]) : 0.0;
+    Value obj = koda_allocate_object(6);
+    koda_gt_set_tag(obj, "rect", 4);
+    koda_object_set(obj, koda_gt_key("x", 1), NUMBER_VAL(x));
+    koda_object_set(obj, koda_gt_key("y", 1), NUMBER_VAL(y));
+    koda_object_set(obj, koda_gt_key("w", 1), NUMBER_VAL(w));
+    koda_object_set(obj, koda_gt_key("h", 1), NUMBER_VAL(h));
+    return obj;
+}
+
+Value koda_box(int argc, Value* argv) {
+    Value center = (argc > 0) ? argv[0] : koda_make_vec3(0.0, 0.0, 0.0);
+    Value size = (argc > 1) ? argv[1] : koda_make_vec3(1.0, 1.0, 1.0);
+    if (koda_gt_kind(center) != 3) {
+        center = koda_make_vec3(0.0, 0.0, 0.0);
+    }
+    if (koda_gt_kind(size) != 3) {
+        size = koda_make_vec3(1.0, 1.0, 1.0);
+    }
+    Value obj = koda_allocate_object(4);
+    koda_gt_set_tag(obj, "box", 3);
+    koda_object_set(obj, koda_gt_key("center", 6), center);
+    koda_object_set(obj, koda_gt_key("size", 4), size);
+    return obj;
+}
+
+Value koda_color(int argc, Value* argv) {
+    int r = (argc > 0 && IS_NUMBER(argv[0])) ? (int)AS_NUMBER(argv[0]) : 0;
+    int g = (argc > 1 && IS_NUMBER(argv[1])) ? (int)AS_NUMBER(argv[1]) : 0;
+    int b = (argc > 2 && IS_NUMBER(argv[2])) ? (int)AS_NUMBER(argv[2]) : 0;
+    int a = (argc > 3 && IS_NUMBER(argv[3])) ? (int)AS_NUMBER(argv[3]) : 255;
+    Value obj = koda_allocate_object(6);
+    koda_gt_set_tag(obj, "color", 5);
+    koda_object_set(obj, koda_gt_key("r", 1), NUMBER_VAL((double)(r & 255)));
+    koda_object_set(obj, koda_gt_key("g", 1), NUMBER_VAL((double)(g & 255)));
+    koda_object_set(obj, koda_gt_key("b", 1), NUMBER_VAL((double)(b & 255)));
+    koda_object_set(obj, koda_gt_key("a", 1), NUMBER_VAL((double)(a & 255)));
+    koda_object_set(obj, koda_gt_key("packed", 6), NUMBER_VAL((double)koda_pack_rgba(r, g, b, a)));
+    return obj;
+}
+
+Value koda_value_mul(Value a, Value b) {
+    int ka = koda_gt_kind(a);
+    int kb = koda_gt_kind(b);
+    if (ka == 2 || ka == 3) {
+        if (IS_NUMBER(b)) {
+            return koda_vec_scale(a, AS_NUMBER(b), ka);
+        }
+    }
+    if (kb == 2 || kb == 3) {
+        if (IS_NUMBER(a)) {
+            return koda_vec_scale(b, AS_NUMBER(a), kb);
+        }
+    }
+    return NUMBER_VAL(koda_unbox_number(a) * koda_unbox_number(b));
+}
+
+Value koda_value_sub(Value a, Value b) {
+    int ka = koda_gt_kind(a);
+    int kb = koda_gt_kind(b);
+    if (ka != 0 && ka == kb) {
+        return koda_vec_sub(a, b, ka);
+    }
+    return NUMBER_VAL(koda_unbox_number(a) - koda_unbox_number(b));
+}
+
+static Value koda_concat_obj_strings(Value sa, Value sb) {
     if (!IS_OBJ(sa) || AS_OBJ(sa)->type != OBJ_STRING) return sb;
     if (!IS_OBJ(sb) || AS_OBJ(sb)->type != OBJ_STRING) return sa;
     ObjString* A = (ObjString*)AS_OBJ(sa);
@@ -1755,6 +2049,47 @@ Value koda_string_concat(Value a, Value b) {
     memcpy(out->chars, A->chars, A->length);
     memcpy(out->chars + A->length, B->chars, B->length);
     return OBJ_VAL((Obj*)out);
+}
+
+Value koda_value_add(Value a, Value b) {
+    if (value_is_koda_string(a) || value_is_koda_string(b)) {
+        Value slots[2];
+        Value* roots[2] = { &slots[0], &slots[1] };
+        if (gc_uses_shadow_stack()) {
+            koda_push_frame(roots, 2);
+        }
+        slots[0] = koda_string(a);
+        slots[1] = koda_string(b);
+        Value result = koda_concat_obj_strings(slots[0], slots[1]);
+        if (gc_uses_shadow_stack()) {
+            koda_pop_frame();
+        }
+        return result;
+    }
+    int ka = koda_gt_kind(a);
+    int kb = koda_gt_kind(b);
+    if (ka != 0 && ka == kb) {
+        return koda_vec_add(a, b, ka);
+    }
+    return NUMBER_VAL(koda_unbox_number(a) + koda_unbox_number(b));
+}
+
+Value koda_string_concat(Value a, Value b) {
+    /* Intermediate strings live in C stack slots; conservative stack scan keeps them
+     * rooted across chained allocations. Under precise GC, root temporaries on the shadow stack. */
+    if (gc_uses_shadow_stack()) {
+        Value slots[2];
+        Value* roots[2] = { &slots[0], &slots[1] };
+        koda_push_frame(roots, 2);
+        slots[0] = koda_string(a);
+        slots[1] = koda_string(b);
+        Value result = koda_concat_obj_strings(slots[0], slots[1]);
+        koda_pop_frame();
+        return result;
+    }
+    Value sa = koda_string(a);
+    Value sb = koda_string(b);
+    return koda_concat_obj_strings(sa, sb);
 }
 
 // Time functions for game development
