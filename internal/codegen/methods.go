@@ -45,9 +45,12 @@ func (g *Generator) tryEmitMethodCall(member *parser.IndexExpr, recvVal value.Va
 		v, err := g.emitStringMethod(name, recvVal, call.Arguments)
 		return v, true, err
 
-	case "join", "sort", "reverse", "push", "pop", "add", "remove_at", "clear", "flat":
+	case "join", "reverse", "push", "pop", "add", "remove_at", "clear", "flat":
 		v, err := g.emitArrayOnlyMethod(name, recvVal, call.Arguments)
 		return v, true, err
+
+	case "sort":
+		return g.emitArrayMethodSort(recvVal, call.Arguments)
 
 	case "slice":
 		v, err := g.emitSliceAmbiguous(recvVal, call.Arguments)
@@ -364,8 +367,6 @@ func (g *Generator) emitArrayOnlyMethod(name string, recv value.Value, args []pa
 			return nil, err
 		}
 		return g.emitArgvRuntime(g.runtimeArrayJoin, []value.Value{loadRecv(), a0}), nil
-	case "sort":
-		return g.emitArgvRuntime(g.runtimeArraySort, []value.Value{loadRecv()}), nil
 	case "reverse":
 		return g.emitArgvRuntime(g.runtimeArrayReverse, []value.Value{loadRecv()}), nil
 	case "push", "add":
@@ -504,6 +505,108 @@ func (g *Generator) emitArgvNilTaggedFallback(primary value.Value, alt func() va
 func (g *Generator) emitArrayLenAsDouble(recv value.Value) value.Value {
 	lv := g.block.NewCall(g.runtimeLen, g.emitAsKodaI64(recv))
 	return g.block.NewCall(g.runtimeUnboxNumber, g.emitAsKodaI64(lv))
+}
+
+func (g *Generator) emitArrayMethodSort(recv value.Value, args []parser.Expr) (value.Value, bool, error) {
+	if len(args) == 0 {
+		return g.emitArgvRuntime(g.runtimeArraySort, []value.Value{recv}), true, nil
+	}
+	if len(args) != 1 {
+		return nil, true, fmt.Errorf("sort expects 0 or 1 arguments (comparator?)")
+	}
+	recvSlot := g.entryAlloca(types.I64)
+	g.shadowStoreTemp(recvSlot)
+	g.block.NewStore(g.emitAsKodaI64(recv), recvSlot)
+
+	fnVal, err := g.emitExpr(args[0])
+	if err != nil {
+		return nil, true, err
+	}
+	nThis := constant.NewInt(types.I64, 0)
+
+	recvLive := g.block.NewLoad(types.I64, recvSlot)
+	lenF := g.emitArrayLenAsDouble(recvLive)
+	one := constant.NewFloat(types.Double, 1)
+	zero := constant.NewFloat(types.Double, 0)
+
+	g.tempN++
+	suf := fmt.Sprintf(".sort%d", g.tempN)
+	outerHdr := g.currentFn.NewBlock("sort.ohdr" + suf)
+	outerBody := g.currentFn.NewBlock("sort.obody" + suf)
+	outerStep := g.currentFn.NewBlock("sort.ostep" + suf)
+	outerDone := g.currentFn.NewBlock("sort.odone" + suf)
+
+	outerI := g.entryAlloca(types.Double)
+	g.block.NewStore(zero, outerI)
+	g.block.NewBr(outerHdr)
+
+	g.block = outerHdr
+	outerNow := g.block.NewLoad(types.Double, outerI)
+	outerLimit := g.block.NewFSub(lenF, one)
+	outerOk := g.block.NewFCmp(enum.FPredOLT, outerNow, outerLimit)
+	g.block.NewCondBr(outerOk, outerBody, outerDone)
+
+	innerHdr := g.currentFn.NewBlock("sort.ihdr" + suf)
+	innerBody := g.currentFn.NewBlock("sort.ibody" + suf)
+	innerSwap := g.currentFn.NewBlock("sort.iswap" + suf)
+	innerSkip := g.currentFn.NewBlock("sort.iskip" + suf)
+	innerStep := g.currentFn.NewBlock("sort.istep" + suf)
+	innerDone := g.currentFn.NewBlock("sort.idone" + suf)
+
+	g.block = outerBody
+	innerJ := g.entryAlloca(types.Double)
+	g.block.NewStore(zero, innerJ)
+	g.block.NewBr(innerHdr)
+
+	g.block = innerHdr
+	innerNow := g.block.NewLoad(types.Double, innerJ)
+	innerLimit := g.block.NewFSub(outerLimit, outerNow)
+	innerOk := g.block.NewFCmp(enum.FPredOLT, innerNow, innerLimit)
+	g.block.NewCondBr(innerOk, innerBody, innerDone)
+
+	g.block = innerBody
+	recvBody := g.block.NewLoad(types.I64, recvSlot)
+	jIdx := g.block.NewCall(g.runtimeBoxNumber, innerNow)
+	jPlus := g.block.NewFAdd(innerNow, one)
+	jPlusIdx := g.block.NewCall(g.runtimeBoxNumber, jPlus)
+	aEl := g.block.NewCall(g.runtimeArrayGet, recvBody, g.emitAsKodaI64(jIdx))
+	bEl := g.block.NewCall(g.runtimeArrayGet, recvBody, g.emitAsKodaI64(jPlusIdx))
+	cmpVal, err := g.emitIndirectI64Callee(fnVal, nThis, []value.Value{aEl, bEl})
+	if err != nil {
+		return nil, true, err
+	}
+	cmpF := g.block.NewCall(g.runtimeUnboxNumber, g.emitAsKodaI64(cmpVal))
+	shouldSwap := g.block.NewFCmp(enum.FPredOGT, cmpF, zero)
+	g.block.NewCondBr(shouldSwap, innerSwap, innerSkip)
+
+	g.block = innerSwap
+	recvSwap := g.block.NewLoad(types.I64, recvSlot)
+	jInt := g.block.NewFPToSI(innerNow, types.I64)
+	jPlusInt := g.block.NewFPToSI(jPlus, types.I64)
+	aLive := g.block.NewCall(g.runtimeArrayGet, recvSwap, g.emitAsKodaI64(jIdx))
+	bLive := g.block.NewCall(g.runtimeArrayGet, recvSwap, g.emitAsKodaI64(jPlusIdx))
+	g.block.NewCall(g.runtimeArraySet, recvSwap, jInt, g.emitAsKodaI64(bLive))
+	g.block.NewCall(g.runtimeArraySet, recvSwap, jPlusInt, g.emitAsKodaI64(aLive))
+	g.block.NewBr(innerSkip)
+
+	g.block = innerSkip
+	g.block.NewBr(innerStep)
+
+	g.block = innerStep
+	innerNext := g.block.NewFAdd(g.block.NewLoad(types.Double, innerJ), one)
+	g.block.NewStore(innerNext, innerJ)
+	g.block.NewBr(innerHdr)
+
+	g.block = innerDone
+	g.block.NewBr(outerStep)
+
+	g.block = outerStep
+	outerNext := g.block.NewFAdd(g.block.NewLoad(types.Double, outerI), one)
+	g.block.NewStore(outerNext, outerI)
+	g.block.NewBr(outerHdr)
+
+	g.block = outerDone
+	return g.block.NewLoad(types.I64, recvSlot), true, nil
 }
 
 func (g *Generator) emitArrayMethodMap(recv value.Value, args []parser.Expr) (value.Value, bool, error) {

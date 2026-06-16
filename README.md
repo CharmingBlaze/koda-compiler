@@ -48,6 +48,8 @@ koda run
 
 Full walkthrough: **[START_HERE.md](START_HERE.md)** · [Beginner's guide](docs/beginners-guide.md)
 
+**VS Code / Cursor:** install syntax highlighting from [`vscode-koda/`](vscode-koda/) (F5 to try locally).
+
 | Platform | Add to PATH (optional) |
 |----------|-------------------------|
 | Windows | `powershell -File scripts\install-koda.ps1` |

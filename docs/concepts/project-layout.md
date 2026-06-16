@@ -86,7 +86,7 @@ tests/
   math_test.koda
 ```
 
-Run with `koda test` from project root.
+Run with `koda test` from project root. Convention: **`*_test.koda`** files (Go-style), e.g. `tests/io_test.koda` or `src/player_test.koda`.
 
 ---
 

@@ -12,8 +12,10 @@ import (
 // lowered in codegen (internal/codegen/methods.go). known is false for names we do not validate here.
 func argvMethodArityBounds(lowerName string) (min, max int, known bool) {
 	switch lowerName {
-	case "trim", "toupper", "tolower", "sort", "reverse", "pop", "clear":
+	case "trim", "toupper", "tolower", "reverse", "pop", "clear":
 		return 0, 0, true
+	case "sort":
+		return 0, 1, true
 	case "split", "startswith", "endswith", "join", "indexof", "includes":
 		return 1, 1, true
 	case "replace", "replaceall", "slice":

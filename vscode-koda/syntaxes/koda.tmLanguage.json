@@ -1,0 +1,164 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Koda",
+  "scopeName": "source.koda",
+  "patterns": [
+    { "include": "#directive" },
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#builtins" },
+    { "include": "#literals" },
+    { "include": "#operators" }
+  ],
+  "repository": {
+    "directive": {
+      "patterns": [
+        {
+          "name": "meta.preprocessor.include.koda",
+          "match": "(#\\s*include)\\s+(\"[^\"]*\"|@?[\\w./-]+)",
+          "captures": {
+            "1": { "name": "keyword.control.import.koda" },
+            "2": { "name": "string.quoted.double.koda" }
+          }
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.koda",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.koda",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.koda",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.koda",
+              "match": "\\\\."
+            },
+            {
+              "name": "meta.interpolation.koda",
+              "begin": "\\{",
+              "end": "\\}",
+              "patterns": [
+                { "include": "$self" }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.koda",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.koda",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.template.koda",
+          "begin": "`",
+          "end": "`",
+          "patterns": [
+            {
+              "name": "constant.character.escape.koda",
+              "match": "\\\\."
+            },
+            {
+              "name": "meta.template.expression.koda",
+              "begin": "\\$\\{",
+              "end": "\\}",
+              "patterns": [
+                { "include": "$self" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.koda",
+          "match": "\\b0x[0-9a-fA-F]+\\b"
+        },
+        {
+          "name": "constant.numeric.float.koda",
+          "match": "\\b(?:\\d+\\.\\d*|\\.\\d+)(?:[eE][+-]?\\d+)?\\b"
+        },
+        {
+          "name": "constant.numeric.integer.koda",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.koda",
+          "match": "\\b(?:if|else|while|for|of|in|do|switch|case|default|break|continue|return|fallthrough|match|defer)\\b"
+        },
+        {
+          "name": "keyword.declaration.koda",
+          "match": "\\b(?:func|let|const|struct|enum|import|test|var)\\b"
+        },
+        {
+          "name": "keyword.other.koda",
+          "match": "\\b(?:this|typeof|delete)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.koda",
+          "match": "\\b(?:int|float|bool|string|number|void|array|map|func|object)\\b"
+        }
+      ]
+    },
+    "builtins": {
+      "patterns": [
+        {
+          "name": "support.function.builtin.koda",
+          "match": "\\b(?:print|len|type|assert|expect|panic|warn|ok|err|format|string|number|bool|abs|sqrt|gc|gcCollect|readDir|listDir|args|env|random|randomChoice|randomRange|randomInt|floor|ceil|round|sin|cos|tan|pow|min|max|clamp|lerp)\\b"
+        },
+        {
+          "name": "support.type.stdlib.koda",
+          "match": "@(?:math|io|json|array|str|util|game|color|vec2|vec3|timer|easing|noise|input|pool|camera|raylib)\\b"
+        }
+      ]
+    },
+    "literals": {
+      "patterns": [
+        {
+          "name": "constant.language.koda",
+          "match": "\\b(?:true|false|null)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.koda",
+          "match": "(==|!=|<=|>=|&&|\\|\\||\\?\\?|\\?\\.|=>|\\+\\+|--|<<|>>|>>>|[+\\-*/%=<>!&|^~?:])"
+        }
+      ]
+    }
+  }
+}

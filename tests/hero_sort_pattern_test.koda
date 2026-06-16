@@ -1,0 +1,23 @@
+struct Enemy { x, y, health }
+
+func main() {
+    let enemies = [
+        Enemy { x: 10, y: 50, health: 30 },
+        Enemy { x: 20, y: 10, health: 80 },
+        Enemy { x: 30, y: 30, health: 10 }
+    ];
+    enemies.sort(func(a, b) {
+        return a.health - b.health;
+    });
+    let seen = "";
+    for (let e of enemies) {
+        print(e.health);
+        if (seen == "") {
+            seen = string(e.health);
+        } else {
+            seen = seen + "," + string(e.health);
+        }
+    }
+    assert(seen == "10,30,80", "hero sort order");
+    print("PASS hero_sort_pattern");
+}

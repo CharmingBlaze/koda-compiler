@@ -266,10 +266,6 @@ func (a *Analyzer) checkStructFieldAccess(e *parser.IndexExpr) {
 		_ = te
 		return
 	}
-	idObj, ok := e.Object.(*parser.IdentifierExpr)
-	if !ok {
-		return
-	}
 	lit, ok := e.Index.(*parser.LiteralExpr)
 	if !ok {
 		return
@@ -278,10 +274,7 @@ func (a *Analyzer) checkStructFieldAccess(e *parser.IndexExpr) {
 	if !ok {
 		return
 	}
-	stName, ok := a.varStructType[idObj.Name.Lexeme]
-	if !ok && a.activeParamStruct != nil {
-		stName, ok = a.activeParamStruct[idObj.Name.Lexeme]
-	}
+	stName, ok := a.structTypeNameForObject(e.Object)
 	if !ok {
 		return
 	}
@@ -307,6 +300,28 @@ func (a *Analyzer) checkStructFieldAccess(e *parser.IndexExpr) {
 		Message: fmt.Sprintf("'%s' is not a field of struct %s", field, stName),
 		Hint:    a.structFieldHint(field, fields),
 	})
+}
+
+func (a *Analyzer) structTypeNameForObject(obj parser.Expr) (string, bool) {
+	switch x := obj.(type) {
+	case *parser.IdentifierExpr:
+		name := x.Name.Lexeme
+		if st, ok := a.varStructType[name]; ok {
+			return st, true
+		}
+		if a.activeParamStruct != nil {
+			if st, ok := a.activeParamStruct[name]; ok {
+				return st, true
+			}
+		}
+	case *parser.IndexExpr:
+		if id, ok := x.Object.(*parser.IdentifierExpr); ok {
+			if st, ok := a.varArrayElementStruct[id.Name.Lexeme]; ok {
+				return st, true
+			}
+		}
+	}
+	return "", false
 }
 
 func (a *Analyzer) structFieldHint(field string, fields []string) string {

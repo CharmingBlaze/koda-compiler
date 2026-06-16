@@ -13,6 +13,12 @@ import (
 	"koda/internal/parser"
 )
 
+func (g *Generator) emitStoreArrayIndex(obj, key, boxed value.Value) {
+	keyF := g.block.NewCall(g.runtimeUnboxNumber, g.emitAsKodaI64(key))
+	idxI := g.block.NewFPToSI(keyF, types.I64)
+	g.block.NewCall(g.runtimeArraySet, g.emitAsKodaI64(obj), idxI, g.emitAsKodaI64(boxed))
+}
+
 // storeBoxedToAssignTarget writes a NaN-boxed value to an assign target (identifier or index).
 func (g *Generator) storeBoxedToAssignTarget(left parser.Expr, boxed value.Value) error {
 	switch l := left.(type) {
@@ -70,7 +76,7 @@ func (g *Generator) storeBoxedToAssignTarget(left parser.Expr, boxed value.Value
 		if err != nil {
 			return err
 		}
-		g.block.NewCall(g.runtimeSet, g.emitAsKodaI64(obj), g.emitAsKodaI64(key), boxed)
+		g.emitStoreArrayIndex(obj, key, boxed)
 		return nil
 	default:
 		return fmt.Errorf("unsupported assignment target: %T", left)
@@ -134,7 +140,7 @@ func (g *Generator) storeNaNBoxedToAssignTarget(left parser.Expr, boxed value.Va
 		if err != nil {
 			return err
 		}
-		g.block.NewCall(g.runtimeSet, g.emitAsKodaI64(obj), g.emitAsKodaI64(key), boxed)
+		g.emitStoreArrayIndex(obj, key, boxed)
 		return nil
 	default:
 		return fmt.Errorf("??= unsupported assignment target: %T", left)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"koda/api"
@@ -11,7 +12,7 @@ import (
 	"koda/internal/project"
 )
 
-// runTest compiles and runs .koda test files (default: tests/*.koda under repo or project).
+// runTest compiles and runs .koda test files via the native pipeline (same as koda run).
 func runTest(args []string) error {
 	var paths []string
 	noOpt := false
@@ -47,7 +48,7 @@ func runTest(args []string) error {
 		paths = found
 	}
 	if len(paths) == 0 {
-		return fmt.Errorf("no test files found (pass paths or add tests/*.koda)")
+		return fmt.Errorf("no test files found (add *_test.koda files or pass paths explicitly)")
 	}
 	if runPattern != "" {
 		filtered := make([]string, 0, len(paths))
@@ -103,21 +104,10 @@ func runTest(args []string) error {
 
 func defaultTestFiles() ([]string, error) {
 	if ctx, err := project.LoadContext(cwd()); err == nil && ctx != nil {
-		testsDir := filepath.Join(ctx.Root, "tests")
-		if entries, err := os.ReadDir(testsDir); err == nil {
-			var out []string
-			for _, e := range entries {
-				if e.IsDir() || !strings.HasSuffix(e.Name(), ".koda") {
-					continue
-				}
-				if strings.HasSuffix(e.Name(), "_module.koda") {
-					continue
-				}
-				out = append(out, filepath.Join(testsDir, e.Name()))
-			}
-			if len(out) > 0 {
-				return out, nil
-			}
+		if out, err := discoverProjectTestFiles(ctx.Root); err != nil {
+			return nil, err
+		} else if len(out) > 0 {
+			return out, nil
 		}
 	}
 	exe, err := os.Executable()
@@ -128,35 +118,79 @@ func defaultTestFiles() ([]string, error) {
 		filepath.Join(filepath.Dir(exe), ".."),
 		".",
 	}
-	var out []string
-	seen := make(map[string]bool)
 	for _, root := range roots {
 		abs, err := filepath.Abs(root)
 		if err != nil {
 			continue
 		}
-		testsDir := filepath.Join(abs, "tests")
-		entries, err := os.ReadDir(testsDir)
-		if err != nil {
-			continue
-		}
-		for _, e := range entries {
-			if e.IsDir() || !strings.HasSuffix(e.Name(), ".koda") {
-				continue
-			}
-			if strings.HasSuffix(e.Name(), "_module.koda") {
-				continue
-			}
-			p := filepath.Join(testsDir, e.Name())
-			if seen[p] {
-				continue
-			}
-			seen[p] = true
-			out = append(out, p)
-		}
-		if len(out) > 0 {
-			break
+		if out, err := discoverCompilerTestFiles(abs); err != nil {
+			return nil, err
+		} else if len(out) > 0 {
+			return out, nil
 		}
 	}
+	return nil, nil
+}
+
+// discoverProjectTestFiles finds Go-style *_test.koda files under a user project.
+func discoverProjectTestFiles(root string) ([]string, error) {
+	var out []string
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if d.IsDir() {
+			base := d.Name()
+			if base == ".git" || base == "node_modules" || base == "dist" || base == ".koda_build" {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !strings.HasSuffix(d.Name(), "_test.koda") {
+			return nil
+		}
+		out = append(out, path)
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	sortStrings(out)
 	return out, nil
+}
+
+// discoverCompilerTestFiles prefers *_test.koda in tests/; falls back to all tests/*.koda
+// (compiler harness) when no *_test.koda files exist.
+func discoverCompilerTestFiles(root string) ([]string, error) {
+	testsDir := filepath.Join(root, "tests")
+	entries, err := os.ReadDir(testsDir)
+	if err != nil {
+		return nil, nil
+	}
+	var named []string
+	var legacy []string
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".koda") {
+			continue
+		}
+		if strings.HasSuffix(e.Name(), "_module.koda") {
+			continue
+		}
+		p := filepath.Join(testsDir, e.Name())
+		if strings.HasSuffix(e.Name(), "_test.koda") {
+			named = append(named, p)
+			continue
+		}
+		legacy = append(legacy, p)
+	}
+	if len(named) > 0 {
+		sortStrings(named)
+		return named, nil
+	}
+	sortStrings(legacy)
+	return legacy, nil
+}
+
+func sortStrings(ss []string) {
+	sort.Strings(ss)
 }

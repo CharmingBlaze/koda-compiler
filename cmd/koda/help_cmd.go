@@ -58,7 +58,8 @@ Uses koda.json entry when no file is given. Arguments after -- are passed to you
 
   koda test [--no-opt] [-v] [--failfast] [-run <pattern>] [<files...>]
 
-Default: tests/*.koda under project or repo. Named test blocks print PASS: lines.
+Default: discovers *_test.koda under the project (Go-style), or tests/*.koda in the compiler repo.
+Uses the native compile-and-run pipeline (same as koda run).
 `,
 	"bench": `Time repeated runs of a program.
 

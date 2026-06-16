@@ -1,0 +1,27 @@
+struct Enemy { y, health }
+
+func main() {
+    let nums = [3, 1, 4, 1, 5];
+    nums.sort();
+    assert(nums[0] == 1, "default sort 0");
+    assert(nums[4] == 5, "default sort 4");
+
+    let enemies = [
+        Enemy { y: 120, health: 30 },
+        Enemy { y: 40, health: 10 },
+        Enemy { y: 80, health: 50 }
+    ];
+    enemies.sort(func(a, b) {
+        return a.y - b.y;
+    });
+    assert(enemies[0].y == 40, "comparator sort top");
+    assert(enemies[1].y == 80, "comparator sort mid");
+    assert(enemies[2].y == 120, "comparator sort bottom");
+
+    enemies.sort(func(a, b) {
+        return a.health - b.health;
+    });
+    assert(enemies[0].health == 10, "health sort");
+
+    print("PASS sort_comparator");
+}

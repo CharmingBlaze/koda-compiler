@@ -1,0 +1,47 @@
+{
+  "name": "koda",
+  "displayName": "Koda",
+  "description": "Syntax highlighting for the Koda programming language (.koda)",
+  "version": "0.5.0",
+  "publisher": "koda-lang",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "koda",
+    "game-dev",
+    "raylib"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "koda",
+        "aliases": [
+          "Koda",
+          "koda"
+        ],
+        "extensions": [
+          ".koda"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "koda",
+        "scopeName": "source.koda",
+        "path": "./syntaxes/koda.tmLanguage.json"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CharmingBlaze/koda-compiler.git",
+    "directory": "vscode-koda"
+  },
+  "homepage": "https://github.com/CharmingBlaze/koda-compiler"
+}

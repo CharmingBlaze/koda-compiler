@@ -1,6 +1,82 @@
 package sema
 
-import "koda/internal/parser"
+import (
+	"strings"
+
+	"koda/internal/parser"
+)
+
+// recordCallbackStructParamsFromMethodCall records struct element types for parameters of
+// anonymous callbacks passed to array methods (.sort, .map, .filter, .each, …).
+func (a *Analyzer) recordCallbackStructParamsFromMethodCall(call *parser.CallExpr) {
+	ix, ok := call.Function.(*parser.IndexExpr)
+	if !ok {
+		return
+	}
+	lit, ok := ix.Index.(*parser.LiteralExpr)
+	if !ok {
+		return
+	}
+	method, ok := lit.Value.(string)
+	if !ok {
+		return
+	}
+	method = strings.ToLower(method)
+	elemStruct := ""
+	switch method {
+	case "sort", "map", "filter", "each", "foreach", "find", "flatmap":
+		elemStruct = a.arrayElementStructType(ix.Object)
+	default:
+		return
+	}
+	if elemStruct == "" || len(call.Arguments) == 0 {
+		return
+	}
+	fe, ok := call.Arguments[0].(*parser.FuncExpr)
+	if !ok {
+		return
+	}
+	if a.funcExprParamStruct == nil {
+		a.funcExprParamStruct = make(map[*parser.FuncExpr]map[string]string)
+	}
+	params := make(map[string]string)
+	switch method {
+	case "sort":
+		for i := 0; i < len(fe.Params) && i < 2; i++ {
+			params[fe.Params[i].Name] = elemStruct
+		}
+	default:
+		if len(fe.Params) > 0 {
+			params[fe.Params[0].Name] = elemStruct
+		}
+	}
+	if len(params) > 0 {
+		a.funcExprParamStruct[fe] = params
+	}
+}
+
+func (a *Analyzer) arrayElementStructType(recv parser.Expr) string {
+	if id, ok := recv.(*parser.IdentifierExpr); ok {
+		if st, ok := a.varArrayElementStruct[id.Name.Lexeme]; ok {
+			return st
+		}
+	}
+	return ""
+}
+
+// refineStructFieldAccessFromCallbacks re-binds struct field slots inside anonymous callbacks
+// after array element types are known from the receiver expression.
+func (a *Analyzer) refineStructFieldAccessFromCallbacks() {
+	if len(a.funcExprParamStruct) == 0 {
+		return
+	}
+	for fe, params := range a.funcExprParamStruct {
+		prev := a.activeParamStruct
+		a.activeParamStruct = params
+		a.walkStmtStructFieldAccess(fe.Body)
+		a.activeParamStruct = prev
+	}
+}
 
 // recordParamStructFromCall records struct types passed to function parameters at call sites.
 func (a *Analyzer) recordParamStructFromCall(call *parser.CallExpr) {
@@ -58,6 +134,13 @@ func (a *Analyzer) structTypeOfExpr(e parser.Expr) string {
 		if slot, ok := a.indexExprStructSlot[x]; ok {
 			if st := a.structTypeFromFieldSlot(x, slot); st != "" {
 				return st
+			}
+		}
+		if id, ok := x.Object.(*parser.IdentifierExpr); ok {
+			if _, ok := x.Index.(*parser.LiteralExpr); ok {
+				if st, ok := a.varArrayElementStruct[id.Name.Lexeme]; ok {
+					return st
+				}
 			}
 		}
 	}

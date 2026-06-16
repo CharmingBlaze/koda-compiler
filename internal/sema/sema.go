@@ -21,6 +21,8 @@ type Analyzer struct {
 	varEnumType   map[string]string   // variable name -> enum type name
 	// funcParamStruct maps function name -> parameter name -> struct type (from call sites).
 	funcParamStruct   map[string]map[string]string
+	// funcExprParamStruct maps anonymous callbacks -> parameter name -> struct type (from .sort/.map/etc.).
+	funcExprParamStruct map[*parser.FuncExpr]map[string]string
 	activeParamStruct map[string]string // param struct types while refining a function body
 	warnings      []string
 
@@ -122,6 +124,7 @@ func (a *Analyzer) Analyze(prog *parser.Program) error {
 	a.varStructType = make(map[string]string)
 	a.varEnumType = make(map[string]string)
 	a.funcParamStruct = make(map[string]map[string]string)
+	a.funcExprParamStruct = make(map[*parser.FuncExpr]map[string]string)
 	a.activeParamStruct = nil
 	a.indexExprStructSlot = make(map[*parser.IndexExpr]int)
 	a.indexExprEnumConst = make(map[*parser.IndexExpr]int64)
@@ -137,6 +140,7 @@ func (a *Analyzer) Analyze(prog *parser.Program) error {
 		a.analyzeDecl(decl)
 	}
 	a.refineStructFieldAccessFromCalls(prog)
+	a.refineStructFieldAccessFromCallbacks()
 	a.checkUnusedBindings()
 	if a.opts != nil && a.opts.WarnUnreachable {
 		for _, decl := range prog.Declarations {
@@ -524,6 +528,7 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 			a.analyzeExpr(arg)
 		}
 		a.recordParamStructFromCall(e)
+		a.recordCallbackStructParamsFromMethodCall(e)
 		a.maybeCheckCallArity(e)
 	case *parser.AssignExpr:
 		a.analyzeExpr(e.Value)
