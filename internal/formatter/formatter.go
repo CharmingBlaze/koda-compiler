@@ -30,13 +30,6 @@ func Format(src string) (string, error) {
 	return finalize(em.String()), nil
 }
 
-// normalizeLegacyOperators rewrites removed === / !== tokens so koda fmt can migrate old sources.
-func normalizeLegacyOperators(src string) string {
-	src = strings.ReplaceAll(src, "!==", "!=")
-	src = strings.ReplaceAll(src, "===", "==")
-	return src
-}
-
 func finalize(s string) string {
 	lines := strings.Split(s, "\n")
 	for i := range lines {

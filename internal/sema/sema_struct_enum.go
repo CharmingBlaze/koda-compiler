@@ -27,14 +27,19 @@ func (a *Analyzer) analyzeStructDecl(d *parser.StructDecl) {
 		if f.Default != nil {
 			defaults[f.Name.Lexeme] = f.Default
 		}
-		if f.Optional && f.Default != nil {
-			a.record(&diagnostic.DiagnosticError{
-				File:    f.Name.File,
-				Line:    f.Name.Line,
-				Col:     f.Name.Col,
-				Message: fmt.Sprintf("struct field '%s' cannot be both optional (?) and have a default value", f.Name.Lexeme),
-				Hint:    "use either 'field?' or 'field = default', not both",
-			})
+		if f.Optional {
+			if f.Default != nil {
+				a.record(&diagnostic.DiagnosticError{
+					File:    f.Name.File,
+					Line:    f.Name.Line,
+					Col:     f.Name.Col,
+					Message: fmt.Sprintf("struct field '%s' cannot be both optional (?) and have a default value", f.Name.Lexeme),
+					Hint:    "use either 'field?' or 'field = default', not both",
+				})
+			} else {
+				// Optional (?) is sugar for "may omit → null", same as `field = null`.
+				defaults[f.Name.Lexeme] = &parser.LiteralExpr{Token: f.Name, Value: nil}
+			}
 		}
 	}
 	a.structLayouts[name] = fields
@@ -312,14 +317,15 @@ func (a *Analyzer) structFieldHint(field string, fields []string) string {
 }
 
 func suggestFromList(name string, candidates []string) string {
+	const maxDist = 2 // distance 1–2 only; 3+ produces misleading hints
 	ln := strings.ToLower(name)
-	best, bestDist := "", 3
+	best, bestDist := "", maxDist+1
 	for _, candidate := range candidates {
 		if candidate == name {
 			continue
 		}
 		d := levenshtein(ln, strings.ToLower(candidate))
-		if d < bestDist {
+		if d >= 1 && d <= maxDist && d < bestDist {
 			best, bestDist = candidate, d
 		}
 	}

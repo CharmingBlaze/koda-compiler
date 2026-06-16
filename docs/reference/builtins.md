@@ -106,7 +106,7 @@ String **methods**: `.trim()`, `.toupper()`, `.split()`, etc. — see [str stdli
 | `isfile(path)` | bool |
 | `isdir(path)` | bool |
 | `filesize(path)` | number |
-| `listdir(path)` | array of entry names |
+| `listdir(path)` | array of **entry names** (not full paths; like Node.js `readdir`) |
 | `readdir(path)` | alias of `listDir` |
 
 Or `import "@io"`.

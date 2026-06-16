@@ -46,6 +46,23 @@ func TestFormatRangeExpr(t *testing.T) {
 	}
 }
 
+func TestFormatPreservesStrictEqualityInStrings(t *testing.T) {
+	src := "let s = \"use === and !== in docs\";\nlet ok = 1 === 1;\n"
+	out, err := Format(src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, "===") || !strings.Contains(out, "!==") {
+		t.Fatalf("string literal must preserve ===/!==, got %q", out)
+	}
+	if strings.Contains(out, "1 === 1") {
+		t.Fatalf("code outside strings must rewrite ===, got %q", out)
+	}
+	if !strings.Contains(out, "1 == 1") {
+		t.Fatalf("expected rewritten equality, got %q", out)
+	}
+}
+
 func TestFormatStrictEqualityRewrite(t *testing.T) {
 	src := "if (a === b) { }\nif (a !== b) { }\n"
 	out, err := Format(src)

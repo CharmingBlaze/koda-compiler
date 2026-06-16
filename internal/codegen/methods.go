@@ -570,6 +570,8 @@ func (g *Generator) emitArrayMethodMap(recv value.Value, args []parser.Expr) (va
 	return g.block.NewLoad(types.I64, outSlot), true, nil
 }
 
+// emitArrayMethodFlatMap lowers callback map then flat(1). Unfused path — a single-loop
+// flatMap in C/runtime would be faster but is not required for correctness.
 func (g *Generator) emitArrayMethodFlatMap(recv value.Value, args []parser.Expr) (value.Value, bool, error) {
 	mapped, handled, err := g.emitArrayMethodMap(recv, args)
 	if err != nil || !handled {

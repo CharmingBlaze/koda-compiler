@@ -242,6 +242,7 @@ func snapshotChanges(a, b map[string]watchFingerprint, root string) []string {
 			if rel == "" {
 				rel = path
 			}
+			rel = filepath.ToSlash(rel)
 			out = append(out, rel+" removed")
 			seen[rel] = true
 			continue
@@ -251,6 +252,7 @@ func snapshotChanges(a, b map[string]watchFingerprint, root string) []string {
 			if rel == "" {
 				rel = path
 			}
+			rel = filepath.ToSlash(rel)
 			out = append(out, rel+" changed")
 			seen[rel] = true
 		}
@@ -261,6 +263,7 @@ func snapshotChanges(a, b map[string]watchFingerprint, root string) []string {
 			if rel == "" {
 				rel = path
 			}
+			rel = filepath.ToSlash(rel)
 			if !seen[rel] {
 				out = append(out, rel+" added")
 			}

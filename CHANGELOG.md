@@ -5,6 +5,41 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-06-16
+
+Compiler-review release: beginner clarity, safer switch semantics, and expanded stdlib surface.
+
+### Added
+
+- **`fallthrough;` keyword** — opt-in C-style switch chaining; default is no fall-through (same as `match`).
+- **Optional struct fields** — `struct Node { value, next? }` (`?` = may omit at construction → `null`; equivalent to `next = null`).
+- **String methods** — `.padStart(n, c?)`, `.padEnd(n, c?)` (C runtime).
+- **Array methods** — `.flat(depth?)`, `.flatMap(callback)` (flatMap via map + flat in codegen).
+- **`readDir(path)`** — alias of `listDir`; returns **entry names only** (not full paths).
+- **Truthy lint** — `koda check` warns on `if (arr)`, `if ({})`, and known array/struct variables (differs from JavaScript).
+- **Struct field hints** — `did you mean 'field'?` on typos (Levenshtein distance 1–2).
+- **`scripts/resolve-raylib-stage.ps1`** — prefers `third_party/raylib_static/stage`, falls back to `raylib_lib/`.
+- **mario64-studio example** — `examples/games/mario64-studio/`.
+- **CI** — `ubuntu-24.04-arm` in main workflow matrix.
+
+### Changed
+
+- **Removed `===` / `!==`** — lexer rejects them; `koda fmt` migrates old sources (string/comment-safe rewrite).
+- **Switch codegen** — cases no longer fall through by default; `break` in a case is a harmless no-op.
+- **For-loop init** — `for (let i = 0, j = 10; …)` allowed (second `let` optional).
+- **`koda fmt`** — rewrites legacy equality outside strings and comments.
+- **`koda watch`** — prints project-relative paths: `[koda watch] src/foo.koda changed — rebuilding...`.
+- **`koda doctor`** — `Fix:` hints for install-dir and temp-folder write failures.
+- **`gcCollect()`** — deprecated; `gc()` is canonical (`koda check` warns).
+- **Documentation** — struct defaults, `@str`, `randomChoice`, `listDir`/`readDir`, truthy/falsy in learn guide; Raylib layout in `ARCHITECTURE.md`.
+
+### Fixed
+
+- **API runtime hardening tests** — set `KODA_HOME` to repo root so builds link local `libkoda_runtime.a`.
+- **Native extern forward refs** — `// koda:extern` names visible before their `let` (struct methods calling shims).
+- **GC write barrier** — `koda_array_remove_at` uses `gc_write_barrier` on element shifts.
+- **Sema** — optional `?` fields register the same null default as `field = null`.
+
 ## [Unreleased]
 
 ### Added

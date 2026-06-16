@@ -751,11 +751,12 @@ let origin = Point { };        // x and y are 0
 let p = Point { x: 5 };        // y defaults to 0
 ```
 
-**Optional fields** — suffix `?` means the field may be omitted (defaults to `null`):
+**Optional fields** — suffix `?` means the field may be omitted at construction time. This is **syntax sugar for “defaults to `null`”**, not a type-level nullable (`string?` is planned separately). These are equivalent:
 
 ```koda
 struct Node { value, next? }
-let leaf = Node { value: 42 }; // next is null
+struct Node { value, next = null }
+let leaf = Node { value: 42 }; // next is null in both cases
 ```
 
 See `tests/struct_test.koda` for more examples.
@@ -1236,7 +1237,7 @@ These are all registered in `internal/codegen/builtin_register.go`. All case-ins
 `len`, `type`, `typeof`, `number`, `string`, `bool`, `isNumber`, `isString`, `isBool`, `isNull`, `isArray`, `isObject`, `isFunction`
 
 **Files:**
-`readFile`, `writeFile`, `appendFile`, `fileExists`, `deleteFile`, `listDir`, `readDir` (alias of `listDir`)
+`readFile`, `writeFile`, `appendFile`, `fileExists`, `deleteFile`, `listDir`, `readDir` (alias) — directory listing returns **entry names only**, not full paths
 
 **JSON:**
 `parseJSON`, `toJSON`
