@@ -82,7 +82,7 @@ func parseRunCommandArgs(args []string) (src string, noOpt bool, debug bool, pro
 }
 
 // version is set by release builds, e.g. -ldflags "-X main.version=1.0.0"
-var version = "0.5.0"
+var version = "0.6.0-dev"
 
 func main() {
 	kodahome.EnsureSDKFromExecutable()
