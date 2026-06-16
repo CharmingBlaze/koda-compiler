@@ -44,6 +44,23 @@ source.koda
 
 Every symbol in `internal/codegen/runtime.go` must have a matching implementation in `runtime/src/koda_runtime.c` with the exact same C calling convention. If these drift, the linker produces a broken binary silently.
 
+Automated guards (run via `go test ./...`):
+
+- `TestWriteBarrierCoverage` — GC write barriers in `koda_runtime.c`
+- `TestRuntimeLLVMSymbolsDefinedInArchive` — LLVM declares match `libkoda_runtime.a`
+- `TestRuntimeLLVMSymbolsMentionedInSources` — every declare appears in `runtime/src/*.c`
+
+## Third-party layout
+
+| Path | Role |
+|---|---|
+| `third_party/raylib_static/` | **Canonical** vendored Raylib — `make -C third_party/raylib_static` builds into `stage/`; used by compiler auto-detect, SDK packaging, and `koda doctor` |
+| `raylib_lib/` | **Dev-only** Windows prebuild used by local `.ps1` scripts — not used by the compiler or release SDK |
+
+## Legacy artifacts
+
+`_legacy/` holds old wrapper-generator output for reference only. It is not part of the build, CI, or release zip. Prefer `wrappers/` and `third_party/` for current Raylib integration.
+
 ## Running tests
 
 ```bash

@@ -35,9 +35,9 @@ func expandIncludes(modulePath string, bundle *ProgramBundle, stack map[string]b
 	stack[modulePath] = true
 	defer delete(stack, modulePath)
 
-	prog := bundle.Modules[modulePath]
-	if prog == nil {
-		return nil, fmt.Errorf("missing module %q (not loaded)", modulePath)
+	prog, modulePath, err := lookupBundleModule(bundle, modulePath)
+	if err != nil {
+		return nil, err
 	}
 
 	var out []Decl
@@ -59,4 +59,19 @@ func expandIncludes(modulePath string, bundle *ProgramBundle, stack map[string]b
 		out = append(out, inner...)
 	}
 	return out, nil
+}
+
+func lookupBundleModule(bundle *ProgramBundle, modulePath string) (*Program, string, error) {
+	if bundle == nil {
+		return nil, "", fmt.Errorf("missing module %q (not loaded)", modulePath)
+	}
+	if prog := bundle.Modules[modulePath]; prog != nil {
+		return prog, modulePath, nil
+	}
+	for path, prog := range bundle.Modules {
+		if strings.EqualFold(path, modulePath) {
+			return prog, path, nil
+		}
+	}
+	return nil, "", fmt.Errorf("missing module %q (not loaded)", modulePath)
 }

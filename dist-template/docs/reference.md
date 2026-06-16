@@ -46,7 +46,7 @@ let b = 2;
 
 ## 3. Operators
 
-Arithmetic `+ - * / %`, unary `- ! ~ delete`, comparisons, `== !=`, logical `&& ||`, assignment `=` and compound `+= -= *= /= %=`, bitwise ops, `===` / `!==`, ternary `?:`, update `++` / `--` (prefix and postfix where parsed), infix **`..`** (range): **implemented** in lexer/parser/sema; **LLVM codegen** (`internal/codegen`) follows the same AST with gaps documented in [HANDOFF.md](HANDOFF.md).
+Arithmetic `+ - * / %`, unary `- ! ~ delete`, comparisons, `== !=`, logical `&& ||`, assignment `=` and compound `+= -= *= /= %=`, bitwise ops, ternary `?:`, update `++` / `--` (prefix and postfix where parsed), infix **`..`** (range): **implemented** in lexer/parser/sema; **LLVM codegen** (`internal/codegen`) follows the same AST with gaps documented in [HANDOFF.md](HANDOFF.md).
 
 Unary **`delete`** applies only to **`obj[stringKey]`** on objects (not array slots); it removes the property and evaluates to **`true`** if the key existed, **`false`** otherwise.
 

@@ -16,7 +16,7 @@ const (
 	PrecedenceBitOr       // |
 	PrecedenceBitXor      // ^
 	PrecedenceBitAnd      // &
-	PrecedenceEquals      // == != === !==
+	PrecedenceEquals      // == !=
 	PrecedenceLessGreater // < > <= >=
 	PrecedenceSum         // + -
 	PrecedenceShift       // << >> >>>
@@ -39,10 +39,8 @@ var precedences = map[lexer.TokenType]int{
 	lexer.TokenCaretEqual:          PrecedenceAssign,
 	lexer.TokenLessLessEqual:       PrecedenceAssign,
 	lexer.TokenGreaterGreaterEqual: PrecedenceAssign,
-	lexer.TokenEqualEqual:          PrecedenceEquals,
-	lexer.TokenStrictEqual:         PrecedenceEquals,
-	lexer.TokenBangEqual:           PrecedenceEquals,
-	lexer.TokenStrictNotEqual:      PrecedenceEquals,
+	lexer.TokenEqualEqual: PrecedenceEquals,
+	lexer.TokenBangEqual:  PrecedenceEquals,
 	lexer.TokenLess:                PrecedenceLessGreater,
 	lexer.TokenLessEqual:           PrecedenceLessGreater,
 	lexer.TokenGreater:             PrecedenceLessGreater,
@@ -183,7 +181,7 @@ func (p *Parser) parseReservedVar() (Expr, error) {
 func (p *Parser) getInfixFn(typ lexer.TokenType) infixParseFn {
 	switch typ {
 	case lexer.TokenPlus, lexer.TokenMinus, lexer.TokenSlash, lexer.TokenStar, lexer.TokenPercent,
-		lexer.TokenEqualEqual, lexer.TokenStrictEqual, lexer.TokenBangEqual, lexer.TokenStrictNotEqual,
+		lexer.TokenEqualEqual, lexer.TokenBangEqual,
 		lexer.TokenLess, lexer.TokenLessEqual,
 		lexer.TokenGreater, lexer.TokenGreaterEqual, lexer.TokenAndAnd, lexer.TokenOrOr,
 		lexer.TokenAnd, lexer.TokenOr, lexer.TokenCaret,

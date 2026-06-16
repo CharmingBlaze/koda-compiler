@@ -120,7 +120,7 @@ switch (state) {
 }
 ```
 
-Cases fall through unless you `break`.
+Cases do **not** fall through. Use `fallthrough;` at the end of a case when you need C-style chaining.
 
 ### match (brace-style)
 

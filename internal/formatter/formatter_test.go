@@ -46,6 +46,20 @@ func TestFormatRangeExpr(t *testing.T) {
 	}
 }
 
+func TestFormatStrictEqualityRewrite(t *testing.T) {
+	src := "if (a === b) { }\nif (a !== b) { }\n"
+	out, err := Format(src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(out, "===") || strings.Contains(out, "!==") {
+		t.Fatalf("expected ===/!== rewrite, got %q", out)
+	}
+	if !strings.Contains(out, "==") || !strings.Contains(out, "!=") {
+		t.Fatalf("expected == and != in output, got %q", out)
+	}
+}
+
 func TestFormatHelloKoda(t *testing.T) {
 	path := filepath.Join("..", "..", "tests", "hello.koda")
 	b, err := os.ReadFile(path)

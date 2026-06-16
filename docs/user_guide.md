@@ -218,8 +218,7 @@ let b = a;
 b == a           // true — same reference
 ```
 
-For strict equality (no type coercion — Koda has none anyway), `===` is also
-available and behaves identically to `==`.
+Use `==` and `!=` for equality. Legacy `===` / `!==` are not supported — run `koda fmt` to migrate old code.
 
 ### Logical
 
@@ -270,7 +269,7 @@ not a statement. It can appear anywhere a value is expected.
 7. Bitwise XOR: `^`
 8. Bitwise OR: `|`
 9. Comparison: `<`, `<=`, `>`, `>=`
-10. Equality: `==`, `!=`, `===`, `!==`
+10. Equality: `==`, `!=`
 11. Logical AND: `&&`
 12. Logical OR: `||`
 13. Ternary: `?:`
@@ -577,7 +576,7 @@ switch (day) {
 }
 ```
 
-Each `case` runs its body and **does not fall through** — no `break` needed.
+Each `case` runs its body and **stops** — no `break` needed. Use `fallthrough;` when you want the next case to run (C-style chaining).
 The `default` branch runs when no case matches.
 
 ### match statement

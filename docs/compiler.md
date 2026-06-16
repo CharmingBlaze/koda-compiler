@@ -88,7 +88,7 @@ javascript// Arithmetic
 
 // Comparison
 ==  !=  <  <=  >  >=
-===  !==                  // strict equality (type + value)
+==  !=                   // equality (=== / !== are not supported; koda fmt rewrites them)
 
 // Logical
 &&  ||  !
@@ -1804,7 +1804,7 @@ bitwiseXor       = bitwiseAnd ("^" bitwiseAnd)*
 
 bitwiseAnd       = equality ("&" equality)*
 
-equality         = comparison (("!=" | "==" | "!==" | "===") comparison)*
+equality         = comparison (("!=" | "==") comparison)*
 
 comparison       = bitwiseShift ((">" | ">=" | "<" | "<=") bitwiseShift)*
 
@@ -1879,7 +1879,7 @@ Implemented (high level)
 - **kodawrap** (sources under **`cmd/wrapgen`**, same Go module): `go build -o kodawrap ./cmd/wrapgen` generates readable `.koda` + `wrapper.c` + Markdown from C headers.
 - **C interop today:** `// koda:extern` lines parsed in [internal/codegen.go](internal/codegen.go), not `#native` / `#ffi` tokens from the grammar below.
 - Modules: `import "path"` expression form, `import("@scope/...")`, and `#include "path"` / `#include <name>` ([internal/parser/loader.go](internal/parser/loader.go)). Optional `#include` forms `as`, `{names}`, `*` from the grammar are **not** implemented.
-- Core language: control flow (`if`, `while`, `for`, `for (let x in/of …)`, `do`/`while`, `switch` with **C-style fall-through** — use `break` to stop; bytecode VM, tree runtime, and LLVM backend match), operators including bitwise/shift/`===`/`!==`, ternary, objects/arrays, closures, template literals, raw strings, numeric radix forms, `...rest` / defaults (see tests and [KODA_PROGRAMMER_REFERENCE.md](KODA_PROGRAMMER_REFERENCE.md)).
+- Core language: control flow (`if`, `while`, `for`, `for (let x in/of …)`, `do`/`while`, `switch` / `match` — **no fall-through** unless you use `fallthrough;`; LLVM backend), operators including bitwise/shift, ternary, objects/arrays, closures, template literals, raw strings, numeric radix forms, `...rest` / defaults (see tests and [KODA_PROGRAMMER_REFERENCE.md](KODA_PROGRAMMER_REFERENCE.md)).
 - Builtins: `type`, conversions, `is_*` predicates, core math/time/file helpers per [internal/sema.go](internal/sema.go).
 
 Release-safe additions implemented after release hardening

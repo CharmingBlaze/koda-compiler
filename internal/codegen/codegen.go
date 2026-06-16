@@ -147,6 +147,7 @@ type Generator struct {
 	runtimeArraySlice       *ir.Func
 	runtimeArrayConcat      *ir.Func
 	runtimeArrayJoin        *ir.Func
+	runtimeArrayFlat        *ir.Func
 	runtimeStringSplit      *ir.Func
 	runtimeStringTrim       *ir.Func
 	runtimeStringUpper      *ir.Func
@@ -157,6 +158,8 @@ type Generator struct {
 	runtimeStringSlice      *ir.Func
 	runtimeStringReplace    *ir.Func
 	runtimeStringReplaceAll *ir.Func
+	runtimeStringPadStart   *ir.Func
+	runtimeStringPadEnd     *ir.Func
 	runtimeReadFile         *ir.Func
 	runtimeAssetPath        *ir.Func
 	runtimeArgs             *ir.Func
@@ -274,9 +277,10 @@ type testEntry struct {
 
 // loopContext tracks information about the current loop for break/continue.
 type loopContext struct {
-	condBlock  *ir.Block
-	incBlock   *ir.Block
-	afterBlock *ir.Block
+	condBlock         *ir.Block
+	incBlock          *ir.Block
+	afterBlock        *ir.Block
+	fallthroughTarget *ir.Block
 }
 
 // NewGenerator creates a new LLVM IR generator.
@@ -375,6 +379,7 @@ func NewGenerator(ctx *sema.NativeEmitContext) *Generator {
 		runtimeArraySlice:       runtimeFuncs["KODA_array_slice"],
 		runtimeArrayConcat:      runtimeFuncs["KODA_array_concat"],
 		runtimeArrayJoin:        runtimeFuncs["KODA_array_join"],
+		runtimeArrayFlat:        runtimeFuncs["KODA_array_flat"],
 		runtimeStringSplit:      runtimeFuncs["KODA_string_split"],
 		runtimeStringTrim:       runtimeFuncs["KODA_string_trim"],
 		runtimeStringUpper:      runtimeFuncs["KODA_string_upper"],
@@ -385,6 +390,8 @@ func NewGenerator(ctx *sema.NativeEmitContext) *Generator {
 		runtimeStringSlice:      runtimeFuncs["KODA_string_slice"],
 		runtimeStringReplace:    runtimeFuncs["KODA_string_replace"],
 		runtimeStringReplaceAll: runtimeFuncs["KODA_string_replaceAll"],
+		runtimeStringPadStart:   runtimeFuncs["KODA_string_padStart"],
+		runtimeStringPadEnd:     runtimeFuncs["KODA_string_padEnd"],
 		runtimeReadFile:         runtimeFuncs["KODA_readFile"],
 		runtimeAssetPath:        runtimeFuncs["KODA_asset_path"],
 		runtimeArgs:             runtimeFuncs["KODA_args"],
@@ -524,6 +531,10 @@ func (g *Generator) Generate(bundle *parser.ProgramBundle) (*ir.Module, error) {
 	g.pushDeferLayer()
 	defer g.popDeferLayer()
 
+	if err := g.prepareBundleBindings(bundle); err != nil {
+		return nil, err
+	}
+
 	if err := g.emitStructMethods(); err != nil {
 		return nil, err
 	}
@@ -607,14 +618,100 @@ func (g *Generator) emitIncludeDecl(_ *parser.IncludeDecl) error {
 	return nil
 }
 
+// prepareBundleBindings registers module-level names before struct methods are emitted.
+// Struct method bodies may call shim natives (drawcube, getmousex, …) declared in #includes
+// that appear after the struct in the flattened entry, or only in included modules.
+func (g *Generator) prepareBundleBindings(bundle *parser.ProgramBundle) error {
+	if bundle == nil {
+		return nil
+	}
+	userMain := g.funcs["user_main"]
+	seenNative := make(map[string]bool)
+	seenGlobal := make(map[string]bool)
+
+	registerDecls := func(decls []parser.Decl) error {
+		for _, decl := range decls {
+			ld, ok := decl.(*parser.LetDecl)
+			if !ok {
+				continue
+			}
+			name := ld.Name.Lexeme
+			if ld.Native != nil {
+				key := strings.ToLower(name)
+				if seenNative[key] {
+					continue
+				}
+				if _, exists := g.funcs[name]; exists {
+					seenNative[key] = true
+					continue
+				}
+				if err := g.emitNativeExternLet(ld); err != nil {
+					return err
+				}
+				seenNative[key] = true
+				continue
+			}
+			if g.currentFn != userMain {
+				continue
+			}
+			if seenGlobal[name] {
+				continue
+			}
+			if _, exists := g.globals[name]; exists {
+				seenGlobal[name] = true
+				continue
+			}
+			global := g.mod.NewGlobalDef("koda_global_"+name, constant.NewInt(types.I64, llvmNilTagged))
+			g.globals[name] = global
+			g.moduleGlobals[name] = global
+			g.moduleGlobalIsCell[name] = false
+			seenGlobal[name] = true
+		}
+		return nil
+	}
+
+	if bundle.Entry != nil {
+		if err := registerDecls(bundle.Entry.Declarations); err != nil {
+			return err
+		}
+	}
+	for _, prog := range bundle.Modules {
+		if prog == nil {
+			continue
+		}
+		if err := registerDecls(prog.Declarations); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (g *Generator) emitLetDecl(d *parser.LetDecl) error {
 	name := d.Name.Lexeme
 
 	if d.Native != nil {
+		if _, exists := g.funcs[name]; exists {
+			return nil
+		}
 		return g.emitNativeExternLet(d)
 	}
 
 	if g.currentFn == g.funcs["user_main"] {
+		if global, exists := g.globals[name]; exists {
+			g.locals[name] = global
+			g.localIsCell[name] = false
+			if g.runtimeRegisterGlobal != nil {
+				g.block.NewCall(g.runtimeRegisterGlobal, global)
+			}
+			if d.Init != nil {
+				initVal, err := g.emitExpr(d.Init)
+				if err != nil {
+					return err
+				}
+				g.block.NewStore(g.emitAsKodaI64(initVal), global)
+			}
+			return nil
+		}
 		global := g.mod.NewGlobalDef("koda_global_"+name, constant.NewInt(types.I64, llvmNilTagged))
 		g.globals[name] = global
 		g.locals[name] = global
@@ -744,8 +841,10 @@ func (g *Generator) emitNativeExternLet(d *parser.LetDecl) error {
 	fn := g.ensureNativeExternFunc(sym)
 	name := d.Name.Lexeme
 	g.funcs[name] = fn
+	g.funcs[strings.ToLower(name)] = fn
 	if kn := strings.TrimSpace(d.Native.BindingName); kn != "" && kn != name {
 		g.funcs[kn] = fn
+		g.funcs[strings.ToLower(kn)] = fn
 	}
 	// Native bindings are declarations only; ignore initializer (typically `0`).
 	return nil

@@ -249,11 +249,11 @@ func (g *Generator) emitInfix(e *parser.InfixExpr) (value.Value, error) {
 		ld := g.block.NewCall(g.runtimeUnboxNumber, leftI)
 		rd := g.block.NewCall(g.runtimeUnboxNumber, rightI)
 		return g.block.NewCall(g.runtimeBoxNumber, g.block.NewFRem(ld, rd)), nil
-	case "==", "===":
+	case "==":
 		eq := g.block.NewCall(g.runtimeValuesEqual, leftI, rightI)
 		cmp := g.block.NewICmp(enum.IPredEQ, eq, constant.NewInt(types.I64, 1))
 		return g.emitBoxBoolNaN(cmp), nil
-	case "!=", "!==":
+	case "!=":
 		eq := g.block.NewCall(g.runtimeValuesEqual, leftI, rightI)
 		cmp := g.block.NewICmp(enum.IPredEQ, eq, constant.NewInt(types.I64, 0))
 		return g.emitBoxBoolNaN(cmp), nil

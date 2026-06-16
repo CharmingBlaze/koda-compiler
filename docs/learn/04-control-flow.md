@@ -73,7 +73,7 @@ for (let k, v of cfg) {
 
 ## Switch (C-style)
 
-Cases **fall through** unless you `break`:
+Cases do **not** fall through. Use `fallthrough;` when you need the next case to run.
 
 ```koda
 let weapon = 2;

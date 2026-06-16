@@ -1659,6 +1659,7 @@ Value koda_array_remove_at(Value arr, int64_t index) {
     }
     Value removed = array->elements[(int)index];
     for (int i = (int)index; i < array->count - 1; i++) {
+        gc_write_barrier((Obj*)array, array->elements[i + 1]);
         array->elements[i] = array->elements[i + 1];
     }
     array->count--;
@@ -2782,6 +2783,35 @@ Value koda_array_concat(int arg_count, Value* args) {
     return ov;
 }
 
+static void flatten_push(Value outv, Value elem, int depth) {
+    if (depth > 0 && IS_OBJ(elem) && AS_OBJ(elem)->type == OBJ_ARRAY) {
+        ObjArray* src = (ObjArray*)AS_OBJ(elem);
+        for (int i = 0; i < src->count; i++) {
+            flatten_push(outv, src->elements[i], depth - 1);
+        }
+        return;
+    }
+    koda_array_push(outv, elem);
+}
+
+Value koda_array_flat(int arg_count, Value* args) {
+    if (arg_count < 1 || arg_count > 2) return NIL_VAL;
+    if (!IS_OBJ(args[0]) || AS_OBJ(args[0])->type != OBJ_ARRAY) return NIL_VAL;
+    int depth = 1;
+    if (arg_count == 2) {
+        if (!IS_NUMBER(args[1])) return NIL_VAL;
+        depth = (int)AS_NUMBER(args[1]);
+    }
+    if (depth < 1) depth = 1;
+    ObjArray* src = (ObjArray*)AS_OBJ(args[0]);
+    ObjArray* out = allocate_array(src->count < 1 ? 1 : src->count);
+    Value ov = OBJ_VAL((Obj*)out);
+    for (int i = 0; i < src->count; i++) {
+        flatten_push(ov, src->elements[i], depth);
+    }
+    return ov;
+}
+
 Value koda_array_join(int arg_count, Value* args) {
     if (arg_count != 2) return NIL_VAL;
     if (!IS_OBJ(args[0]) || AS_OBJ(args[0])->type != OBJ_ARRAY) return NIL_VAL;
@@ -2904,6 +2934,66 @@ Value koda_string_endsWith(int arg_count, Value* args) {
     if (suf->length > s->length) return BOOL_VAL(false);
     int off = s->length - suf->length;
     return BOOL_VAL(memcmp(s->chars + off, suf->chars, (size_t)suf->length) == 0);
+}
+
+Value koda_string_padStart(int arg_count, Value* args) {
+    if (arg_count < 2 || arg_count > 3) return NIL_VAL;
+    if (!IS_OBJ(args[0]) || AS_OBJ(args[0])->type != OBJ_STRING) return NIL_VAL;
+    if (!IS_NUMBER(args[1])) return NIL_VAL;
+    ObjString* s = (ObjString*)AS_OBJ(args[0]);
+    int target = (int)AS_NUMBER(args[1]);
+    if (target <= s->length) return args[0];
+    const char* pad = " ";
+    int padLen = 1;
+    if (arg_count == 3) {
+        Value padv = koda_string(args[2]);
+        if (!IS_OBJ(padv) || AS_OBJ(padv)->type != OBJ_STRING) return NIL_VAL;
+        ObjString* ps = (ObjString*)AS_OBJ(padv);
+        if (ps->length < 1) return NIL_VAL;
+        pad = ps->chars;
+        padLen = ps->length;
+    }
+    int need = target - s->length;
+    ObjString* out = allocate_string(target);
+    int pos = 0;
+    while (pos < need) {
+        int chunk = padLen;
+        if (need - pos < chunk) chunk = need - pos;
+        memcpy(out->chars + pos, pad, (size_t)chunk);
+        pos += chunk;
+    }
+    memcpy(out->chars + pos, s->chars, (size_t)s->length);
+    return OBJ_VAL((Obj*)out);
+}
+
+Value koda_string_padEnd(int arg_count, Value* args) {
+    if (arg_count < 2 || arg_count > 3) return NIL_VAL;
+    if (!IS_OBJ(args[0]) || AS_OBJ(args[0])->type != OBJ_STRING) return NIL_VAL;
+    if (!IS_NUMBER(args[1])) return NIL_VAL;
+    ObjString* s = (ObjString*)AS_OBJ(args[0]);
+    int target = (int)AS_NUMBER(args[1]);
+    if (target <= s->length) return args[0];
+    const char* pad = " ";
+    int padLen = 1;
+    if (arg_count == 3) {
+        Value padv = koda_string(args[2]);
+        if (!IS_OBJ(padv) || AS_OBJ(padv)->type != OBJ_STRING) return NIL_VAL;
+        ObjString* ps = (ObjString*)AS_OBJ(padv);
+        if (ps->length < 1) return NIL_VAL;
+        pad = ps->chars;
+        padLen = ps->length;
+    }
+    int need = target - s->length;
+    ObjString* out = allocate_string(target);
+    memcpy(out->chars, s->chars, (size_t)s->length);
+    int pos = s->length;
+    while (pos < target) {
+        int chunk = padLen;
+        if (target - pos < chunk) chunk = target - pos;
+        memcpy(out->chars + pos, pad, (size_t)chunk);
+        pos += chunk;
+    }
+    return OBJ_VAL((Obj*)out);
 }
 
 Value koda_string_indexOf(int arg_count, Value* args) {

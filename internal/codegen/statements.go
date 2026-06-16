@@ -9,7 +9,6 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
-	"koda/internal/lexer"
 	"koda/internal/parser"
 )
 
@@ -37,6 +36,8 @@ func (g *Generator) emitStmt(stmt parser.Stmt) error {
 		return g.emitForInStmt(s)
 	case *parser.BreakStmt:
 		return g.emitBreakStmt(s)
+	case *parser.FallthroughStmt:
+		return g.emitFallthroughStmt(s)
 	case *parser.ContinueStmt:
 		return g.emitContinueStmt(s)
 	case *parser.SwitchStmt:
@@ -606,6 +607,19 @@ func (g *Generator) emitBreakStmt(_ *parser.BreakStmt) error {
 	return nil
 }
 
+func (g *Generator) emitFallthroughStmt(s *parser.FallthroughStmt) error {
+	if len(g.loopStack) == 0 {
+		return fmt.Errorf("fallthrough statement outside of switch")
+	}
+	ctx := g.loopStack[len(g.loopStack)-1]
+	if ctx.fallthroughTarget == nil {
+		return fmt.Errorf("%s:%d:%d: fallthrough not allowed in the last switch case without a following default",
+			s.Token.File, s.Token.Line, s.Token.Col)
+	}
+	g.block.NewBr(ctx.fallthroughTarget)
+	return nil
+}
+
 // emitContinueStmt emits LLVM IR for continue statements.
 func (g *Generator) emitContinueStmt(_ *parser.ContinueStmt) error {
 	// Continue statement - jump to the loop's increment or condition block
@@ -629,7 +643,6 @@ func (g *Generator) emitSwitchStmt(s *parser.SwitchStmt) error {
 	g.tempN++
 	suf := fmt.Sprintf(".%d", g.tempN)
 	mergeBlock := g.block.Parent.NewBlock("switch.merge" + suf)
-	isMatch := s.Token.Type == lexer.TokenMatch
 
 	swCtx := loopContext{condBlock: mergeBlock, incBlock: mergeBlock, afterBlock: mergeBlock}
 	g.loopStack = append(g.loopStack, swCtx)
@@ -682,16 +695,31 @@ func (g *Generator) emitSwitchStmt(s *parser.SwitchStmt) error {
 	for i, caseStmt := range s.Cases {
 		g.block = caseBodyBlocks[i]
 		g.shadowRewindTemps()
+		var fallTarget *ir.Block
+		if i < len(s.Cases)-1 {
+			fallTarget = caseBodyBlocks[i+1]
+		} else if defaultBodyBlock != mergeBlock {
+			fallTarget = defaultBodyBlock
+		}
+		caseCtx := loopContext{
+			condBlock:         mergeBlock,
+			incBlock:          mergeBlock,
+			afterBlock:        mergeBlock,
+			fallthroughTarget: fallTarget,
+		}
+		g.loopStack = append(g.loopStack, caseCtx)
+		usedFallthrough := false
 		for _, decl := range caseStmt.Body {
+			if _, ok := decl.(*parser.FallthroughStmt); ok {
+				usedFallthrough = true
+			}
 			if err := g.emitDecl(decl); err != nil {
+				g.loopStack = g.loopStack[:len(g.loopStack)-1]
 				return err
 			}
 		}
-		if isMatch {
-			g.block.NewBr(mergeBlock)
-		} else if i < len(s.Cases)-1 {
-			g.block.NewBr(caseBodyBlocks[i+1])
-		} else {
+		g.loopStack = g.loopStack[:len(g.loopStack)-1]
+		if !usedFallthrough {
 			g.block.NewBr(mergeBlock)
 		}
 	}

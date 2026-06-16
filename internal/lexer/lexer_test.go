@@ -145,12 +145,15 @@ func TestLexerNullishAssign(t *testing.T) {
 	})
 }
 
-func TestLexerStrictEquality(t *testing.T) {
-	assertTokenTypes(t, `a === b; c !== d;`, []TokenType{
-		TokenIdentifier, TokenStrictEqual, TokenIdentifier, TokenSemicolon,
-		TokenIdentifier, TokenStrictNotEqual, TokenIdentifier, TokenSemicolon,
-		TokenEOF,
-	})
+func TestLexerRejectsStrictEquality(t *testing.T) {
+	l := NewLexer(`a === b`, "test.koda")
+	if _, err := l.Tokenize(); err == nil {
+		t.Fatal("expected error for ===")
+	}
+	l = NewLexer(`a !== b`, "test.koda")
+	if _, err := l.Tokenize(); err == nil {
+		t.Fatal("expected error for !==")
+	}
 }
 
 func TestLexerOperatorsAndDirectives(t *testing.T) {

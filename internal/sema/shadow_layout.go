@@ -153,7 +153,7 @@ func shadowRegisterInStmt(s parser.Stmt, ctx *NativeEmitContext) {
 		if st.Value != nil {
 			shadowScanExprForFuncExprs(st.Value, ctx)
 		}
-	case *parser.BreakStmt, *parser.ContinueStmt:
+	case *parser.BreakStmt, *parser.ContinueStmt, *parser.FallthroughStmt:
 	default:
 	}
 }

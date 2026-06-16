@@ -186,20 +186,18 @@ func (l *Lexer) scanToken() error {
 	case '!':
 		if l.match('=') {
 			if l.match('=') {
-				l.addToken(TokenStrictNotEqual)
-			} else {
-				l.addToken(TokenBangEqual)
+				return fmt.Errorf("%d:%d: use '!=' instead of '!==' (Koda has no loose equality)", l.line, l.current-l.lineStart)
 			}
+			l.addToken(TokenBangEqual)
 		} else {
 			l.addToken(TokenBang)
 		}
 	case '=':
 		if l.match('=') {
 			if l.match('=') {
-				l.addToken(TokenStrictEqual)
-			} else {
-				l.addToken(TokenEqualEqual)
+				return fmt.Errorf("%d:%d: use '==' instead of '===' (Koda has no loose equality)", l.line, l.current-l.lineStart)
 			}
+			l.addToken(TokenEqualEqual)
 		} else if l.match('>') {
 			l.addToken(TokenArrow)
 		} else {
@@ -381,6 +379,8 @@ func (l *Lexer) lookupKeyword(text string) TokenType {
 		return TokenElse
 	case "false":
 		return TokenFalse
+	case "fallthrough":
+		return TokenFallthrough
 	case "for":
 		return TokenFor
 	case "func":

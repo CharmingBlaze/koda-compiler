@@ -34,6 +34,7 @@ func chdirRepoRoot(t *testing.T) string {
 
 func TestRunArrayGetOutOfBoundsPanics(t *testing.T) {
 	root := chdirRepoRoot(t)
+	t.Setenv("KODA_HOME", root)
 	p := filepath.Join(root, "tests", "array_oob_get.koda")
 	var out, errBuf bytes.Buffer
 	err := RunWithWritersOpts(p, "", &out, &errBuf, BuildOptions{NoOpt: true})
@@ -48,6 +49,7 @@ func TestRunArrayGetOutOfBoundsPanics(t *testing.T) {
 
 func TestRunArraySetOutOfBoundsPanics(t *testing.T) {
 	root := chdirRepoRoot(t)
+	t.Setenv("KODA_HOME", root)
 	p := filepath.Join(root, "tests", "array_oob_set.koda")
 	var out, errBuf bytes.Buffer
 	err := RunWithWritersOpts(p, "", &out, &errBuf, BuildOptions{NoOpt: true})

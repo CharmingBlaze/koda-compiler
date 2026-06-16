@@ -96,7 +96,7 @@ Supported escapes: `\n`, `\r`, `\t`, `\"`, `\\`, `\'`.
 
 In `if` conditions, these are **falsy**: `false`, `null`, `0`, `""` (empty string).
 
-Everything else is truthy.
+Everything else is truthy — including **`[]` and `{}`**. This differs from JavaScript, where empty arrays and objects are falsy. Use `len(arr) > 0` instead of `if (arr)` when you mean “non-empty array”.
 
 ---
 

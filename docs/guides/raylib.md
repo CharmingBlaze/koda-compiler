@@ -539,7 +539,7 @@ go build -o bin\kodawrap.exe .\cmd\wrapgen
 # Generate bindings from the header
 .\bin\kodawrap.exe `
   -name raylib `
-  -headers .\raylib_lib\raylib-5.0_win64_mingw-w64\include\raylib.h `
+  -headers .\third_party\raylib_static\stage\include\raylib.h `
   -out .\wrappers\raylib_generated
 ```
 

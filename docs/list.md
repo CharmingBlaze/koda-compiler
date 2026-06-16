@@ -53,7 +53,7 @@ go test ./... -count=1
 - [x] `import` as **expression** `import "path"` (see modules).
 - [x] `in` and `of` in `for (let x in/of iterable)`.
 - [ ] `this` as a dedicated keyword / `TokenThis` — **not** reserved; object methods use identifiers per [KODA_PROGRAMMER_REFERENCE.md](KODA_PROGRAMMER_REFERENCE.md) §6.
-- [x] Arithmetic `+ - * / % **`, comparisons, `==` `!=` `===` `!==`, logical `&& || !`, bitwise `& | ^ ~ << >> >>>`, compound assigns, ternary `?:`.
+- [x] Arithmetic `+ - * / % **`, comparisons, `==` `!=`, logical `&& || !`, bitwise `& | ^ ~ << >> >>>`, compound assigns, ternary `?:`.
 - [x] `>>=` and `>>>=` compound assignment tokens ([lexer.go](internal/lexer.go)).
 - [x] Unary `+ - ! ~`, prefix/postfix `++ --`.
 - [x] **Arrow functions** (`=>`) — parsed as sugar for `func` expressions (`id => …`, `(a, b) => …`, block or expression body).

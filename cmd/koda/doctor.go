@@ -39,7 +39,10 @@ func runDoctor(args []string) error {
 
 	install, err := kodahome.InstallDir()
 	if err != nil {
-		lines = append(lines, doctorLine{ok: false, label: "install dir", detail: err.Error()})
+		lines = append(lines, doctorLine{
+			ok: false, label: "install dir", detail: err.Error(),
+			fix: "Set KODA_HOME to your SDK folder or run koda from an unpacked release zip.",
+		})
 		failures++
 	} else {
 		lines = append(lines, doctorLine{ok: true, label: "SDK path", detail: install})
@@ -150,7 +153,10 @@ func runDoctor(args []string) error {
 
 	tmpDir := os.TempDir()
 	if f, err := os.CreateTemp(tmpDir, "koda_doctor_*"); err != nil {
-		lines = append(lines, doctorLine{ok: false, label: "temp folder write", detail: err.Error()})
+		lines = append(lines, doctorLine{
+			ok: false, label: "temp folder write", detail: err.Error(),
+			fix: "Check permissions on " + tmpDir + " or set TMP/TEMP to a writable folder.",
+		})
 		failures++
 	} else {
 		_ = f.Close()

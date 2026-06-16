@@ -70,7 +70,7 @@ func stmtEndsWithTerminal(s parser.Stmt) bool {
 	switch x := s.(type) {
 	case *parser.ReturnStmt:
 		return true
-	case *parser.BreakStmt, *parser.ContinueStmt:
+	case *parser.BreakStmt, *parser.ContinueStmt, *parser.FallthroughStmt:
 		return true
 	case *parser.BlockStmt:
 		term := false

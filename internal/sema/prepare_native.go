@@ -156,7 +156,7 @@ func walkStmt(s parser.Stmt, ctx *NativeEmitContext, walkBlock func(*parser.Bloc
 		for _, cd := range st.Default {
 			walkDecl(cd)
 		}
-	case *parser.BreakStmt, *parser.ContinueStmt:
+	case *parser.BreakStmt, *parser.ContinueStmt, *parser.FallthroughStmt:
 	default:
 	}
 }
@@ -244,7 +244,7 @@ func walkStmtFull(s parser.Stmt, env *envFrame, ctx *NativeEmitContext, curFunc 
 		for _, cd := range st.Default {
 			walkDecl(cd, blockEnv, ctx, curFunc)
 		}
-	case *parser.BreakStmt, *parser.ContinueStmt:
+	case *parser.BreakStmt, *parser.ContinueStmt, *parser.FallthroughStmt:
 	default:
 	}
 }

@@ -36,10 +36,8 @@ const (
 
 	// One or two character tokens
 	TokenEqual           // =
-	TokenEqualEqual      // ==
-	TokenStrictEqual     // ===
-	TokenBangEqual       // !=
-	TokenStrictNotEqual  // !==
+	TokenEqualEqual // ==
+	TokenBangEqual  // !=
 	TokenGreater        // >
 	TokenGreaterEqual   // >=
 	TokenLess           // <
@@ -83,6 +81,7 @@ const (
 	TokenDo
 	TokenElse
 	TokenFalse
+	TokenFallthrough
 	TokenFor
 	TokenFunc
 	TokenIf
@@ -171,12 +170,8 @@ func (t TokenType) String() string {
 		return "="
 	case TokenEqualEqual:
 		return "=="
-	case TokenStrictEqual:
-		return "==="
 	case TokenBangEqual:
 		return "!="
-	case TokenStrictNotEqual:
-		return "!=="
 	case TokenGreater:
 		return ">"
 	case TokenGreaterEqual:
@@ -251,6 +246,8 @@ func (t TokenType) String() string {
 		return "else"
 	case TokenFalse:
 		return "false"
+	case TokenFallthrough:
+		return "fallthrough"
 	case TokenFor:
 		return "for"
 	case TokenFunc:

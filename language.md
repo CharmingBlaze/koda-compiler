@@ -166,7 +166,7 @@ let f = 2 ** 8;   // 256 (power)
 1 != 2    // true
 ```
 
-Use `==` and `!=` for equality. Legacy `===` / `!==` are identical but deprecated — `koda check` warns when you use them.
+Use `==` and `!=` for equality. The legacy `===` / `!==` tokens are **not supported** — use `koda fmt` to migrate old sources (it rewrites them automatically).
 
 ### Logic
 
@@ -303,10 +303,11 @@ for (let i = 0; i < 5; i += 1) {
     print(i);
 }
 
-// Multiple variables in the init
-for (let i = 0, let j = 10; i < j; i += 1) {
+// Multiple variables in the init (let optional after the first)
+for (let i = 0, j = 10; i < j; i += 1) {
     print(i, j);
 }
+// Same as: for (let i = 0, let j = 10; ...)
 
 // Infinite loop
 for (;;) {
@@ -380,7 +381,19 @@ switch (direction) {
 }
 ```
 
-Cases **fall through** unless you use `break`. Use `break` at the end of each branch you want to stop at.
+Each `case` runs its body and **stops** — no fall-through (unlike C). Use `fallthrough;` when you need the next case to run:
+
+```koda
+switch (n) {
+    case 1:
+        print("one");
+        fallthrough;
+    case 2:
+        print("two");
+}
+```
+
+Use `match` for brace-style dispatch; both stop after each arm unless you use `fallthrough;`.
 
 ### `match`
 
@@ -411,7 +424,7 @@ match state {
 }
 ```
 
-Each arm is a block `{ … }`. Classic `switch (x) { case …: … }` still works when you want C-style fall-through.
+Each arm is a block `{ … }`. **`match` is the recommended form** for enums and game states; `switch` uses the same no-fall-through semantics.
 
 **`switch` as an expression** — arms use `=>`:
 
@@ -730,6 +743,21 @@ let box = Rect { x: 0, y: 0, w: 100, h: 50 };
 print(area(box));   // 5000
 ```
 
+**Field defaults** — omit fields that have a default:
+
+```koda
+struct Point { x = 0, y = 0 }
+let origin = Point { };        // x and y are 0
+let p = Point { x: 5 };        // y defaults to 0
+```
+
+**Optional fields** — suffix `?` means the field may be omitted (defaults to `null`):
+
+```koda
+struct Node { value, next? }
+let leaf = Node { value: 42 }; // next is null
+```
+
 See `tests/struct_test.koda` for more examples.
 
 ---
@@ -810,6 +838,8 @@ Call these on any string value. Names are case-insensitive.
 | `slice(start, end)` | Substring from `start` up to (not including) `end` | `"hello".slice(1, 3)` → `"el"` |
 | `startsWith(prefix)` | `true` if string starts with prefix | `"hello".startsWith("he")` → `true` |
 | `endsWith(suffix)` | `true` if string ends with suffix | `"hello".endsWith("lo")` → `true` |
+| `padStart(n, c?)` | Pad on the left to length `n` (pad char `c`, default space) | `"7".padStart(3, "0")` → `"007"` |
+| `padEnd(n, c?)` | Pad on the right to length `n` | `"hi".padEnd(5, ".")` → `"hi..."` |
 
 ```koda
 let s = "  Hello, World!  ";
@@ -844,6 +874,8 @@ for (let p of parts) {
 | `filter(callback)` | Return new array with only elements where `callback(element)` is truthy |
 | `find(callback)` | Return first element where `callback(element)` is truthy, or `null` |
 | `reduce(callback)` or `reduce(callback, initial)` | Reduce to a single value; `callback(accumulator, element)` |
+| `flat(depth?)` | Flatten nested arrays one level (or `depth` levels) | `[1, [2, 3]].flat()` → `[1, 2, 3]` |
+| `flatMap(callback)` | Map then flatten one level | `[[1], [2]].flatMap(func(x) { return x; })` |
 
 ```koda
 let nums = [3, 1, 4, 1, 5, 9];
@@ -1100,6 +1132,7 @@ utils.helper();
 |--------|------------------------|
 | `@math` | `pi`, `sin`, `cos`, `sqrt`, `lerp`, `clamp`, … |
 | `@json` | `parse`, `stringify`, `tryparse` |
+| `@str` | `upper`, `lower`, `trim`, `split`, `join`, `format`, `padStart`, `padEnd`, `repeat` |
 | `@vec2` | `vec2`, `add`, `dot`, `normalize`, … |
 
 The builtin `parseJSON(text)` returns `ok(value)` or `err(message)`; `json.parse` returns the value directly (or `null` on failure).
@@ -1203,7 +1236,7 @@ These are all registered in `internal/codegen/builtin_register.go`. All case-ins
 `len`, `type`, `typeof`, `number`, `string`, `bool`, `isNumber`, `isString`, `isBool`, `isNull`, `isArray`, `isObject`, `isFunction`
 
 **Files:**
-`readFile`, `writeFile`, `appendFile`, `fileExists`, `deleteFile`
+`readFile`, `writeFile`, `appendFile`, `fileExists`, `deleteFile`, `listDir`, `readDir` (alias of `listDir`)
 
 **JSON:**
 `parseJSON`, `toJSON`
@@ -1213,6 +1246,8 @@ These are all registered in `internal/codegen/builtin_register.go`. All case-ins
 
 **Random:**
 `random`, `randomInt`, `randomChoice`, `randomSeed`
+
+`randomChoice(array)` returns a random element from `array` (or `null` if empty).
 
 **Math globals:**
 `abs`, `sqrt`, `pow`, `exp`, `log`, `log10`,
@@ -1227,7 +1262,9 @@ These are all registered in `internal/codegen/builtin_register.go`. All case-ins
 `matches`
 
 **GC:**
-`gc`, `gcCollect`, `gcDisable`, `gcEnable`, `gcFrameStep`, `gcStats`
+`gc` (canonical), `gcDisable`, `gcEnable`, `gcFrameStep`, `gcStats`
+
+> `gcCollect` is a deprecated alias of `gc()` — use `gc()` only.
 
 ---
 

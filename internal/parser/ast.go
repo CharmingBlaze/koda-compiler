@@ -85,10 +85,11 @@ type FuncDecl struct {
 	Native *NativeDirective
 }
 
-// StructField is one field in a struct declaration, optionally with a default value.
+// StructField is one field in a struct declaration, optionally with a default value or optional marker.
 type StructField struct {
-	Name    lexer.Token
-	Default Expr
+	Name     lexer.Token
+	Default  Expr
+	Optional bool
 }
 
 // StructDecl declares a named struct type with ordered fields (O(1) slot access at compile time).
@@ -522,6 +523,14 @@ type ContinueStmt struct {
 func (s *ContinueStmt) declNode()      {}
 func (s *ContinueStmt) stmtNode()      {}
 func (s *ContinueStmt) String() string { return "continue;" }
+
+type FallthroughStmt struct {
+	Token lexer.Token
+}
+
+func (s *FallthroughStmt) declNode()      {}
+func (s *FallthroughStmt) stmtNode()      {}
+func (s *FallthroughStmt) String() string { return "fallthrough;" }
 
 // DeleteStmt deletes an own property from a table object (`delete obj["k"]`).
 type DeleteStmt struct {

@@ -8,7 +8,8 @@ Set-Location $repoRoot
 
 . (Join-Path $PSScriptRoot "use-raylib-env.ps1") -RepoRoot $repoRoot
 
-$raylibDll = Join-Path $repoRoot "raylib_lib\raylib-5.0_win64_mingw-w64\lib\raylib.dll"
+$raylibRoot = & (Join-Path $PSScriptRoot "resolve-raylib-stage.ps1") -RepoRoot $repoRoot
+$raylibDll = Join-Path $raylibRoot "lib\raylib.dll"
 if (!(Test-Path $raylibDll)) {
     throw "raylib.dll not found at '$raylibDll'"
 }

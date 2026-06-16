@@ -166,7 +166,7 @@ let f = 2 ** 8;   // 256 (power)
 1 != 2    // true
 ```
 
-Use `==` and `!=` for equality. Legacy `===` / `!==` are identical but deprecated — `koda check` warns when you use them.
+Use `==` and `!=` for equality. The legacy `===` / `!==` tokens are **not supported** — use `koda fmt` to migrate old sources (it rewrites them automatically).
 
 ### Logic
 
@@ -380,7 +380,7 @@ switch (direction) {
 }
 ```
 
-Cases **fall through** unless you use `break`. Use `break` at the end of each branch you want to stop at.
+Each `case` runs its body and **stops** — no fall-through (unlike C). Use `fallthrough;` when you need the next case to run.
 
 ### `match`
 
@@ -411,7 +411,7 @@ match state {
 }
 ```
 
-Each arm is a block `{ … }`. Classic `switch (x) { case …: … }` still works when you want C-style fall-through.
+Each arm is a block `{ … }`. **`match` is the recommended form** for enums and game states; `switch` uses the same no-fall-through semantics unless you write `fallthrough;`.
 
 **`switch` as an expression** — arms use `=>`:
 

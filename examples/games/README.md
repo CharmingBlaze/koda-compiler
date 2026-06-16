@@ -12,11 +12,12 @@ koda run examples/games/lunar_lander_text.koda
 
 | Project | Path |
 |---------|------|
-| **Mario 64** (new) | `examples/games/mario64/` |
+| **Mario 64 Studio** (Koda Studio demo) | `examples/games/mario64-studio/` |
+| Mario 64 | `examples/games/mario64/` |
 | Koda64 (original) | `examples/games/koda64/` |
 
 ```bash
-cd examples/games/mario64
+cd examples/games/mario64-studio
 koda run
 ```
 

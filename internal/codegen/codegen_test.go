@@ -236,3 +236,59 @@ func TestEmitInfixIntegerLiteralMulFoldNoUnbox(t *testing.T) {
 		t.Fatalf("expected boxed numeric result, got:\n%s", ir)
 	}
 }
+
+func TestStructMethodNativeExternBeforeLet(t *testing.T) {
+	// Native shim is declared after the struct; struct methods emit before top-level
+	// let decls unless prepareBundleBindings registers natives first.
+	src := `
+struct Widget {
+	func ping() {
+		shimfn(1);
+	}
+}
+
+// koda:extern shimfn koda_test_shimfn 1
+let shimfn = 0;
+
+func main() {
+	let w = Widget {};
+}
+`
+	program := parseForTest(t, src)
+	if err := sema.NewAnalyzer().Analyze(program); err != nil {
+		t.Fatal(err)
+	}
+	ctx, err := sema.PrepareNativeBundle(&parser.ProgramBundle{Entry: program})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := NewGenerator(ctx).Generate(ctx.Bundle); err != nil {
+		t.Fatalf("codegen failed: %v", err)
+	}
+}
+
+func TestStructMethodImplicitFieldAssign(t *testing.T) {
+	src := `
+struct Coin {
+	on = true;
+	func pickup() {
+		on = false;
+	}
+}
+func main() {
+	let c = Coin {};
+	c.pickup();
+}
+`
+	program := parseForTest(t, src)
+	if err := sema.NewAnalyzer().Analyze(program); err != nil {
+		t.Fatal(err)
+	}
+	ctx, err := sema.PrepareNativeBundle(&parser.ProgramBundle{Entry: program})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := NewGenerator(ctx).Generate(ctx.Bundle); err != nil {
+		t.Fatalf("codegen failed: %v", err)
+	}
+}

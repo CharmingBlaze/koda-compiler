@@ -27,6 +27,15 @@ func (a *Analyzer) analyzeStructDecl(d *parser.StructDecl) {
 		if f.Default != nil {
 			defaults[f.Name.Lexeme] = f.Default
 		}
+		if f.Optional && f.Default != nil {
+			a.record(&diagnostic.DiagnosticError{
+				File:    f.Name.File,
+				Line:    f.Name.Line,
+				Col:     f.Name.Col,
+				Message: fmt.Sprintf("struct field '%s' cannot be both optional (?) and have a default value", f.Name.Lexeme),
+				Hint:    "use either 'field?' or 'field = default', not both",
+			})
+		}
 	}
 	a.structLayouts[name] = fields
 	if len(defaults) > 0 {
@@ -159,9 +168,12 @@ func (a *Analyzer) recordVarTypesFromInit(varName string, init parser.Expr) {
 			}
 		}
 	}
-	if ae, ok := init.(*parser.ArrayExpr); ok && len(ae.Elements) > 0 {
-		if st := a.structTypeOfExpr(ae.Elements[0]); st != "" {
-			a.varArrayElementStruct[varName] = st
+	if ae, ok := init.(*parser.ArrayExpr); ok {
+		a.varIsArray[varName] = true
+		if len(ae.Elements) > 0 {
+			if st := a.structTypeOfExpr(ae.Elements[0]); st != "" {
+				a.varArrayElementStruct[varName] = st
+			}
 		}
 		return
 	}
@@ -244,7 +256,7 @@ func (a *Analyzer) checkStructFieldAccess(e *parser.IndexExpr) {
 			Line:    lit.Token.Line,
 			Col:     lit.Token.Col,
 			Message: fmt.Sprintf("'%s' is not a field of struct %s", field, stName),
-			Hint:    fmt.Sprintf("fields: %s", strings.Join(fields, ", ")),
+			Hint:    a.structFieldHint(field, fields),
 		})
 		_ = te
 		return
@@ -288,8 +300,33 @@ func (a *Analyzer) checkStructFieldAccess(e *parser.IndexExpr) {
 		Line:    lit.Token.Line,
 		Col:     lit.Token.Col,
 		Message: fmt.Sprintf("'%s' is not a field of struct %s", field, stName),
-		Hint:    fmt.Sprintf("fields: %s", strings.Join(fields, ", ")),
+		Hint:    a.structFieldHint(field, fields),
 	})
+}
+
+func (a *Analyzer) structFieldHint(field string, fields []string) string {
+	if hint := suggestFromList(field, fields); hint != "" {
+		return hint
+	}
+	return fmt.Sprintf("fields: %s", strings.Join(fields, ", "))
+}
+
+func suggestFromList(name string, candidates []string) string {
+	ln := strings.ToLower(name)
+	best, bestDist := "", 3
+	for _, candidate := range candidates {
+		if candidate == name {
+			continue
+		}
+		d := levenshtein(ln, strings.ToLower(candidate))
+		if d < bestDist {
+			best, bestDist = candidate, d
+		}
+	}
+	if best != "" {
+		return fmt.Sprintf("did you mean '%s'?", best)
+	}
+	return ""
 }
 
 func (a *Analyzer) checkEnumMemberAccess(e *parser.IndexExpr) {

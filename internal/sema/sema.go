@@ -30,6 +30,7 @@ type Analyzer struct {
 	structFieldDefaults   map[string]map[string]parser.Expr // struct -> field -> default expr
 	implicitStructField   map[*parser.IdentifierExpr]int    // bare field refs in struct methods
 	varArrayElementStruct map[string]string                 // array var -> element struct type
+	varIsArray            map[string]bool                   // variable name -> bound to an array value
 
 	letReads  map[*parser.LetDecl]int
 	funcReads map[*parser.FuncDecl]int
@@ -106,6 +107,7 @@ func NewAnalyzerWithOptions(opts *AnalysisOptions) *Analyzer {
 		structFieldDefaults:   make(map[string]map[string]parser.Expr),
 		implicitStructField:   make(map[*parser.IdentifierExpr]int),
 		varArrayElementStruct: make(map[string]string),
+		varIsArray:            make(map[string]bool),
 		letReads:            make(map[*parser.LetDecl]int),
 		funcReads:           make(map[*parser.FuncDecl]int),
 	}
@@ -126,9 +128,11 @@ func (a *Analyzer) Analyze(prog *parser.Program) error {
 	a.structFieldDefaults = make(map[string]map[string]parser.Expr)
 	a.implicitStructField = make(map[*parser.IdentifierExpr]int)
 	a.varArrayElementStruct = make(map[string]string)
+	a.varIsArray = make(map[string]bool)
 	a.letReads = make(map[*parser.LetDecl]int)
 	a.funcReads = make(map[*parser.FuncDecl]int)
 	a.currentStructType = ""
+	a.seedNativeExterns(prog)
 	for _, decl := range prog.Declarations {
 		a.analyzeDecl(decl)
 	}
@@ -210,7 +214,13 @@ func (a *Analyzer) analyzeDecl(decl parser.Decl) {
 
 func (a *Analyzer) analyzeLetDecl(d *parser.LetDecl) {
 	name := d.Name.Lexeme
-	if _, ok := a.currentScope.symbols[name]; ok {
+	if existing, ok := a.currentScope.symbols[name]; ok {
+		if prev, ok := existing.(*parser.LetDecl); ok && prev.Native != nil && d.Native != nil {
+			if d.Init != nil {
+				a.analyzeExpr(d.Init)
+			}
+			return
+		}
 		a.record(&diagnostic.DiagnosticError{
 			File:    d.Name.File,
 			Line:    d.Name.Line,
@@ -306,12 +316,14 @@ func (a *Analyzer) analyzeStmt(stmt parser.Stmt) {
 			a.analyzeExpr(s.Value)
 		}
 	case *parser.IfStmt:
+		a.checkTruthyCondition(s.Condition)
 		a.analyzeExpr(s.Condition)
 		a.analyzeStmt(s.Then)
 		if s.Else != nil {
 			a.analyzeStmt(s.Else)
 		}
 	case *parser.WhileStmt:
+		a.checkTruthyCondition(s.Condition)
 		a.analyzeExpr(s.Condition)
 		a.analyzeStmt(s.Body)
 	case *parser.DoWhileStmt:
@@ -322,6 +334,7 @@ func (a *Analyzer) analyzeStmt(stmt parser.Stmt) {
 			a.analyzeDecl(ini)
 		}
 		if s.Condition != nil {
+			a.checkTruthyCondition(s.Condition)
 			a.analyzeExpr(s.Condition)
 		}
 		for _, inc := range s.Increments {
@@ -373,7 +386,7 @@ func (a *Analyzer) analyzeStmt(stmt parser.Stmt) {
 		a.analyzeExpr(s.Target)
 	case *parser.DeferStmt:
 		a.analyzeExpr(s.Expr)
-	case *parser.BreakStmt, *parser.ContinueStmt:
+	case *parser.BreakStmt, *parser.ContinueStmt, *parser.FallthroughStmt:
 		return
 	default:
 		a.record(fmt.Errorf("unsupported statement type: %T", stmt))
@@ -408,6 +421,22 @@ func (a *Analyzer) suggestName(name string) string {
 		return fmt.Sprintf("did you mean '%s'?", best)
 	}
 	return ""
+}
+
+func (a *Analyzer) seedNativeExterns(prog *parser.Program) {
+	if prog == nil {
+		return
+	}
+	for _, decl := range prog.Declarations {
+		ld, ok := decl.(*parser.LetDecl)
+		if !ok || ld.Native == nil {
+			continue
+		}
+		name := ld.Name.Lexeme
+		if _, exists := a.currentScope.Resolve(name); !exists {
+			a.currentScope.Define(name, ld)
+		}
+	}
 }
 
 func (a *Analyzer) noteStructMethodRead(ix *parser.IndexExpr) {
@@ -469,14 +498,6 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 	case *parser.PrefixExpr:
 		a.analyzeExpr(e.Right)
 	case *parser.InfixExpr:
-		if e.Operator == "===" || e.Operator == "!==" {
-			alt := "=="
-			if e.Operator == "!==" {
-				alt = "!="
-			}
-			a.warn(fmt.Sprintf("%s:%d:%d: '%s' is deprecated; use '%s' instead (Koda has no loose equality)",
-				e.Token.File, e.Token.Line, e.Token.Col, e.Operator, alt))
-		}
 		a.analyzeExpr(e.Left)
 		a.analyzeExpr(e.Right)
 	case *parser.LogicalExpr:
@@ -485,6 +506,10 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 	case *parser.CallExpr:
 		a.analyzeExpr(e.Function)
 		if id, ok := e.Function.(*parser.IdentifierExpr); ok {
+			if strings.EqualFold(id.Name.Lexeme, "gcCollect") {
+				a.warn(fmt.Sprintf("%s:%d:%d: 'gcCollect' is deprecated; use 'gc()' instead",
+					id.Name.File, id.Name.Line, id.Name.Col))
+			}
 			if decl, ok2 := a.currentScope.Resolve(id.Name.Lexeme); ok2 {
 				a.noteBindingRead(decl)
 				if sd, ok3 := decl.(*parser.StructDecl); ok3 {

@@ -13,7 +13,7 @@ Engineering snapshot of the language surface, LLVM codegen, C runtime, and wrapp
 - **Variables:** `let`, `const`, optional type annotations (`int`, `float`, `string`, …).
 - **Primitives:** number (64-bit float at runtime), string, bool, null.
 - **Composite values:** arrays, objects, **structs** (preferred for game data), enum members.
-- **Operators:** arithmetic, comparison, **`==` / `!=`** (legacy `===` warns), logical, compound assignment.
+- **Operators:** arithmetic, comparison, **`==` / `!=`**, logical, compound assignment.
 - **Control flow:** `if` / `else`, `while`, `do-while`, `for`, `for ... of`, `switch`, **`match`**, `break`, `continue`, `defer`.
 - **String interpolation:** `"Score: {score}"` in double-quoted strings; backtick `` `${expr}` `` templates.
 - **Functions:** declarations, calls, recursion, return, function expressions, closures with upvalues.

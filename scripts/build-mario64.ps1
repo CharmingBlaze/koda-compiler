@@ -13,7 +13,8 @@ if ($LASTEXITCODE -ne 0) {
     throw "Build failed for $Source"
 }
 
-$raylibDll = Join-Path $repoRoot "raylib_lib\raylib-5.0_win64_mingw-w64\lib\raylib.dll"
+$raylibRoot = & (Join-Path $PSScriptRoot "resolve-raylib-stage.ps1") -RepoRoot $repoRoot
+$raylibDll = Join-Path $raylibRoot "lib\raylib.dll"
 if (Test-Path $raylibDll) {
     Copy-Item -Force $raylibDll (Join-Path $repoRoot "raylib.dll")
 }

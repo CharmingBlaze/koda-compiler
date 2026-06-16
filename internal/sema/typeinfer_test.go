@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"koda/internal/lexer"
 	"koda/internal/parser"
 )
 
@@ -162,15 +163,11 @@ func TestSemaConstRequiresInit(t *testing.T) {
 	}
 }
 
-func TestSemaStrictEqualityDeprecated(t *testing.T) {
+func TestSemaRejectsStrictEquality(t *testing.T) {
 	src := `func main() { let a = 1 === 1; }`
-	prog := parseForTest(t, src)
-	a := NewAnalyzer()
-	if err := a.Analyze(prog); err != nil {
-		t.Fatalf("analyze: %v", err)
-	}
-	if len(a.Warnings()) == 0 {
-		t.Fatal("expected === deprecation warning")
+	l := lexer.NewLexer(src, "test.koda")
+	if _, err := l.Tokenize(); err == nil {
+		t.Fatal("expected lexer error for ===")
 	}
 }
 

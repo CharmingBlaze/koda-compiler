@@ -12,6 +12,7 @@ import (
 
 // Format parses Koda source and returns canonical spaced formatting.
 func Format(src string) (string, error) {
+	src = normalizeLegacyOperators(src)
 	l := lexer.NewLexer(src, "")
 	tokens, err := l.Tokenize()
 	if err != nil {
@@ -27,6 +28,13 @@ func Format(src string) (string, error) {
 		return "", err
 	}
 	return finalize(em.String()), nil
+}
+
+// normalizeLegacyOperators rewrites removed === / !== tokens so koda fmt can migrate old sources.
+func normalizeLegacyOperators(src string) string {
+	src = strings.ReplaceAll(src, "!==", "!=")
+	src = strings.ReplaceAll(src, "===", "==")
+	return src
 }
 
 func finalize(s string) string {
@@ -351,6 +359,9 @@ func (e *emitter) emitStmt(s parser.Stmt) error {
 	case *parser.ContinueStmt:
 		e.write("continue;\n")
 		return nil
+	case *parser.FallthroughStmt:
+		e.write("fallthrough;\n")
+		return nil
 	case *parser.SwitchStmt:
 		if n.Token.Type == lexer.TokenMatch {
 			e.write("match ")
@@ -496,7 +507,14 @@ func (e *emitter) emitExpr(ex parser.Expr, minPrec int) error {
 			return err
 		}
 		e.write(" ")
-		e.write(strings.TrimSpace(v.Operator))
+		op := strings.TrimSpace(v.Operator)
+		switch op {
+		case "===":
+			op = "=="
+		case "!==":
+			op = "!="
+		}
+		e.write(op)
 		e.write(" ")
 		return e.emitExpr(v.Right, opPrec+1)
 	case *parser.LogicalExpr:

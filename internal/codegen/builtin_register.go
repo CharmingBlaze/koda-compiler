@@ -88,6 +88,7 @@ func (g *Generator) registerBuiltinFuncs() {
 		{"isDir", g.runtimeIsDir},
 		{"fileSize", g.runtimeFileSize},
 		{"listDir", g.runtimeListDir},
+		{"readDir", g.runtimeListDir},
 		{"trace", g.runtimeTrace},
 		{"parseJSON", g.runtimeParseJSON},
 		{"toJSON", g.runtimeToJSON},

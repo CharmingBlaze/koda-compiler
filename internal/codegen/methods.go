@@ -41,11 +41,11 @@ func (g *Generator) tryEmitMethodCall(member *parser.IndexExpr, recvVal value.Va
 		}
 		return g.emitArgvRuntime(g.runtimeArrayConcat, args), true, nil
 
-	case "split", "trim", "toupper", "tolower", "replace", "replaceall", "startswith", "endswith":
+	case "split", "trim", "toupper", "tolower", "replace", "replaceall", "startswith", "endswith", "padstart", "padend":
 		v, err := g.emitStringMethod(name, recvVal, call.Arguments)
 		return v, true, err
 
-	case "join", "sort", "reverse", "push", "pop", "add", "remove_at", "clear":
+	case "join", "sort", "reverse", "push", "pop", "add", "remove_at", "clear", "flat":
 		v, err := g.emitArrayOnlyMethod(name, recvVal, call.Arguments)
 		return v, true, err
 
@@ -72,6 +72,8 @@ func (g *Generator) tryEmitMethodCall(member *parser.IndexExpr, recvVal value.Va
 		return g.emitArrayMethodFind(recvVal, call.Arguments)
 	case "reduce":
 		return g.emitArrayMethodReduce(recvVal, call.Arguments)
+	case "flatmap":
+		return g.emitArrayMethodFlatMap(recvVal, call.Arguments)
 	}
 
 	return nil, false, nil
@@ -242,7 +244,7 @@ func (g *Generator) ioNamespaceNative(name string) *ir.Func {
 		return g.runtimeIsDir
 	case "size":
 		return g.runtimeFileSize
-	case "list":
+	case "list", "readdir", "read_dir":
 		return g.runtimeListDir
 	default:
 		return nil
@@ -315,6 +317,32 @@ func (g *Generator) emitStringMethod(name string, recv value.Value, args []parse
 			return nil, err
 		}
 		return g.emitArgvRuntime(g.runtimeStringEndsWith, []value.Value{loadRecv(), a0}), nil
+	case "padstart":
+		if len(args) < 1 || len(args) > 2 {
+			return nil, fmt.Errorf("padStart expects 1-2 arguments (targetLength [, padChar])")
+		}
+		argv := []value.Value{loadRecv()}
+		for _, a := range args {
+			v, err := g.emitExpr(a)
+			if err != nil {
+				return nil, err
+			}
+			argv = append(argv, v)
+		}
+		return g.emitArgvRuntime(g.runtimeStringPadStart, argv), nil
+	case "padend":
+		if len(args) < 1 || len(args) > 2 {
+			return nil, fmt.Errorf("padEnd expects 1-2 arguments (targetLength [, padChar])")
+		}
+		argv := []value.Value{loadRecv()}
+		for _, a := range args {
+			v, err := g.emitExpr(a)
+			if err != nil {
+				return nil, err
+			}
+			argv = append(argv, v)
+		}
+		return g.emitArgvRuntime(g.runtimeStringPadEnd, argv), nil
 	default:
 		return nil, fmt.Errorf("unknown string method %q", name)
 	}
@@ -372,6 +400,19 @@ func (g *Generator) emitArrayOnlyMethod(name string, recv value.Value, args []pa
 			return nil, fmt.Errorf("pop expects 0 arguments")
 		}
 		return g.block.NewCall(g.runtimeArrayPop, loadRecv()), nil
+	case "flat":
+		argv := []value.Value{loadRecv()}
+		if len(args) > 1 {
+			return nil, fmt.Errorf("flat expects 0-1 arguments (depth?)")
+		}
+		if len(args) == 1 {
+			a0, err := g.emitExpr(args[0])
+			if err != nil {
+				return nil, err
+			}
+			argv = append(argv, a0)
+		}
+		return g.emitArgvRuntime(g.runtimeArrayFlat, argv), nil
 	default:
 		return nil, fmt.Errorf("unknown array method %q", name)
 	}
@@ -527,6 +568,16 @@ func (g *Generator) emitArrayMethodMap(recv value.Value, args []parser.Expr) (va
 
 	g.block = done
 	return g.block.NewLoad(types.I64, outSlot), true, nil
+}
+
+func (g *Generator) emitArrayMethodFlatMap(recv value.Value, args []parser.Expr) (value.Value, bool, error) {
+	mapped, handled, err := g.emitArrayMethodMap(recv, args)
+	if err != nil || !handled {
+		return mapped, handled, err
+	}
+	one := constant.NewInt(types.I64, 1)
+	flat := g.emitArgvRuntime(g.runtimeArrayFlat, []value.Value{mapped, one})
+	return flat, true, nil
 }
 
 func (g *Generator) emitArrayMethodFilter(recv value.Value, args []parser.Expr) (value.Value, bool, error) {

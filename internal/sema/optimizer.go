@@ -425,9 +425,9 @@ func (c *NativeEmitContext) foldExprWithConstants(e parser.Expr, constants map[p
 						return &parser.LiteralExpr{Value: lNum <= rNum}, true
 					}
 				}
-			case "==", "===":
+			case "==":
 				return &parser.LiteralExpr{Value: lLit.Value == rLit.Value}, true
-			case "!=", "!==":
+			case "!=":
 				return &parser.LiteralExpr{Value: lLit.Value != rLit.Value}, true
 			}
 		}

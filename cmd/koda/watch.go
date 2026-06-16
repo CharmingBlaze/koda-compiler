@@ -84,8 +84,14 @@ func runWatch(path string, opts nativebuild.BuildOptions, progArgs []string) err
 			if snapshotsEqual(snap, next) {
 				continue
 			}
+			changes := snapshotChanges(snap, next, watchRoot)
 			snap = next
-			fmt.Println("\nwatch: change detected, rebuilding...")
+			for _, ch := range changes {
+				fmt.Printf("\n[koda watch] %s — rebuilding...\n", ch)
+			}
+			if len(changes) == 0 {
+				fmt.Println("\nwatch: change detected, rebuilding...")
+			}
 			if proc != nil {
 				_ = proc.Kill()
 				_, _ = <-procDone
@@ -224,4 +230,42 @@ func snapshotsEqual(a, b map[string]watchFingerprint) bool {
 		}
 	}
 	return true
+}
+
+func snapshotChanges(a, b map[string]watchFingerprint, root string) []string {
+	var out []string
+	seen := make(map[string]bool)
+	for path, av := range a {
+		bv, ok := b[path]
+		if !ok {
+			rel, _ := filepath.Rel(root, path)
+			if rel == "" {
+				rel = path
+			}
+			out = append(out, rel+" removed")
+			seen[rel] = true
+			continue
+		}
+		if av != bv {
+			rel, _ := filepath.Rel(root, path)
+			if rel == "" {
+				rel = path
+			}
+			out = append(out, rel+" changed")
+			seen[rel] = true
+		}
+	}
+	for path := range b {
+		if _, ok := a[path]; !ok {
+			rel, _ := filepath.Rel(root, path)
+			if rel == "" {
+				rel = path
+			}
+			if !seen[rel] {
+				out = append(out, rel+" added")
+			}
+		}
+	}
+	sort.Strings(out)
+	return out
 }

@@ -65,7 +65,7 @@ let { a, b } = obj;  // object destructuring
 
 **Comparison:** `<` `<=` `>` `>=` `==` `!=`
 
-> **Note:** `===` and `!==` are legacy aliases — they behave identically to `==` and `!=`. Use `==` / `!=` only; `koda check` warns on the legacy forms.
+> **Note:** `===` and `!==` are **not supported**. Use `==` / `!=` only; run `koda fmt` to migrate old sources.
 
 **Logic:** `&&` `||` `!`
 
@@ -431,7 +431,7 @@ let bindingName;
 
 ## Precedence (high → low)
 
-`call .member [index] ++ --` → `typeof ! + - ++ --` (prefix) → `**` → `* / %` → `+ -` → `<< >> >>>` → `< <= > >=` → `== != === !==` → `&` → `^` → `|` → `&&` → `|| ??` → `= += …` (assignment)
+`call .member [index] ++ --` → `typeof ! + - ++ --` (prefix) → `**` → `* / %` → `+ -` → `<< >> >>>` → `< <= > >=` → `== !=` → `&` → `^` → `|` → `&&` → `|| ??` → `= += …` (assignment)
 
 ---
 

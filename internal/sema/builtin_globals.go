@@ -22,7 +22,7 @@ var nativeBuiltinNames = []string{
 	"isnumber", "isstring", "isbool", "isnull", "isarray", "isobject", "isfunction",
 	"bool", "format",
 	"readfile", "writefile", "appendfile", "fileexists", "deletefile",
-	"isfile", "isdir", "filesize", "listdir",
+	"isfile", "isdir", "filesize", "listdir", "readdir",
 	"trace", "parsejson", "tojson",
 	"abs", "sqrt", "cbrt", "number", "string",
 	"gc", "gccollect", "gcdisable", "gcenable", "gcframestep", "gcstats",

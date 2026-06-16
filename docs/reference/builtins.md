@@ -74,7 +74,7 @@ Run with extra arguments: `koda run tool.koda -- input.txt output.txt`
 
 `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`, `pow`, `exp`, `log`, `log2`, `log10`, `sqrt`, `cbrt`, `abs`, `floor`, `ceil`, `round`, `trunc`, `sign`, `min`, `max`, `hypot`, `fmod`, `lerp`, `clamp`, `wrap`, `approach`, `smoothstep`, `distance`, `distancesq`, `normalize`, `map`, `degrees`, `radians`, `smoothdamp`, `pi`, `e`
 
-Random: `random()`, `randomint(lo, hi)`, `randomchoice(arr)`, `randomseed(n)`.
+Random: `random()`, `randomint(lo, hi)`, `randomchoice(arr)` (pick a random element), `randomseed(n)`.
 
 Prefer `import "@math"` for namespace grouping.
 
@@ -106,7 +106,8 @@ String **methods**: `.trim()`, `.toupper()`, `.split()`, etc. — see [str stdli
 | `isfile(path)` | bool |
 | `isdir(path)` | bool |
 | `filesize(path)` | number |
-| `listdir(path)` | array |
+| `listdir(path)` | array of entry names |
+| `readdir(path)` | alias of `listDir` |
 
 Or `import "@io"`.
 
@@ -134,7 +135,8 @@ See [json stdlib](../stdlib/json.md).
 
 | Name | Purpose |
 |------|---------|
-| `gc()` / `gcCollect()` | Full collection |
+| `gc()` | Full collection (canonical) |
+| `gcCollect()` | deprecated alias of `gc()` |
 | `gcDisable()` / `gcEnable()` | Toggle GC |
 | `gcFrameStep(ms)` | Incremental step (per frame in games; budget in ms) |
 | `gcStats()` | Collector stats |

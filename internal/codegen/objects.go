@@ -385,61 +385,11 @@ func (g *Generator) emitAssign(e *parser.AssignExpr) (value.Value, error) {
 		return nil, err
 	}
 
-	switch left := e.Left.(type) {
-	case *parser.IdentifierExpr:
-		name := left.Name.Lexeme
-		if slot, ok := g.locals[name]; ok {
-			boxed := g.emitAsKodaI64(val)
-			if g.localIsCell != nil && g.localIsCell[name] {
-				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
-			} else {
-				g.block.NewStore(boxed, slot)
-			}
-			return val, nil
-		}
-		if slot, ok := g.moduleGlobals[name]; ok {
-			boxed := g.emitAsKodaI64(val)
-			if g.moduleGlobalIsCell != nil && g.moduleGlobalIsCell[name] {
-				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
-			} else {
-				g.block.NewStore(boxed, slot)
-			}
-			return val, nil
-		}
-		if global, ok := g.globals[name]; ok {
-			g.block.NewStore(g.emitAsKodaI64(val), global)
-			return val, nil
-		}
-		return nil, g.undefinedVarError(name, left.Name.File, left.Name.Line, left.Name.Col)
-	case *parser.IndexExpr:
-		if g.ctx != nil {
-			if slot, ok := g.ctx.IndexExprStructSlot[left]; ok {
-				obj, err := g.emitExpr(left.Object)
-				if err != nil {
-					return nil, err
-				}
-				idx := constant.NewInt(types.I64, int64(slot))
-				boxed := g.emitAsKodaI64(val)
-				return g.block.NewCall(g.runtimeStructSet, g.emitAsKodaI64(obj), idx, boxed), nil
-			}
-		}
-		// Property or array assignment
-		obj, err := g.emitExpr(left.Object)
-		if err != nil {
-			return nil, err
-		}
-		key, err := g.emitExpr(left.Index)
-		if err != nil {
-			return nil, err
-		}
-		// If the value is a double, convert it to i64 (NaN-boxed)
-		if val.Type().String() == "double" {
-			val = g.block.NewBitCast(val, types.I64)
-		}
-		return g.block.NewCall(g.runtimeSet, g.emitAsKodaI64(obj), g.emitAsKodaI64(key), g.emitAsKodaI64(val)), nil
-	default:
-		return nil, fmt.Errorf("unsupported assignment target: %T", left)
+	boxed := g.emitAsKodaI64(val)
+	if err := g.storeBoxedToAssignTarget(e.Left, boxed); err != nil {
+		return nil, err
 	}
+	return val, nil
 }
 
 // emitCompoundAssign emits LLVM IR for compound assignment expressions (+=, -=, *=, /=).

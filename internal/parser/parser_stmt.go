@@ -335,6 +335,13 @@ func (p *Parser) parseStatement() (Stmt, error) {
 		}
 		return &ContinueStmt{Token: token}, nil
 	}
+	if p.match(lexer.TokenFallthrough) {
+		token := p.previous()
+		if _, err := p.consume(lexer.TokenSemicolon, "expected ';' after fallthrough"); err != nil {
+			return nil, err
+		}
+		return &FallthroughStmt{Token: token}, nil
+	}
 	if p.match(lexer.TokenSwitch) {
 		return p.parseSwitchStatement()
 	}
@@ -685,23 +692,36 @@ func (p *Parser) parseForStatement() (Stmt, error) {
 		}
 		inits := []Decl{&LetDecl{Token: letTok, Name: name, Init: init}}
 		for p.match(lexer.TokenComma) {
-			if !p.match(lexer.TokenLet) {
-				return nil, p.error(p.peek(), "expected 'let' after ',' in for-loop initializer")
-			}
-			letTok2 := p.previous()
-			name2, err := p.consume(lexer.TokenIdentifier, "expected variable name in for-loop initializer")
-			if err != nil {
-				return nil, err
-			}
-			name2 = normalizeIdentLexeme(name2)
-			var init2 Expr
-			if p.match(lexer.TokenEqual) {
-				init2, err = p.parseExpression(PrecedenceLowest)
+			if p.match(lexer.TokenLet) {
+				letTok2 := p.previous()
+				name2, err := p.consume(lexer.TokenIdentifier, "expected variable name in for-loop initializer")
 				if err != nil {
 					return nil, err
 				}
+				name2 = normalizeIdentLexeme(name2)
+				var init2 Expr
+				if p.match(lexer.TokenEqual) {
+					init2, err = p.parseExpression(PrecedenceLowest)
+					if err != nil {
+						return nil, err
+					}
+				}
+				inits = append(inits, &LetDecl{Token: letTok2, Name: name2, Init: init2})
+			} else {
+				name2, err := p.consume(lexer.TokenIdentifier, "expected variable name in for-loop initializer")
+				if err != nil {
+					return nil, err
+				}
+				name2 = normalizeIdentLexeme(name2)
+				if !p.match(lexer.TokenEqual) {
+					return nil, p.error(p.peek(), "expected '=' after variable name in for-loop initializer")
+				}
+				init2, err := p.parseExpression(PrecedenceLowest)
+				if err != nil {
+					return nil, err
+				}
+				inits = append(inits, &LetDecl{Token: letTok, Name: name2, Init: init2})
 			}
-			inits = append(inits, &LetDecl{Token: letTok2, Name: name2, Init: init2})
 		}
 		if _, err := p.consume(lexer.TokenSemicolon, "expected ';' after for-loop initializer"); err != nil {
 			return nil, err
@@ -835,6 +855,10 @@ func (p *Parser) parseStructDeclaration() (Decl, error) {
 			return nil, err
 		}
 		f = normalizeIdentLexeme(f)
+		optional := false
+		if p.match(lexer.TokenQuestion) {
+			optional = true
+		}
 		var defaultExpr Expr
 		if p.match(lexer.TokenEqual) {
 			defaultExpr, err = p.parseExpression(PrecedenceAssign)
@@ -842,7 +866,7 @@ func (p *Parser) parseStructDeclaration() (Decl, error) {
 				return nil, err
 			}
 		}
-		fields = append(fields, StructField{Name: f, Default: defaultExpr})
+		fields = append(fields, StructField{Name: f, Default: defaultExpr, Optional: optional})
 		if p.check(lexer.TokenRBrace) {
 			break
 		}

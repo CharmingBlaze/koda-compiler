@@ -138,6 +138,10 @@ func declareRuntimeFunctions(mod *ir.Module) map[string]*ir.Func {
 	functions["KODA_string_slice"] = argvI64(mod, "koda_string_slice")
 	functions["KODA_string_replace"] = argvI64(mod, "koda_string_replace")
 	functions["KODA_string_replaceAll"] = argvI64(mod, "koda_string_replaceAll")
+	functions["KODA_string_padStart"] = argvI64(mod, "koda_string_padStart")
+	functions["KODA_string_padEnd"] = argvI64(mod, "koda_string_padEnd")
+
+	functions["KODA_array_flat"] = argvI64(mod, "koda_array_flat")
 
 	functions["KODA_readFile"] = argvI64(mod, "koda_readFile")
 	functions["KODA_writeFile"] = argvI64(mod, "koda_writeFile")

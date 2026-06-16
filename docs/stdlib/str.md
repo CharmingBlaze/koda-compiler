@@ -16,6 +16,9 @@ Aliases and helpers around string **methods** (`trim`, `toupper`, etc.).
 | `split(s, sep)` | `s.split(sep)` |
 | `join(arr, sep)` | `arr.join(sep)` |
 | `format(tmpl, obj)` | Replace `{key}` in template |
+| `padStart(s, n, c?)` | Left-pad to length `n` |
+| `padEnd(s, n, c?)` | Right-pad to length `n` |
+| `repeat(s, n)` | Repeat string `n` times |
 
 ---
 
@@ -29,6 +32,7 @@ Aliases and helpers around string **methods** (`trim`, `toupper`, etc.).
 | `replace(a, b)` | Replace first |
 | `replaceall(a, b)` | Replace all |
 | `startswith(s)`, `endswith(s)` | Prefix/suffix test |
+| `padStart(n, c?)`, `padEnd(n, c?)` | Pad to length (also on string values directly) |
 
 Array method: `arr.join(sep)`.
 
