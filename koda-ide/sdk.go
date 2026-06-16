@@ -4,7 +4,7 @@ import (
 	"koda/api"
 )
 
-const studioVersion = "0.4.0"
+const studioVersion = "0.5.0"
 
 func (a *App) bootstrapSDK() {
 	api.EnsureSDKFromExecutable()

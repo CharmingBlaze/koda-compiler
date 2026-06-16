@@ -35,7 +35,7 @@ func main() {
 
 ## Install in 2 minutes
 
-1. Download the **SDK zip** for your OS from [GitHub Releases](https://github.com/CharmingBlaze/koda-compiler/releases) (recommended: **v0.4.0**).
+1. Download the **SDK zip** for your OS from [GitHub Releases](https://github.com/CharmingBlaze/koda-compiler/releases) (recommended: **v0.5.0**).
 2. Unzip anywhere — keep `stdlib/` next to `koda`.
 3. Run:
 
