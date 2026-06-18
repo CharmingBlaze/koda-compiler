@@ -35,7 +35,7 @@ Syntax highlighting for VS Code / Cursor: [`vscode-koda/`](https://github.com/Ch
 ### What Koda looks like
 
 ```koda
-#include "@game"
+use koda.game;
 
 struct Mario { x, y, speed, health }
 

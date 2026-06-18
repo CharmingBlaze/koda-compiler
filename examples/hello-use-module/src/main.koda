@@ -1,0 +1,6 @@
+// Official module import — `use koda.easing` (same as legacy `import "@easing"`).
+use koda.easing;
+
+func main() {
+    print("easeIn(0.5) =", easeIn(0.5));
+}

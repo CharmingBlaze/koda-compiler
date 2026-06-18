@@ -8,7 +8,7 @@ See the full hub in the repository: [docs/README.md](https://github.com/Charming
 |---------|------|
 | Learn | [beginners-guide.md](beginners-guide.md) · [learn/README.md](learn/README.md) |
 | Games | [guides/game-dev.md](guides/game-dev.md) |
-| Reference | [language.md](../language.md) · [reference/cli.md](reference/cli.md) |
+| Reference | [language.md](../language.md) · [KODA_LANGUAGE_VISION.md](KODA_LANGUAGE_VISION.md) · [reference/cli.md](reference/cli.md) |
 | Help | [faq.md](faq.md) · [troubleshooting.md](troubleshooting.md) |
 
 Install from [GitHub Releases](https://github.com/CharmingBlaze/koda-compiler/releases) with **`stdlib/`** beside the binaries.

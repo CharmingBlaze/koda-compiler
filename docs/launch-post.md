@@ -22,15 +22,15 @@ No Go runtime on the player's machine. No Python. No "install LLVM first." Unzip
 
 - **`koda`** CLI — `new`, `run`, `build`, `check`, `fmt`, `test`, `doctor`
 - **Embedded Clang + runtime** — release builds bundle the compiler; beginners don't configure a toolchain
-- **`@game` stdlib** — Raylib-backed API so your first program can open a window and draw rectangles
+- **`koda.game` stdlib** — Raylib-backed API so your first program can open a window and draw rectangles
 - **Koda Studio** — desktop IDE (Wails) with docs, templates, and F5 to run
 - **Examples** — bouncing ball, lunar lander, and a Mario 64-style 3D demo (`mario64-studio`)
 
 ### Hello, native game
 
 ```koda
-#include "wrappers/raylib_shim/raylib.koda"
-#include "@game"
+use raylib;
+use koda.game;
 
 struct Mario { x, y, speed, health }
 
@@ -113,7 +113,7 @@ If you try it, I'd love to hear what broke first — that's the roadmap.
 
 Author here. Koda is a small compiled language aimed at beginners who want **native games/apps** without C++ toolchain pain.
 
-**What works today:** one SDK zip (compiler + stdlib + Raylib + IDE), `koda run` → native binary, `@game` API, structs/enums/match, GC, `koda new --template graphics`.
+**What works today:** one SDK zip (compiler + stdlib + Raylib + IDE), `koda run` → native binary, `koda.game` API, structs/enums/match, GC, `koda new --template graphics`.
 
 **v0.5.0** just shipped: safer switch semantics, truthy lint, optional struct fields, mario64-studio demo.
 
@@ -125,4 +125,4 @@ Happy to answer questions about the compiler pipeline (Go → LLVM → Clang), G
 
 ## One-liner bios (Twitter / Mastodon / Bluesky)
 
-> Shipped Koda v0.5.0 — a beginner-friendly compiled language for games. One SDK zip, native binaries, Raylib `@game` API, no CMake/LLVM for users. https://github.com/CharmingBlaze/koda-compiler/releases/tag/v0.5.0
+> Shipped Koda v0.5.0 — a beginner-friendly compiled language for games. One SDK zip, native binaries, Raylib `koda.game` API, no CMake/LLVM for users. https://github.com/CharmingBlaze/koda-compiler/releases/tag/v0.5.0

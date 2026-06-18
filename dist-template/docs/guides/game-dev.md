@@ -2,8 +2,10 @@
 
 Koda compiles game logic to a **native binary** — same end result as a C + Raylib project, with faster iteration (`koda run`, `koda watch`) and less boilerplate.
 
-**Complete Raylib reference:** [raylib.md](raylib.md)  
+**Complete Raylib reference:** [raylib.md](raylib.md) — all 548 functions, original C names  
 **Coming from C:** [from-c.md](from-c.md)
+
+> **`use raylib;` gives you the entire Raylib API.** Names like `InitWindow`, `DrawTexture`, and `CheckCollisionBoxes` work exactly as in C. `koda.game` is optional sugar for 2D loops — it does not hide or limit the underlying wrapper.
 
 ---
 
@@ -19,7 +21,9 @@ cd lander
 koda run
 ```
 
-### 2. Graphics project (`@game` API)
+### 2. Graphics project (`koda.game` API — optional)
+
+The graphics template links the **full Raylib wrapper** (548 functions). `koda.game` is a thin helper module; you can call any Raylib function directly with `use raylib;`.
 
 ```bash
 koda new bounce --template graphics
@@ -28,30 +32,37 @@ koda doctor
 koda run
 ```
 
-The graphics template sets `"graphics": true` in `koda.json` — platform link flags and the Raylib shim wrapper are applied automatically. No manual `KODA_LINKFLAGS` or `KODA_NATIVE_SOURCES` for beginners.
+The graphics template sets `"graphics": true` in `koda.json` and links the **full Raylib wrapper** (`wrappers/raylib/wrapper.c`) from the SDK. No manual `KODA_LINKFLAGS` or `KODA_NATIVE_SOURCES` for beginners.
 
-Koda also infers the correct C glue from your `#include` (`koda_shim_*` → shim, `koda_wrap_raylib_*` → full wrapper), so stale shell environment variables are overridden when they do not match.
+```koda
+use raylib;
+use koda.game;
+```
+
+Koda infers the correct C glue from your imports (`koda_wrap_raylib_*` → full wrapper). Stale shell `KODA_NATIVE_SOURCES` is overridden when it does not match `koda.json`.
 
 ### 3. Study the repo examples
 
-| File | Description |
-|------|-------------|
-| `examples/games/koda64/` | Mario 64-style 3D platformer (orbit camera, structs, dot notation) |
-| `examples/games/brick_breaker.koda` | Full brick breaker |
-| `examples/raylib_shim_demo.koda` | 3D camera + cube |
-| `examples/games/lunar_lander_text.koda` | Text lander (standalone file) |
+| Project | Description |
+|---------|-------------|
+| `examples/games/pong/` | Canonical 2D `koda.game` loop |
+| `examples/games/brick-breaker/` | Breakout — enums, inferred fast math, zero-alloc draws |
+| `examples/games/mario64-studio/` | Optimized 3D — fusion camera, packed colors |
+| `examples/spinning-cube/` | Minimal 3D intro |
+| `examples/lunar-lander/` | Text lander (no graphics) |
+| `dist-template/examples/games/brick_breaker.koda` | Single-file SDK copy of brick-breaker |
 
-Refresh an older project's shim with **`koda setup raylib`** before using `@game`.
+Run **`koda setup raylib`** in older projects missing `koda.json` native settings. Use **`koda setup raylib --shim`** only for legacy shim-based code.
 
 ---
 
 ## Gold-standard windowed game
 
-Use the `@game` wrapper — not raw Raylib names:
+Use **`koda.game`** helpers (full Raylib underneath):
 
 ```koda
-#include "wrappers/raylib_shim/raylib.koda"
-#include "@game"
+use raylib;
+use koda.game;
 
 struct Mario {
     x, y,
@@ -61,6 +72,7 @@ struct Mario {
 
 func main() {
     game.open(800, 600, "Koda Game");
+    defer game.close();
     game.fps(60);
 
     let player = Mario {
@@ -73,13 +85,13 @@ func main() {
     while (game.running()) {
         let dt = game.delta();
 
-        if (game.keyDown(Key.Left)) {
+        if (game.keyDown(KEY_LEFT)) {
             player.x = player.x - player.speed * dt;
         }
-        if (game.keyDown(Key.Right)) {
+        if (game.keyDown(KEY_RIGHT)) {
             player.x = player.x + player.speed * dt;
         }
-        if (game.mouseDown(Mouse.Left)) {
+        if (game.mouseDown(MOUSE_BUTTON_LEFT)) {
             player.x = game.mouseX();
             player.y = game.mouseY();
         }
@@ -88,10 +100,7 @@ func main() {
         game.clear(colors.dark);
         game.rect(player.x, player.y, 32, 32, colors.white);
         game.end();
-        game.setGcBudget(0.5);
     }
-
-    game.close();
 }
 ```
 
@@ -103,7 +112,7 @@ func main() {
   "entry": "src/main.koda",
   "lint": "beginner",
   "native": {
-    "sources": ["wrappers/raylib_shim/wrapper.c"],
+    "sources": ["wrappers/raylib/wrapper.c"],
     "graphics": true
   }
 }
@@ -192,7 +201,7 @@ draw.text("Score: {score}   Lives: {lives}", 20, 20, 24, colors.white);
 
 ---
 
-## `@game` API reference
+## `koda.game` API reference
 
 | Function | Purpose |
 |----------|---------|
@@ -219,11 +228,15 @@ draw.text("Score: {score}   Lives: {lives}", 20, 20, 24, colors.white);
 | `game.width()` / `game.height()` | Window size |
 | `game.setTitle(title)` | Window title |
 | `game.fpsCounter()` | Current FPS |
-| `game.setGcBudget(ms)` | Incremental GC budget per frame |
+| `game.setGcBudget(ms)` | Extra incremental GC budget (optional) |
+| `game.begin3d(…)` / `game.end3d()` | Fusion-friendly 3D camera pass |
+| `game.warmup3d()` | One hidden 3D frame before the main loop |
+
+**Full Raylib API:** `use raylib;` exposes all **548** C functions (`InitWindow`, `DrawCube`, `LoadModel`, …). The table below lists optional `koda.game` shortcuts only.
 
 `Key`, `Mouse`, and `Color` constants are defined in `stdlib/game.koda`. Full detail: [stdlib/game](../stdlib/game.md).
 
-Raw Raylib shim names (`initwindow`, `drawtext`, …) remain available for advanced wrapping — see [raylib.md](raylib.md).
+For raw Raylib (3D, textures, audio, anything in the API reference), skip `koda.game` and call Raylib by name — see [raylib.md](raylib.md) and `wrappers/raylib/api_reference.md`.
 
 ---
 
@@ -240,25 +253,41 @@ Run `koda doctor` before your first graphics build.
 
 ---
 
+## Structs in game code
+
+Struct values passed to functions are **shared by reference** (like objects in JavaScript): mutating `bob.x` inside `reset_bobomb(bob, …)` updates the caller’s `bob1` / `bob2`. That is intentional for enemies, coins, and the player — pass the struct, modify fields in place, no `return` needed.
+
+Use `for (let coin of coins)` to iterate arrays; `for coin in coins` (no `let`) is equivalent sugar — see [language.md](../language.md#forin-values-and-ranges).
+
+---
+
 ## Quick reference (cheatsheet)
 
 | Need | API |
 |------|-----|
-| Window + loop | `import` / `#include "@game"` |
+| Window + loop | `use raylib;` + optional `use koda.game;` |
 | Frame delta | `game.delta()` |
-| Input | `game.keyDown(Key.Left)`, `game.mouseX()`, `game.mouseDown(Mouse.Left)` |
+| Input | `game.keyDown(KEY_LEFT)`, `game.mouseX()`, `game.mouseDown(MOUSE_BUTTON_LEFT)` |
 | Draw | `game.begin()`, `game.clear()`, `game.rect()`, `game.end()` |
 | RNG | `random()`, `randomint(a,b)`, `import "@math"` |
 | Timers | `import "@timer"` |
 | JSON config | `import "@json"` |
-| GC per frame | `game.setGcBudget(0.5)` |
+| GC per frame | `game.begin()` / `game.end()` (built-in); raw loops: `gcframestep(1.0)` ×2 |
 | Diagnostics | `koda doctor`, `koda check` |
 
 ---
 
 ## GC and performance
 
-Beginners should call `game.setGcBudget(0.5)` once per frame — the runtime spreads GC work automatically. Advanced: `arena()`, `gcDisable()`, `gcFrameStep()` — see [runtime and GC](../concepts/runtime-and-gc.md).
+`game.begin()` and `game.end()` each spread ~1 ms of incremental GC work — use them every frame instead of calling `game.setGcBudget()` manually.
+
+**2D draws:** `game.rect` / `game.circle` / `game.clear` / `game.text` with `colors.*` are zero-allocation (packed colors + compiler fusion to `koda_fast_Draw*`). Cache HUD strings; avoid `` `{score}` `` every frame unless the value changed.
+
+**Build:** `koda build` defaults to `-O3`; use `koda run --release` when profiling gameplay.
+
+For **raw Raylib loops**, call `gcframestep(1.0)` at the start and end of each frame. **3D games** should warm up GPU shaders once (`game.warmup3d()` or one hidden draw before the loop). Hoist colors and reused vectors to module-level `let` bindings; use `BeginMode3D(camera3d(px, py, pz, tx, ty, tz, fovy))` for zero-allocation cameras.
+
+Advanced: `arena()` + `arenaReset()` per frame for scratch data — see [runtime and GC](../concepts/runtime-and-gc.md).
 
 ---
 
@@ -267,7 +296,7 @@ Beginners should call `game.setGcBudget(0.5)` once per frame — the runtime spr
 | Document | Contents |
 |----------|----------|
 | [Beginner's guide](../beginners-guide.md) | Full onboarding |
-| [stdlib/game](../stdlib/game.md) | `@game` module |
-| [raylib.md](raylib.md) | Low-level shim (advanced) |
+| [stdlib/game](../stdlib/game.md) | `koda.game` module |
+| [raylib.md](raylib.md) | Full Raylib API (548 functions) + cheat sheet |
 | [wrappers.md](../wrappers.md) | Extending bindings with kodawrap |
 | [distribution.md](distribution.md) | Shipping builds |

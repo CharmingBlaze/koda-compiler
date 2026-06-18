@@ -22,7 +22,7 @@ Terms used in Koda documentation.
 | **`match`** | Brace-style dispatch on a value (`match state { GameState.Won { … } }`) |
 | **`const`** | Immutable binding — cannot reassign after initialization |
 | **String interpolation** | Embed expressions in strings: `"Score: {score}"` or `` `Hi ${name}` `` |
-| **`draw`** | `@game` alias object — `draw.text`, `draw.rect`, `draw.line` |
+| **`draw`** | `koda.game` alias object — `draw.text`, `draw.rect`, `draw.line` |
 | **Closure** | Function capturing outer variables |
 | **GC** | Garbage collector in `libkoda_runtime` |
 | **`deltatime()`** | Seconds since previous frame (games) |

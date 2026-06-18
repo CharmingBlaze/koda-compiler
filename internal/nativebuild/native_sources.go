@@ -28,7 +28,7 @@ func ApplyNativeSourcesForBundle(bundle *parser.ProgramBundle, projectRoot strin
 	}
 	want, ok := resolveNativeWrapperPath(kind, projectRoot)
 	if !ok {
-		return fmt.Errorf("program needs raylib native glue but wrapper.c was not found; run: koda setup raylib (shim) or koda setup raylib --full")
+		return fmt.Errorf("program needs raylib native glue but wrapper.c was not found; run: koda setup raylib")
 	}
 	cur := strings.TrimSpace(os.Getenv("KODA_NATIVE_SOURCES"))
 	if cur != "" && nativeSourcesMatchKind(cur, kind) {
@@ -68,11 +68,11 @@ func inferNativeGlueKind(bundle *parser.ProgramBundle) nativeGlueKind {
 			}
 		}
 	}
-	if hasShim {
-		return nativeGlueShim
-	}
 	if hasWrap {
 		return nativeGlueFullRaylib
+	}
+	if hasShim {
+		return nativeGlueShim
 	}
 	return nativeGlueNone
 }

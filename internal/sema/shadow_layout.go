@@ -112,6 +112,8 @@ func shadowRegisterInStmt(s parser.Stmt, ctx *NativeEmitContext) {
 	case *parser.WhileStmt:
 		shadowScanExprForFuncExprs(st.Condition, ctx)
 		shadowRegisterInStmt(st.Body, ctx)
+	case *parser.LoopStmt:
+		shadowRegisterInStmt(st.Body, ctx)
 	case *parser.DoWhileStmt:
 		shadowRegisterInStmt(st.Body, ctx)
 		shadowScanExprForFuncExprs(st.Condition, ctx)
@@ -195,6 +197,8 @@ func shadowScanStmtForFuncExprs(s parser.Stmt, ctx *NativeEmitContext) {
 			shadowScanStmtForFuncExprs(st.Else, ctx)
 		}
 	case *parser.WhileStmt:
+		shadowScanStmtForFuncExprs(st.Body, ctx)
+	case *parser.LoopStmt:
 		shadowScanStmtForFuncExprs(st.Body, ctx)
 	case *parser.DoWhileStmt:
 		shadowScanStmtForFuncExprs(st.Body, ctx)
@@ -343,6 +347,8 @@ func shadowWalkDecl(d parser.Decl, L *ShadowLayout, next *int) {
 		return
 	case *parser.IncludeDecl:
 		return
+	case *parser.UseDecl:
+		return
 	case *parser.BlockStmt:
 		shadowWalkBlock(x, L, next)
 	case parser.Stmt:
@@ -369,6 +375,8 @@ func shadowWalkStmt(s parser.Stmt, L *ShadowLayout, next *int) {
 			shadowWalkStmt(st.Else, L, next)
 		}
 	case *parser.WhileStmt:
+		shadowWalkStmt(st.Body, L, next)
+	case *parser.LoopStmt:
 		shadowWalkStmt(st.Body, L, next)
 	case *parser.DoWhileStmt:
 		shadowWalkStmt(st.Body, L, next)

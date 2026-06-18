@@ -1,0 +1,73 @@
+// WASD camera fly-through — grid, bobbing cube, raw Raylib loop.
+use raylib;
+use koda.util;
+
+const SCREEN_W = 800;
+const SCREEN_H = 600;
+const MOVE_SPEED = 10.0;
+
+let clearColor = #101018;
+let cubeColor = #FF5050;
+let wireColor = #FFFFFF;
+let hudWhite = #FFFFFF;
+let hudGray = #888888;
+
+func camera3d(px, py, pz, tx, ty, tz, fovy) {
+    return {
+        position: { x: px, y: py, z: pz },
+        target: { x: tx, y: ty, z: tz },
+        up: { x: 0, y: 1, z: 0 },
+        fovy: fovy,
+        projection: CAMERA_PERSPECTIVE
+    };
+}
+
+func warmup3d() {
+    BeginDrawing();
+    ClearBackground(clearColor);
+    BeginMode3D(camera3d(5, 5, 5, 0, 0, 0, 45));
+    DrawCube({ x: 0, y: 0, z: 0 }, 1, 1, 1, cubeColor);
+    EndMode3D();
+    EndDrawing();
+    gcframestep(2.0);
+}
+
+func main() {
+    InitWindow(SCREEN_W, SCREEN_H, "Koda - 3D Demo");
+    defer CloseWindow();
+    SetTargetFPS(60);
+    warmup3d();
+
+    let camX = 10.0;
+    let camY = 10.0;
+    let camZ = 10.0;
+    let spin = 0.0;
+    let fovy = 45.0;
+
+    loop {
+        if WindowShouldClose() {
+            break;
+        }
+        gcframestep(1.0);
+        let dt = clampDelta(GetFrameTime());
+        spin += 60.0 * dt;
+
+        if IsKeyDown(KEY_W) { camZ -= MOVE_SPEED * dt; }
+        if IsKeyDown(KEY_S) { camZ += MOVE_SPEED * dt; }
+        if IsKeyDown(KEY_A) { camX -= MOVE_SPEED * dt; }
+        if IsKeyDown(KEY_D) { camX += MOVE_SPEED * dt; }
+
+        BeginDrawing();
+        ClearBackground(clearColor);
+        BeginMode3D(camera3d(camX, camY, camZ, 0, 0, 0, fovy));
+        DrawGrid(20, 1.0);
+        let bob = sin(spin * 0.017) * 0.5;
+        DrawCube({ x: 0, y: bob, z: 0 }, 2, 2, 2, cubeColor);
+        DrawCubeWires({ x: 0, y: bob, z: 0 }, 2.05, 2.05, 2.05, wireColor);
+        EndMode3D();
+        DrawText("Koda 3D Demo", 10, 10, 20, hudWhite);
+        DrawText("WASD - move camera", 10, 40, 16, hudGray);
+        EndDrawing();
+        gcframestep(1.0);
+    }
+}

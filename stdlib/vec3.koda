@@ -1,3 +1,13 @@
+struct Vec3 {
+    x: float = 0.0;
+    y: float = 0.0;
+    z: float = 0.0;
+}
+
+func zero() {
+    return Vec3 {};
+}
+
 func create(x, y, z) {
     return { x: x, y: y, z: z };
 }
@@ -33,11 +43,16 @@ func length(v) {
 func normalize(v) {
     let len = length(v);
     if (len == 0.0) {
-        return create(0, 0, 0);
+        return zero();
     }
     return scale(v, 1.0 / len);
 }
 
 func lerp(a, b, t) {
     return create(math.lerp(a.x, b.x, t), math.lerp(a.y, b.y, t), math.lerp(a.z, b.z, t));
+}
+
+// Raylib Vector3 object for full wrapper calls (DrawCube, BeginMode3D, …).
+func to_raylib(v) {
+    return { x: v.x, y: v.y, z: v.z };
 }

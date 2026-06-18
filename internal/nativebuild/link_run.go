@@ -101,42 +101,26 @@ func runCompileAndLink(tc *kodahome.Toolchain, irFile, outAbs, sdkRoot, projectR
 		inputFile = objPath
 	}
 
-	linkArgs := []string{opts.llcOptFlag()}
-	if opts.Debug {
-		linkArgs = append(linkArgs, "-g")
-	}
-	if tc.LLD != "" {
-		if runtime.GOOS == "windows" {
-			// Clang treats "-fuse-ld=C:\..." as multiple tokens (drive colon); rely on LLVM lld on PATH.
-			linkArgs = append(linkArgs, "-fuse-ld=lld")
-		} else {
-			linkArgs = append(linkArgs, "-fuse-ld="+tc.LLD)
-		}
-	} else if UseLLD() {
-		linkArgs = append(linkArgs, "-fuse-ld=lld")
-	}
-	if res, err := kodahome.BundledClangResourceFlags(); err == nil {
-		linkArgs = append(linkArgs, res...)
-	}
-	linkArgs = append(linkArgs, inputFile, "-I", runtimeInclude)
-	// LLVM IR often carries a target triple; suppress noisy override warning from clang.
-	linkArgs = append(linkArgs, "-Wno-override-module")
 	nativeSrc := os.Getenv("KODA_NATIVE_SOURCES")
 	if strings.TrimSpace(nativeSrc) == "" {
 		nativeSrc = os.Getenv("KODA_NATIVE_SOURCES")
 	}
-	if nativeSources := strings.Fields(nativeSrc); len(nativeSources) > 0 {
+	var nativeLinkObjects []string
+	if nativeSources := splitNativeSources(nativeSrc); len(nativeSources) > 0 {
 		if log != nil {
 			log(fmt.Sprintf("  native sources: %s\n", strings.Join(nativeSources, " ")))
 		}
-		linkArgs = append(linkArgs, nativeSources...)
+		var err error
+		nativeLinkObjects, err = materializeNativeObjects(cc, nativeSources, projectRoot, sdkRoot, opts, log)
+		if err != nil {
+			return err
+		}
 	}
-	linkArgs = append(linkArgs, tc.RuntimeLib)
 	if inc, arch, ok := vendoredRaylibStatic(projectRoot); ok {
 		if log != nil {
 			log(fmt.Sprintf("  vendored raylib: %s\n", arch))
 		}
-		linkArgs = append(linkArgs, "-I", inc, arch)
+		_ = inc
 	}
 	linkExtra := os.Getenv("KODA_LINKFLAGS")
 	if strings.TrimSpace(linkExtra) == "" {
@@ -149,13 +133,7 @@ func runCompileAndLink(tc *kodahome.Toolchain, irFile, outAbs, sdkRoot, projectR
 		if log != nil {
 			log(fmt.Sprintf("  link flags: %s\n\n", strings.Join(extra, " ")))
 		}
-		linkArgs = append(linkArgs, extra...)
 	}
-	linkArgs = append(linkArgs, defaultSystemLinkFlags()...)
-	if runtime.GOOS == "windows" {
-		linkArgs = append(linkArgs, "-lmsvcrt")
-	}
-	linkArgs = append(linkArgs, "-o", outAbs)
 
 	buildArgs := func(o BuildOptions) []string {
 		args := make([]string, 0, 64)
@@ -175,15 +153,15 @@ func runCompileAndLink(tc *kodahome.Toolchain, irFile, outAbs, sdkRoot, projectR
 		if res, err := kodahome.BundledClangResourceFlags(); err == nil {
 			args = append(args, res...)
 		}
-		args = append(args, inputFile, "-I", runtimeInclude)
-		if nativeSources := strings.Fields(os.Getenv("KODA_NATIVE_SOURCES")); len(nativeSources) > 0 {
-			args = append(args, nativeSources...)
+		args = append(args, inputFile, "-I", runtimeInclude, "-Wno-override-module")
+		if len(nativeLinkObjects) > 0 {
+			args = append(args, nativeLinkObjects...)
 		}
 		args = append(args, tc.RuntimeLib)
 		if inc, arch, ok := vendoredRaylibStatic(projectRoot); ok {
 			args = append(args, "-I", inc, arch)
 		}
-		if extra := strings.Fields(os.Getenv("KODA_LINKFLAGS")); len(extra) > 0 {
+		if extra := strings.Fields(linkExtra); len(extra) > 0 {
 			if _, _, vendored := vendoredRaylibStatic(projectRoot); vendored {
 				extra = omitLinkFlag(extra, "-lraylib")
 			}

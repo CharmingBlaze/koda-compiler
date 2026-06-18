@@ -63,7 +63,7 @@ Details: [Distribution guide](../guides/distribution.md).
 ```json
 {
   "native": {
-    "sources": ["wrappers/raylib_shim/wrapper.c"],
+    "sources": ["wrappers/raylib/wrapper.c"],
     "linkflags": "-lraylib -lopengl32 -lgdi32 -lwinmm"
   }
 }
@@ -72,7 +72,7 @@ Details: [Distribution guide](../guides/distribution.md).
 Or set environment variables (override manifest):
 
 ```bash
-export KODA_NATIVE_SOURCES="wrappers/raylib_shim/wrapper.c"
+export KODA_NATIVE_SOURCES="wrappers/raylib/wrapper.c"
 export KODA_LINKFLAGS="-lraylib -lm"
 ```
 

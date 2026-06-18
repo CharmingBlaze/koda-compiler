@@ -1,0 +1,77 @@
+// Fast Raylib shim — numeric args only (no per-frame Vector3/Color object boxing).
+// Use with koda.json native.sources: ["wrappers/raylib_shim/wrapper.c"]
+
+// koda:extern InitWindow koda_shim_InitWindow 3
+let InitWindow = 0;
+
+// koda:extern CloseWindow koda_shim_CloseWindow 0
+let CloseWindow = 0;
+
+// koda:extern WindowShouldClose koda_shim_WindowShouldClose 0
+let WindowShouldClose = 0;
+
+// koda:extern SetTargetFPS koda_shim_SetTargetFPS 1
+let SetTargetFPS = 0;
+
+// koda:extern BeginDrawing koda_shim_BeginDrawing 0
+let BeginDrawing = 0;
+
+// koda:extern EndDrawing koda_shim_EndDrawing 0
+let EndDrawing = 0;
+
+// koda:extern ClearBackground koda_shim_ClearBackground 1
+let ClearBackground = 0;
+
+// koda:extern BeginMode3D koda_shim_BeginMode3D 10
+let BeginMode3D = 0;
+
+// koda:extern EndMode3D koda_shim_EndMode3D 0
+let EndMode3D = 0;
+
+// koda:extern DrawGrid koda_shim_DrawGrid 2
+let DrawGrid = 0;
+
+// koda:extern DrawCube koda_shim_DrawCube 7
+let DrawCube = 0;
+
+// koda:extern DrawCubeWires koda_shim_DrawCubeWires 7
+let DrawCubeWires = 0;
+
+// koda:extern DrawText koda_shim_DrawText 5
+let DrawText = 0;
+
+// koda:extern IsKeyDown koda_shim_IsKeyDown 1
+let IsKeyDown = 0;
+
+// koda:extern IsKeyPressed koda_shim_IsKeyPressed 1
+let IsKeyPressed = 0;
+
+// koda:extern GetFrameTime koda_shim_GetFrameTime 0
+let GetFrameTime = 0;
+
+// koda:extern GetMouseX koda_shim_GetMouseX 0
+let GetMouseX = 0;
+
+// koda:extern GetMouseY koda_shim_GetMouseY 0
+let GetMouseY = 0;
+
+// koda:extern IsMouseButtonDown koda_shim_IsMouseButtonDown 1
+let IsMouseButtonDown = 0;
+
+// koda:extern IsMouseButtonPressed koda_shim_IsMouseButtonPressed 1
+let IsMouseButtonPressed = 0;
+
+// koda:extern GetMouseWheelMove koda_shim_GetMouseWheelMove 0
+let GetMouseWheelMove = 0;
+
+let KEY_W = 87;
+let KEY_A = 65;
+let KEY_S = 83;
+let KEY_D = 68;
+let KEY_R = 82;
+let KEY_SPACE = 32;
+let KEY_ESCAPE = 256;
+
+let MOUSE_BUTTON_LEFT = 0;
+let MOUSE_BUTTON_RIGHT = 2;
+let MOUSE_BUTTON_MIDDLE = 1;

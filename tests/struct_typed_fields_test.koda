@@ -1,0 +1,31 @@
+struct Config {
+    width: int = 1280;
+    height: int = 720;
+    title: string = "Game";
+    speed: float = 8.0;
+    active: bool = true;
+}
+
+struct Player {
+    health: float = 100.0;
+    speed: float = 8.0;
+}
+
+func main() {
+    let cfg = Config {};
+    assert(cfg.width == 1280, "default width");
+    assert(cfg.height == 720, "default height");
+    assert(cfg.title == "Game", "default title");
+    assert(cfg.speed == 8.0, "default speed");
+    assert(cfg.active == true, "default active");
+
+    let p = Player {};
+    assert(p.health == 100.0, "default health");
+    assert(p.speed == 8.0, "default speed");
+
+    let hurt = Player { health: 50.0 };
+    assert(hurt.health == 50.0, "partial literal");
+    assert(hurt.speed == 8.0, "partial keeps default");
+
+    print("PASS struct_typed_fields_test");
+}

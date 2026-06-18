@@ -1,0 +1,66 @@
+// Recommended 3D intro — orbiting camera, fusion-friendly camera3d().
+use raylib;
+use koda.util;
+
+let clearColor = #101018;
+let cubeColor = #50B4FF;
+let wireColor = #FFFFFF;
+let hudWhite = #FFFFFF;
+let hudGray = #888888;
+
+func camera3d(px, py, pz, tx, ty, tz, fovy) {
+    return {
+        position: { x: px, y: py, z: pz },
+        target: { x: tx, y: ty, z: tz },
+        up: { x: 0, y: 1, z: 0 },
+        fovy: fovy,
+        projection: CAMERA_PERSPECTIVE
+    };
+}
+
+func warmup3d() {
+    BeginDrawing();
+    ClearBackground(clearColor);
+    BeginMode3D(camera3d(5, 5, 5, 0, 0, 0, 45));
+    DrawCube({ x: 0, y: 0, z: 0 }, 1, 1, 1, cubeColor);
+    EndMode3D();
+    EndDrawing();
+    gcframestep(2.0);
+}
+
+func main() {
+    InitWindow(960, 540, "Koda - Spinning Cube");
+    defer CloseWindow();
+    SetTargetFPS(60);
+    warmup3d();
+
+    let angle = 0.0;
+    let radius = 8.0;
+    let camY = 3.5;
+    let fovy = 45.0;
+
+    loop {
+        if WindowShouldClose() {
+            break;
+        }
+        gcframestep(1.0);
+        let dt = clampDelta(GetFrameTime());
+        angle += dt * 1.2;
+
+        let camX = radius * sin(angle);
+        let camZ = radius * cos(angle);
+        let bob = sin(angle * 3.0) * 0.15;
+
+        BeginDrawing();
+        ClearBackground(clearColor);
+        BeginMode3D(camera3d(camX, camY, camZ, 0, 0, 0, fovy));
+        DrawGrid(16, 1.0);
+        DrawCube({ x: 0, y: bob, z: 0 }, 2, 2, 2, cubeColor);
+        DrawCubeWires({ x: 0, y: bob, z: 0 }, 2.04, 2.04, 2.04, wireColor);
+        EndMode3D();
+        DrawText("Spinning Cube", 16, 14, 28, hudWhite);
+        DrawText("ESC to close", 16, 48, 18, hudGray);
+        EndDrawing();
+        gcframestep(1.0);
+    }
+}

@@ -1,0 +1,51 @@
+// Raylib struct types + palette constants — injected when `use raylib;` is present.
+// Embedded by internal/parser/prelude.go (InjectRaylibPrelude).
+// Mirror: wrappers/raylib/types.koda
+
+struct Vector3 {
+    x: float = 0.0;
+    y: float = 0.0;
+    z: float = 0.0;
+}
+
+struct Camera3D {
+    position: Vector3;
+    target: Vector3;
+    up: Vector3;
+    fovy: float = 45.0;
+    projection: int = 0;
+}
+
+struct Color {
+    r: int = 255;
+    g: int = 255;
+    b: int = 255;
+    a: int = 255;
+}
+
+let LIGHTGRAY = { r: 200, g: 200, b: 200, a: 255 };
+let GRAY = { r: 130, g: 130, b: 130, a: 255 };
+let DARKGRAY = { r: 80, g: 80, b: 80, a: 255 };
+let YELLOW = { r: 253, g: 249, b: 0, a: 255 };
+let GOLD = { r: 255, g: 203, b: 0, a: 255 };
+let ORANGE = { r: 255, g: 161, b: 0, a: 255 };
+let PINK = { r: 255, g: 109, b: 194, a: 255 };
+let RED = { r: 230, g: 41, b: 55, a: 255 };
+let MAROON = { r: 190, g: 33, b: 55, a: 255 };
+let GREEN = { r: 0, g: 228, b: 48, a: 255 };
+let LIME = { r: 0, g: 158, b: 47, a: 255 };
+let DARKGREEN = { r: 0, g: 117, b: 44, a: 255 };
+let SKYBLUE = { r: 102, g: 191, b: 255, a: 255 };
+let BLUE = { r: 0, g: 121, b: 241, a: 255 };
+let DARKBLUE = { r: 0, g: 82, b: 172, a: 255 };
+let PURPLE = { r: 200, g: 122, b: 255, a: 255 };
+let VIOLET = { r: 135, g: 60, b: 190, a: 255 };
+let DARKPURPLE = { r: 112, g: 31, b: 126, a: 255 };
+let BEIGE = { r: 211, g: 176, b: 131, a: 255 };
+let BROWN = { r: 127, g: 106, b: 79, a: 255 };
+let DARKBROWN = { r: 76, g: 63, b: 47, a: 255 };
+let WHITE = { r: 255, g: 255, b: 255, a: 255 };
+let BLACK = { r: 0, g: 0, b: 0, a: 255 };
+let BLANK = { r: 0, g: 0, b: 0, a: 0 };
+let MAGENTA = { r: 255, g: 0, b: 255, a: 255 };
+let RAYWHITE = { r: 245, g: 245, b: 245, a: 255 };

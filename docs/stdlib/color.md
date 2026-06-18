@@ -32,4 +32,4 @@ clearbackground(c.packed);
 
 Hex literals (`0xRRGGBBAA`) still work when you need them. Import `@color` for `hsv()`, `lerp()`, and `toHex()` — see `stdlib/color.koda`.
 
-With `@game`, `Color.white` aliases the same palette as `colors.white`.
+With `koda.game`, `Color.white` aliases the same palette as `colors.white`.

@@ -1,0 +1,17 @@
+{
+  "native": {
+    "sources": [
+      "wrappers/raylib/wrapper.c"
+    ],
+    "graphics": true
+  },
+  "entry": "src/main.koda",
+  "lint": "beginner",
+  "version": "0.1.0",
+  "name": "raylib-3d-demo",
+  "studio": {
+    "category": "graphics",
+    "blurb": "WASD camera fly-through around a cube.",
+    "title": "Raylib 3D Demo"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "fps-arena",
+  "version": "0.1.0",
+  "entry": "src/main.koda",
+  "lint": "beginner",
+  "native": {
+    "sources": [
+      "wrappers/raylib/wrapper.c"
+    ],
+    "graphics": true
+  },
+  "studio": {
+    "category": "game",
+    "blurb": "First-person shooter — mouse look, shoot targets.",
+    "title": "FPS Arena"
+  }
+}

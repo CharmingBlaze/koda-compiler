@@ -41,6 +41,10 @@ This hub links every user-facing document.
 | Document | Contents |
 |----------|----------|
 | [Language reference](../language.md) | Every syntax form (repo root) |
+| [Language cheatsheet](reference/language-cheatsheet.md) | One-page quick reference (accurate syntax) |
+| [Language vision](KODA_LANGUAGE_VISION.md) | North-star design (layers, raylib-first, planned syntax) |
+| [Handoff guide](KODA_HANDOFF.md) | **Language + examples + continuation** (start here for new sessions) |
+| [Implementation handoff](handoff.md) | Compiler/runtime engineering checklist |
 | [Reference index](reference/README.md) | Lookup hub |
 | [CLI](reference/cli.md) | Subcommands and `koda.json` |
 | [Builtins](reference/builtins.md) | Global functions |
@@ -61,7 +65,7 @@ This hub links every user-facing document.
 | `@util` | [util.md](stdlib/util.md) |
 | `@noise` | [noise.md](stdlib/noise.md) |
 | `@str` | [str.md](stdlib/str.md) |
-| `@game` | [game.md](stdlib/game.md) |
+| `koda.game` | [game.md](stdlib/game.md) |
 | `@input` | [input.md](stdlib/input.md) |
 | `@color` | [color.md](stdlib/color.md) |
 | `@easing` | [easing.md](stdlib/easing.md) |
@@ -74,11 +78,16 @@ This hub links every user-facing document.
 | Document | Contents |
 |----------|----------|
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | Build from source, PRs |
+| [KODA_LANGUAGE_ROADMAP.md](KODA_LANGUAGE_ROADMAP.md) | Vision, progressive depth, implementation phases |
+| [CURRENT_COMPILER_ARCHITECTURE.md](CURRENT_COMPILER_ARCHITECTURE.md) | Lexer → LLVM audit |
+| [KODA_WRAPPER_SYSTEM.md](KODA_WRAPPER_SYSTEM.md) | C/C++ bindings, registry, raw vs helpers |
 | [positioning.md](positioning.md) | Honest product framing (who Koda is for) |
-| [ROADMAP.md](ROADMAP.md) | Prioritized engineering queue |
+| [ROADMAP.md](ROADMAP.md) | Prioritized engineering queue (CI, runtime) |
 | [status.md](status.md) | Implementation matrix |
 | [MASTER_PLAN.md](MASTER_PLAN.md) | Detailed engineering roadmap |
-| [handoff.md](handoff.md) | Compiler pipeline |
+| [architecture.md](architecture.md) | Pipeline overview |
+| [Handoff guide](KODA_HANDOFF.md) | Language + examples + next steps |
+| [Implementation handoff](handoff.md) | Compiler/runtime checklist |
 | [STYLE-GUIDE.md](STYLE-GUIDE.md) | How we write docs |
 
 ---
@@ -92,7 +101,7 @@ This hub links every user-facing document.
 | `examples/games/koda64/` | Mario 64-style demo — structs, orbit camera, dot notation |
 | `examples/keys.koda` | Raylib key/color constants |
 | `examples/release_features.koda` | Feature smoke test |
-| `cmd/koda/templates/` | `koda new` templates |
+| `internal/project/templates/` | `koda new` templates (embedded in compiler) |
 
 ---
 

@@ -26,6 +26,10 @@ export function DiagnoseFile(arg1, arg2) {
   return window['go']['main']['App']['DiagnoseFile'](arg1, arg2);
 }
 
+export function ExampleGamePath(arg1) {
+  return window['go']['main']['App']['ExampleGamePath'](arg1);
+}
+
 export function GetWorkspaceRoot() {
   return window['go']['main']['App']['GetWorkspaceRoot']();
 }
@@ -40,6 +44,10 @@ export function ListDir(arg1) {
 
 export function ListDocPages() {
   return window['go']['main']['App']['ListDocPages']();
+}
+
+export function ListExamples() {
+  return window['go']['main']['App']['ListExamples']();
 }
 
 export function ListProjectTemplates() {

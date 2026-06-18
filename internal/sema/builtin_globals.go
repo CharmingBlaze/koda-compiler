@@ -19,7 +19,7 @@ var nativeBuiltinNames = []string{
 	"floor", "ceil", "round", "trunc", "sign", "min", "max",
 	"smoothstep", "distancesq", "normalize",
 	"hypot", "fmod", "degrees", "radians", "wrap", "approach", "smoothdamp",
-	"isnumber", "isstring", "isbool", "isnull", "isarray", "isobject", "isfunction",
+	"isnumber", "isstring", "isbool", "isarray", "isobject", "isfunction",
 	"bool", "format",
 	"readfile", "writefile", "appendfile", "fileexists", "deletefile",
 	"isfile", "isdir", "filesize", "listdir", "readdir",

@@ -37,6 +37,9 @@ let drawcubewires = 0;
 // koda:extern drawtext koda_shim_DrawText 5
 let drawtext = 0;
 
+// koda:extern getframetime koda_shim_GetFrameTime 0
+let getframetime = 0;
+
 // koda:extern iskeydown koda_shim_IsKeyDown 1
 let iskeydown = 0;
 
@@ -57,6 +60,18 @@ let getmousex = 0;
 
 // koda:extern getmousey koda_shim_GetMouseY 0
 let getmousey = 0;
+
+// koda:extern getmousedeltax koda_shim_GetMouseDeltaX 0
+let getmousedeltax = 0;
+
+// koda:extern getmousedeltay koda_shim_GetMouseDeltaY 0
+let getmousedeltay = 0;
+
+// koda:extern disablecursor koda_shim_DisableCursor 0
+let disablecursor = 0;
+
+// koda:extern enablecursor koda_shim_EnableCursor 0
+let enablecursor = 0;
 
 // koda:extern ismousebuttondown koda_shim_IsMouseButtonDown 1
 let ismousebuttondown = 0;

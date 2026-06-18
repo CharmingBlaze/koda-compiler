@@ -1,5 +1,5 @@
-#include "../wrappers/raylib_shim/raylib.koda"
-#include "@game"
+use raylib;
+use koda.game;
 
 struct Paddle {
     x, y,
@@ -14,6 +14,12 @@ struct Ball {
     radius
 }
 
+enum Phase {
+    Serve,
+    Play,
+    Won
+}
+
 const SCREEN_W = 800;
 const SCREEN_H = 600;
 const WIN_SCORE = 11;
@@ -22,21 +28,11 @@ const PADDLE_H = 96;
 const BALL_R = 10;
 const BALL_SPEED = 360;
 
-const ST_SERVE = 0;
-const ST_PLAY = 1;
-const ST_WON = 2;
-
-const KEY_W = 87;
-const KEY_S = 83;
-const KEY_UP = 265;
-const KEY_DOWN = 264;
-const KEY_SPACE = 32;
-
 func clamp(v, lo, hi) {
-    if (v < lo) {
+    if v < lo {
         return lo;
     }
-    if (v > hi) {
+    if v > hi {
         return hi;
     }
     return v;
@@ -52,7 +48,7 @@ func serveBall(ball, towardRight) {
     ball.x = SCREEN_W / 2;
     ball.y = SCREEN_H / 2;
     let dir = 1;
-    if (!towardRight) {
+    if not towardRight {
         dir = -1;
     }
     ball.vx = BALL_SPEED * dir;
@@ -61,18 +57,18 @@ func serveBall(ball, towardRight) {
 
 func tryPaddleHit(ball, px, py, pw, ph, fromLeft) {
     let hitX = false;
-    if (fromLeft) {
+    if fromLeft {
         hitX = ball.vx < 0 && ball.x - ball.radius <= px + pw;
     } else {
         hitX = ball.vx > 0 && ball.x + ball.radius >= px;
     }
-    if (!hitX) {
+    if not hitX {
         return false;
     }
-    if (ball.y + ball.radius < py) {
+    if ball.y + ball.radius < py {
         return false;
     }
-    if (ball.y - ball.radius > py + ph) {
+    if ball.y - ball.radius > py + ph {
         return false;
     }
 
@@ -81,7 +77,7 @@ func tryPaddleHit(ball, px, py, pw, ph, fromLeft) {
     ball.vx = -ball.vx;
     ball.vy = offset * BALL_SPEED * 0.85;
 
-    if (fromLeft) {
+    if fromLeft {
         ball.x = px + pw + ball.radius;
     } else {
         ball.x = px - ball.radius;
@@ -93,15 +89,14 @@ func drawCenterLine() {
     let segment = 18;
     let gap = 14;
     let x = SCREEN_W / 2 - 2;
-    let y = 0;
-    while (y < SCREEN_H) {
+    for y in 0..SCREEN_H step segment + gap {
         game.rect(x, y, 4, segment, colors.white);
-        y = y + segment + gap;
     }
 }
 
 func main() {
-    game.open(SCREEN_W, SCREEN_H, "{{name}} — Pong");
+    game.open(SCREEN_W, SCREEN_H, "Koda Pong");
+    defer game.close();
     game.fps(60);
 
     let left = Paddle {
@@ -130,48 +125,46 @@ func main() {
         radius: BALL_R
     };
 
-    let phase = ST_SERVE;
+    let state = Phase.Serve;
     let serveRight = true;
     let winMessage = "";
 
-    while (game.running()) {
-        let dt = game.delta();
-        if (isnull(dt)) {
-            dt = 0.016;
-        } else if (dt <= 0) {
-            dt = 0.016;
+    loop {
+        if not game.running() {
+            break;
         }
+        let dt = game.delta() or 0.016;
 
-        if (phase == ST_WON) {
-            if (game.keyPressed(KEY_SPACE)) {
+        if state == Phase.Won {
+            if game.keyPressed(KEY_SPACE) {
                 left.score = 0;
                 right.score = 0;
                 winMessage = "";
-                phase = ST_SERVE;
+                state = Phase.Serve;
                 serveRight = true;
                 ball.x = SCREEN_W / 2;
                 ball.y = SCREEN_H / 2;
                 ball.vx = 0;
                 ball.vy = 0;
             }
-        } else if (phase == ST_SERVE) {
+        } else if state == Phase.Serve {
             ball.x = SCREEN_W / 2;
             ball.y = SCREEN_H / 2;
             ball.vx = 0;
             ball.vy = 0;
-            if (game.keyPressed(KEY_SPACE)) {
-                phase = ST_PLAY;
+            if game.keyPressed(KEY_SPACE) {
+                state = Phase.Play;
                 serveBall(ball, serveRight);
             }
         } else {
-            ball.x = ball.x + ball.vx * dt;
-            ball.y = ball.y + ball.vy * dt;
+            ball.x += ball.vx * dt;
+            ball.y += ball.vy * dt;
 
-            if (ball.y - ball.radius <= 0) {
+            if ball.y - ball.radius <= 0 {
                 ball.y = ball.radius;
                 ball.vy = -ball.vy;
             }
-            if (ball.y + ball.radius >= SCREEN_H) {
+            if ball.y + ball.radius >= SCREEN_H {
                 ball.y = SCREEN_H - ball.radius;
                 ball.vy = -ball.vy;
             }
@@ -179,39 +172,39 @@ func main() {
             tryPaddleHit(ball, left.x, left.y, left.w, left.h, true);
             tryPaddleHit(ball, right.x, right.y, right.w, right.h, false);
 
-            if (ball.x < -ball.radius) {
-                right.score = right.score + 1;
+            if ball.x < -ball.radius {
+                right.score += 1;
                 serveRight = false;
-                phase = ST_SERVE;
-                if (right.score >= WIN_SCORE) {
+                state = Phase.Serve;
+                if right.score >= WIN_SCORE {
                     winMessage = "Right player wins!";
-                    phase = ST_WON;
+                    state = Phase.Won;
                 }
             }
-            if (ball.x > SCREEN_W + ball.radius) {
-                left.score = left.score + 1;
+            if ball.x > SCREEN_W + ball.radius {
+                left.score += 1;
                 serveRight = true;
-                phase = ST_SERVE;
-                if (left.score >= WIN_SCORE) {
+                state = Phase.Serve;
+                if left.score >= WIN_SCORE {
                     winMessage = "Left player wins!";
-                    phase = ST_WON;
+                    state = Phase.Won;
                 }
             }
         }
 
         let moveLeft = 0;
         let moveRight = 0;
-        if (game.keyDown(KEY_W)) {
-            moveLeft = moveLeft - 1;
+        if game.keyDown(KEY_W) {
+            moveLeft -= 1;
         }
-        if (game.keyDown(KEY_S)) {
-            moveLeft = moveLeft + 1;
+        if game.keyDown(KEY_S) {
+            moveLeft += 1;
         }
-        if (game.keyDown(KEY_UP)) {
-            moveRight = moveRight - 1;
+        if game.keyDown(KEY_UP) {
+            moveRight -= 1;
         }
-        if (game.keyDown(KEY_DOWN)) {
-            moveRight = moveRight + 1;
+        if game.keyDown(KEY_DOWN) {
+            moveRight += 1;
         }
         left.y = nextPaddleY(left.y, left.h, left.speed, moveLeft, dt);
         right.y = nextPaddleY(right.y, right.h, right.speed, moveRight, dt);
@@ -223,23 +216,20 @@ func main() {
         game.rect(right.x, right.y, right.w, right.h, colors.white);
         game.circle(ball.x, ball.y, ball.radius, colors.green);
 
-        let scoreText = string(left.score) + "  -  " + string(right.score);
+        let scoreText = `{left.score}  -  {right.score}`;
         game.text(scoreText, SCREEN_W / 2 - 36, 24, 40, colors.white);
 
-        if (phase == ST_SERVE) {
+        if state == Phase.Serve {
             game.text("SPACE to serve", SCREEN_W / 2 - 110, SCREEN_H / 2 + 40, 22, colors.white);
         }
-        if (phase == ST_WON) {
+        if state == Phase.Won {
             game.text(winMessage, SCREEN_W / 2 - 140, SCREEN_H / 2 - 16, 32, colors.red);
-            game.text("SPACE — play again", SCREEN_W / 2 - 130, SCREEN_H / 2 + 28, 22, colors.white);
+            game.text("SPACE - play again", SCREEN_W / 2 - 130, SCREEN_H / 2 + 28, 22, colors.white);
         }
-        if (phase == ST_PLAY) {
-            game.text("W/S vs Up/Down — first to 11", 12, SCREEN_H - 32, 18, colors.white);
+        if state == Phase.Play {
+            game.text("W/S vs Up/Down - first to 11", 12, SCREEN_H - 32, 18, colors.white);
         }
 
         game.end();
-        game.setGcBudget(0.5);
     }
-
-    game.close();
 }

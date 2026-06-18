@@ -33,3 +33,12 @@ func isIntegerTypeName(name string) bool {
 		return IntegerTypeNames[n]
 	}
 }
+
+func isFloatTypeName(name string) bool {
+	switch normalizeTypeName(name) {
+	case "float", "float32", "float64":
+		return true
+	default:
+		return false
+	}
+}

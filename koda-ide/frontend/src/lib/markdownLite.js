@@ -8,6 +8,10 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;')
 }
 
+function escapeAttr(s) {
+  return escapeHtml(s).replace(/'/g, '&#39;')
+}
+
 /** @param {string} text */
 function inlineFormat(text) {
   let s = escapeHtml(text)
@@ -48,7 +52,10 @@ export function renderMarkdown(md) {
       }
       i++
       const cls = lang ? ` class="language-${escapeHtml(lang)}"` : ''
-      out.push(`<pre><code${cls}>${escapeHtml(code.join('\n'))}</code></pre>`)
+      const rawCode = code.join('\n')
+      out.push(
+        `<div class="code-copy-wrap"><button type="button" class="copy-button copy-button-compact" data-copy-text="${escapeAttr(rawCode)}" title="Copy code" aria-label="Copy code"><span aria-hidden="true">⧉</span><span>Copy</span></button><pre><code${cls}>${escapeHtml(rawCode)}</code></pre></div>`,
+      )
       continue
     }
 

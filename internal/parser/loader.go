@@ -85,7 +85,7 @@ func loadModuleImports(modulePath string, prog *Program, bundle *ProgramBundle, 
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			abs, err := ResolveImportPath(modulePath, rel)
+			abs, err := resolveModuleRef(modulePath, rel)
 			if err != nil {
 				results <- result{err: err}
 				return
@@ -184,6 +184,8 @@ func findImports(node Node, imports *[]string) {
 	case *IncludeDecl:
 		rel := strings.Trim(n.Path.Lexeme, `"'`)
 		*imports = append(*imports, rel)
+	case *UseDecl:
+		*imports = append(*imports, useImportRef(n.ModulePath))
 	case *FuncDecl:
 		for _, p := range n.Params {
 			if p.Default != nil {
@@ -231,6 +233,10 @@ func findImports(node Node, imports *[]string) {
 		if n.Condition != nil {
 			findImports(n.Condition, imports)
 		}
+		if n.Body != nil {
+			findImports(n.Body, imports)
+		}
+	case *LoopStmt:
 		if n.Body != nil {
 			findImports(n.Body, imports)
 		}

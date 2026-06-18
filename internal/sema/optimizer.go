@@ -81,6 +81,8 @@ func (c *NativeEmitContext) walkStmtAssignments(s parser.Stmt, cb func(parser.De
 	case *parser.WhileStmt:
 		c.walkExprAssignments(stmt.Condition, cb)
 		c.walkStmtAssignments(stmt.Body, cb)
+	case *parser.LoopStmt:
+		c.walkStmtAssignments(stmt.Body, cb)
 	case *parser.ForStmt:
 		for _, init := range stmt.Inits {
 			c.walkDeclAssignments(init, cb)
@@ -248,6 +250,12 @@ func (c *NativeEmitContext) foldStmtWithConstants(s parser.Stmt, constants map[p
 		}
 		newBody, c2 := c.foldStmtWithConstants(stmt.Body, constants)
 		if c2 {
+			stmt.Body = newBody
+			changed = true
+		}
+	case *parser.LoopStmt:
+		newBody, c1 := c.foldStmtWithConstants(stmt.Body, constants)
+		if c1 {
 			stmt.Body = newBody
 			changed = true
 		}
@@ -689,6 +697,12 @@ func (c *NativeEmitContext) inlineStmt(s parser.Stmt, inlinable map[*parser.Func
 		}
 		newBody, c1 := c.inlineStmt(stmt.Body, inlinable)
 		if c1 {
+			stmt.Body = newBody
+			changed = true
+		}
+	case *parser.LoopStmt:
+		newBody, ok := c.inlineStmt(stmt.Body, inlinable)
+		if ok {
 			stmt.Body = newBody
 			changed = true
 		}

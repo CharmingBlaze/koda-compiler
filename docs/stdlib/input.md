@@ -1,62 +1,62 @@
-# @input — keyboard and mouse helpers
+# `@input` / `koda.input`
 
-Standalone input functions over the Raylib shim. Ships in `stdlib/input.koda`.
-
-For windowed games, prefer [`@game`](game.md). Use `@input` when you want input helpers without the `game` object namespace.
-
----
+Keyboard and mouse helpers over the **full Raylib wrapper**.
 
 ## Setup
 
-Include the shim first:
-
 ```koda
-#include "wrappers/raylib_shim/raylib.koda"
-#include "@input"
+use raylib;
+use koda.input;
 ```
 
----
+Prefer **`koda.game`** for windowed games with a built-in loop. Use **`koda.input`** when you manage the window yourself but want `Key.*` / `Mouse.*` constants and thin wrappers.
 
 ## API
 
-| Function | Description |
-|----------|-------------|
-| `keyDown(k)` | Key held |
-| `keyPressed(k)` | Key pressed this frame |
-| `mousePos()` | `{ x, y }` cursor position |
-| `mouseButton(b)` | Mouse button held (0=left, 1=right, 2=middle) |
-| `mousePressed(b)` | Button pressed this frame |
-| `mouseWheel()` | Scroll wheel delta |
+```koda
+if (keyDown(Key.W)) { ... }
+if (keyPressed(Key.Space)) { ... }
+if (mousePressed(Mouse.Left)) { ... }
+let pos = mousePos();  // { x, y } from GetMousePosition()
+```
 
-Use `Key` / `Mouse` constants from `@game` if you include both modules, or define your own key codes.
+| Function | Raylib |
+|----------|--------|
+| `keyDown(k)` | `IsKeyDown` |
+| `keyPressed(k)` | `IsKeyPressed` |
+| `mouseButton(b)` | `IsMouseButtonDown` |
+| `mousePressed(b)` | `IsMouseButtonPressed` |
+| `mouseWheel()` | `GetMouseWheelMove` |
 
----
+## Constants
+
+`Key` and `Mouse` map to Raylib enums (`KEY_W`, `MOUSE_BUTTON_LEFT`, …). Load **`use raylib`** before **`use koda.input`**.
 
 ## Example
 
 ```koda
-#include "wrappers/raylib_shim/raylib.koda"
-#include "@input"
+use raylib;
+use koda.input;
 
 func main() {
-    initwindow(400, 300, "Input demo");
-    while (!windowshouldclose()) {
-        let pos = mousePos();
-        if (mousePressed(0)) {
-            print("click at", pos.x, pos.y);
+    InitWindow(800, 600, "Input");
+    defer CloseWindow();
+
+    while (!WindowShouldClose()) {
+        if (keyPressed(Key.Escape)) { break; }
+        BeginDrawing();
+        ClearBackground(asRaylib(colors.dark));
+        if (keyDown(Key.W)) {
+            DrawText("W held", 20, 20, 20, asRaylib(colors.white));
         }
-        begindrawing();
-        clearbackground(colors.dark);
-        drawcircle(pos.x, pos.y, 6, colors.white);
-        enddrawing();
+        EndDrawing();
     }
-    closewindow();
 }
 ```
 
----
+Use **`use koda.color`** for `asRaylib()` when passing colors to full-wrapper draw calls.
 
-## Related
+## See also
 
-- [@game](game.md)
-- Source: `stdlib/input.koda`
+- [Game module](game.md)
+- [Game dev guide](../guides/game-dev.md)

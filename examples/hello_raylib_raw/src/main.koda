@@ -1,0 +1,19 @@
+// Smallest graphics sample — raw Raylib, no game helpers.
+use raylib;
+
+func main() {
+    InitWindow(640, 480, "Koda - Hello Raylib");
+    defer CloseWindow();
+    SetTargetFPS(60);
+
+    loop {
+        if WindowShouldClose() {
+            break;
+        }
+        BeginDrawing();
+        ClearBackground(#101018);
+        DrawText("Hello from Koda + Raylib", 120, 200, 28, #FFFFFF);
+        DrawText("ESC to close", 240, 250, 18, #888888);
+        EndDrawing();
+    }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "mario64-hilltop",
+  "version": "0.1.0",
+  "entry": "src/main.koda",
+  "lint": "beginner",
+  "native": {
+    "sources": [
+      "wrappers/raylib/wrapper.c"
+    ],
+    "graphics": true
+  },
+  "studio": {
+    "category": "game",
+    "blurb": "Rolling meadow course — 8 red coins.",
+    "title": "Bob-omb Hilltop"
+  }
+}

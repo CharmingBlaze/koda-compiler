@@ -11,12 +11,12 @@ koda setup raylib
 koda run
 ```
 
-`koda setup raylib` writes or **refreshes** `wrappers/raylib_shim/` (overwrites stale copies) and sets `koda.json`:
+`koda setup raylib` configures the **full** `wrappers/raylib/wrapper.c` in `koda.json`. Use **`koda setup raylib --shim`** only to copy the legacy shim into a project.
 
 ```json
 {
   "native": {
-    "sources": ["wrappers/raylib_shim/wrapper.c"],
+    "sources": ["wrappers/raylib/wrapper.c"],
     "graphics": true
   }
 }

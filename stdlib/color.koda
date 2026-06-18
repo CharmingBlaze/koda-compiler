@@ -5,10 +5,49 @@
 //   game.clear(colors.sky);
 //   game.rect(0, 0, 100, 100, rgb(34, 139, 34));
 //
-// Advanced: hex literals still work (0xRRGGBBAA) when you need them.
+// Advanced: hex colors (#RRGGBB, #RGB) and 0xRRGGBBAA integers when you need them.
+
+struct ColorBytes {
+    r: float = 0.0;
+    g: float = 0.0;
+    b: float = 0.0;
+    a: float = 255.0;
+}
+
+// Full Raylib Color { r, g, b, a }. Accepts packed rgb()/rgba() or ColorBytes.
+func asRaylib(c) {
+    if (type(c) == "number") {
+        return {
+            r: floor(c / 16777216) % 256,
+            g: floor(c / 65536) % 256,
+            b: floor(c / 256) % 256,
+            a: floor(c) % 256
+        };
+    }
+    if (c.a == null) {
+        return { r: c.r, g: c.g, b: c.b, a: 255 };
+    }
+    return { r: c.r, g: c.g, b: c.b, a: c.a };
+}
+
+func zero() {
+    return ColorBytes {};
+}
+
+func create(r, g, b, a) {
+    return { r: r, g: g, b: b, a: a };
+}
 
 func fromBytes(r, g, b, a) {
     return rgba(r, g, b, a);
+}
+
+func toPacked(c) {
+    return rgba(c.r, c.g, c.b, c.a);
+}
+
+func to_raylib(c) {
+    return asRaylib(c);
 }
 
 func hsv(h, s, v) {
@@ -56,12 +95,11 @@ func toHex(c) {
     let g = floor(c / 65536) % 256;
     let b = floor(c / 256) % 256;
     let hexChars = "0123456789abcdef";
-    return format("#{}{}{}{}{}{}",
-        hexChars[floor(r / 16)],
-        hexChars[r % 16],
-        hexChars[floor(g / 16)],
-        hexChars[g % 16],
-        hexChars[floor(b / 16)],
-        hexChars[b % 16]
-    );
+    return "#"
+        + hexChars[floor(r / 16)]
+        + hexChars[r % 16]
+        + hexChars[floor(g / 16)]
+        + hexChars[g % 16]
+        + hexChars[floor(b / 16)]
+        + hexChars[b % 16];
 }

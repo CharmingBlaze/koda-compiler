@@ -2,6 +2,8 @@
   import { onMount } from 'svelte'
   import { ListDocPages, ReadDocPage } from '../../wailsjs/go/main/App.js'
   import { BrowserOpenURL } from '../../wailsjs/runtime/runtime.js'
+  import CopyButton from './CopyButton.svelte'
+  import { copyText } from './clipboard.js'
   import { renderMarkdown, resolveDocLink } from './markdownLite.js'
   import {
     KODA_KEYWORDS,
@@ -98,6 +100,22 @@
   function onDocClick(e) {
     const t = e.target
     if (!(t instanceof Element)) return
+    const copyButton = t.closest('button[data-copy-text]')
+    if (copyButton) {
+      e.preventDefault()
+      const text = copyButton.getAttribute('data-copy-text') || ''
+      void copyText(text).then((ok) => {
+        if (!ok) return
+        copyButton.classList.add('copied')
+        const label = copyButton.querySelector('span:last-child')
+        if (label) label.textContent = 'Copied'
+        window.setTimeout(() => {
+          copyButton.classList.remove('copied')
+          if (label) label.textContent = 'Copy'
+        }, 1400)
+      })
+      return
+    }
     const a = t.closest('a[data-doc-href]')
     if (!a) return
     e.preventDefault()
@@ -125,13 +143,21 @@
     if (!entry) return
     /** @type {Record<string, string>} */
     const stdlibDoc = {
+      raylib: 'docs/guides/raylib.md',
+      'koda.game': 'docs/stdlib/game.md',
+      '@game': 'docs/stdlib/game.md',
+      'koda.input': 'docs/stdlib/input.md',
+      '@input': 'docs/stdlib/input.md',
+      'koda.camera': 'docs/stdlib/camera.md',
+      'koda.color': 'docs/stdlib/color.md',
+      '@color': 'docs/stdlib/color.md',
       '@math': 'docs/stdlib/math.md',
+      'koda.math': 'docs/stdlib/math.md',
       '@json': 'docs/stdlib/json.md',
       '@io': 'docs/stdlib/io.md',
       '@array': 'docs/stdlib/array.md',
       '@str': 'docs/stdlib/str.md',
       '@util': 'docs/stdlib/util.md',
-      '@game': 'docs/stdlib/game.md',
       '@vec2': 'docs/stdlib/vec2.md',
       '@vec3': 'docs/stdlib/vec3.md',
       '@timer': 'docs/stdlib/timer.md',
@@ -193,6 +219,7 @@
             <button type="button" class="help-quick-btn" onclick={() => openPage('docs/faq.md')}>FAQ</button>
             <button type="button" class="help-quick-btn" onclick={() => openPage('docs/troubleshooting.md')}>Troubleshooting</button>
             <button type="button" class="help-quick-btn" onclick={() => openPage('docs/guides/game-dev.md')}>Game development</button>
+            <button type="button" class="help-quick-btn" onclick={() => openPage('docs/reference/language-cheatsheet.md')}>Language cheatsheet</button>
             <button type="button" class="help-quick-btn" onclick={() => openPage('language.md')}>Language reference</button>
           </div>
 
@@ -254,6 +281,7 @@
         <article class="help-content help-content-ref">
           <h3>Language quick reference</h3>
           <p>Type in the editor and use autocomplete for snippets. Hover any word for a short explanation.</p>
+          <p><strong>Full cheatsheet:</strong> open <button type="button" class="help-quick-btn" onclick={() => openPage('docs/reference/language-cheatsheet.md')}>Language cheatsheet</button> (accurate syntax — not <code>fn</code>, ECS, or <code>ptr&lt;T&gt;</code>).</p>
           <p>Studio shortcuts: <kbd>F5</kbd> run · <kbd>Ctrl</kbd>+<kbd>S</kbd> save · <kbd>Ctrl</kbd>+<kbd>P</kbd> palette · <kbd>F1</kbd> help</p>
           {#if refFilter}
             {@const entry = lookupKodaHelp(refFilter)}
@@ -262,7 +290,10 @@
                 <div class="help-ref-card-title">{entry.signature || entry.name}</div>
                 <p>{entry.desc}</p>
                 {#if entry.example}
-                  <pre><code>{entry.example}</code></pre>
+                  <div class="code-copy-wrap">
+                    <CopyButton text={entry.example} label="Copy" copiedLabel="Copied" title="Copy example" compact />
+                    <pre><code>{entry.example}</code></pre>
+                  </div>
                 {/if}
               </div>
             {/if}

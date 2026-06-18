@@ -125,11 +125,12 @@ for (let i in arr)   { /* i is numeric index */ }
 ### `for`…`in` (values and ranges)
 
 ```koda
-for coin in coins { /* each element */ }
-for i in 0..10    { /* 0,1,…,9 half-open */ }
+for (let coin of coins) { /* each element — preferred in docs */ }
+for coin in coins         { /* same; `let` optional sugar */ }
+for i in 0..10            { /* 0,1,…,9 half-open */ }
 ```
 
-Legacy parenthesized form still works: `for (let v of arr)`.
+Both `for (let x of arr)` and `for x in arr` iterate array values. Prefer the parenthesized form with `let` in tutorials; the short form is intentional sugar for game loops.
 
 ### `for`…`of` with pairs
 
@@ -232,6 +233,20 @@ func sum(...nums) { /* nums is an array */ }
 ---
 
 ## Struct types
+
+Typed fields (recommended for libraries):
+
+```koda
+struct Player {
+    health: float = 100.0;
+    speed: float = 8.0;
+}
+
+let player = Player {};
+let hurt = Player { health: 50.0 };
+```
+
+Full example with methods and untyped fields:
 
 ```koda
 struct Coin {
@@ -404,12 +419,17 @@ let s = `Hello, ${ name }! Score: ${ score * 2 }`;
 
 ---
 
-## Includes and imports
+## Modules, includes, and imports
 
 ```koda
-#include "relative/path.koda"    // textual include (most common)
-let m = import("./module.koda"); // expression form
+use koda.math;                   // official stdlib import
+use raylib;                      // wrapper module (wrappers/raylib/)
+#include "relative/path.koda"    // legacy textual include
+let m = import("./module.koda"); // expression form (export object)
+use koda.game;                   // game helpers (requires use raylib)
 ```
+
+`use koda.*` maps to stdlib; bare `use raylib` searches `wrappers/` first. Unknown modules list searched paths in the error.
 
 ---
 

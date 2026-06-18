@@ -5,12 +5,16 @@ import (
 	"strings"
 
 	"koda/internal/diagnostic"
+	"koda/internal/lexer"
 	"koda/internal/parser"
 )
 
 func (a *Analyzer) analyzeStructDecl(d *parser.StructDecl) {
 	name := d.Name.Lexeme
-	if _, ok := a.currentScope.symbols[name]; ok {
+	if existing, ok := a.currentScope.symbols[name]; ok {
+		if prev, ok := existing.(*parser.StructDecl); ok && prev == d {
+			return
+		}
 		a.record(&diagnostic.DiagnosticError{
 			File:    d.Name.File,
 			Line:    d.Name.Line,
@@ -22,10 +26,25 @@ func (a *Analyzer) analyzeStructDecl(d *parser.StructDecl) {
 	a.currentScope.Define(name, d)
 	fields := make([]string, len(d.Fields))
 	defaults := make(map[string]parser.Expr)
+	fieldTypes := make(map[string]string)
 	for i, f := range d.Fields {
-		fields[i] = f.Name.Lexeme
+		fname := f.Name.Lexeme
+		fields[i] = fname
+		if f.TypeAnnot != "" {
+			if !a.isValidStructFieldType(f.TypeAnnot) {
+				a.record(&diagnostic.DiagnosticError{
+					File:    f.Name.File,
+					Line:    f.Name.Line,
+					Col:     f.Name.Col,
+					Message: fmt.Sprintf("unknown type '%s' on struct field '%s'", f.TypeAnnot, fname),
+					Hint:    "use int, float, bool, string, or a struct type name",
+				})
+			} else {
+				fieldTypes[fname] = normalizeTypeName(f.TypeAnnot)
+			}
+		}
 		if f.Default != nil {
-			defaults[f.Name.Lexeme] = f.Default
+			defaults[fname] = f.Default
 		}
 		if f.Optional {
 			if f.Default != nil {
@@ -46,10 +65,8 @@ func (a *Analyzer) analyzeStructDecl(d *parser.StructDecl) {
 	if len(defaults) > 0 {
 		a.structFieldDefaults[name] = defaults
 	}
-	for _, f := range d.Fields {
-		if f.Default != nil {
-			a.analyzeExpr(f.Default)
-		}
+	if len(fieldTypes) > 0 {
+		a.structFieldTypes[name] = fieldTypes
 	}
 	methods := make(map[string]*parser.FuncDecl)
 	for _, m := range d.Methods {
@@ -65,10 +82,10 @@ func (a *Analyzer) analyzeStructDecl(d *parser.StructDecl) {
 		}
 		methods[mname] = m
 		a.funcReads[m] = 0
-		prev := a.currentStructType
-		a.currentStructType = name
-		a.analyzeFuncDecl(m)
-		a.currentStructType = prev
+		a.pendingStructMethods = append(a.pendingStructMethods, pendingStructMethod{
+			structType: name,
+			method:     m,
+		})
 	}
 	if len(methods) > 0 {
 		a.structMethods[name] = methods
@@ -160,15 +177,65 @@ func (a *Analyzer) checkStructConstructorCall(call *parser.CallExpr, sd *parser.
 	a.checkCallArity(call, stName, 0, false, newFn.Params)
 }
 
+func (a *Analyzer) recordPlainObjectLiterals(varName string, oe *parser.ObjectExpr) {
+	if oe == nil || len(oe.ComputedKeys) > 0 {
+		return
+	}
+	fields := make(map[string]int64)
+	for i, k := range oe.Keys {
+		lit, ok := oe.Values[i].(*parser.LiteralExpr)
+		if !ok {
+			return
+		}
+		switch v := lit.Value.(type) {
+		case int:
+			fields[k.Lexeme] = int64(v)
+		case float64:
+			fields[k.Lexeme] = int64(v)
+		default:
+			return
+		}
+	}
+	if len(fields) > 0 {
+		a.constPlainObjectLiterals[varName] = fields
+	}
+}
+
+// ExportConstPlainObjectLiterals returns module-level plain object lets with all-literal fields.
+func (a *Analyzer) ExportConstPlainObjectLiterals() map[string]map[string]int64 {
+	out := make(map[string]map[string]int64)
+	for name, fields := range a.constPlainObjectLiterals {
+		cp := make(map[string]int64)
+		for k, v := range fields {
+			cp[k] = v
+		}
+		out[name] = cp
+	}
+	return out
+}
+
 func (a *Analyzer) recordVarTypesFromInit(varName string, init parser.Expr) {
-	if oe, ok := init.(*parser.ObjectExpr); ok && oe.StructTag != nil {
-		a.varStructType[varName] = oe.StructTag.Lexeme
+	if oe, ok := init.(*parser.ObjectExpr); ok {
+		if oe.StructTag != nil {
+			a.varStructType[varName] = oe.StructTag.Lexeme
+		} else {
+			a.varPlainObject[varName] = true
+			a.recordPlainObjectLiterals(varName, oe)
+		}
 		return
 	}
 	if call, ok := init.(*parser.CallExpr); ok {
 		if id, ok := call.Function.(*parser.IdentifierExpr); ok {
 			if st := a.structConstructorType(id.Name.Lexeme); st != "" {
 				a.varStructType[varName] = st
+				return
+			}
+			if st := a.funcReturnStructType(id.Name.Lexeme); st != "" {
+				a.varStructType[varName] = st
+				return
+			}
+			if a.funcReturnsPlainObject(id.Name.Lexeme) {
+				a.varPlainObject[varName] = true
 				return
 			}
 		}
@@ -233,37 +300,190 @@ func (a *Analyzer) validateStructLiteral(e *parser.ObjectExpr) {
 			})
 		}
 	}
+	a.checkStructLiteralFieldTypes(e, stName)
+}
+
+func (a *Analyzer) isValidStructFieldType(name string) bool {
+	if isKnownTypeAnnotation(name) {
+		return true
+	}
+	decl, ok := a.currentScope.Resolve(name)
+	if !ok {
+		return false
+	}
+	_, ok = decl.(*parser.StructDecl)
+	return ok
+}
+
+func (a *Analyzer) checkStructLiteralFieldTypes(e *parser.ObjectExpr, stName string) {
+	types, ok := a.structFieldTypes[stName]
+	if !ok || len(types) == 0 {
+		return
+	}
+	for i, k := range e.Keys {
+		if i >= len(e.Values) {
+			break
+		}
+		wantType, ok := types[k.Lexeme]
+		if !ok || wantType == "" {
+			continue
+		}
+		a.checkExprMatchesType(e.Values[i], wantType, k)
+	}
+}
+
+func (a *Analyzer) checkExprMatchesType(expr parser.Expr, wantType string, at lexer.Token) {
+	if expr == nil {
+		return
+	}
+	wantType = normalizeTypeName(wantType)
+	if a.exprMatchesType(expr, wantType) {
+		return
+	}
+	got := a.exprTypeName(expr)
+	if got == "" {
+		return
+	}
+	if got == wantType {
+		return
+	}
+	// float accepts integer literals; int accepts whole-number float literals (Koda number lexing).
+	if wantType == "float" && got == "int" {
+		return
+	}
+	if wantType == "int" && got == "float" {
+		if lit, ok := expr.(*parser.LiteralExpr); ok {
+			if f, ok := lit.Value.(float64); ok && f == float64(int64(f)) {
+				return
+			}
+		}
+	}
+	a.record(&diagnostic.DiagnosticError{
+		File:    at.File,
+		Line:    at.Line,
+		Col:     at.Col,
+		Message: fmt.Sprintf("expected type '%s', got '%s'", wantType, got),
+	})
+}
+
+func (a *Analyzer) exprMatchesType(expr parser.Expr, wantType string) bool {
+	switch wantType {
+	case "vector3":
+		return a.isVector3Expr(expr)
+	case "color":
+		return a.isColorExpr(expr)
+	default:
+		return false
+	}
+}
+
+func (a *Analyzer) isVector3Expr(expr parser.Expr) bool {
+	if call, ok := expr.(*parser.CallExpr); ok {
+		if id, ok := call.Function.(*parser.IdentifierExpr); ok && strings.EqualFold(id.Name.Lexeme, "vec3") {
+			return len(call.Arguments) == 3
+		}
+	}
+	oe, ok := expr.(*parser.ObjectExpr)
+	if !ok || len(oe.ComputedKeys) > 0 {
+		return false
+	}
+	if oe.StructTag != nil && !strings.EqualFold(oe.StructTag.Lexeme, "vector3") {
+		return false
+	}
+	hasX, hasY, hasZ := false, false, false
+	for _, k := range oe.Keys {
+		switch strings.ToLower(k.Lexeme) {
+		case "x":
+			hasX = true
+		case "y":
+			hasY = true
+		case "z":
+			hasZ = true
+		}
+	}
+	return hasX && hasY && hasZ
+}
+
+func (a *Analyzer) isColorExpr(expr parser.Expr) bool {
+	if call, ok := expr.(*parser.CallExpr); ok {
+		if id, ok := call.Function.(*parser.IdentifierExpr); ok {
+			switch strings.ToLower(id.Name.Lexeme) {
+			case "rgb", "rgba", "color":
+				return true
+			}
+		}
+	}
+	if _, ok := expr.(*parser.LiteralExpr); ok {
+		// hex colors lex as numbers at runtime; sema may not see them here.
+		return false
+	}
+	oe, ok := expr.(*parser.ObjectExpr)
+	if !ok || len(oe.ComputedKeys) > 0 {
+		return false
+	}
+	if oe.StructTag != nil && !strings.EqualFold(oe.StructTag.Lexeme, "color") {
+		return false
+	}
+	hasR, hasG, hasB := false, false, false
+	for _, k := range oe.Keys {
+		switch strings.ToLower(k.Lexeme) {
+		case "r":
+			hasR = true
+		case "g":
+			hasG = true
+		case "b":
+			hasB = true
+		}
+	}
+	return hasR && hasG && hasB
+}
+
+func (a *Analyzer) exprTypeName(expr parser.Expr) string {
+	switch x := expr.(type) {
+	case *parser.LiteralExpr:
+		switch x.Value.(type) {
+		case int:
+			return "int"
+		case float64:
+			return "float"
+		case bool:
+			return "bool"
+		case string:
+			return "string"
+		default:
+			if x.Value == nil {
+				return "null"
+			}
+			return ""
+		}
+	case *parser.ObjectExpr:
+		if x.StructTag != nil {
+			return normalizeTypeName(x.StructTag.Lexeme)
+		}
+		return "object"
+	case *parser.IdentifierExpr:
+		if decl, ok := a.currentScope.Resolve(x.Name.Lexeme); ok {
+			if ld, ok := decl.(*parser.LetDecl); ok && ld.TypeAnnot != "" {
+				return normalizeTypeName(ld.TypeAnnot)
+			}
+			if st, ok := a.varStructType[x.Name.Lexeme]; ok {
+				return normalizeTypeName(st)
+			}
+		}
+		return ""
+	default:
+		return ""
+	}
 }
 
 func (a *Analyzer) checkStructFieldAccess(e *parser.IndexExpr) {
 	if te, ok := e.Object.(*parser.ThisExpr); ok && a.currentStructType != "" {
-		lit, ok := e.Index.(*parser.LiteralExpr)
-		if !ok {
-			return
-		}
-		field, ok := lit.Value.(string)
-		if !ok {
-			return
-		}
-		stName := a.currentStructType
-		fields, ok := a.structLayouts[stName]
-		if !ok {
-			return
-		}
-		for i, f := range fields {
-			if f == field {
-				a.indexExprStructSlot[e] = i
-				return
-			}
-		}
-		a.record(&diagnostic.DiagnosticError{
-			File:    lit.Token.File,
-			Line:    lit.Token.Line,
-			Col:     lit.Token.Col,
-			Message: fmt.Sprintf("'%s' is not a field of struct %s", field, stName),
-			Hint:    a.structFieldHint(field, fields),
-		})
 		_ = te
+		a.bindReceiverFieldAccess(e, a.currentStructType)
+		return
+	}
+	if id, ok := e.Object.(*parser.IdentifierExpr); ok && a.currentStructType != "" && isSelfReceiverParam(id.Name.Lexeme) {
+		a.bindReceiverFieldAccess(e, a.currentStructType)
 		return
 	}
 	lit, ok := e.Index.(*parser.LiteralExpr)
@@ -420,6 +640,23 @@ func (a *Analyzer) enumCaseOrdinal(val parser.Expr, enumName string) (int, bool)
 	return 0, false
 }
 
+// ExportVarArrayAndObject returns array vs plain-object variable bindings for codegen method dispatch.
+func (a *Analyzer) ExportVarArrayAndObject() (map[string]bool, map[string]bool) {
+	arr := make(map[string]bool)
+	for k, v := range a.varIsArray {
+		if v {
+			arr[k] = true
+		}
+	}
+	obj := make(map[string]bool)
+	for k, v := range a.varPlainObject {
+		if v {
+			obj[k] = true
+		}
+	}
+	return arr, obj
+}
+
 // ExportForCodegen copies struct/enum binding maps for LLVM emission.
 func (a *Analyzer) ExportForCodegen() (
 	structFields map[string][]string,
@@ -430,6 +667,7 @@ func (a *Analyzer) ExportForCodegen() (
 	indexEnum map[*parser.IndexExpr]int64,
 	fieldDefaults map[string]map[string]parser.Expr,
 	implicitField map[*parser.IdentifierExpr]int,
+	forOfVarStruct map[string]map[string]string,
 ) {
 	structFields = make(map[string][]string)
 	for k, v := range a.structLayouts {
@@ -473,7 +711,28 @@ func (a *Analyzer) ExportForCodegen() (
 	for k, v := range a.indexExprEnumConst {
 		indexEnum[k] = v
 	}
-	return structFields, structMethods, varStruct, varEnum, indexStruct, indexEnum, fieldDefaults, implicitField
+	forOfVarStruct = make(map[string]map[string]string)
+	for fn, vars := range a.forOfVarStruct {
+		cp := make(map[string]string, len(vars))
+		for k, v := range vars {
+			cp[k] = v
+		}
+		forOfVarStruct[fn] = cp
+	}
+	return structFields, structMethods, varStruct, varEnum, indexStruct, indexEnum, fieldDefaults, implicitField, forOfVarStruct
+}
+
+// ExportStructFieldTypes copies struct field type annotations for codegen fast paths.
+func (a *Analyzer) ExportStructFieldTypes() map[string]map[string]string {
+	out := make(map[string]map[string]string)
+	for st, fields := range a.structFieldTypes {
+		cp := make(map[string]string, len(fields))
+		for k, v := range fields {
+			cp[k] = v
+		}
+		out[st] = cp
+	}
+	return out
 }
 
 func enumOrdinalMap(entry *parser.Program) map[string]int {

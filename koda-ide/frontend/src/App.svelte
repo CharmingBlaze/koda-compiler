@@ -5,6 +5,8 @@
     PickParentFolderForNewProject,
     CreateProjectInParent,
     OpenWorkspace,
+    ExampleGamePath,
+    ListExamples,
     GetWorkspaceRoot,
     ListDir,
     ReadFile,
@@ -26,6 +28,7 @@
   import DiagnosticToast from './lib/DiagnosticToast.svelte'
   import FileMenuBar from './lib/FileMenuBar.svelte'
   import ThemePicker from './lib/ThemePicker.svelte'
+  import CopyButton from './lib/CopyButton.svelte'
   import WelcomeScreen from './lib/WelcomeScreen.svelte'
   import { defaultTheme, safeTheme } from './lib/themes.js'
   import HelpPanel from './lib/HelpPanel.svelte'
@@ -79,6 +82,8 @@
   let newProjectErr = $state('')
   /** @type {{ ok: boolean, version?: string, installDir?: string, stdlibDir?: string, lines?: { ok: boolean, label: string, detail: string, fix?: string }[] }} */
   let sdkStatus = $state({ ok: false, lines: [] })
+  /** @type {{ id: string, title: string, blurb: string, category: string }[]} */
+  let exampleList = $state([])
   let startupError = $state('')
   let newFileOpen = $state(false)
   let newFileRel = $state('hello.koda')
@@ -264,6 +269,38 @@
         }
       }),
     )
+  }
+
+  async function openExampleGameFlow(name) {
+    if (!confirmDiscardDirty('Open this demo and discard unsaved tab changes?')) return
+    const app = wailsAppBinding()
+    if (!app || typeof app.ExampleGamePath !== 'function') {
+      outputOpen = true
+      outputText =
+        'Demo projects need the desktop app (Wails).\n\nRun: .\\koda-ide\\run-koda-studio.ps1 from the repo root.'
+      return
+    }
+    let path = ''
+    try {
+      path = await ExampleGamePath(name)
+    } catch (e) {
+      outputOpen = true
+      outputText = e instanceof Error ? e.message : String(e)
+      return
+    }
+    if (!path) return
+    try {
+      await OpenWorkspace(path)
+      workspace = await GetWorkspaceRoot()
+      tabs = []
+      activeIndex = -1
+      outputText = ''
+      await refreshTree()
+      await openProjectEntry()
+    } catch (e) {
+      outputOpen = true
+      outputText = e instanceof Error ? e.message : String(e)
+    }
   }
 
   async function openWorkspaceFlow() {
@@ -614,6 +651,11 @@
       } catch {
         sdkStatus = { ok: false, lines: [{ ok: false, label: 'SDK', detail: 'Could not check SDK', fix: 'Run Koda Studio from the SDK folder.' }] }
       }
+      try {
+        exampleList = await ListExamples()
+      } catch {
+        exampleList = []
+      }
       const init = await LSPMessage(rpcInitialize(1))
       void init
       void LSPMessage(notifyInitialized())
@@ -696,10 +738,6 @@
       <button
         type="button"
         class="rounded-md px-2 py-0.5 text-[var(--color-subtext)] hover:bg-[var(--color-surface0)]"
-        onclick={() => void openPalette()}>Palette <kbd class="font-sans text-[10px] text-[var(--color-overlay0)]">⌃P</kbd></button>
-      <button
-        type="button"
-        class="rounded-md px-2 py-0.5 text-[var(--color-subtext)] hover:bg-[var(--color-surface0)]"
         onclick={() => (zen = !zen)}>Zen</button>
       <button
         type="button"
@@ -719,6 +757,9 @@
         <ThemePicker bind:value={theme} />
       {/if}
       <span class="studio-spacer" title={workspace || ''}>{workspace || 'No folder open'}</span>
+      {#if workspace}
+        <CopyButton text={workspace} label="Path" copiedLabel="Copied" title="Copy workspace path" compact />
+      {/if}
     </header>
   {/if}
 
@@ -813,8 +854,10 @@
         {:else if !workspace}
           <WelcomeScreen
             sdk={sdkStatus}
+            examples={exampleList}
             onNewProject={(template) => void startNewProjectWizard(template)}
             onOpenWorkspace={() => void openWorkspaceFlow()}
+            onOpenExample={(name) => void openExampleGameFlow(name)}
             onOpenHelp={(page) => openHelp(page)}
           />
         {:else}
@@ -846,6 +889,7 @@
         <aside class="output-dock">
           <div class="output-dock-header">
             <span>Output</span>
+            <CopyButton text={outputText} label="Copy" copiedLabel="Copied" title="Copy output" compact />
             <button type="button" onclick={() => (outputText = '')}>Clear</button>
             <button type="button" onclick={() => (outputOpen = false)}>Close</button>
           </div>
@@ -901,6 +945,7 @@
           <p class="mb-4 text-sm text-[var(--color-subtext)]">
             Folder will be created inside:
             <span class="break-all font-mono text-[var(--color-overlay0)]">{newProjectParent}</span>
+            <CopyButton text={newProjectParent} label="Copy" copiedLabel="Copied" title="Copy folder path" compact />
           </p>
           <label class="mb-1 block text-sm font-medium text-[var(--color-subtext)]" for="np-name">Project folder name</label>
           <input

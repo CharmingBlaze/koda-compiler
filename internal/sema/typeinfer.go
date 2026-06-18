@@ -2,6 +2,7 @@ package sema
 
 import (
 	"math"
+	"strings"
 
 	"koda/internal/parser"
 )
@@ -50,13 +51,14 @@ func InferNumericKinds(prog *parser.Program, escaping map[*parser.LetDecl]bool) 
 			case int:
 				return KindInt
 			case float64:
+				lex := x.Token.Lexeme
+				if strings.Contains(lex, ".") || strings.Contains(strings.ToLower(lex), "e") {
+					return KindFloat
+				}
 				if math.IsNaN(v) || math.IsInf(v, 0) {
 					return KindFloat
 				}
-				if v == math.Trunc(v) {
-					return KindInt
-				}
-				return KindFloat
+				return KindInt
 			default:
 				return KindFloat
 			}
@@ -67,11 +69,26 @@ func InferNumericKinds(prog *parser.Program, escaping map[*parser.LetDecl]bool) 
 				}
 			}
 			return KindFloat
+		case *parser.CallExpr:
+			if calleeReturnsFloat(x.Function) {
+				return KindFloat
+			}
+			return KindFloat
+		case *parser.LogicalExpr:
+			lk := exprKind(x.Left)
+			rk := exprKind(x.Right)
+			if lk == KindFloat || rk == KindFloat {
+				return KindFloat
+			}
+			return KindInt
 		case *parser.InfixExpr:
 			lk := exprKind(x.Left)
 			rk := exprKind(x.Right)
 			switch x.Operator {
 			case "+", "-", "*", "%", "&", "|", "^", "<<", ">>", ">>>":
+				if lk == KindFloat || rk == KindFloat {
+					return KindFloat
+				}
 				if lk == KindInt && rk == KindInt && x.Operator != "/" {
 					return KindInt
 				}
@@ -117,6 +134,9 @@ func InferNumericKinds(prog *parser.Program, escaping map[*parser.LetDecl]bool) 
 		case *parser.IndexExpr:
 			walkExpr(x.Object)
 			walkExpr(x.Index)
+		case *parser.LogicalExpr:
+			walkExpr(x.Left)
+			walkExpr(x.Right)
 		}
 	}
 
@@ -139,6 +159,8 @@ func InferNumericKinds(prog *parser.Program, escaping map[*parser.LetDecl]bool) 
 			walkStmt(x.Else)
 		case *parser.WhileStmt:
 			walkExpr(x.Condition)
+			walkStmt(x.Body)
+		case *parser.LoopStmt:
 			walkStmt(x.Body)
 		case *parser.DoWhileStmt:
 			walkStmt(x.Body)
@@ -178,11 +200,15 @@ func InferNumericKinds(prog *parser.Program, escaping map[*parser.LetDecl]bool) 
 		switch x := d.(type) {
 		case *parser.LetDecl:
 			if x.TypeAnnot != "" {
-				narrow(x, KindInt)
-			} else if x.Init != nil {
+				if isFloatTypeName(x.TypeAnnot) {
+					narrow(x, KindFloat)
+				} else if isIntegerTypeName(x.TypeAnnot) {
+					narrow(x, KindInt)
+				} else {
+					narrow(x, KindFloat)
+				}
+			} else if x.Init != nil && isNumericInferInit(x.Init) {
 				narrow(x, exprKind(x.Init))
-			} else {
-				narrow(x, KindFloat)
 			}
 			walkExpr(x.Init)
 		case *parser.FuncDecl:
@@ -238,4 +264,24 @@ func resolveLetInProgram(prog *parser.Program, name string) (*parser.LetDecl, bo
 		}
 	}
 	return nil, false
+}
+
+// isNumericInferInit reports whether a let initializer can be stored as unboxed int/float.
+func isNumericInferInit(e parser.Expr) bool {
+	if e == nil {
+		return false
+	}
+	switch x := e.(type) {
+	case *parser.LiteralExpr:
+		switch x.Value.(type) {
+		case int, float64:
+			return true
+		default:
+			return false
+		}
+	case *parser.IdentifierExpr, *parser.InfixExpr, *parser.PrefixExpr, *parser.GroupingExpr, *parser.CallExpr, *parser.LogicalExpr:
+		return true
+	default:
+		return false
+	}
 }

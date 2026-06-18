@@ -1,0 +1,20 @@
+#include "../stdlib/color.koda"
+
+func main() {
+    let z = zero();
+    assert(z.r == 0.0, "zero r");
+    assert(z.a == 255.0, "zero default alpha");
+
+    let c = ColorBytes { r: 255.0, g: 128.0, b: 0.0, a: 255.0 };
+    assert(c.g == 128.0, "typed g");
+
+    let packed = toPacked(c);
+    assert(packed == rgb(255, 128, 0), "toPacked");
+
+    let rl = to_raylib(c);
+    assert(rl.r == 255 && rl.g == 128 && rl.b == 0 && rl.a == 255, "to_raylib Color object");
+
+    let from = fromBytes(10, 20, 30, 255);
+    assert(from == rgba(10, 20, 30, 255), "fromBytes packed");
+    print("PASS color_struct");
+}

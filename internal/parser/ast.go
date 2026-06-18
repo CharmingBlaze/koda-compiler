@@ -36,8 +36,10 @@ type Program struct {
 
 // ProgramBundle represents a complete multi-module program.
 type ProgramBundle struct {
-	Entry   *Program
-	Modules map[string]*Program // Absolute path -> AST
+	Entry           *Program
+	Modules         map[string]*Program // Absolute path -> AST
+	RaylibImported  bool                // set when entry uses `use raylib` in any form
+	RaylibAlias     string              // set when entry uses `use raylib as <alias>`
 }
 
 func (p *Program) String() string {
@@ -85,11 +87,12 @@ type FuncDecl struct {
 	Native *NativeDirective
 }
 
-// StructField is one field in a struct declaration, optionally with a default value or optional marker.
+// StructField is one field in a struct declaration, optionally with a type, default value, or optional marker.
 type StructField struct {
-	Name     lexer.Token
-	Default  Expr
-	Optional bool
+	Name      lexer.Token
+	TypeAnnot string // optional explicit type, e.g. "float", "int", "Player"
+	Default   Expr
+	Optional  bool
 }
 
 // StructDecl declares a named struct type with ordered fields (O(1) slot access at compile time).
@@ -114,9 +117,10 @@ func (e *EnumDecl) declNode() {}
 func (e *EnumDecl) String() string { return "enum " + e.Name.Lexeme }
 
 type Param struct {
-	Name    string
-	Default Expr // optional
-	IsRest  bool
+	Name      string
+	TypeAnnot string // optional, e.g. "float", "i32"
+	Default   Expr   // optional
+	IsRest    bool
 }
 
 func (d *FuncDecl) declNode() {}
@@ -241,6 +245,17 @@ func (s *WhileStmt) String() string {
 	return fmt.Sprintf("while (%s) %s", s.Condition.String(), s.Body.String())
 }
 
+type LoopStmt struct {
+	Token lexer.Token
+	Body  Stmt
+}
+
+func (s *LoopStmt) declNode() {}
+func (s *LoopStmt) stmtNode() {}
+func (s *LoopStmt) String() string {
+	return fmt.Sprintf("loop %s", s.Body.String())
+}
+
 // Expressions
 
 type IdentifierExpr struct {
@@ -327,7 +342,12 @@ type ThisExpr struct {
 }
 
 func (e *ThisExpr) exprNode()      {}
-func (e *ThisExpr) String() string { return "this" }
+func (e *ThisExpr) String() string {
+	if e.Token.Lexeme != "" {
+		return e.Token.Lexeme
+	}
+	return "this"
+}
 
 type GroupingExpr struct {
 	Token lexer.Token
@@ -358,6 +378,7 @@ type RangeExpr struct {
 	Token lexer.Token
 	From  Expr
 	To    Expr
+	Step  Expr // optional; nil means step 1
 }
 
 func (e *RangeExpr) exprNode() {}
@@ -588,3 +609,37 @@ type IncludeDecl struct {
 
 func (d *IncludeDecl) declNode()      {}
 func (d *IncludeDecl) String() string { return fmt.Sprintf("include %s;", d.Path.Lexeme) }
+
+// UseDecl imports a module by dotted path (e.g. raylib, koda.math).
+// Expanded at compile time like #include.
+// When Alias is set (`use raylib as rl`), bindings are exposed only through the alias object.
+// When Selective is non-empty (`use raylib { InitWindow, DrawText }`), only those names are imported.
+type UseDecl struct {
+	Token      lexer.Token
+	ModulePath string   // e.g. "raylib", "koda.math"
+	Alias      string   // optional namespace, e.g. "rl"
+	Selective  []string // optional import filter
+}
+
+func (d *UseDecl) declNode() {}
+func (d *UseDecl) String() string {
+	var b strings.Builder
+	b.WriteString("use ")
+	b.WriteString(d.ModulePath)
+	if len(d.Selective) > 0 {
+		b.WriteString(" { ")
+		for i, n := range d.Selective {
+			if i > 0 {
+				b.WriteString(", ")
+			}
+			b.WriteString(n)
+		}
+		b.WriteString(" }")
+	}
+	if d.Alias != "" {
+		b.WriteString(" as ")
+		b.WriteString(d.Alias)
+	}
+	b.WriteString(";")
+	return b.String()
+}

@@ -1,0 +1,7 @@
+// Compile-only: koda.game module loads with full Raylib wrapper (no window).
+use raylib;
+use koda.game;
+
+func main() {
+    print("PASS koda_game_import_test");
+}

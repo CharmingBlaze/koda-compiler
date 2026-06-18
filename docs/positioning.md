@@ -8,13 +8,13 @@ An honest picture of what Koda is, who it is for, and how it replaces C/C++ for 
 
 ## The pitch
 
-**Koda is the best beginner language for native games and applications** when the alternative is learning C or C++ first.
+**Koda is the best beginner language for native games and applications** when the alternative is learning C or C++ first — with a **serious ceiling**: full Raylib, generated C/C++ wrappers, structs, methods, and native performance. See [KODA_LANGUAGE_ROADMAP.md](KODA_LANGUAGE_ROADMAP.md).
 
 | Promise | Delivery |
 |---------|----------|
 | **Easy install** | One SDK zip — no Go, Python, LLVM, or IDE required to compile |
 | **Native output** | Same as C/C++: a real executable, no VM on the player's machine |
-| **Games + apps** | `@game`, Raylib in the zip, `koda new --template graphics` |
+| **Games + apps** | `koda.game`, Raylib in the zip, `koda new --template graphics` |
 | **Beginner-safe** | GC, typo hints, `--warn-unused`, `koda doctor` |
 
 Koda is **not** Python (no interpreter workflow). Koda is **not** a toy — LLVM backend, generational GC, cross-platform CI.
@@ -43,7 +43,7 @@ Compared to **C/C++**: Koda trades kernel-grade control for **approachable synta
 
 | Audience | Fit today |
 |----------|-----------|
-| **"I want to make games"** | Ready — `@game`, templates, bundled Raylib, `koda bundle` |
+| **"I want to make games"** | Ready — full Raylib (`use raylib;`, 548 fn), optional `koda.game`, templates, `koda bundle` |
 | **"I want desktop/CLI apps"** | Ready — I/O, JSON, native binary |
 | **"I want to learn C/C++ syntax without the pain"** | Ready — structs, methods, enums, native output |
 | **"I want OS kernels / firmware"** | Not Koda — use C/Rust |
@@ -58,7 +58,7 @@ Compared to **C/C++**: Koda trades kernel-grade control for **approachable synta
 | **Language** | Structs **with methods**, opt-in `i32`/`u8`, enums, closures, defer |
 | **Diagnostics** | Typo hints, `--warn-unused`, enum exhaustiveness warnings |
 | **GC** | Tri-generational, arena, `gcFrameStep` for game loops |
-| **Graphics** | `@game` over Raylib; `"graphics": true` in `koda.json` |
+| **Graphics** | `koda.game` over Raylib; `"graphics": true` in `koda.json` |
 | **Ship** | `koda build`, `koda bundle`, `assetPath()` |
 
 See [status.md](status.md) for engineering detail.

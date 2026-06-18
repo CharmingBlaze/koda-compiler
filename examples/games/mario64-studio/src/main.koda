@@ -1,18 +1,13 @@
-// Mario 64 — Peach's Castle grounds (Koda Studio demo)
-// Features: const, enum, match, string interpolation, struct methods, OrbitCamera
-#include "../wrappers/raylib_shim/raylib.koda"
-#include "@camera"
+// Mario 64 — Peach's Castle (canonical optimized 3D sample).
+// Full Raylib via `use raylib`; packed #hex colors + fusion-friendly camera3d().
+use raylib;
+use koda.camera;
+use koda.input;
+use koda.ui;
+use koda.util;
 
 const sw = 1280;
 const sh = 720;
-
-const key_w = 87;
-const key_s = 83;
-const key_a = 65;
-const key_d = 68;
-const key_space = 32;
-const key_r = 82;
-
 const speed = 8.0;
 const gravity = -22.0;
 const jump_v = 9.5;
@@ -32,7 +27,7 @@ struct Coin {
 
     func show() {
         if (on) {
-            drawcube(x, 1.5, z, 0.45, 0.45, 0.12, colors.gold);
+            DrawCube({ x: x, y: 1.5, z: z }, 0.45, 0.45, 0.12, col_gold);
         }
     }
 
@@ -74,6 +69,42 @@ let score = 0;
 let lives = 3;
 let state = GameState.Playing;
 
+// HUD - Raylib Color objects for DrawText (small call count).
+let hud_white = { r: 255, g: 255, b: 255, a: 255 };
+let hud_yellow = { r: 255, g: 255, b: 0, a: 255 };
+let hud_red = { r: 255, g: 0, b: 0, a: 255 };
+let hud_sky = #FFD8A8;
+
+// World — packed hex (fused DrawCube / ClearBackground paths).
+let col_grass = #228B22;
+let col_dirt = #8B4513;
+let col_forest = #006400;
+let col_gray = #808080;
+let col_red = #FF0000;
+let col_blue = #0000FF;
+let col_brown = #554422;
+let col_gold = #FFD700;
+let col_yellow = #FFFF00;
+let col_black = #000000;
+let col_white = #FFFFFF;
+
+let hud_score_text = "Score: 0   Lives: 3";
+
+func cam_begin_fast() {
+    let px = player.x;
+    let py = player.y;
+    let pz = player.z;
+    let ty = py + cam.look_offset;
+    let cp = cos(cam.pitch);
+    let sp = sin(cam.pitch);
+    let sy = sin(cam.yaw);
+    let ccy = cos(cam.yaw);
+    let ex = px + cam.distance * cp * sy;
+    let ey = ty + cam.distance * sp;
+    let ez = pz + cam.distance * cp * ccy;
+    BeginMode3D(camera3d(ex, ey, ez, px, ty, pz, cam.fovy));
+}
+
 func on_plat(px, pz, cx, cz, hw, hd) {
     return px >= cx - hw && px <= cx + hw && pz >= cz - hd && pz <= cz + hd;
 }
@@ -95,6 +126,10 @@ func clamp(v, lo, hi) {
     return v;
 }
 
+func refresh_hud_score() {
+    hud_score_text = "Score: {score}   Lives: {lives}";
+}
+
 func respawn_player() {
     player.x = 0.0;
     player.z = 8.0;
@@ -108,11 +143,12 @@ func reset_game(coins) {
     score = 0;
     lives = 3;
     state = GameState.Playing;
+    refresh_hud_score();
     goomba.x = -4.0;
     goomba.z = -2.0;
     goomba.dir = 1.0;
     cam.reset();
-    for coin in coins {
+    for (let coin of coins) {
         coin.on = true;
     }
 }
@@ -120,10 +156,14 @@ func reset_game(coins) {
 func move_player(dt, yaw) {
     let move_x = 0.0;
     let move_z = 0.0;
-    if (iskeydown(key_w)) { move_z -= 1.0; }
-    if (iskeydown(key_s)) { move_z += 1.0; }
-    if (iskeydown(key_a)) { move_x -= 1.0; }
-    if (iskeydown(key_d)) { move_x += 1.0; }
+    if (IsKeyDown(KEY_W)) { move_z -= 1.0; }
+    if (IsKeyDown(KEY_S)) { move_z += 1.0; }
+    if (IsKeyDown(KEY_A)) { move_x -= 1.0; }
+    if (IsKeyDown(KEY_D)) { move_x += 1.0; }
+
+    if (move_x == 0.0 && move_z == 0.0) {
+        return;
+    }
 
     let fwd_x = sin(yaw);
     let fwd_z = cos(yaw);
@@ -131,20 +171,17 @@ func move_player(dt, yaw) {
     let right_z = -sin(yaw);
     player.x += (move_z * fwd_x + move_x * right_x) * speed * dt;
     player.z += (move_z * fwd_z + move_x * right_z) * speed * dt;
-
     player.x = clamp(player.x, -14.5, 14.5);
     player.z = clamp(player.z, -14.5, 14.5);
 }
 
 func apply_physics(dt) {
-    if (player.grounded && iskeypressed(key_space)) {
+    if (player.grounded && IsKeyPressed(KEY_SPACE)) {
         player.vel_y = jump_v;
         player.grounded = false;
     }
-
     player.vel_y += gravity * dt;
     player.y += player.vel_y * dt;
-
     let floor = floor_y(player.x, player.z);
     if (player.y <= floor) {
         player.y = floor;
@@ -156,6 +193,7 @@ func apply_physics(dt) {
 func hurt_player() {
     lives -= 1;
     respawn_player();
+    refresh_hud_score();
     if (lives <= 0) {
         state = GameState.GameOver;
     }
@@ -180,51 +218,53 @@ func goomba_hits_player() {
 }
 
 func draw_tree(tx, tz) {
-    drawcube(tx, 1.0, tz, 0.5, 2.0, 0.5, colors.dirt);
-    drawcube(tx, 3.2, tz, 2.0, 2.0, 2.0, colors.forest);
+    DrawCube({ x: tx, y: 1.0, z: tz }, 0.5, 2.0, 0.5, col_dirt);
+    DrawCube({ x: tx, y: 3.2, z: tz }, 2.0, 2.0, 2.0, col_forest);
 }
 
 func draw_castle(cx, cz) {
-    drawcube(cx, 1.5, cz, 4.0, 3.0, 4.0, colors.gray);
-    drawcube(cx, 4.0, cz, 3.0, 2.0, 3.0, colors.gray);
-    drawcube(cx, 6.2, cz, 0.3, 2.5, 0.3, colors.red);
-    drawcube(cx + 1.5, 5.5, cz + 1.5, 1.2, 1.2, 1.2, colors.blue);
+    DrawCube({ x: cx, y: 1.5, z: cz }, 4.0, 3.0, 4.0, col_gray);
+    DrawCube({ x: cx, y: 4.0, z: cz }, 3.0, 2.0, 3.0, col_gray);
+    DrawCube({ x: cx, y: 6.2, z: cz }, 0.3, 2.5, 0.3, col_red);
+    DrawCube({ x: cx + 1.5, y: 5.5, z: cz + 1.5 }, 1.2, 1.2, 1.2, col_blue);
 }
 
 func draw_mario() {
-    drawcube(player.x, player.y, player.z, player.r * 2.0, player.h, player.r * 2.0, colors.red);
-    drawcube(player.x, player.y + 0.55, player.z, player.r * 1.4, 0.35, player.r * 1.4, colors.blue);
-    drawcubewires(player.x, player.y, player.z, player.r * 2.0, player.h, player.r * 2.0, colors.black);
+    let pr = player.r * 2.0;
+    let ph = player.h;
+    DrawCube({ x: player.x, y: player.y, z: player.z }, pr, ph, pr, col_red);
+    DrawCube({ x: player.x, y: player.y + 0.55, z: player.z }, player.r * 1.4, 0.35, player.r * 1.4, col_blue);
+    DrawCubeWires({ x: player.x, y: player.y, z: player.z }, pr, ph, pr, col_black);
 }
 
 func draw_goomba() {
-    drawcube(goomba.x, 0.7, goomba.z, 0.9, 0.9, 0.9, colors.brown);
-    drawcubewires(goomba.x, 0.7, goomba.z, 0.9, 0.9, 0.9, colors.black);
+    DrawCube({ x: goomba.x, y: 0.7, z: goomba.z }, 0.9, 0.9, 0.9, col_brown);
+    DrawCubeWires({ x: goomba.x, y: 0.7, z: goomba.z }, 0.9, 0.9, 0.9, col_black);
 }
 
 func draw_world(coins) {
-    drawcube(0.0, -0.5, 0.0, 30.0, 1.0, 30.0, colors.grass);
-    drawgrid(30, 1.0);
+    DrawCube({ x: 0.0, y: -0.5, z: 0.0 }, 30.0, 1.0, 30.0, col_grass);
+    DrawGrid(30, 1.0);
 
-    drawcube(7.0, 2.0, -5.0, 5.0, 1.0, 5.0, colors.dirt);
-    drawcube(-8.0, 2.5, 3.0, 6.0, 1.0, 6.0, colors.dirt);
-    drawcube(5.0, 3.5, 7.0, 4.0, 1.0, 4.0, colors.dirt);
-    drawcube(0.0, 1.5, -9.0, 8.0, 1.0, 4.0, colors.dirt);
-    drawcube(0.0, 4.5, 0.0, 7.0, 3.0, 7.0, colors.dirt);
+    DrawCube({ x: 7.0, y: 2.0, z: -5.0 }, 5.0, 1.0, 5.0, col_dirt);
+    DrawCube({ x: -8.0, y: 2.5, z: 3.0 }, 6.0, 1.0, 6.0, col_dirt);
+    DrawCube({ x: 5.0, y: 3.5, z: 7.0 }, 4.0, 1.0, 4.0, col_dirt);
+    DrawCube({ x: 0.0, y: 1.5, z: -9.0 }, 8.0, 1.0, 4.0, col_dirt);
+    DrawCube({ x: 0.0, y: 4.5, z: 0.0 }, 7.0, 3.0, 7.0, col_dirt);
 
     draw_tree(-10.0, 10.0);
     draw_tree(11.0, -8.0);
     draw_tree(-11.0, -10.0);
     draw_castle(12.0, 12.0);
 
-    for coin in coins {
+    for (let coin of coins) {
         coin.show();
     }
 
     if (score >= goal) {
         let star_y = 6.8;
-        drawcube(0.0, star_y, 0.0, 1.2, 1.2, 1.2, colors.yellow);
-        drawcubewires(0.0, star_y, 0.0, 1.4, 1.4, 1.4, colors.white);
+        DrawCube({ x: 0.0, y: star_y, z: 0.0 }, 1.2, 1.2, 1.2, col_yellow);
+        DrawCubeWires({ x: 0.0, y: star_y, z: 0.0 }, 1.4, 1.4, 1.4, col_white);
     }
 
     draw_goomba();
@@ -232,37 +272,26 @@ func draw_world(coins) {
 }
 
 func draw_hud() {
-    drawtext("MARIO 64", 20, 16, 36, colors.white);
-    drawtext("WASD move   SPACE jump   R restart", 20, 54, 20, colors.white);
-    drawtext("Right-mouse: orbit cam   Wheel: zoom", 20, 78, 18, colors.white);
-    drawtext("Collect {goal} coins, then grab the star on the hill!", 20, 102, 18, colors.white);
-
-    for i in 0..goal {
-        let col = colors.black;
-        if (score > i) { col = colors.gold; }
-        drawrectangle(20 + i * 28, 134, 22, 22, col);
-    }
-
-    for i in 0..3 {
-        let lc = colors.black;
-        if (lives > i) { lc = colors.red; }
-        drawrectangle(50 + i * 26, 172, 18, 18, lc);
-    }
-
-    drawtext("Score: {score}   Lives: {lives}", 20, 200, 24, colors.white);
+    DrawText("MARIO 64", 20, 16, 36, hud_white);
+    DrawText("WASD move   SPACE jump   R restart", 20, 54, 20, hud_white);
+    DrawText("Right mouse: orbit cam   Wheel: zoom", 20, 78, 18, hud_white);
+    DrawText("Collect 5 coins, then grab the star on the hill!", 20, 102, 18, hud_white);
+    score_pips(20, 134, score, goal);
+    life_pips(50, 172, lives, 3);
+    DrawText(hud_score_text, 20, 200, 24, hud_white);
 }
 
 func draw_overlay() {
     match state {
         GameState.Won {
-            drawtext("STAR GET! Course clear!", 380, 340, 40, colors.yellow);
+            DrawText("STAR GET! Course clear!", 380, 340, 40, hud_yellow);
         }
         GameState.GameOver {
-            drawtext("GAME OVER — press R", 400, 340, 36, colors.red);
+            DrawText("GAME OVER - press R", 400, 340, 36, hud_red);
         }
         default {
             if (score >= goal) {
-                drawtext("Climb the hill — touch the star!", 380, 340, 28, colors.yellow);
+                DrawText("Climb the hill - touch the star!", 380, 340, 28, hud_yellow);
             }
         }
     }
@@ -276,9 +305,10 @@ func update_playing(dt, coins) {
         hurt_player();
     }
 
-    for coin in coins {
+    for (let coin of coins) {
         if (coin.pickup(player)) {
             score += 1;
+            refresh_hud_score();
         }
     }
 
@@ -305,36 +335,46 @@ func main() {
         Coin { x: -6.0, z: -6.0, on: true }
     ];
 
-    initwindow(sw, sh, "Mario 64 — Peach's Castle Grounds");
-    settargetfps(60);
+    InitWindow(sw, sh, "Mario 64 - Peach's Castle Grounds");
+    defer CloseWindow();
+    SetTargetFPS(60);
 
-    while (!windowshouldclose()) {
-        let dt = deltatime();
-        if (dt > 0.05) { dt = 0.05; }
-        gcframestep(0.5);
+    // GPU shader warmup + initial GC spread before the main loop.
+    BeginDrawing();
+    ClearBackground(hud_sky);
+    cam_begin_fast();
+    DrawCube({ x: 0.0, y: 1.0, z: 0.0 }, 1.0, 1.0, 1.0, col_white);
+    EndMode3D();
+    EndDrawing();
+    gcframestep(2.0);
 
-        if (iskeypressed(key_r)) {
+    loop {
+        if WindowShouldClose() {
+            break;
+        }
+        gcframestep(1.0);
+        let dt = clampDelta(GetFrameTime());
+
+        if IsKeyPressed(KEY_R) {
             reset_game(coins);
         }
 
-        if (state == GameState.Playing) {
+        if state == GameState.Playing {
             update_playing(dt, coins);
         }
 
         cam.update();
 
-        begindrawing();
-        clearbackground(colors.sky);
+        BeginDrawing();
+        ClearBackground(hud_sky);
 
-        cam.begin();
+        cam_begin_fast();
         draw_world(coins);
-        cam.end();
+        EndMode3D();
 
         draw_hud();
         draw_overlay();
-
-        enddrawing();
+        EndDrawing();
+        gcframestep(1.0);
     }
-
-    closewindow();
 }

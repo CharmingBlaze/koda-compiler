@@ -13,6 +13,7 @@ type Parser struct {
 	testSeq             int
 	inForIterableExpr   bool // suppress `Type {` after `for x in expr`
 	inMatchExpr         bool // suppress `Type {` after `match subject` / case label
+	inControlCondition  bool // suppress `Type {` at end of bare if/while condition
 }
 
 func NewParser(tokens []lexer.Token) *Parser {

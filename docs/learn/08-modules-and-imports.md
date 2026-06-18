@@ -25,21 +25,21 @@ let player = import "./player";
 
 | Import | Use for |
 |--------|---------|
-| `@game` | Beginner game API (`game.open`, `game.running`, …) |
+| `koda.game` | Beginner game API (`game.open`, `game.running`, …) |
 | `@math` | Trig, lerp, clamp, RNG |
 | `@json` | parse, stringify |
 | `@io` | read, write, list, exists |
 | `@array` | range, shuffle, zip |
 
-Graphics projects also `#include` the Raylib shim before `@game` — see [game dev guide](../guides/game-dev.md).
+Graphics projects use **`use raylib;`** (and optionally **`use koda.game;`**) — see [game dev guide](../guides/game-dev.md).
 
 ---
 
 ## Include — merge source files (advanced)
 
 ```koda
-#include "wrappers/raylib_shim/raylib.koda"
-#include "@game"
+use raylib;
+use koda.game;
 ```
 
 The included file is compiled as if pasted at that line. Beginners use `import` for stdlib modules instead of `#include "stdlib/..."`.

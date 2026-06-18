@@ -1,0 +1,76 @@
+// 3D demo — full Raylib API (548 functions), orbiting camera + satellite cubes.
+use raylib;
+use koda.util;
+
+let clearColor = #101018;
+let cubeColor = #00AAFF;
+let wireColor = #FFFFFF;
+let hudGreen = #00FF00;
+let hudWhite = #FFFFFF;
+let hudGray = #888888;
+let orbColor = #FF8C00;
+
+func camera3d(px, py, pz, tx, ty, tz, fovy) {
+    return {
+        position: { x: px, y: py, z: pz },
+        target: { x: tx, y: ty, z: tz },
+        up: { x: 0, y: 1, z: 0 },
+        fovy: fovy,
+        projection: CAMERA_PERSPECTIVE
+    };
+}
+
+func warmup3d() {
+    BeginDrawing();
+    ClearBackground(clearColor);
+    BeginMode3D(camera3d(5, 5, 5, 0, 0, 0, 45));
+    DrawCube({ x: 0, y: 1, z: 0 }, 2, 2, 2, cubeColor);
+    EndMode3D();
+    EndDrawing();
+    gcframestep(2.0);
+}
+
+func main() {
+    InitWindow(800, 450, "Koda - 3D Cube");
+    defer CloseWindow();
+    SetTargetFPS(60);
+    warmup3d();
+
+    let angle = 0.0;
+    let radius = 10.0;
+    let camY = 5.0;
+    let fovy = 45.0;
+
+    loop {
+        if WindowShouldClose() {
+            break;
+        }
+        gcframestep(1.0);
+        let dt = clampDelta(GetFrameTime());
+        angle += dt * 0.8;
+
+        let camX = radius * sin(angle);
+        let camZ = radius * cos(angle);
+
+        BeginDrawing();
+        ClearBackground(clearColor);
+        BeginMode3D(camera3d(camX, camY, camZ, 0, 1, 0, fovy));
+        DrawGrid(20, 1.0);
+        DrawCube({ x: 0, y: 1, z: 0 }, 2, 2, 2, cubeColor);
+        DrawCubeWires({ x: 0, y: 1, z: 0 }, 2.1, 2.1, 2.1, wireColor);
+
+        for i in 0..5 {
+            let t = angle + i * (3.14159 * 2 / 5);
+            let fx = 4 * sin(t);
+            let fz = 4 * cos(t);
+            let fy = 1 + sin(angle * 2 + i);
+            DrawCube({ x: fx, y: fy, z: fz }, 0.5, 0.5, 0.5, orbColor);
+        }
+        EndMode3D();
+
+        DrawText("Koda 3D - orbiting camera", 15, 15, 20, hudGreen);
+        DrawText("ESC to close", 15, 40, 18, hudWhite);
+        EndDrawing();
+        gcframestep(1.0);
+    }
+}

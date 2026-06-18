@@ -1,9 +1,17 @@
-// @camera — orbit camera for 3D games over the Raylib shim.
-// Include the shim first, then this module:
-//   #include "wrappers/raylib_shim/raylib.koda"
-//   #include "@camera"
-//
-// Follows entities with x, y, z as the first three struct fields (slot 0, 1, 2).
+// @camera — orbit and first-person cameras for 3D games over the full Raylib wrapper.
+// Load Raylib first:
+//   use raylib;
+//   use koda.camera;
+
+func camera3d(px, py, pz, tx, ty, tz, fovy) {
+    return {
+        position: { x: px, y: py, z: pz },
+        target: { x: tx, y: ty, z: tz },
+        up: { x: 0.0, y: 1.0, z: 0.0 },
+        fovy: fovy,
+        projection: CAMERA_PERSPECTIVE
+    };
+}
 
 struct OrbitCamera {
     target = null;
@@ -11,7 +19,7 @@ struct OrbitCamera {
     pitch = 0.42;
     distance = 13.0;
     sensitivity = 0.005;
-    orbit_button = 1;
+    orbit_button = MOUSE_BUTTON_RIGHT;
     look_offset = 0.5;
     min_distance = 5.0;
     max_distance = 24.0;
@@ -48,18 +56,18 @@ struct OrbitCamera {
     }
 
     func update() {
-        let mx = getmousex();
-        let my = getmousey();
-        if (this.prev_mx >= 0.0 && ismousebuttondown(this.orbit_button)) {
+        let mx = GetMouseX();
+        let my = GetMouseY();
+        if (this.prev_mx >= 0.0 && IsMouseButtonDown(this.orbit_button)) {
             let dx = mx - this.prev_mx;
             let dy = my - this.prev_my;
-            this.yaw += dx * this.sensitivity;
+            this.yaw -= dx * this.sensitivity;
             this.pitch -= dy * this.sensitivity;
             this.pitch = clamp(this.pitch, this.min_pitch, this.max_pitch);
         }
         this.prev_mx = mx;
         this.prev_my = my;
-        let wheel = getmousewheelmove();
+        let wheel = GetMouseWheelMove();
         if (wheel != 0) {
             this.distance -= wheel * 1.5;
             this.distance = clamp(this.distance, this.min_distance, this.max_distance);
@@ -79,11 +87,11 @@ struct OrbitCamera {
         let ex = px + this.distance * cp * sy;
         let ey = ty + this.distance * sp;
         let ez = pz + this.distance * cp * ccy;
-        beginmode3d(ex, ey, ez, px, ty, pz, 0.0, 1.0, 0.0, this.fovy);
+        BeginMode3D(camera3d(ex, ey, ez, px, ty, pz, this.fovy));
     }
 
     func end() {
-        endmode3d();
+        EndMode3D();
     }
 };
 
@@ -93,3 +101,65 @@ func orbit(cfg) {
     }
     return OrbitCamera(cfg.target, cfg.distance, cfg.pitch, cfg.yaw);
 }
+
+struct FirstPersonCamera {
+    x = 0.0;
+    y = 1.6;
+    z = 0.0;
+    yaw = 0.0;
+    pitch = 0.0;
+    sensitivity = 0.003;
+    min_pitch = -1.45;
+    max_pitch = 1.45;
+    fovy = 70.0;
+
+    func fp_reset() {
+        this.x = 0.0;
+        this.y = 1.6;
+        this.z = 14.0;
+        this.yaw = 3.14159;
+        this.pitch = 0.0;
+    }
+
+    func fp_look() {
+        let md = GetMouseDelta();
+        this.yaw -= md.x * this.sensitivity;
+        this.pitch -= md.y * this.sensitivity;
+        this.pitch = clamp(this.pitch, this.min_pitch, this.max_pitch);
+    }
+
+    func fp_fwd_x() {
+        return cos(this.pitch) * sin(this.yaw);
+    }
+
+    func fp_fwd_y() {
+        return sin(this.pitch);
+    }
+
+    func fp_fwd_z() {
+        return cos(this.pitch) * cos(this.yaw);
+    }
+
+    func fp_right_x() {
+        return cos(this.yaw);
+    }
+
+    func fp_right_z() {
+        return -sin(this.yaw);
+    }
+
+    func fp_begin() {
+        let cp = cos(this.pitch);
+        let fx = cp * sin(this.yaw);
+        let fy = sin(this.pitch);
+        let fz = cp * cos(this.yaw);
+        let tx = this.x + fx;
+        let ty = this.y + fy;
+        let tz = this.z + fz;
+        BeginMode3D(camera3d(this.x, this.y, this.z, tx, ty, tz, this.fovy));
+    }
+
+    func fp_end() {
+        EndMode3D();
+    }
+};

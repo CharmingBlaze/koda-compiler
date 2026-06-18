@@ -1,0 +1,315 @@
+// FPS Arena — first-person shooter; full Raylib + koda.camera / koda.input.
+use raylib;
+use koda.camera;
+use koda.util;
+
+const sw = 1280;
+const sh = 720;
+const arena_half = 16.0;
+const eye_h = 1.6;
+const move_speed = 8.0;
+const fire_cooldown = 0.28;
+const aim_dot_min = 0.97;
+const shoot_range = 40.0;
+const touch_damage = 12.0;
+const touch_cooldown = 0.6;
+
+let skyColor = #87CEEB;
+let floorColor = #808080;
+let wallColor = #191919;
+
+struct Target {
+    x: float = 0.0;
+    z: float = 0.0;
+    alive: bool = true;
+    angle: float = 0.0;
+    radius: float = 2.0;
+    home_x: float = 0.0;
+    home_z: float = 0.0;
+}
+
+struct Pillar {
+    x: float = 0.0;
+    z: float = 0.0;
+    half: float = 1.0;
+}
+
+let cam = FirstPersonCamera { x: 0.0, y: eye_h, z: 14.0, yaw: 3.14159, pitch: 0.0 };
+let health = 100.0;
+let kills = 0;
+let won = false;
+let lost = false;
+let fire_timer = 0.0;
+let hurt_timer = 0.0;
+let flash_timer = 0.0;
+
+let pillars = [
+    Pillar { x: -5.0, z: 0.0, half: 1.2 },
+    Pillar { x: 5.0, z: 0.0, half: 1.2 },
+    Pillar { x: 0.0, z: -6.0, half: 1.4 },
+    Pillar { x: -9.0, z: 8.0, half: 1.0 },
+    Pillar { x: 9.0, z: 8.0, half: 1.0 }
+];
+
+func dist2(x1, z1, x2, z2) {
+    let dx = x1 - x2;
+    let dz = z1 - z2;
+    return dx * dx + dz * dz;
+}
+
+func clamp_x(x) {
+    if x < -arena_half { return -arena_half; }
+    if x > arena_half { return arena_half; }
+    return x;
+}
+
+func clamp_z(z) {
+    if z < -arena_half { return -arena_half; }
+    if z > arena_half { return arena_half; }
+    return z;
+}
+
+func blocked_by_pillars(px, pz, pillar_list) {
+    for (let p of pillar_list) {
+        if dist2(px, pz, p.x, p.z) < (p.half + 0.35) * (p.half + 0.35) {
+            return true;
+        }
+    }
+    return false;
+}
+
+func move_camera(dt) {
+    let mx = 0.0;
+    let mz = 0.0;
+    if IsKeyDown(KEY_W) { mz -= 1.0; }
+    if IsKeyDown(KEY_S) { mz += 1.0; }
+    if IsKeyDown(KEY_A) { mx -= 1.0; }
+    if IsKeyDown(KEY_D) { mx += 1.0; }
+    if mx == 0.0 and mz == 0.0 { return; }
+
+    let len = sqrt(mx * mx + mz * mz);
+    mx = mx / len;
+    mz = mz / len;
+    let spd = move_speed * dt;
+    let nx = cam.x + (mz * cam.fp_fwd_x() + mx * cam.fp_right_x()) * spd;
+    let nz = cam.z + (mz * cam.fp_fwd_z() + mx * cam.fp_right_z()) * spd;
+    nx = clamp_x(nx);
+    nz = clamp_z(nz);
+    if not blocked_by_pillars(nx, cam.z, pillars) { cam.x = nx; }
+    if not blocked_by_pillars(cam.x, nz, pillars) { cam.z = nz; }
+}
+
+func reset_target(t, hx, hz, rad) {
+    t.home_x = hx;
+    t.home_z = hz;
+    t.radius = rad;
+    t.angle = 0.0;
+    t.x = hx;
+    t.z = hz;
+    t.alive = true;
+}
+
+func tick_target(t, dt) {
+    if not t.alive { return; }
+    t.angle += dt * 1.1;
+    t.x = t.home_x + sin(t.angle) * t.radius;
+    t.z = t.home_z + cos(t.angle) * t.radius;
+}
+
+func draw_target(t) {
+    if not t.alive { return; }
+    DrawCube({ x: t.x, y: 0.9, z: t.z }, 0.9, 1.8, 0.9, #FF0000);
+    DrawCubeWires({ x: t.x, y: 0.9, z: t.z }, 0.95, 1.85, 0.95, #000000);
+}
+
+func aim_at(px, py, pz, tx, ty, tz) {
+    let dx = tx - px;
+    let dy = ty - py;
+    let dz = tz - pz;
+    let dist = sqrt(dx * dx + dy * dy + dz * dz);
+    if dist > shoot_range { return false; }
+    let dot = (dx / dist) * cam.fp_fwd_x() + (dy / dist) * cam.fp_fwd_y() + (dz / dist) * cam.fp_fwd_z();
+    return dot >= aim_dot_min;
+}
+
+func try_shoot(targets) {
+    if fire_timer > 0.0 or won or lost { return; }
+    if not IsMouseButtonPressed(MOUSE_BUTTON_LEFT) { return; }
+    for (let t of targets) {
+        if t.alive and aim_at(cam.x, cam.y, cam.z, t.x, 0.9, t.z) {
+            t.alive = false;
+            kills += 1;
+            fire_timer = fire_cooldown;
+            flash_timer = 0.06;
+            return;
+        }
+    }
+    fire_timer = fire_cooldown;
+    flash_timer = 0.04;
+}
+
+func living_count(targets) {
+    let n = 0;
+    for (let t of targets) {
+        if t.alive { n += 1; }
+    }
+    return n;
+}
+
+func tick_contact(targets, dt) {
+    if won or lost { return; }
+    if hurt_timer > 0.0 {
+        hurt_timer -= dt;
+        return;
+    }
+    for (let t of targets) {
+        if t.alive and dist2(cam.x, cam.z, t.x, t.z) < 1.4 {
+            health -= touch_damage;
+            hurt_timer = touch_cooldown;
+            if health <= 0.0 {
+                health = 0.0;
+                lost = true;
+            }
+            return;
+        }
+    }
+}
+
+func reset_game(targets) {
+    cam.fp_reset();
+    health = 100.0;
+    kills = 0;
+    won = false;
+    lost = false;
+    fire_timer = 0.0;
+    hurt_timer = 0.0;
+    flash_timer = 0.0;
+    reset_target(targets[0], -8.0, -4.0, 2.5);
+    reset_target(targets[1], 8.0, -5.0, 3.0);
+    reset_target(targets[2], -6.0, 6.0, 2.0);
+    reset_target(targets[3], 7.0, 7.0, 2.5);
+    reset_target(targets[4], 0.0, -10.0, 3.5);
+    reset_target(targets[5], -11.0, 2.0, 2.0);
+}
+
+func draw_arena(pillar_list) {
+    DrawCube({ x: 0.0, y: -0.5, z: 0.0 }, arena_half * 2.0 + 4.0, 1.0, arena_half * 2.0 + 4.0, floorColor);
+    DrawGrid(32, 1.0);
+    DrawCube({ x: 0.0, y: 2.5, z: -arena_half - 1.0 }, arena_half * 2.0 + 2.0, 5.0, 1.0, wallColor);
+    DrawCube({ x: 0.0, y: 2.5, z: arena_half + 1.0 }, arena_half * 2.0 + 2.0, 5.0, 1.0, wallColor);
+    DrawCube({ x: -arena_half - 1.0, y: 2.5, z: 0.0 }, 1.0, 5.0, arena_half * 2.0 + 2.0, wallColor);
+    DrawCube({ x: arena_half + 1.0, y: 2.5, z: 0.0 }, 1.0, 5.0, arena_half * 2.0 + 2.0, wallColor);
+    for (let p of pillar_list) {
+        DrawCube({ x: p.x, y: 1.5, z: p.z }, p.half * 2.0, 3.0, p.half * 2.0, #00FFFF);
+        DrawCubeWires({ x: p.x, y: 1.5, z: p.z }, p.half * 2.0 + 0.05, 3.05, p.half * 2.0 + 0.05, #FFFFFF);
+    }
+}
+
+func draw_crosshair() {
+    let cx = sw / 2;
+    let cy = sh / 2;
+    DrawLine(cx - 12, cy, cx + 12, cy, #FFFFFF);
+    DrawLine(cx, cy - 12, cx, cy + 12, #FFFFFF);
+    DrawCircleLines(cx, cy, 6, #FFFFFF);
+}
+
+func draw_hud(targets) {
+    DrawText("FPS ARENA", 20, 14, 32, #FFFFFF);
+    DrawText("WASD move  Click shoot  R restart", 20, 48, 18, #AAAAAA);
+    DrawText("Health", 20, 82, 20, #FFFFFF);
+    DrawRectangle(110, 80, 200, 18, #000000);
+    let hw = floor(health * 2.0);
+    if hw > 200 { hw = 200; }
+    DrawRectangle(110, 80, hw, 18, #00FF00);
+
+    DrawText("Targets left", 20, 112, 20, #FFFFFF);
+    let left = living_count(targets);
+    for i in 0..6 {
+        let col = #333333;
+        if i < left { col = #FF0000; }
+        DrawRectangle(160 + i * 22, 110, 18, 18, col);
+    }
+
+    DrawText("Kills", 20, 142, 20, #FFFFFF);
+    for i in 0..6 {
+        let kc = #333333;
+        if i < kills { kc = #FFFF00; }
+        DrawRectangle(80 + i * 18, 140, 14, 14, kc);
+    }
+
+    if won {
+        DrawText("ARENA CLEAR!", 480, 320, 44, #FFFF00);
+    } else if lost {
+        DrawText("DEFEATED - press R", 440, 320, 36, #FF0000);
+    }
+}
+
+func main() {
+    let targets = [
+        Target { x: -8.0, z: -4.0, radius: 2.5, home_x: -8.0, home_z: -4.0 },
+        Target { x: 8.0, z: -5.0, radius: 3.0, home_x: 8.0, home_z: -5.0 },
+        Target { x: -6.0, z: 6.0, radius: 2.0, home_x: -6.0, home_z: 6.0 },
+        Target { x: 7.0, z: 7.0, radius: 2.5, home_x: 7.0, home_z: 7.0 },
+        Target { x: 0.0, z: -10.0, radius: 3.5, home_z: -10.0 },
+        Target { x: -11.0, z: 2.0, radius: 2.0, home_x: -11.0 }
+    ];
+
+    InitWindow(sw, sh, "FPS Arena - Koda");
+    defer CloseWindow();
+    SetTargetFPS(60);
+    DisableCursor();
+
+    BeginDrawing();
+    ClearBackground(#101018);
+    cam.fp_begin();
+    DrawCube({ x: 0, y: 1, z: 0 }, 1, 1, 1, #FFFFFF);
+    cam.fp_end();
+    EndDrawing();
+    gcframestep(2.0);
+
+    loop {
+        if WindowShouldClose() {
+            break;
+        }
+        gcframestep(1.0);
+        let dt = clampDelta(GetFrameTime());
+
+        if IsKeyPressed(KEY_R) {
+            reset_game(targets);
+        }
+
+        cam.fp_look();
+        if not won and not lost {
+            move_camera(dt);
+            for (let t of targets) { tick_target(t, dt); }
+            if fire_timer > 0.0 { fire_timer -= dt; }
+            try_shoot(targets);
+            tick_contact(targets, dt);
+            if living_count(targets) == 0 { won = true; }
+        }
+        if flash_timer > 0.0 { flash_timer -= dt; }
+
+        BeginDrawing();
+        ClearBackground(skyColor);
+        cam.fp_begin();
+        draw_arena(pillars);
+        for (let t of targets) { draw_target(t); }
+        if flash_timer > 0.0 {
+            let fx = cam.x + cam.fp_fwd_x() * 2.0;
+            let fy = cam.y + cam.fp_fwd_y() * 2.0;
+            let fz = cam.z + cam.fp_fwd_z() * 2.0;
+            let tx = cam.x + cam.fp_fwd_x() * 30.0;
+            let ty = cam.y + cam.fp_fwd_y() * 30.0;
+            let tz = cam.z + cam.fp_fwd_z() * 30.0;
+            DrawLine3D({ x: cam.x, y: cam.y, z: cam.z }, { x: fx, y: fy, z: fz }, #FFFF00);
+            DrawLine3D({ x: fx, y: fy, z: fz }, { x: tx, y: ty, z: tz }, #FFFF00);
+        }
+        cam.fp_end();
+        draw_crosshair();
+        draw_hud(targets);
+        EndDrawing();
+        gcframestep(1.0);
+    }
+
+    EnableCursor();
+}

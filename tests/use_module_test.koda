@@ -1,0 +1,6 @@
+use koda.easing;
+
+func main() {
+    assert(easeIn(0.5) == 0.25, "easeIn");
+    print("PASS use_module_test");
+}

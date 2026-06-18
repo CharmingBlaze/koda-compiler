@@ -1,17 +1,30 @@
-func vec2(x, y) {
+struct Vector2 {
+    x: float = 0.0;
+    y: float = 0.0;
+}
+
+func zero() {
+    return Vector2 {};
+}
+
+func create(x, y) {
     return { x: x, y: y };
 }
 
+func vec2(x, y) {
+    return create(x, y);
+}
+
 func add(a, b) {
-    return vec2(a.x + b.x, a.y + b.y);
+    return create(a.x + b.x, a.y + b.y);
 }
 
 func sub(a, b) {
-    return vec2(a.x - b.x, a.y - b.y);
+    return create(a.x - b.x, a.y - b.y);
 }
 
 func scale(a, s) {
-    return vec2(a.x * s, a.y * s);
+    return create(a.x * s, a.y * s);
 }
 
 func dot(a, b) {
@@ -28,8 +41,8 @@ func length(a) {
 
 func normalize(a) {
     let len = length(a);
-    if (len == 0) {
-        return vec2(0, 0);
+    if (len == 0.0) {
+        return zero();
     }
-    return vec2(a.x / len, a.y / len);
+    return create(a.x / len, a.y / len);
 }

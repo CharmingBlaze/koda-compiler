@@ -1,0 +1,7 @@
+use koda.easing { easeIn, easeOut };
+
+func main() {
+    assert(easeIn(0.5) == 0.25, "easeIn selective");
+    assert(easeOut(0.5) == 0.75, "easeOut selective");
+    print("PASS use_selective_test");
+}

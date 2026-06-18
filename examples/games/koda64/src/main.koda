@@ -1,41 +1,106 @@
-// KODA 64 — 3D platformer (Raylib shim)
-// Uses JS-style dot notation: player.x, camera.yaw, coin.on
-// Colors: colors.sky, colors.grass, rgb(r,g,b) — no raw hex needed.
-#include "../wrappers/raylib_shim/raylib.koda"
-#include "@camera"
+// KODA 64 — Peach's Castle demo (3D platformer sample).
+// Full Raylib via `use raylib`; packed #hex colors + fusion-friendly camera3d().
+use raylib;
+use koda.camera;
+use koda.input;
+use koda.ui;
+use koda.util;
 
-let sw = 1280;
-let sh = 720;
+const sw = 1280;
+const sh = 720;
+const speed = 8.0;
+const gravity = -22.0;
+const jump_v = 9.5;
+const goal = 5;
+const pick_radius = 1.4;
 
-let key_w = 87;
-let key_s = 83;
-let key_a = 65;
-let key_d = 68;
-let key_space = 32;
-let key_r = 82;
+enum GameState {
+    Playing,
+    Won,
+    GameOver
+}
 
-struct Coin { x, z, on }
-struct Mario { x, y, z, h, r, vel_y, grounded }
-struct GoombaNpc { x, z, dir }
+struct Coin {
+    x = 0.0;
+    z = 0.0;
+    on = true;
 
-let player = Mario { x: 0.0, y: 1.0, z: 8.0, h: 1.2, r: 0.45, vel_y: 0.0, grounded: true };
-let goomba_npc = GoombaNpc { x: -4.0, z: -2.0, dir: 1.0 };
+    func show() {
+        if (on) {
+            DrawCube({ x: x, y: 1.5, z: z }, 0.45, 0.45, 0.12, col_gold);
+        }
+    }
 
-let camera = OrbitCamera { target: player, distance: 13.0, pitch: 0.42, yaw: -0.55 };
+    func pickup(mario) {
+        if (!on) {
+            return false;
+        }
+        let dx = mario.x - x;
+        let dz = mario.z - z;
+        if (dx * dx + dz * dz < pick_radius * pick_radius) {
+            on = false;
+            return true;
+        }
+        return false;
+    }
+}
 
-let speed = 8.0;
-let gravity = -22.0;
-let jump_v = 9.5;
+struct Mario {
+    x = 0.0;
+    y = 1.0;
+    z = 8.0;
+    h = 1.2;
+    r = 0.45;
+    vel_y = 0.0;
+    grounded = true;
+}
+
+struct GoombaNpc {
+    x = -4.0;
+    z = -2.0;
+    dir = 1.0;
+}
+
+let player = Mario {};
+let goomba = GoombaNpc {};
+let cam = OrbitCamera { target: player, distance: 13.0, pitch: 0.42, yaw: -0.55 };
+
 let score = 0;
 let lives = 3;
-let goal = 5;
-let won = false;
-let star_spin = 0.0;
+let state = GameState.Playing;
 
-func dist2(x1, z1, x2, z2) {
-    let dx = x1 - x2;
-    let dz = z1 - z2;
-    return dx * dx + dz * dz;
+let hud_white = { r: 255, g: 255, b: 255, a: 255 };
+let hud_yellow = { r: 255, g: 255, b: 0, a: 255 };
+let hud_red = { r: 255, g: 0, b: 0, a: 255 };
+let hud_sky = #FFD8A8;
+
+let col_grass = #228B22;
+let col_dirt = #8B4513;
+let col_forest = #006400;
+let col_gray = #808080;
+let col_red = #FF0000;
+let col_blue = #0000FF;
+let col_brown = #554422;
+let col_gold = #FFD700;
+let col_yellow = #FFFF00;
+let col_black = #000000;
+let col_white = #FFFFFF;
+
+let hud_score_text = "Score: 0   Lives: 3";
+
+func cam_begin_fast() {
+    let px = player.x;
+    let py = player.y;
+    let pz = player.z;
+    let ty = py + cam.look_offset;
+    let cp = cos(cam.pitch);
+    let sp = sin(cam.pitch);
+    let sy = sin(cam.yaw);
+    let ccy = cos(cam.yaw);
+    let ex = px + cam.distance * cp * sy;
+    let ey = ty + cam.distance * sp;
+    let ez = pz + cam.distance * cp * ccy;
+    BeginMode3D(camera3d(ex, ey, ez, px, ty, pz, cam.fovy));
 }
 
 func on_plat(px, pz, cx, cz, hw, hd) {
@@ -59,6 +124,10 @@ func clamp(v, lo, hi) {
     return v;
 }
 
+func refresh_hud_score() {
+    hud_score_text = "Score: {score}   Lives: {lives}";
+}
+
 func respawn_player() {
     player.x = 0.0;
     player.z = 8.0;
@@ -67,39 +136,191 @@ func respawn_player() {
     player.grounded = true;
 }
 
-func reset_game() {
+func reset_game(coins) {
     respawn_player();
     score = 0;
     lives = 3;
-    won = false;
-    goomba_npc.x = -4.0;
-    goomba_npc.z = -2.0;
-    goomba_npc.dir = 1.0;
-    camera.reset();
-}
-
-func draw_tree(tx, tz) {
-    drawcube(tx, 1.0, tz, 0.5, 2.0, 0.5, colors.dirt);
-    drawcube(tx, 3.2, tz, 2.0, 2.0, 2.0, colors.forest);
-}
-
-func draw_castle(cx, cz) {
-    drawcube(cx, 1.5, cz, 4.0, 3.0, 4.0, colors.gray);
-    drawcube(cx, 4.0, cz, 3.0, 2.0, 3.0, colors.gray);
-    drawcube(cx, 6.2, cz, 0.3, 2.5, 0.3, colors.red);
-    drawcube(cx + 1.5, 5.5, cz + 1.5, 1.2, 1.2, 1.2, colors.blue);
-}
-
-func draw_coin(coin) {
-    if (coin.on) {
-        drawcube(coin.x, 1.5, coin.z, 0.45, 0.45, 0.12, colors.gold);
+    state = GameState.Playing;
+    refresh_hud_score();
+    goomba.x = -4.0;
+    goomba.z = -2.0;
+    goomba.dir = 1.0;
+    cam.reset();
+    for (let coin of coins) {
+        coin.on = true;
     }
 }
 
-func try_collect(coin, pick) {
-    if (coin.on && dist2(player.x, player.z, coin.x, coin.z) < pick) {
-        coin.on = false;
-        score += 1;
+func move_player(dt, yaw) {
+    let move_x = 0.0;
+    let move_z = 0.0;
+    if (IsKeyDown(KEY_W)) { move_z -= 1.0; }
+    if (IsKeyDown(KEY_S)) { move_z += 1.0; }
+    if (IsKeyDown(KEY_A)) { move_x -= 1.0; }
+    if (IsKeyDown(KEY_D)) { move_x += 1.0; }
+
+    if (move_x == 0.0 && move_z == 0.0) {
+        return;
+    }
+
+    let fwd_x = sin(yaw);
+    let fwd_z = cos(yaw);
+    let right_x = cos(yaw);
+    let right_z = -sin(yaw);
+    player.x += (move_z * fwd_x + move_x * right_x) * speed * dt;
+    player.z += (move_z * fwd_z + move_x * right_z) * speed * dt;
+    player.x = clamp(player.x, -14.5, 14.5);
+    player.z = clamp(player.z, -14.5, 14.5);
+}
+
+func apply_physics(dt) {
+    if (player.grounded && IsKeyPressed(KEY_SPACE)) {
+        player.vel_y = jump_v;
+        player.grounded = false;
+    }
+    player.vel_y += gravity * dt;
+    player.y += player.vel_y * dt;
+    let floor = floor_y(player.x, player.z);
+    if (player.y <= floor) {
+        player.y = floor;
+        player.vel_y = 0.0;
+        player.grounded = true;
+    }
+}
+
+func hurt_player() {
+    lives -= 1;
+    respawn_player();
+    refresh_hud_score();
+    if (lives <= 0) {
+        state = GameState.GameOver;
+    }
+}
+
+func update_goomba(dt) {
+    goomba.x += goomba.dir * 4.0 * dt;
+    if (goomba.x > 6.0) {
+        goomba.x = 6.0;
+        goomba.dir = -1.0;
+    }
+    if (goomba.x < -10.0) {
+        goomba.x = -10.0;
+        goomba.dir = 1.0;
+    }
+}
+
+func goomba_hits_player() {
+    let dx = player.x - goomba.x;
+    let dz = player.z - goomba.z;
+    return dx * dx + dz * dz < 1.0 && player.y < 2.5;
+}
+
+func draw_tree(tx, tz) {
+    DrawCube({ x: tx, y: 1.0, z: tz }, 0.5, 2.0, 0.5, col_dirt);
+    DrawCube({ x: tx, y: 3.2, z: tz }, 2.0, 2.0, 2.0, col_forest);
+}
+
+func draw_castle(cx, cz) {
+    DrawCube({ x: cx, y: 1.5, z: cz }, 4.0, 3.0, 4.0, col_gray);
+    DrawCube({ x: cx, y: 4.0, z: cz }, 3.0, 2.0, 3.0, col_gray);
+    DrawCube({ x: cx, y: 6.2, z: cz }, 0.3, 2.5, 0.3, col_red);
+    DrawCube({ x: cx + 1.5, y: 5.5, z: cz + 1.5 }, 1.2, 1.2, 1.2, col_blue);
+}
+
+func draw_mario() {
+    let pr = player.r * 2.0;
+    let ph = player.h;
+    DrawCube({ x: player.x, y: player.y, z: player.z }, pr, ph, pr, col_red);
+    DrawCube({ x: player.x, y: player.y + 0.55, z: player.z }, player.r * 1.4, 0.35, player.r * 1.4, col_blue);
+    DrawCubeWires({ x: player.x, y: player.y, z: player.z }, pr, ph, pr, col_black);
+}
+
+func draw_goomba() {
+    DrawCube({ x: goomba.x, y: 0.7, z: goomba.z }, 0.9, 0.9, 0.9, col_brown);
+    DrawCubeWires({ x: goomba.x, y: 0.7, z: goomba.z }, 0.9, 0.9, 0.9, col_black);
+}
+
+func draw_world(coins) {
+    DrawCube({ x: 0.0, y: -0.5, z: 0.0 }, 30.0, 1.0, 30.0, col_grass);
+    DrawGrid(30, 1.0);
+
+    DrawCube({ x: 7.0, y: 2.0, z: -5.0 }, 5.0, 1.0, 5.0, col_dirt);
+    DrawCube({ x: -8.0, y: 2.5, z: 3.0 }, 6.0, 1.0, 6.0, col_dirt);
+    DrawCube({ x: 5.0, y: 3.5, z: 7.0 }, 4.0, 1.0, 4.0, col_dirt);
+    DrawCube({ x: 0.0, y: 1.5, z: -9.0 }, 8.0, 1.0, 4.0, col_dirt);
+    DrawCube({ x: 0.0, y: 4.5, z: 0.0 }, 7.0, 3.0, 7.0, col_dirt);
+
+    draw_tree(-10.0, 10.0);
+    draw_tree(11.0, -8.0);
+    draw_tree(-11.0, -10.0);
+    draw_castle(12.0, 12.0);
+
+    for (let coin of coins) {
+        coin.show();
+    }
+
+    if (score >= goal) {
+        let star_y = 6.8;
+        DrawCube({ x: 0.0, y: star_y, z: 0.0 }, 1.2, 1.2, 1.2, col_yellow);
+        DrawCubeWires({ x: 0.0, y: star_y, z: 0.0 }, 1.4, 1.4, 1.4, col_white);
+    }
+
+    draw_goomba();
+    draw_mario();
+}
+
+func draw_hud() {
+    DrawText("KODA 64", 20, 16, 36, hud_white);
+    DrawText("WASD move   SPACE jump   R restart", 20, 54, 20, hud_white);
+    DrawText("Right mouse: orbit cam   Wheel: zoom", 20, 78, 18, hud_white);
+    DrawText("Collect 5 coins, then grab the star on the hill!", 20, 102, 18, hud_white);
+    score_pips(20, 134, score, goal);
+    life_pips(50, 172, lives, 3);
+    DrawText(hud_score_text, 20, 200, 24, hud_white);
+}
+
+func draw_overlay() {
+    match state {
+        GameState.Won {
+            DrawText("STAR GET! Course clear!", 380, 340, 40, hud_yellow);
+        }
+        GameState.GameOver {
+            DrawText("GAME OVER - press R", 400, 340, 36, hud_red);
+        }
+        default {
+            if (score >= goal) {
+                DrawText("Climb the hill - touch the star!", 380, 340, 28, hud_yellow);
+            }
+        }
+    }
+}
+
+func update_playing(dt, coins) {
+    move_player(dt, cam.yaw);
+    apply_physics(dt);
+
+    if (player.y < -5.0) {
+        hurt_player();
+    }
+
+    for (let coin of coins) {
+        if (coin.pickup(player)) {
+            score += 1;
+            refresh_hud_score();
+        }
+    }
+
+    update_goomba(dt);
+    if (goomba_hits_player()) {
+        hurt_player();
+    }
+
+    if (score >= goal) {
+        let dx = player.x;
+        let dz = player.z;
+        if (dx * dx + dz * dz < 4.0 && player.y > 4.0) {
+            state = GameState.Won;
+        }
     }
 }
 
@@ -112,148 +333,45 @@ func main() {
         Coin { x: -6.0, z: -6.0, on: true }
     ];
 
-    initwindow(sw, sh, "KODA 64 — Koda 64 Demo");
-    settargetfps(60);
+    InitWindow(sw, sh, "KODA 64 - Koda 64 Demo");
+    defer CloseWindow();
+    SetTargetFPS(60);
 
-    while (!windowshouldclose()) {
-        let dt = deltatime();
-        if (dt > 0.05) { dt = 0.05; }
-        gcframestep(0.5);
+    BeginDrawing();
+    ClearBackground(hud_sky);
+    cam_begin_fast();
+    DrawCube({ x: 0.0, y: 1.0, z: 0.0 }, 1.0, 1.0, 1.0, col_white);
+    EndMode3D();
+    EndDrawing();
+    gcframestep(2.0);
 
-        if (iskeypressed(key_r)) {
-            reset_game();
+    loop {
+        if WindowShouldClose() {
+            break;
+        }
+        gcframestep(1.0);
+        let dt = clampDelta(GetFrameTime());
+
+        if IsKeyPressed(KEY_R) {
+            reset_game(coins);
         }
 
-        if (!won && lives > 0) {
-            let move_x = 0.0;
-            let move_z = 0.0;
-            if (iskeydown(key_w)) { move_z -= 1.0; }
-            if (iskeydown(key_s)) { move_z += 1.0; }
-            if (iskeydown(key_a)) { move_x -= 1.0; }
-            if (iskeydown(key_d)) { move_x += 1.0; }
-
-            let fwd_x = sin(camera.yaw);
-            let fwd_z = cos(camera.yaw);
-            let right_x = cos(camera.yaw);
-            let right_z = -sin(camera.yaw);
-            player.x += (move_z * fwd_x + move_x * right_x) * speed * dt;
-            player.z += (move_z * fwd_z + move_x * right_z) * speed * dt;
-
-            if (player.grounded && iskeypressed(key_space)) {
-                player.vel_y = jump_v;
-                player.grounded = false;
-            }
-
-            player.vel_y += gravity * dt;
-            player.y += player.vel_y * dt;
-
-            let floor = floor_y(player.x, player.z);
-            if (player.y <= floor) {
-                player.y = floor;
-                player.vel_y = 0.0;
-                player.grounded = true;
-            }
-
-            if (player.x < -14.5) { player.x = -14.5; }
-            if (player.x > 14.5) { player.x = 14.5; }
-            if (player.z < -14.5) { player.z = -14.5; }
-            if (player.z > 14.5) { player.z = 14.5; }
-
-            if (player.y < -5.0) {
-                lives -= 1;
-                respawn_player();
-            }
-
-            let pick = 1.4;
-            for coin in coins {
-                try_collect(coin, pick);
-            }
-
-            goomba_npc.x += goomba_npc.dir * 4.0 * dt;
-            if (goomba_npc.x > 6.0) { goomba_npc.x = 6.0; goomba_npc.dir = -1.0; }
-            if (goomba_npc.x < -10.0) { goomba_npc.x = -10.0; goomba_npc.dir = 1.0; }
-
-            if (dist2(player.x, player.z, goomba_npc.x, goomba_npc.z) < 1.0 && player.y < 2.5) {
-                lives -= 1;
-                respawn_player();
-            }
-
-            if (score >= goal && dist2(player.x, player.z, 0.0, 0.0) < 2.0 && player.y > 4.0) {
-                won = true;
-            }
+        if state == GameState.Playing {
+            update_playing(dt, coins);
         }
 
-        star_spin += dt * 120.0;
-        camera.update();
+        cam.update();
 
-        begindrawing();
-        clearbackground(colors.sky);
+        BeginDrawing();
+        ClearBackground(hud_sky);
 
-        camera.begin();
+        cam_begin_fast();
+        draw_world(coins);
+        EndMode3D();
 
-        drawcube(0.0, -0.5, 0.0, 30.0, 1.0, 30.0, colors.grass);
-        drawgrid(30, 1.0);
-
-        drawcube(7.0, 2.0, -5.0, 5.0, 1.0, 5.0, colors.dirt);
-        drawcube(-8.0, 2.5, 3.0, 6.0, 1.0, 6.0, colors.dirt);
-        drawcube(5.0, 3.5, 7.0, 4.0, 1.0, 4.0, colors.dirt);
-        drawcube(0.0, 1.5, -9.0, 8.0, 1.0, 4.0, colors.dirt);
-        drawcube(0.0, 4.5, 0.0, 7.0, 3.0, 7.0, colors.dirt);
-
-        draw_tree(-10.0, 10.0);
-        draw_tree(11.0, -8.0);
-        draw_tree(-11.0, -10.0);
-        draw_castle(12.0, 12.0);
-
-        for coin in coins {
-            draw_coin(coin);
-        }
-
-        if (score >= goal) {
-            let star_y = 6.8;
-            drawcube(0.0, star_y, 0.0, 1.2, 1.2, 1.2, colors.yellow);
-            drawcubewires(0.0, star_y, 0.0, 1.4, 1.4, 1.4, colors.white);
-        }
-
-        drawcube(goomba_npc.x, 0.7, goomba_npc.z, 0.9, 0.9, 0.9, colors.brown);
-        drawcubewires(goomba_npc.x, 0.7, goomba_npc.z, 0.9, 0.9, 0.9, colors.black);
-
-        drawcube(player.x, player.y, player.z, player.r * 2.0, player.h, player.r * 2.0, colors.red);
-        drawcube(player.x, player.y + 0.55, player.z, player.r * 1.4, 0.35, player.r * 1.4, colors.blue);
-        drawcubewires(player.x, player.y, player.z, player.r * 2.0, player.h, player.r * 2.0, colors.black);
-
-        camera.end();
-
-        drawtext("KODA 64", 20, 16, 36, colors.white);
-        drawtext("WASD move (camera-relative)   SPACE jump   R restart", 20, 54, 20, colors.white);
-        drawtext("Right-mouse drag: orbit cam   Wheel: zoom", 20, 78, 18, colors.white);
-        drawtext("Collect 5 coins, then grab the star on the hill!", 20, 102, 18, colors.white);
-
-        let hud_x = 20;
-        let hud_y = 134;
-        for i in 0..goal {
-            let col = colors.black;
-            if (score > i) { col = colors.gold; }
-            drawrectangle(hud_x + i * 28, hud_y, 22, 22, col);
-        }
-
-        drawtext("x", 20, 169, 24, colors.white);
-        for i in 0..3 {
-            let lc = colors.black;
-            if (lives > i) { lc = colors.red; }
-            drawrectangle(50 + i * 26, 172, 18, 18, lc);
-        }
-
-        if (won) {
-            drawtext("STAR GET! Course clear!", 380, 340, 40, colors.yellow);
-        } else if (lives <= 0) {
-            drawtext("GAME OVER - press R", 400, 340, 36, colors.red);
-        } else if (score >= goal) {
-            drawtext("Climb the hill - touch the star!", 380, 340, 28, colors.yellow);
-        }
-
-        enddrawing();
+        draw_hud();
+        draw_overlay();
+        EndDrawing();
+        gcframestep(1.0);
     }
-
-    closewindow();
 }

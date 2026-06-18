@@ -1,0 +1,233 @@
+// Brick Breaker — canonical 2D game with koda.game; types inferred from usage.
+// Brick state uses parallel arrays (case-insensitive names — avoid ballx + { x } fields).
+use raylib;
+use koda.game;
+
+enum Phase {
+    Start,
+    Playing,
+    Paused,
+    GameOver,
+    Win
+}
+
+const SCREEN_W = 800;
+const SCREEN_H = 600;
+const PADDLE_W = 100;
+const PADDLE_H = 15;
+const BALL_R = 8;
+const BRICK_W = 75;
+const BRICK_H = 20;
+const BRICK_ROWS = 5;
+const BRICK_COLS = 10;
+const PADDLE_SPEED = 480;
+
+let paddlex = 350.0;
+let paddley = 565.0;
+let ballx = 400.0;
+let bally = 300.0;
+let ballspeedx = 320.0;
+let ballspeedy = -320.0;
+let ballactive = false;
+let brickX = [];
+let brickY = [];
+let brickRow = [];
+let brickAlive = [];
+let score = 0;
+let lives = 3;
+let state = Phase.Start;
+let hudScore = "Score: 0";
+let hudLives = "Lives: 3";
+
+func rowColor(row) {
+    if row == 0 { return #FF0000; }
+    if row == 1 { return #FFA500; }
+    if row == 2 { return #FFFF00; }
+    if row == 3 { return #00FF00; }
+    return #0000FF;
+}
+
+func refreshHud() {
+    hudScore = `Score: {score}`;
+    hudLives = `Lives: {lives}`;
+}
+
+func initBricks() {
+    brickX = [];
+    brickY = [];
+    brickRow = [];
+    brickAlive = [];
+    for ri in 0..BRICK_ROWS {
+        for ci in 0..BRICK_COLS {
+            brickX.push(ci * (BRICK_W + 4) + 35.0);
+            brickY.push(ri * (BRICK_H + 4) + 60.0);
+            brickRow.push(ri);
+            brickAlive.push(true);
+        }
+    }
+}
+
+func resetBall() {
+    ballx = paddlex + PADDLE_W / 2;
+    bally = paddley - BALL_R - 2;
+    ballspeedx = 320.0;
+    ballspeedy = -320.0;
+    ballactive = false;
+}
+
+func ballHitsRect(ballpx, ballpy, ballr, rectpx, rectpy, rectw, recth) {
+    let closestx = ballpx;
+    if ballpx < rectpx { closestx = rectpx; }
+    else if ballpx > rectpx + rectw { closestx = rectpx + rectw; }
+    let closesty = ballpy;
+    if ballpy < rectpy { closesty = rectpy; }
+    else if ballpy > rectpy + recth { closesty = rectpy + recth; }
+    let dx = ballpx - closestx;
+    let dy = ballpy - closesty;
+    return dx * dx + dy * dy < ballr * ballr;
+}
+
+func allBricksGone() {
+    for (let alive of brickAlive) {
+        if alive { return false; }
+    }
+    return true;
+}
+
+func updatePlaying(dt) {
+    if game.keyDown(KEY_LEFT) and paddlex > 0 {
+        paddlex -= PADDLE_SPEED * dt;
+    }
+    if game.keyDown(KEY_RIGHT) and paddlex < SCREEN_W - PADDLE_W {
+        paddlex += PADDLE_SPEED * dt;
+    }
+    if not ballactive { return; }
+
+    ballx += ballspeedx * dt;
+    bally += ballspeedy * dt;
+
+    if ballx + BALL_R > SCREEN_W or ballx - BALL_R < 0 { ballspeedx = -ballspeedx; }
+    if bally - BALL_R < 0 { ballspeedy = -ballspeedy; }
+    if bally - BALL_R > SCREEN_H {
+        lives -= 1;
+        refreshHud();
+        if lives <= 0 {
+            state = Phase.GameOver;
+        } else {
+            resetBall();
+        }
+        return;
+    }
+
+    if ballspeedy > 0 and ballHitsRect(ballx, bally, BALL_R, paddlex, paddley, PADDLE_W, PADDLE_H) {
+        ballspeedy = -ballspeedy;
+        let hitpos = (ballx - paddlex) / PADDLE_W;
+        ballspeedx = 640.0 * (hitpos - 0.5);
+    }
+
+    for i in 0..len(brickAlive) {
+        if brickAlive[i] and ballHitsRect(ballx, bally, BALL_R, brickX[i], brickY[i], BRICK_W, BRICK_H) {
+            brickAlive[i] = false;
+            ballspeedy = -ballspeedy;
+            score += 10;
+            refreshHud();
+            if allBricksGone() { state = Phase.Win; }
+            break;
+        }
+    }
+}
+
+func drawPlaying() {
+    for i in 0..len(brickAlive) {
+        if brickAlive[i] {
+            game.rect(brickX[i], brickY[i], BRICK_W, BRICK_H, rowColor(brickRow[i]));
+        }
+    }
+    game.rect(paddlex, paddley, PADDLE_W, PADDLE_H, #FFFFFF);
+    game.circle(ballx, bally, BALL_R, #FFFFFF);
+    game.text(hudScore, 10, 10, 20, #FFFFFF);
+    game.text(hudLives, 10, 35, 20, #FFFFFF);
+}
+
+func main() {
+    game.open(SCREEN_W, SCREEN_H, "Koda - Brick Breaker");
+    defer game.close();
+    game.fps(60);
+    initBricks();
+    resetBall();
+    refreshHud();
+
+    loop {
+        if not game.running() {
+            break;
+        }
+        let dt = game.delta();
+
+        match state {
+            Phase.Start {
+                if game.keyPressed(KEY_SPACE) {
+                    state = Phase.Playing;
+                    ballactive = true;
+                }
+            }
+            Phase.Playing {
+                updatePlaying(dt);
+                if game.keyPressed(KEY_SPACE) { state = Phase.Paused; }
+            }
+            Phase.Paused {
+                if game.keyPressed(KEY_SPACE) { state = Phase.Playing; }
+            }
+            Phase.GameOver {
+                if game.keyPressed(KEY_R) {
+                    score = 0;
+                    lives = 3;
+                    state = Phase.Start;
+                    initBricks();
+                    paddlex = 350.0;
+                    resetBall();
+                    refreshHud();
+                }
+            }
+            Phase.Win {
+                if game.keyPressed(KEY_R) {
+                    score = 0;
+                    lives = 3;
+                    state = Phase.Start;
+                    initBricks();
+                    paddlex = 350.0;
+                    resetBall();
+                    refreshHud();
+                }
+            }
+        }
+
+        game.begin();
+        game.clear(#000000);
+
+        match state {
+            Phase.Start {
+                game.text("KODA BRICK BREAKER", 220, 150, 40, #FFFFFF);
+                game.text("Press SPACE to start", 280, 250, 20, #FFFFFF);
+                game.text("LEFT/RIGHT to move paddle", 240, 300, 20, #AAAAAA);
+            }
+            Phase.Playing {
+                drawPlaying();
+            }
+            Phase.Paused {
+                drawPlaying();
+                game.text("PAUSED", 350, 300, 30, #FFFF00);
+            }
+            Phase.GameOver {
+                game.text("GAME OVER", 310, 250, 40, #FF0000);
+                game.text(hudScore, 350, 310, 20, #FFFFFF);
+                game.text("Press R to restart", 320, 350, 20, #AAAAAA);
+            }
+            Phase.Win {
+                game.text("YOU WIN!", 330, 250, 40, #00FF00);
+                game.text(hudScore, 350, 310, 20, #FFFFFF);
+                game.text("Press R to restart", 320, 350, 20, #AAAAAA);
+            }
+        }
+        game.end();
+    }
+}

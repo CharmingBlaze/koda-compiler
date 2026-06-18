@@ -21,7 +21,7 @@ type watchFingerprint struct {
 	modUnix int64
 }
 
-func parseWatchCommandArgs(args []string) (src string, noOpt bool, debug bool, progArgs []string, err error) {
+func parseWatchCommandArgs(args []string) (src string, noOpt bool, debug bool, release bool, progArgs []string, err error) {
 	before, after := splitAtDoubleDash(args)
 	progArgs = after
 	var file string
@@ -31,20 +31,22 @@ func parseWatchCommandArgs(args []string) (src string, noOpt bool, debug bool, p
 			noOpt = true
 		case "--debug":
 			debug = true
+		case "--release":
+			release = true
 		default:
 			if strings.HasPrefix(before[i], "-") {
-				return "", false, false, nil, fmt.Errorf("unknown flag: %s", before[i])
+				return "", false, false, false, nil, fmt.Errorf("unknown flag: %s", before[i])
 			}
 			if file != "" {
-				return "", false, false, nil, fmt.Errorf("multiple source files")
+				return "", false, false, false, nil, fmt.Errorf("multiple source files")
 			}
 			file = before[i]
 		}
 	}
 	if file == "" {
-		return "", noOpt, debug, progArgs, nil
+		return "", noOpt, debug, release, progArgs, nil
 	}
-	return file, noOpt, debug, progArgs, nil
+	return file, noOpt, debug, release, progArgs, nil
 }
 
 func runWatch(path string, opts nativebuild.BuildOptions, progArgs []string) error {

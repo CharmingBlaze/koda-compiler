@@ -14,10 +14,11 @@ Engineering snapshot of the language surface, LLVM codegen, C runtime, and wrapp
 - **Primitives:** number (64-bit float at runtime), string, bool, null.
 - **Composite values:** arrays, objects, **structs** (preferred for game data), enum members.
 - **Operators:** arithmetic, comparison, **`==` / `!=`**, logical, compound assignment.
-- **Control flow:** `if` / `else`, `while`, `do-while`, `for`, `for ... of`, `switch`, **`match`**, `break`, `continue`, `defer`.
+- **Control flow:** `if` / `else`, `while`, **`loop`**, `do-while`, `for`, `for (let … of …)`, `switch`, **`match`**, `break`, `continue`, `defer`.
 - **String interpolation:** `"Score: {score}"` in double-quoted strings; backtick `` `${expr}` `` templates.
 - **Functions:** declarations, calls, recursion, return, function expressions, closures with upvalues.
-- **Modules:** `import "@game"`, `import "@array"`, `#include` for low-level shims.
+- **Modules:** `use raylib;`, `use raylib as rl;`, `use raylib { InitWindow, DrawText };`, `use koda.math;`, `use koda.game;`, legacy `#include` / `import "@x"`.
+- **Colors / 3D:** `#RRGGBB` hex literals, `colors.*`, Raylib prelude (`RAYWHITE`, `Camera3D { }`, `vec3()`).
 - **Structs / enums:** struct methods, field-checked literals, enum exhaustiveness warnings.
 - **Diagnostics:** typo suggestions; `koda check --warn-unused`; unreachable warnings in `strict` lint.
 - **Tooling:** `koda doctor` (OK/FAIL), `koda bench` (p50/p95/p99), `assetPath()`, parallel module parse.
@@ -49,17 +50,17 @@ Engineering snapshot of the language surface, LLVM codegen, C runtime, and wrapp
 - **Time / games:** `deltaTime`, `programTime`, `time`, `sleep`, `clock`, `timestamp`.
 - **Math:** trig, `lerp`, `clamp`, `distance`, `random`, `randomInt`, ... (runtime + `stdlib/math.koda`).
 - **I/O:** `readFile`, `writeFile`, `parseJSON`, `toJSON`, `listDir`, ...
-- **Modules:** `@math`, `@json`, `@io`, `@array`, `@game`, `@timer`, `@vec2`, `@vec3`, `@util`, `@noise`, `@str`, `@color`, `@easing`.
+- **Modules:** `@math`, `@json`, `@io`, `@array`, `koda.game`, `@timer`, `@vec2`, `@vec3`, `@util`, `@noise`, `@str`, `@color`, `@easing`.
 
 ### Native apps, games, and FFI
 
 - **`koda build`** links **`runtime/libkoda_runtime.a`** plus optional **`KODA_NATIVE_SOURCES`** / **`KODA_LINKFLAGS`**.
 - **`koda bundle`** -- distributable folder with launcher, assets manifest, and `assetPath()`.
 - **`koda.json` `"graphics": true`** -- auto Raylib link flags (no manual `KODA_LINKFLAGS` for beginners).
-- **`koda setup raylib`** -- refreshes project shim (overwrites stale copies).
+- **`koda setup raylib`** -- configures full Raylib wrapper in `koda.json` (`--shim` for legacy only).
 - **`koda wrap upgrade` / `install` / `check` / `list`** -- wrapper catalog and drift detection (`koda doctor`).
-- **`koda doctor --fix`** -- auto-refresh stale project `raylib_shim` when `@game` symbols are missing.
-- **Raylib** via `@game` + `wrappers/raylib_shim` (~33 fn) or full `@raylib` (548 fn).
+- **`koda doctor --fix`** -- refreshes legacy project `raylib_shim` when needed.
+- **Raylib** -- full wrapper via `use raylib` (548 fn). `koda.game` helpers on top. Legacy shim: `koda setup raylib --shim`.
 - **`args()` / `env()`** -- CLI and environment builtins.
 - **`// koda:extern`** -- Koda calls lower to `Value symbol(int argCount, Value* args)`.
 
@@ -137,10 +138,8 @@ These address findings from the full compiler/runtime review:
 ### Graphical / Raylib
 
 ```powershell
-$env:KODA_NATIVE_SOURCES = '..\wrappers\raylib_shim\wrapper.c'
-$env:KODA_LINKFLAGS = '-I..\temp_raylib\src -L..\temp_raylib\src -lraylib -lopengl32 -lgdi32 -lwinmm'
-.\koda.exe build .\raylib_brick_breaker.koda -o .\raylib_brick_breaker.exe
-.\raylib_brick_breaker.exe
+cd examples\games\brick-breaker
+..\..\..\koda.exe run
 ```
 
 ### GC and arena smokes

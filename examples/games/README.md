@@ -1,40 +1,20 @@
-# Example games
+# Game examples
 
-## Text-only (no Raylib)
+| Project | API style | Notes |
+|---------|-----------|-------|
+| **pong** | `koda.game` | Canonical 2D — `loop`, `match`, hex colors |
+| **brick-breaker** | `koda.game` | Breakout — parallel arrays, `#hex`, `match` |
+| **mario64-studio** | Raw Raylib + `koda.camera` / `koda.ui` | Canonical 3D — `loop`, fusion camera, `#hex` |
+| **mario64** | Raw Raylib + helpers | Same Peach's Castle course |
+| **mario64-hilltop** | Raw Raylib + orbit cam | Rolling meadow + Bob-ombs |
+| **koda64** | Raw Raylib + helpers | KODA 64 variant |
+| **fps-arena** | Raw Raylib + `FirstPersonCamera` | FPS shooting gallery |
 
-Runs anywhere **`koda`** runs:
+Run any project:
 
-```bash
-koda run examples/games/lunar_lander_text.koda
+```powershell
+cd examples/games/pong
+..\..\koda.exe run
 ```
 
-## Koda64 / Mario 64 (Mario 64-style 3D)
-
-| Project | Path |
-|---------|------|
-| **Mario 64 Studio** (Koda Studio demo) | `examples/games/mario64-studio/` |
-| Mario 64 | `examples/games/mario64/` |
-| Koda64 (original) | `examples/games/koda64/` |
-
-```bash
-cd examples/games/mario64-studio
-koda run
-```
-
-Open in **Koda Studio**: run `koda-ide/run-koda-studio.ps1` with the project path, or pass the folder as the first argument after build.
-
-## Graphics with `@game` (beginner)
-
-```bash
-koda new bounce --template graphics
-cd bounce
-koda run
-```
-
-Uses `wrappers/raylib_shim` + `@game`. Refresh stale shims with **`koda setup raylib`**.
-
-## Raylib (full wrapper / advanced)
-
-For hundreds of Raylib functions, use **`koda setup raylib --full`** or **`koda wrap install raylib --project`**, then `#include "@raylib"`.
-
-See **`docs/guides/raylib.md`** and **`docs/guides/wrapping-libraries.md`**.
+Or open in Koda Studio and press **F5**.

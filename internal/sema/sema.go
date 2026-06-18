@@ -18,9 +18,15 @@ type Analyzer struct {
 	structLayouts map[string][]string // struct type name -> ordered field names
 	structMethods map[string]map[string]*parser.FuncDecl
 	varStructType map[string]string   // variable name -> struct type name
+	varPlainObject map[string]bool    // variable name -> untagged object literal init
+	constPlainObjectLiterals map[string]map[string]int64 // var -> field -> int literal (compile-time color etc.)
 	varEnumType   map[string]string   // variable name -> enum type name
 	// funcParamStruct maps function name -> parameter name -> struct type (from call sites).
-	funcParamStruct   map[string]map[string]string
+	funcParamStruct map[string]map[string]string
+	// funcParamArrayElement maps function name -> parameter name -> array element struct type.
+	funcParamArrayElement map[string]map[string]string
+	// funcParamPlain marks parameters also passed plain/dynamic objects at some call site.
+	funcParamPlain map[string]map[string]bool
 	// funcExprParamStruct maps anonymous callbacks -> parameter name -> struct type (from .sort/.map/etc.).
 	funcExprParamStruct map[*parser.FuncExpr]map[string]string
 	activeParamStruct map[string]string // param struct types while refining a function body
@@ -30,14 +36,27 @@ type Analyzer struct {
 	indexExprEnumConst  map[*parser.IndexExpr]int64
 
 	structFieldDefaults   map[string]map[string]parser.Expr // struct -> field -> default expr
+	structFieldTypes      map[string]map[string]string     // struct -> field -> type annotation
 	implicitStructField   map[*parser.IdentifierExpr]int    // bare field refs in struct methods
 	varArrayElementStruct map[string]string                 // array var -> element struct type
+	forOfVarStruct        map[string]map[string]string      // func name -> for-of loop var -> struct type
 	varIsArray            map[string]bool                   // variable name -> bound to an array value
 
 	letReads  map[*parser.LetDecl]int
 	funcReads map[*parser.FuncDecl]int
+	funcReturnStruct map[*parser.FuncDecl]string // first return struct type per function
+	funcReturnPlain  map[*parser.FuncDecl]bool   // first return is untagged object literal
 
 	currentStructType string // set while analyzing a struct method body
+	currentFuncName   string // set while analyzing a function/method body
+
+	// pendingStructMethods holds struct method bodies analyzed after top-level bindings exist.
+	pendingStructMethods []pendingStructMethod
+}
+
+type pendingStructMethod struct {
+	structType string
+	method     *parser.FuncDecl
 }
 
 // Scope represents a lexical scope with symbol bindings.
@@ -103,15 +122,20 @@ func NewAnalyzerWithOptions(opts *AnalysisOptions) *Analyzer {
 		structLayouts:       make(map[string][]string),
 		structMethods:       make(map[string]map[string]*parser.FuncDecl),
 		varStructType:       make(map[string]string),
+		varPlainObject:     make(map[string]bool),
+		constPlainObjectLiterals: make(map[string]map[string]int64),
 		varEnumType:         make(map[string]string),
 		indexExprStructSlot: make(map[*parser.IndexExpr]int),
 		indexExprEnumConst:  make(map[*parser.IndexExpr]int64),
 		structFieldDefaults:   make(map[string]map[string]parser.Expr),
+		structFieldTypes:      make(map[string]map[string]string),
 		implicitStructField:   make(map[*parser.IdentifierExpr]int),
 		varArrayElementStruct: make(map[string]string),
 		varIsArray:            make(map[string]bool),
 		letReads:            make(map[*parser.LetDecl]int),
 		funcReads:           make(map[*parser.FuncDecl]int),
+		funcReturnStruct:    make(map[*parser.FuncDecl]string),
+		funcReturnPlain:     make(map[*parser.FuncDecl]bool),
 	}
 }
 
@@ -122,23 +146,50 @@ func (a *Analyzer) Analyze(prog *parser.Program) error {
 	a.structLayouts = make(map[string][]string)
 	a.structMethods = make(map[string]map[string]*parser.FuncDecl)
 	a.varStructType = make(map[string]string)
+	a.varPlainObject = make(map[string]bool)
+	a.constPlainObjectLiterals = make(map[string]map[string]int64)
 	a.varEnumType = make(map[string]string)
 	a.funcParamStruct = make(map[string]map[string]string)
+	a.funcParamArrayElement = make(map[string]map[string]string)
+	a.funcParamPlain = make(map[string]map[string]bool)
 	a.funcExprParamStruct = make(map[*parser.FuncExpr]map[string]string)
 	a.activeParamStruct = nil
 	a.indexExprStructSlot = make(map[*parser.IndexExpr]int)
 	a.indexExprEnumConst = make(map[*parser.IndexExpr]int64)
 	a.structFieldDefaults = make(map[string]map[string]parser.Expr)
+	a.structFieldTypes = make(map[string]map[string]string)
 	a.implicitStructField = make(map[*parser.IdentifierExpr]int)
 	a.varArrayElementStruct = make(map[string]string)
+	a.forOfVarStruct = make(map[string]map[string]string)
 	a.varIsArray = make(map[string]bool)
 	a.letReads = make(map[*parser.LetDecl]int)
 	a.funcReads = make(map[*parser.FuncDecl]int)
+	a.funcReturnStruct = make(map[*parser.FuncDecl]string)
+	a.funcReturnPlain = make(map[*parser.FuncDecl]bool)
 	a.currentStructType = ""
+	a.currentFuncName = ""
+	a.pendingStructMethods = nil
 	a.seedNativeExterns(prog)
 	for _, decl := range prog.Declarations {
-		a.analyzeDecl(decl)
+		switch d := decl.(type) {
+		case *parser.StructDecl:
+			a.analyzeStructDecl(d)
+		case *parser.EnumDecl:
+			a.analyzeEnumDecl(d)
+		}
 	}
+	a.predeclareTopLevelBindings(prog)
+	a.prescanLetTypes(prog)
+	for _, decl := range prog.Declarations {
+		switch decl.(type) {
+		case *parser.StructDecl, *parser.EnumDecl:
+			continue
+		default:
+			a.analyzeDecl(decl)
+		}
+	}
+	a.analyzePendingStructMethods()
+	a.analyzeStructFieldDefaults(prog)
 	a.refineStructFieldAccessFromCalls(prog)
 	a.refineStructFieldAccessFromCallbacks()
 	a.checkUnusedBindings()
@@ -211,27 +262,89 @@ func (a *Analyzer) analyzeDecl(decl parser.Decl) {
 		a.analyzeEnumDecl(d)
 	case *parser.IncludeDecl:
 		return
+	case *parser.UseDecl:
+		return
 	case parser.Stmt:
 		a.analyzeStmt(d)
+	}
+}
+
+func (a *Analyzer) predeclareTopLevelBindings(prog *parser.Program) {
+	for _, decl := range prog.Declarations {
+		switch d := decl.(type) {
+		case *parser.FuncDecl:
+			name := d.Name.Lexeme
+			if _, ok := a.currentScope.symbols[name]; ok {
+				continue
+			}
+			a.currentScope.Define(name, d)
+			a.funcReads[d] = 0
+		case *parser.LetDecl:
+			name := d.Name.Lexeme
+			if _, ok := a.currentScope.symbols[name]; ok {
+				continue
+			}
+			a.currentScope.Define(name, d)
+			a.letReads[d] = 0
+		}
+	}
+}
+
+func (a *Analyzer) prescanLetTypes(prog *parser.Program) {
+	for _, decl := range prog.Declarations {
+		if ld, ok := decl.(*parser.LetDecl); ok && ld.Init != nil {
+			a.recordVarTypesFromInit(ld.Name.Lexeme, ld.Init)
+		}
+	}
+}
+
+func (a *Analyzer) analyzeStructFieldDefaults(prog *parser.Program) {
+	for _, decl := range prog.Declarations {
+		sd, ok := decl.(*parser.StructDecl)
+		if !ok {
+			continue
+		}
+		fieldTypes := a.structFieldTypes[sd.Name.Lexeme]
+		for _, f := range sd.Fields {
+			if f.Default == nil {
+				continue
+			}
+			a.analyzeExpr(f.Default)
+			if f.TypeAnnot != "" && fieldTypes[f.Name.Lexeme] != "" {
+				a.checkExprMatchesType(f.Default, fieldTypes[f.Name.Lexeme], f.Name)
+			}
+		}
+	}
+}
+
+func (a *Analyzer) analyzePendingStructMethods() {
+	for _, pm := range a.pendingStructMethods {
+		prev := a.currentStructType
+		a.currentStructType = pm.structType
+		a.analyzeFuncDecl(pm.method)
+		a.currentStructType = prev
 	}
 }
 
 func (a *Analyzer) analyzeLetDecl(d *parser.LetDecl) {
 	name := d.Name.Lexeme
 	if existing, ok := a.currentScope.symbols[name]; ok {
-		if prev, ok := existing.(*parser.LetDecl); ok && prev.Native != nil && d.Native != nil {
+		if prev, ok := existing.(*parser.LetDecl); ok && prev == d {
+			// Predeclared in predeclareTopLevelBindings; analyze initializer below.
+		} else if prev, ok := existing.(*parser.LetDecl); ok && prev.Native != nil && d.Native != nil {
 			if d.Init != nil {
 				a.analyzeExpr(d.Init)
 			}
 			return
+		} else {
+			a.record(&diagnostic.DiagnosticError{
+				File:    d.Name.File,
+				Line:    d.Name.Line,
+				Col:     d.Name.Col,
+				Message: fmt.Sprintf("duplicate binding '%s' in the same scope", name),
+			})
+			return
 		}
-		a.record(&diagnostic.DiagnosticError{
-			File:    d.Name.File,
-			Line:    d.Name.Line,
-			Col:     d.Name.Col,
-			Message: fmt.Sprintf("duplicate binding '%s' in the same scope", name),
-		})
-		return
 	}
 	if d.TypeAnnot != "" {
 		if !isKnownTypeAnnotation(d.TypeAnnot) {
@@ -256,26 +369,37 @@ func (a *Analyzer) analyzeLetDecl(d *parser.LetDecl) {
 		a.analyzeExpr(d.Init)
 		a.recordVarTypesFromInit(name, d.Init)
 	}
-	a.currentScope.Define(name, d)
-	a.letReads[d] = 0
+	if _, ok := a.currentScope.symbols[name]; !ok {
+		a.currentScope.Define(name, d)
+		a.letReads[d] = 0
+	}
 }
 
 func (a *Analyzer) analyzeFuncDecl(d *parser.FuncDecl) {
 	name := d.Name.Lexeme
-	if _, ok := a.currentScope.symbols[name]; ok {
-		a.record(&diagnostic.DiagnosticError{
-			File:    d.Name.File,
-			Line:    d.Name.Line,
-			Col:     d.Name.Col,
-			Message: fmt.Sprintf("duplicate function '%s' in the same scope", name),
-		})
-		return
+	if existing, ok := a.currentScope.symbols[name]; ok {
+		if prev, ok := existing.(*parser.FuncDecl); ok && prev == d {
+			// Predeclared in predeclareTopLevelBindings; analyze body below.
+		} else {
+			a.record(&diagnostic.DiagnosticError{
+				File:    d.Name.File,
+				Line:    d.Name.Line,
+				Col:     d.Name.Col,
+				Message: fmt.Sprintf("duplicate function '%s' in the same scope", name),
+			})
+			return
+		}
+	} else {
+		a.currentScope.Define(name, d)
+		a.funcReads[d] = 0
 	}
-	a.currentScope.Define(name, d)
-	a.funcReads[d] = 0
 
 	a.enterScope()
 	defer a.exitScope()
+
+	prevFn := a.currentFuncName
+	a.currentFuncName = name
+	defer func() { a.currentFuncName = prevFn }()
 
 	for _, param := range d.Params {
 		paramTok := d.Name
@@ -287,6 +411,7 @@ func (a *Analyzer) analyzeFuncDecl(d *parser.FuncDecl) {
 	}
 
 	a.analyzeStmt(d.Body)
+	a.recordFuncReturnStruct(d)
 }
 
 func (a *Analyzer) analyzeTestDecl(d *parser.TestDecl) {
@@ -330,6 +455,8 @@ func (a *Analyzer) analyzeStmt(stmt parser.Stmt) {
 		a.checkTruthyCondition(s.Condition)
 		a.analyzeExpr(s.Condition)
 		a.analyzeStmt(s.Body)
+	case *parser.LoopStmt:
+		a.analyzeStmt(s.Body)
 	case *parser.DoWhileStmt:
 		a.analyzeStmt(s.Body)
 		a.analyzeExpr(s.Condition)
@@ -360,10 +487,8 @@ func (a *Analyzer) analyzeStmt(stmt parser.Stmt) {
 		a.analyzeExpr(s.Iterable)
 		a.enterScope()
 		a.currentScope.Define(s.VarName.Lexeme, s)
-		if id, ok := s.Iterable.(*parser.IdentifierExpr); ok {
-			if st, ok := a.varArrayElementStruct[id.Name.Lexeme]; ok {
-				a.varStructType[s.VarName.Lexeme] = st
-			}
+		if st := a.arrayElementStructType(s.Iterable); st != "" {
+			a.varStructType[s.VarName.Lexeme] = st
 		}
 		if s.ValueVar != nil {
 			a.currentScope.Define(s.ValueVar.Lexeme, s)
@@ -527,7 +652,9 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 		for _, arg := range e.Arguments {
 			a.analyzeExpr(arg)
 		}
-		a.recordParamStructFromCall(e)
+		a.recordParamStructFromCall(e, false)
+		a.recordParamArrayElementFromCall(e)
+		a.recordStructMethodParamFromCall(e)
 		a.recordCallbackStructParamsFromMethodCall(e)
 		a.maybeCheckCallArity(e)
 	case *parser.AssignExpr:
@@ -540,8 +667,8 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 						File:    ident.Name.File,
 						Line:    ident.Name.Line,
 						Col:     ident.Name.Col,
-						Message: fmt.Sprintf("cannot assign to const '%s'", name),
-						Hint:    "use let for mutable bindings; const is immutable",
+					Message: fmt.Sprintf("Cannot assign to constant '%s'.", name),
+					Hint:    "use let for mutable bindings; const is immutable",
 					})
 					return
 				}
@@ -590,6 +717,7 @@ func (a *Analyzer) analyzeExpr(expr parser.Expr) {
 			a.analyzeExpr(p)
 		}
 	case *parser.ThisExpr:
+		a.checkReceiverOutsideMethod(e)
 		return
 	case *parser.ArrayExpr:
 		for _, el := range e.Elements {

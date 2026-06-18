@@ -37,7 +37,7 @@ Read line:column in the message. Common issues: missing `;` after `let`, wrong k
 Graphics projects need native libraries. Prefer manifest-based setup:
 
 ```json
-"native": { "graphics": true, "sources": ["wrappers/raylib_shim/wrapper.c"] }
+"native": { "graphics": true, "sources": ["wrappers/raylib/wrapper.c"] }
 ```
 
 Run `koda doctor` and fix FAIL lines. If Raylib is still missing, build vendored sources from the SDK repo: `make -C third_party/raylib_static`.
@@ -48,23 +48,25 @@ Manual override (advanced):
 $env:KODA_LINKFLAGS = "-lraylib -lopengl32 -lgdi32 -lwinmm"
 ```
 
-### `@game` errors: undefined `drawline`, `getmousex`, …
+### `koda.game` / undefined `InitWindow`, `IsKeyDown`, …
 
-Your project's **`wrappers/raylib_shim/raylib.koda`** is **out of date**. `@game` in stdlib calls shim functions that older templates did not include.
+Ensure the full wrapper is loaded and linked:
 
-**Fix:**
+```koda
+use raylib;
+use koda.game;
+```
+
+```json
+"native": { "graphics": true, "sources": ["wrappers/raylib/wrapper.c"] }
+```
 
 ```bash
 koda setup raylib
 koda run
 ```
 
-This **overwrites** `raylib.koda` and `wrapper.c` from the SDK copy. Always include the shim before `@game`:
-
-```koda
-#include "wrappers/raylib_shim/raylib.koda"
-#include "@game"
-```
+**Legacy shim projects** (`koda setup raylib --shim`): refresh with `koda doctor --fix` if `koda.game` reports missing lowercase shim symbols.
 
 ### Duplicate binding `player` / `goomba`
 
@@ -126,7 +128,7 @@ Often mixing strings and numbers in arithmetic. Use `number(x)` or fix operand t
 
 ### Stutter every few seconds
 
-GC collection — call `gcframestep()` each frame; avoid allocating large arrays every frame.
+Incremental GC — use `game.begin()` / `game.end()` (or `gcframestep(1.0)` twice per frame in raw Raylib loops). Avoid per-frame `{r,g,b,a}` color objects, uncached `` `{score}` `` strings, and `{x,y}` field names that clash with locals like `ballx` (identifiers are case-insensitive).
 
 ### Slow `koda run` every time
 

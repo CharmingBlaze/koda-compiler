@@ -15,6 +15,8 @@ export function DefaultBuildOutput(arg1:string):Promise<string>;
 
 export function DiagnoseFile(arg1:string,arg2:string):Promise<Array<api.Diagnostic>>;
 
+export function ExampleGamePath(arg1:string):Promise<string>;
+
 export function GetWorkspaceRoot():Promise<string>;
 
 export function LSPMessage(arg1:string):Promise<string>;
@@ -22,6 +24,8 @@ export function LSPMessage(arg1:string):Promise<string>;
 export function ListDir(arg1:string):Promise<Array<main.DirEntry>>;
 
 export function ListDocPages():Promise<Array<api.DocPage>>;
+
+export function ListExamples():Promise<Array<api.ExampleEntry>>;
 
 export function ListProjectTemplates():Promise<Array<string>>;
 

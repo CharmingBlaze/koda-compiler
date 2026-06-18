@@ -213,7 +213,7 @@ Use
   Keep this folder together so stdlib sits next to koda.exe:
 
     .\koda.exe version
-    .\koda.exe run examples\games\brick_breaker.koda
+    .\koda.exe run examples\games\brick-breaker\src\main.koda
 
   Raylib static linking: when third_party/raylib_static/stage exists next to koda.exe, the
   compiler adds include + libraylib.a automatically (see docs/guides/raylib.md).

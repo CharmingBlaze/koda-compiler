@@ -91,7 +91,8 @@ func docBeginner(rel string) bool {
 	if strings.HasPrefix(r, "docs/stdlib/") {
 		return true
 	}
-	if r == "docs/reference/builtins.md" || r == "docs/reference/cli.md" {
+	if r == "docs/reference/builtins.md" || r == "docs/reference/cli.md" ||
+		r == "docs/reference/language-cheatsheet.md" {
 		return true
 	}
 	return false

@@ -1,0 +1,17 @@
+{
+  "native": {
+    "sources": [
+      "wrappers/raylib/wrapper.c"
+    ],
+    "graphics": true
+  },
+  "entry": "src/main.koda",
+  "lint": "beginner",
+  "version": "0.1.0",
+  "name": "crystal-plaza",
+  "studio": {
+    "category": "graphics",
+    "blurb": "Neon 3D plaza — WASD fly, SPACE bob up.",
+    "title": "Crystal Plaza"
+  }
+}

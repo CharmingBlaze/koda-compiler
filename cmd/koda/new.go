@@ -57,7 +57,7 @@ func runNew(args []string) error {
 	fmt.Printf("  cd %s\n", name)
 	switch template {
 	case "graphics", "pong":
-		fmt.Println("  koda run    # raylib shim + @game")
+		fmt.Println("  koda run    # use raylib + koda.game")
 	case "raylib":
 		fmt.Println("  koda run    # full Raylib API (#include \"@raylib\")")
 	case "game":

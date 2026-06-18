@@ -23,8 +23,8 @@ See [docs/guides/wrapping-libraries.md](../docs/guides/wrapping-libraries.md).
 
 | Directory | Library |
 |-----------|---------|
-| `raylib/` | Raylib 5.x (full bindings + HTML docs) |
-| `raylib_shim/` | Minimal Raylib shim for templates |
+| `raylib/` | **Default** — Raylib 5.x full bindings (548 functions) + HTML docs |
+| `raylib_shim/` | **Legacy only** — ~33-function subset for old `--shim` projects |
 | `raylib_min/` | Reduced Raylib bridge |
 
 Each package includes `docs/index.html` for offline browsing.

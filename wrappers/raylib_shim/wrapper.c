@@ -13,6 +13,16 @@ static const char* koda_arg_cstr(Value* args, int i) {
     return ((ObjString*)AS_OBJ(args[i]))->chars;
 }
 
+/* Koda rgb()/rgba() pack as 0xRRGGBBAA; Raylib Color is {r,g,b,a} bytes — do not cast the uint32. */
+static Color koda_color_from_packed(unsigned int packed) {
+    Color c;
+    c.r = (unsigned char)((packed >> 24) & 255);
+    c.g = (unsigned char)((packed >> 16) & 255);
+    c.b = (unsigned char)((packed >> 8) & 255);
+    c.a = (unsigned char)(packed & 255);
+    return c;
+}
+
 Value koda_shim_InitWindow(int argCount, Value* args) {
     if (argCount < 3) return NIL_VAL;
     int w = (int)(IS_NUMBER(args[0]) ? AS_NUMBER(args[0]) : 0);
@@ -59,7 +69,7 @@ Value koda_shim_EndDrawing(int argCount, Value* args) {
 Value koda_shim_ClearBackground(int argCount, Value* args) {
     if (argCount < 1) return NIL_VAL;
     unsigned int c = (unsigned int)(IS_NUMBER(args[0]) ? AS_NUMBER(args[0]) : 0);
-    ClearBackground(*(Color*)&c);
+    ClearBackground(koda_color_from_packed(c));
     return NIL_VAL;
 }
 
@@ -101,7 +111,7 @@ Value koda_shim_DrawCube(int argCount, Value* args) {
     Vector3 pos = {(float)AS_NUMBER(args[0]), (float)AS_NUMBER(args[1]), (float)AS_NUMBER(args[2])};
     Vector3 size = {(float)AS_NUMBER(args[3]), (float)AS_NUMBER(args[4]), (float)AS_NUMBER(args[5])};
     unsigned int c = (unsigned int)AS_NUMBER(args[6]);
-    DrawCubeV(pos, size, *(Color*)&c);
+    DrawCubeV(pos, size, koda_color_from_packed(c));
     return NIL_VAL;
 }
 
@@ -110,7 +120,7 @@ Value koda_shim_DrawCubeWires(int argCount, Value* args) {
     Vector3 pos = {(float)AS_NUMBER(args[0]), (float)AS_NUMBER(args[1]), (float)AS_NUMBER(args[2])};
     Vector3 size = {(float)AS_NUMBER(args[3]), (float)AS_NUMBER(args[4]), (float)AS_NUMBER(args[5])};
     unsigned int c = (unsigned int)AS_NUMBER(args[6]);
-    DrawCubeWiresV(pos, size, *(Color*)&c);
+    DrawCubeWiresV(pos, size, koda_color_from_packed(c));
     return NIL_VAL;
 }
 
@@ -121,8 +131,14 @@ Value koda_shim_DrawText(int argCount, Value* args) {
     int y = (int)AS_NUMBER(args[2]);
     int fs = (int)AS_NUMBER(args[3]);
     unsigned int c = (unsigned int)AS_NUMBER(args[4]);
-    DrawText(text, x, y, fs, *(Color*)&c);
+    DrawText(text, x, y, fs, koda_color_from_packed(c));
     return NIL_VAL;
+}
+
+Value koda_shim_GetFrameTime(int argCount, Value* args) {
+    (void)argCount;
+    (void)args;
+    return NUMBER_VAL((double)GetFrameTime());
 }
 
 Value koda_shim_IsKeyDown(int argCount, Value* args) {
@@ -144,7 +160,7 @@ Value koda_shim_DrawRectangle(int argCount, Value* args) {
     int w = (int)AS_NUMBER(args[2]);
     int h = (int)AS_NUMBER(args[3]);
     unsigned int c = (unsigned int)AS_NUMBER(args[4]);
-    DrawRectangle(x, y, w, h, *(Color*)&c);
+    DrawRectangle(x, y, w, h, koda_color_from_packed(c));
     return NIL_VAL;
 }
 
@@ -154,7 +170,7 @@ Value koda_shim_DrawCircle(int argCount, Value* args) {
     int y = (int)AS_NUMBER(args[1]);
     float r = (float)AS_NUMBER(args[2]);
     unsigned int c = (unsigned int)AS_NUMBER(args[3]);
-    DrawCircle(x, y, r, *(Color*)&c);
+    DrawCircle(x, y, r, koda_color_from_packed(c));
     return NIL_VAL;
 }
 
@@ -163,7 +179,7 @@ Value koda_shim_DrawLine3D(int argCount, Value* args) {
     Vector3 a = {(float)AS_NUMBER(args[0]), (float)AS_NUMBER(args[1]), (float)AS_NUMBER(args[2])};
     Vector3 b = {(float)AS_NUMBER(args[3]), (float)AS_NUMBER(args[4]), (float)AS_NUMBER(args[5])};
     unsigned int c = (unsigned int)AS_NUMBER(args[6]);
-    DrawLine3D(a, b, *(Color*)&c);
+    DrawLine3D(a, b, koda_color_from_packed(c));
     return NIL_VAL;
 }
 
@@ -177,6 +193,32 @@ Value koda_shim_GetMouseY(int argCount, Value* args) {
     (void)argCount;
     (void)args;
     return NUMBER_VAL((double)GetMouseY());
+}
+
+Value koda_shim_GetMouseDeltaX(int argCount, Value* args) {
+    (void)argCount;
+    (void)args;
+    return NUMBER_VAL((double)GetMouseDelta().x);
+}
+
+Value koda_shim_GetMouseDeltaY(int argCount, Value* args) {
+    (void)argCount;
+    (void)args;
+    return NUMBER_VAL((double)GetMouseDelta().y);
+}
+
+Value koda_shim_DisableCursor(int argCount, Value* args) {
+    (void)argCount;
+    (void)args;
+    DisableCursor();
+    return NIL_VAL;
+}
+
+Value koda_shim_EnableCursor(int argCount, Value* args) {
+    (void)argCount;
+    (void)args;
+    EnableCursor();
+    return NIL_VAL;
 }
 
 Value koda_shim_IsMouseButtonDown(int argCount, Value* args) {
@@ -228,7 +270,7 @@ Value koda_shim_DrawLine(int argCount, Value* args) {
     int x2 = (int)AS_NUMBER(args[2]);
     int y2 = (int)AS_NUMBER(args[3]);
     unsigned int c = (unsigned int)AS_NUMBER(args[4]);
-    DrawLine(x1, y1, x2, y2, *(Color*)&c);
+    DrawLine(x1, y1, x2, y2, koda_color_from_packed(c));
     return NIL_VAL;
 }
 
@@ -238,7 +280,7 @@ Value koda_shim_DrawCircleLines(int argCount, Value* args) {
     int y = (int)AS_NUMBER(args[1]);
     float r = (float)AS_NUMBER(args[2]);
     unsigned int c = (unsigned int)AS_NUMBER(args[3]);
-    DrawCircleLines(x, y, r, *(Color*)&c);
+    DrawCircleLines(x, y, r, koda_color_from_packed(c));
     return NIL_VAL;
 }
 
@@ -249,7 +291,7 @@ Value koda_shim_DrawRectangleLines(int argCount, Value* args) {
     int w = (int)AS_NUMBER(args[2]);
     int h = (int)AS_NUMBER(args[3]);
     unsigned int c = (unsigned int)AS_NUMBER(args[4]);
-    DrawRectangleLines(x, y, w, h, *(Color*)&c);
+    DrawRectangleLines(x, y, w, h, koda_color_from_packed(c));
     return NIL_VAL;
 }
 
@@ -273,7 +315,7 @@ Value koda_shim_DrawTexture(int argCount, Value* args) {
     int y = (int)AS_NUMBER(args[2]);
     unsigned int c = (unsigned int)AS_NUMBER(args[3]);
     if (id < 0 || id >= koda_texture_count) return NIL_VAL;
-    DrawTexture(koda_textures[id], x, y, *(Color*)&c);
+    DrawTexture(koda_textures[id], x, y, koda_color_from_packed(c));
     return NIL_VAL;
 }
 

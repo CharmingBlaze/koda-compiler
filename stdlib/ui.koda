@@ -1,0 +1,27 @@
+// @ui — 2D HUD widgets (score/life pips) over the full Raylib wrapper.
+//   use raylib;
+//   use koda.color;
+//   use koda.ui;
+//
+// Loops use half-open ranges: `for i in 0..count` runs 0 .. count-1.
+
+// Draw `count` squares in a row; first `filled` use fill_color, rest empty_color.
+func draw_pips(x, y, filled, count, size, gap, fill_color, empty_color) {
+    let fill = { r: floor(fill_color / 16777216) % 256, g: floor(fill_color / 65536) % 256, b: floor(fill_color / 256) % 256, a: floor(fill_color) % 256 };
+    let empty = { r: floor(empty_color / 16777216) % 256, g: floor(empty_color / 65536) % 256, b: floor(empty_color / 256) % 256, a: floor(empty_color) % 256 };
+    for i in 0..count {
+        let col = empty;
+        if (filled > i) { col = fill; }
+        DrawRectangle(x + i * gap, y, size, size, col);
+    }
+}
+
+// Coin / star progress (gold on black) — matches Mario 64 example HUD defaults.
+func score_pips(x, y, score, goal) {
+    draw_pips(x, y, score, goal, 22, 28, colors.gold, colors.black);
+}
+
+// Life hearts / blocks (red on black).
+func life_pips(x, y, lives, max_lives) {
+    draw_pips(x, y, lives, max_lives, 18, 26, colors.red, colors.black);
+}

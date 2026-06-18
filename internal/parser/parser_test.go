@@ -360,6 +360,24 @@ func TestParserBreakContinueAndInclude(t *testing.T) {
 	}
 }
 
+func TestParserLoopStmt(t *testing.T) {
+	program := parseForTest(t, `
+		func main() {
+			loop {
+				break;
+			}
+		}
+	`)
+	fn := program.Declarations[0].(*FuncDecl)
+	loop, ok := fn.Body.Declarations[0].(*LoopStmt)
+	if !ok {
+		t.Fatalf("expected LoopStmt, got %T", fn.Body.Declarations[0])
+	}
+	if _, ok := loop.Body.(*BlockStmt); !ok {
+		t.Fatalf("expected block body, got %T", loop.Body)
+	}
+}
+
 func TestParserRejectsInvalidRestParams(t *testing.T) {
 	l := lexer.NewLexer(`func bad(...rest, x) { return x; }`, "")
 	tokens, err := l.Tokenize()
@@ -373,7 +391,7 @@ func TestParserRejectsInvalidRestParams(t *testing.T) {
 }
 
 func TestProgramIncludeLoadsShim(t *testing.T) {
-	repoExamples := filepath.Join("..", "..", "examples", "raylib_shim_demo.koda")
+	repoExamples := filepath.Join("..", "..", "examples", "raylib-3d-demo", "src", "main.koda")
 	bundle, err := LoadProgram(repoExamples)
 	if err != nil {
 		t.Fatal(err)
@@ -511,6 +529,33 @@ func TestParseDeferStatement(t *testing.T) {
 	}
 }
 
+func TestParseStructTypedFields(t *testing.T) {
+	src := `struct Player {
+    health: float = 100.0;
+    speed: float = 8.0;
+    x, y;
+}`
+	l := lexer.NewLexer(src, "test.koda")
+	tokens, err := l.Tokenize()
+	if err != nil {
+		t.Fatal(err)
+	}
+	prog, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatal(err)
+	}
+	sd := prog.Declarations[0].(*StructDecl)
+	if len(sd.Fields) != 4 {
+		t.Fatalf("fields: want 4, got %d", len(sd.Fields))
+	}
+	if sd.Fields[0].TypeAnnot != "float" || sd.Fields[0].Name.Lexeme != "health" {
+		t.Fatalf("field[0]: %+v", sd.Fields[0])
+	}
+	if sd.Fields[3].TypeAnnot != "" {
+		t.Fatalf("untyped field should have empty TypeAnnot")
+	}
+}
+
 func TestParseMatchEnumCase(t *testing.T) {
 	src := `enum Phase { Playing, Won, GameOver }
 func main() {
@@ -536,5 +581,148 @@ func main() {
 	matchStmt := fn.Body.Declarations[0].(*SwitchStmt)
 	if len(matchStmt.Cases) != 1 {
 		t.Fatalf("cases: want 1, got %d", len(matchStmt.Cases))
+	}
+}
+
+func TestParseIfWithoutParens(t *testing.T) {
+	src := `func main() {
+	if phase == Won {
+		x = 1;
+	}
+	while game.running() {
+		x = 2;
+	}
+}`
+	l := lexer.NewLexer(src, "test.koda")
+	tokens, err := l.Tokenize()
+	if err != nil {
+		t.Fatal(err)
+	}
+	prog, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	fn := prog.Declarations[0].(*FuncDecl)
+	if _, ok := fn.Body.Declarations[0].(*IfStmt); !ok {
+		t.Fatalf("first stmt: want IfStmt, got %T", fn.Body.Declarations[0])
+	}
+	if _, ok := fn.Body.Declarations[1].(*WhileStmt); !ok {
+		t.Fatalf("second stmt: want WhileStmt, got %T", fn.Body.Declarations[1])
+	}
+}
+
+func TestParseNullOrCondition(t *testing.T) {
+	src := `func main() {
+	if dt == null or dt <= 0 {
+		dt = 0.016;
+	}
+}`
+	l := lexer.NewLexer(src, "test.koda")
+	tokens, err := l.Tokenize()
+	if err != nil {
+		t.Fatal(err)
+	}
+	prog, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	fn := prog.Declarations[0].(*FuncDecl)
+	ifStmt, ok := fn.Body.Declarations[0].(*IfStmt)
+	if !ok {
+		t.Fatalf("want IfStmt, got %T", fn.Body.Declarations[0])
+	}
+	infix, ok := ifStmt.Condition.(*InfixExpr)
+	if !ok || infix.Operator != "or" {
+		t.Fatalf("condition: want or InfixExpr, got %T op=%q", ifStmt.Condition, infix.Operator)
+	}
+}
+
+func TestParseForRangeStep(t *testing.T) {
+	src := `func main() {
+	for y in 0..100 step 32 {
+		x = y;
+	}
+}`
+	l := lexer.NewLexer(src, "test.koda")
+	tokens, err := l.Tokenize()
+	if err != nil {
+		t.Fatal(err)
+	}
+	prog, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	fn := prog.Declarations[0].(*FuncDecl)
+	forStmt := fn.Body.Declarations[0].(*ForOfStmt)
+	r, ok := forStmt.Iterable.(*RangeExpr)
+	if !ok || r.Step == nil {
+		t.Fatalf("want RangeExpr with step, got %T", forStmt.Iterable)
+	}
+}
+
+func TestParseBacktickInterpolation(t *testing.T) {
+	src := "func main() {\n\tlet s = `{a} - {b}`;\n}"
+	l := lexer.NewLexer(src, "test.koda")
+	tokens, err := l.Tokenize()
+	if err != nil {
+		t.Fatal(err)
+	}
+	prog, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	fn := prog.Declarations[0].(*FuncDecl)
+	let := fn.Body.Declarations[0].(*LetDecl)
+	tmpl, ok := let.Init.(*TemplateExpr)
+	if !ok || len(tmpl.Parts) < 3 {
+		t.Fatalf("want TemplateExpr with holes, got %T", let.Init)
+	}
+}
+
+func TestParseNotKeyword(t *testing.T) {
+	src := `func main() {
+	if not hitX {
+		return;
+	}
+}`
+	l := lexer.NewLexer(src, "test.koda")
+	tokens, err := l.Tokenize()
+	if err != nil {
+		t.Fatal(err)
+	}
+	prog, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	fn := prog.Declarations[0].(*FuncDecl)
+	ifStmt := fn.Body.Declarations[0].(*IfStmt)
+	pre, ok := ifStmt.Condition.(*PrefixExpr)
+	if !ok || pre.Operator != "not" {
+		t.Fatalf("want not PrefixExpr, got %T op=%q", ifStmt.Condition, pre.Operator)
+	}
+}
+
+func TestParseFuncParamTypeAnnot(t *testing.T) {
+	src := `func tick(dt: float, count: int) {
+		return dt * count;
+	}`
+	l := lexer.NewLexer(src, "test.koda")
+	tokens, err := l.Tokenize()
+	if err != nil {
+		t.Fatal(err)
+	}
+	prog, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	fn := prog.Declarations[0].(*FuncDecl)
+	if len(fn.Params) != 2 {
+		t.Fatalf("params: want 2, got %d", len(fn.Params))
+	}
+	if fn.Params[0].Name != "dt" || fn.Params[0].TypeAnnot != "float" {
+		t.Fatalf("first param: got name=%q type=%q", fn.Params[0].Name, fn.Params[0].TypeAnnot)
+	}
+	if fn.Params[1].Name != "count" || fn.Params[1].TypeAnnot != "int" {
+		t.Fatalf("second param: got name=%q type=%q", fn.Params[1].Name, fn.Params[1].TypeAnnot)
 	}
 }

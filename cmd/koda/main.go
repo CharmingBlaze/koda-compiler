@@ -18,7 +18,15 @@ import (
 	"koda/internal/sema"
 )
 
-func parseBuildCommandArgs(args []string) (src string, out string, noOpt bool, debug bool, err error) {
+func buildOptionsFromFlags(noOpt, debug, release bool) nativebuild.BuildOptions {
+	opts := nativebuild.BuildOptions{NoOpt: noOpt || debug, Debug: debug}
+	if release && !noOpt && !debug {
+		opts.OptLevel = 3
+	}
+	return opts
+}
+
+func parseBuildCommandArgs(args []string) (src string, out string, noOpt bool, debug bool, release bool, err error) {
 	var output string
 	var file string
 	for i := 0; i < len(args); i++ {
@@ -27,35 +35,37 @@ func parseBuildCommandArgs(args []string) (src string, out string, noOpt bool, d
 			noOpt = true
 		case "--debug":
 			debug = true
+		case "--release":
+			release = true
 		case "-o":
 			if i+1 >= len(args) {
-				return "", "", false, false, fmt.Errorf("-o requires a path")
+				return "", "", false, false, false, fmt.Errorf("-o requires a path")
 			}
 			i++
 			output = args[i]
 		default:
 			if strings.HasPrefix(args[i], "-") {
-				return "", "", false, false, fmt.Errorf("unknown flag: %s", args[i])
+				return "", "", false, false, false, fmt.Errorf("unknown flag: %s", args[i])
 			}
 			if file != "" {
-				return "", "", false, false, fmt.Errorf("multiple source files")
+				return "", "", false, false, false, fmt.Errorf("multiple source files")
 			}
 			file = args[i]
 		}
 	}
 	if file == "" {
 		if output == "" {
-			return "", "", noOpt, debug, nil
+			return "", "", noOpt, debug, release, nil
 		}
-		return "", "", false, false, fmt.Errorf("usage: koda build [--no-opt] [--debug] [<file.koda>] [-o <exe>]")
+		return "", "", false, false, false, fmt.Errorf("usage: koda build [--release] [--no-opt] [--debug] [<file.koda>] [-o <exe>]")
 	}
 	if output == "" {
 		output = defaultExeName(file)
 	}
-	return file, output, noOpt, debug, nil
+	return file, output, noOpt, debug, release, nil
 }
 
-func parseRunCommandArgs(args []string) (src string, noOpt bool, debug bool, progArgs []string, err error) {
+func parseRunCommandArgs(args []string) (src string, noOpt bool, debug bool, release bool, progArgs []string, err error) {
 	before, after := splitAtDoubleDash(args)
 	progArgs = after
 	var file string
@@ -65,20 +75,22 @@ func parseRunCommandArgs(args []string) (src string, noOpt bool, debug bool, pro
 			noOpt = true
 		case "--debug":
 			debug = true
+		case "--release":
+			release = true
 		default:
 			if strings.HasPrefix(before[i], "-") {
-				return "", false, false, nil, fmt.Errorf("unknown flag: %s", before[i])
+				return "", false, false, false, nil, fmt.Errorf("unknown flag: %s", before[i])
 			}
 			if file != "" {
-				return "", false, false, nil, fmt.Errorf("multiple source files")
+				return "", false, false, false, nil, fmt.Errorf("multiple source files")
 			}
 			file = before[i]
 		}
 	}
 	if file == "" {
-		return "", noOpt, debug, progArgs, nil
+		return "", noOpt, debug, release, progArgs, nil
 	}
-	return file, noOpt, debug, progArgs, nil
+	return file, noOpt, debug, release, progArgs, nil
 }
 
 // version is set by release builds, e.g. -ldflags "-X main.version=1.0.0"
@@ -97,7 +109,7 @@ func main() {
 		if maybeCommandHelp(args) {
 			return
 		}
-		path, noOpt, debug, progArgs, err := parseRunCommandArgs(args[1:])
+		path, noOpt, debug, release, progArgs, err := parseRunCommandArgs(args[1:])
 		if err != nil {
 			fatal(err.Error())
 		}
@@ -107,7 +119,7 @@ func main() {
 				fatal(err.Error())
 			}
 		}
-		opts := nativebuild.BuildOptions{NoOpt: noOpt || debug, Debug: debug}
+		opts := buildOptionsFromFlags(noOpt, debug, release)
 		if err := withProject(path, func() error {
 			return api.RunWithBuildOptionsProgram(path, "", opts, progArgs)
 		}); err != nil {
@@ -118,7 +130,7 @@ func main() {
 		if maybeCommandHelp(args) {
 			return
 		}
-		path, noOpt, debug, progArgs, err := parseWatchCommandArgs(args[1:])
+		path, noOpt, debug, release, progArgs, err := parseWatchCommandArgs(args[1:])
 		if err != nil {
 			fatal(err.Error())
 		}
@@ -128,7 +140,7 @@ func main() {
 				fatal(err.Error())
 			}
 		}
-		opts := nativebuild.BuildOptions{NoOpt: noOpt || debug, Debug: debug}
+		opts := buildOptionsFromFlags(noOpt, debug, release)
 		if err := withProject(path, func() error {
 			return runWatch(path, opts, progArgs)
 		}); err != nil {
@@ -218,7 +230,7 @@ func main() {
 		if maybeCommandHelp(args) {
 			return
 		}
-		src, output, noOpt, debug, err := parseBuildCommandArgs(args[1:])
+		src, output, noOpt, debug, _, err := parseBuildCommandArgs(args[1:])
 		if err != nil {
 			fatal(err.Error())
 		}
@@ -235,7 +247,7 @@ func main() {
 		if output == "" {
 			output = defaultBuildOutput(src, ctx)
 		}
-		opts := nativebuild.BuildOptions{NoOpt: noOpt || debug, Debug: debug}
+		opts := buildOptionsFromFlags(noOpt, debug, !noOpt && !debug)
 		if err := withProject(src, func() error {
 			return buildFileOpts(src, output, opts)
 		}); err != nil {
@@ -324,7 +336,7 @@ func main() {
 		if maybeCommandHelp(args) {
 			return
 		}
-		path, _, _, progArgs, err := parseRunCommandArgs(args[1:])
+		path, _, _, _, progArgs, err := parseRunCommandArgs(args[1:])
 		if err != nil {
 			fatal(err.Error())
 		}

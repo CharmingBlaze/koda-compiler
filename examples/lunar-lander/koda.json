@@ -1,0 +1,11 @@
+{
+  "entry": "src/main.koda",
+  "lint": "beginner",
+  "version": "0.1.0",
+  "name": "lunar-lander",
+  "studio": {
+    "category": "console",
+    "blurb": "Text-mode lander — no graphics.",
+    "title": "Lunar Lander"
+  }
+}

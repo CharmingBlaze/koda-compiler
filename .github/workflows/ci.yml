@@ -129,10 +129,15 @@ jobs:
         run: |
           set -euo pipefail
           "$KODA_CI_BIN" check tests/hello.koda
+          "$KODA_CI_BIN" check tests/koda_game_import_test.koda
           if "$KODA_CI_BIN" check tests/undefined_var.koda 2>/dev/null; then echo "expected check to fail"; exit 1; fi
           if "$KODA_CI_BIN" check tests/sema_errors.koda 2>/dev/null; then echo "expected sema_errors check to fail"; exit 1; fi
           if "$KODA_CI_BIN" check tests/struct_typo_test.koda 2>/dev/null; then echo "expected struct field typo check to fail"; exit 1; fi
           if "$KODA_CI_BIN" check --warn-unused tests/warn_unused.koda 2>&1 | grep -q "unused variable"; then echo "warn-unused OK"; else echo "expected warn-unused warnings"; exit 1; fi
+
+      - name: koda check (canonical examples)
+        shell: bash
+        run: bash scripts/ci-examples-check.sh
 
       - name: Native smoke (koda build / run)
         shell: bash

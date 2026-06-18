@@ -1,11 +1,16 @@
 # Build output
 *.o
+*.obj
 *.a
 *.ll
 *.exe
 /bin/
 /dist/
 /.KODA_build/
+**/.KODA_build/
+
+# Scratch / local test dirs
+tmp-*/
 
 # Release artifacts
 raylib_win.zip

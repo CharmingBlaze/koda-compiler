@@ -1,34 +1,29 @@
-# {{name}}
+# Graphics template (bouncing ball)
 
-A **windowed graphics demo** using Raylib through `@game` and the bundled `wrappers/raylib_shim` bridge.
+A **windowed graphics demo** using the **full Raylib wrapper** (548 functions) with optional **`koda.game`** helpers. Call **any** Raylib function via `use raylib;` — the template does not restrict the API.
 
 ## Run
 
 ```bash
-koda doctor
 koda run
 ```
 
-The project manifest sets `"graphics": true` — Koda applies platform Raylib link flags automatically. You do **not** need to set `KODA_LINKFLAGS` for a standard SDK install.
-
-## Source layout
+## Source
 
 ```koda
-#include "../wrappers/raylib_shim/raylib.koda"
-#include "@game"
+use raylib;
+use koda.game;
 ```
 
-`@game` requires the shim include first. If you see undefined-variable errors for `drawline`, `getmousex`, etc., refresh the shim:
+`koda.json` links `wrappers/raylib/wrapper.c` from the SDK — no project-local shim copy required.
 
-```bash
-koda setup raylib
-```
+## Troubleshooting
 
-## Build & bundle
+- **`koda setup raylib`** — writes `koda.json` native section for graphics
+- **`koda doctor`** — SDK health check
+- Undefined `InitWindow` / `game` → ensure `use raylib` and `use koda.game` appear before `main`
 
-```bash
-koda build -o {{name}}
-koda bundle -o dist/{{name}}
-```
+## See also
 
-See [Raylib guide](https://github.com/CharmingBlaze/koda-compiler/blob/main/docs/guides/raylib.md) and [@game stdlib](https://github.com/CharmingBlaze/koda-compiler/blob/main/docs/stdlib/game.md) in the SDK docs.
+- [Game stdlib](../../../docs/stdlib/game.md)
+- [Raylib guide](../../../docs/guides/raylib.md)

@@ -1,6 +1,6 @@
 # {{name}}
 
-Windowed demo using the **full Raylib wrapper** (`548` functions from `raylib.h`).
+Windowed demo using the **full Raylib wrapper** (548 functions from `raylib.h`).
 
 ## Quick start
 
@@ -9,19 +9,20 @@ koda run
 koda doctor   # if linking fails
 ```
 
-## Include
+## Import
 
 ```koda
-#include "@raylib"
+use raylib;
+use koda.color;   // asRaylib() for draw colors
 ```
 
-The bindings live in the Koda SDK at `wrappers/raylib/` — you do not copy them into this project. `koda.json` points at `wrappers/raylib/wrapper.c`; the compiler resolves it from the SDK when missing locally.
+Bindings live in the Koda SDK at `wrappers/raylib/`. `koda.json` points at `wrappers/raylib/wrapper.c`; the compiler resolves it from the SDK.
 
 ## API docs
 
-- `koda doc wrapper @raylib`
-- SDK: `wrappers/raylib/api_reference.md` and `wrappers/raylib/docs/index.html`
+- `wrappers/raylib/api_reference.md`
+- `wrappers/raylib/docs/index.html`
 
-## Beginner API
+## Beginner helpers
 
-For a smaller surface (window, 2D draw, input), use `koda new mygame --template graphics` with `@game` instead.
+For a smaller API surface (window loop, 2D draw), use `koda new mygame --template graphics` with `use koda.game` on top of the same full wrapper.

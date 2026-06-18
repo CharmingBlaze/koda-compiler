@@ -98,6 +98,12 @@ let speed: float = 8.0;
 let label: string = "Player";
 ```
 
+You can usually **omit** types — Koda infers them from literals and usage. A game loop like `func update(dt) { x += speed * dt; }` still compiles to fast native math without writing `: float`.
+
+Struct fields annotated `: float` get the same treatment — `this.x += dt * 2.0` inside a method, or `player.x += speed * dt` on a struct variable, compile to native `fadd`/`fmul` when the compiler can see the field type.
+
+Explicit annotations remain useful for clarity, struct fields, and APIs you want to document.
+
 Keywords and names are **case-insensitive** — `Let`, `LET`, and `let` all work.
 
 ---
@@ -584,10 +590,10 @@ let str = toJSON({ hp: 100, name: "Ada" });
 
 ## 16. Game loop pattern
 
-Here is a minimal game loop using Raylib (Koda's built-in graphics library):
+Here is a minimal game loop using **raw Raylib** (`use raylib;` — all 548 functions available; `koda.game` is optional sugar on top):
 
 ```koda
-#include "../wrappers/raylib_shim/raylib.koda"
+use raylib;
 
 let screenW = 800;
 let screenH = 600;

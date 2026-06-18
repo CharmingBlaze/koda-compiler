@@ -66,12 +66,26 @@ type NativeEmitContext struct {
 	StructMethods map[string]map[string]*parser.FuncDecl
 	// StructFieldDefaults maps struct type -> field name -> default expression.
 	StructFieldDefaults map[string]map[string]parser.Expr
+	// StructFieldTypes maps struct type -> field name -> normalized type annotation.
+	StructFieldTypes map[string]map[string]string
 	// ImplicitStructField maps bare field identifiers in struct methods to slot indices.
 	ImplicitStructField map[*parser.IdentifierExpr]int
+	// FuncForOfVarStruct maps function name -> for-of loop variable -> element struct type.
+	FuncForOfVarStruct map[string]map[string]string
 	// NumericKinds maps stack LetDecl to inferred integer/float kind (A8).
 	NumericKinds map[*parser.LetDecl]NumericKind
+	// ConstPlainObjectLiterals maps module let name -> field -> integer literal (e.g. color components).
+	ConstPlainObjectLiterals map[string]map[string]int64
+	// VarIsArray maps variable name -> bound to an array literal (for method dispatch).
+	VarIsArray map[string]bool
+	// PlainObjectVars maps variable name -> plain object literal init (not array/struct).
+	PlainObjectVars map[string]bool
 	// TypedLocals maps LetDecl to explicit integer type name (P1).
 	TypedLocals map[*parser.LetDecl]string
+	// TypedParams maps function parameter to explicit type name.
+	TypedParams map[ParamCellKey]string
+	// ParamNumericKinds maps untyped parameters to inferred int/float kind (fast path without annotations).
+	ParamNumericKinds map[ParamCellKey]NumericKind
 }
 
 // PrepareOptions configures sema passes during native bundle preparation.
@@ -92,6 +106,7 @@ func PrepareNativeBundleWithOptions(bundle *parser.ProgramBundle, opts *PrepareO
 	}
 	parser.InjectNativeMathPrelude(bundle)
 	parser.InjectColorPrelude(bundle)
+	parser.InjectRaylibPrelude(bundle)
 
 	entryPath := "<entry>"
 	if p, err := parser.BundleEntryPath(bundle); err == nil {
@@ -143,17 +158,26 @@ func PrepareNativeBundleWithOptions(bundle *parser.ProgramBundle, opts *PrepareO
 		ImplicitStructField: make(map[*parser.IdentifierExpr]int),
 		NumericKinds:   make(map[*parser.LetDecl]NumericKind),
 		TypedLocals:    make(map[*parser.LetDecl]string),
+		TypedParams:       make(map[ParamCellKey]string),
+		ParamNumericKinds: make(map[ParamCellKey]NumericKind),
 	}
 	if analyzer != nil {
-		ctx.StructFields, ctx.StructMethods, ctx.VarStruct, ctx.VarEnum, ctx.IndexExprStructSlot, ctx.IndexExprEnumConst, ctx.StructFieldDefaults, ctx.ImplicitStructField = analyzer.ExportForCodegen()
+		ctx.StructFields, ctx.StructMethods, ctx.VarStruct, ctx.VarEnum, ctx.IndexExprStructSlot, ctx.IndexExprEnumConst, ctx.StructFieldDefaults, ctx.ImplicitStructField, ctx.FuncForOfVarStruct = analyzer.ExportForCodegen()
+		ctx.StructFieldTypes = analyzer.ExportStructFieldTypes()
+		ctx.ConstPlainObjectLiterals = analyzer.ExportConstPlainObjectLiterals()
+		ctx.VarIsArray, ctx.PlainObjectVars = analyzer.ExportVarArrayAndObject()
 	}
 	if bundle.Entry != nil {
 		for _, d := range bundle.Entry.Declarations {
 			collectTypedLocals(d, ctx.TypedLocals)
+			collectTypedParams(d, ctx.TypedParams)
 		}
 	}
 	prepareNativeAnalysis(ctx, bundle)
 	ctx.NumericKinds = InferNumericKinds(bundle.Entry, ctx.EscapingDecls)
+	ctx.ParamNumericKinds = InferParamNumericKinds(bundle.Entry)
+	InferParamKindsFromCallSites(bundle.Entry, ctx.NumericKinds, ctx.ParamNumericKinds)
+	collectTypedParamsFromProgram(bundle.Entry, ctx.TypedParams)
 	if opts != nil {
 		ctx.EmitDebug = opts.EmitDebug
 	}
@@ -178,6 +202,149 @@ func collectTypedLocals(d parser.Decl, out map[*parser.LetDecl]string) {
 	}
 }
 
+func collectTypedParams(d parser.Decl, out map[ParamCellKey]string) {
+	switch x := d.(type) {
+	case *parser.FuncDecl:
+		recordFuncParamTypes(x, out)
+		collectTypedParamsInBlock(x.Body, out)
+	case *parser.StructDecl:
+		for _, m := range x.Methods {
+			recordFuncParamTypes(m, out)
+			collectTypedParamsInBlock(m.Body, out)
+		}
+	case parser.Stmt:
+		collectTypedParamsInStmt(x, out)
+	}
+}
+
+func recordFuncParamTypes(fd *parser.FuncDecl, out map[ParamCellKey]string) {
+	recordOwnerParamTypes(fd, fd.Params, out)
+}
+
+func recordOwnerParamTypes(owner interface{}, params []parser.Param, out map[ParamCellKey]string) {
+	if owner == nil {
+		return
+	}
+	for i, p := range params {
+		if p.TypeAnnot != "" && isKnownTypeAnnotation(p.TypeAnnot) {
+			out[NewParamCellKey(owner, i)] = normalizeTypeName(p.TypeAnnot)
+		}
+	}
+}
+
+func collectTypedParamsFromProgram(prog *parser.Program, out map[ParamCellKey]string) {
+	if prog == nil {
+		return
+	}
+	var scanExpr func(parser.Expr)
+	scanExpr = func(e parser.Expr) {
+		if e == nil {
+			return
+		}
+		switch x := e.(type) {
+		case *parser.FuncExpr:
+			recordOwnerParamTypes(x, x.Params, out)
+			scanParamsInBlock(x.Body, scanExpr)
+		case *parser.CallExpr:
+			scanExpr(x.Function)
+			for _, a := range x.Arguments {
+				scanExpr(a)
+			}
+		case *parser.InfixExpr:
+			scanExpr(x.Left)
+			scanExpr(x.Right)
+		case *parser.PrefixExpr:
+			scanExpr(x.Right)
+		case *parser.AssignExpr:
+			scanExpr(x.Left)
+			scanExpr(x.Value)
+		case *parser.LogicalExpr:
+			scanExpr(x.Left)
+			scanExpr(x.Right)
+		case *parser.IndexExpr:
+			scanExpr(x.Object)
+			scanExpr(x.Index)
+		case *parser.GroupingExpr:
+			scanExpr(x.Expr)
+		case *parser.ArrayExpr:
+			for _, el := range x.Elements {
+				scanExpr(el)
+			}
+		case *parser.IfExpr:
+			scanExpr(x.Condition)
+			scanExpr(x.Then)
+			if x.Else != nil {
+				scanExpr(x.Else)
+			}
+		}
+	}
+	var walkDecl func(parser.Decl)
+	walkDecl = func(d parser.Decl) {
+		switch x := d.(type) {
+		case *parser.LetDecl:
+			scanExpr(x.Init)
+		case *parser.FuncDecl:
+			scanParamsInBlock(x.Body, scanExpr)
+		case *parser.StructDecl:
+			for _, m := range x.Methods {
+				scanParamsInBlock(m.Body, scanExpr)
+			}
+		case *parser.BlockStmt:
+			for _, inner := range x.Declarations {
+				walkDecl(inner)
+			}
+		case parser.Stmt:
+			walkParamsInStmtForScan(x, walkDecl, scanExpr)
+		}
+	}
+	for _, d := range prog.Declarations {
+		walkDecl(d)
+	}
+}
+
+func collectTypedParamsInBlock(b *parser.BlockStmt, out map[ParamCellKey]string) {
+	if b == nil {
+		return
+	}
+	for _, inner := range b.Declarations {
+		collectTypedParams(inner, out)
+	}
+}
+
+func collectTypedParamsInStmt(s parser.Stmt, out map[ParamCellKey]string) {
+	if s == nil {
+		return
+	}
+	switch x := s.(type) {
+	case *parser.BlockStmt:
+		collectTypedParamsInBlock(x, out)
+	case *parser.IfStmt:
+		collectTypedParamsInStmt(x.Then, out)
+		collectTypedParamsInStmt(x.Else, out)
+	case *parser.WhileStmt:
+		collectTypedParamsInStmt(x.Body, out)
+	case *parser.LoopStmt:
+		collectTypedParamsInStmt(x.Body, out)
+	case *parser.DoWhileStmt:
+		collectTypedParamsInStmt(x.Body, out)
+	case *parser.ForStmt:
+		collectTypedParamsInStmt(x.Body, out)
+	case *parser.ForInStmt:
+		collectTypedParamsInStmt(x.Body, out)
+	case *parser.ForOfStmt:
+		collectTypedParamsInStmt(x.Body, out)
+	case *parser.SwitchStmt:
+		for _, c := range x.Cases {
+			for _, cd := range c.Body {
+				collectTypedParams(cd, out)
+			}
+		}
+		for _, cd := range x.Default {
+			collectTypedParams(cd, out)
+		}
+	}
+}
+
 func collectTypedLocalsInBlock(b *parser.BlockStmt, out map[*parser.LetDecl]string) {
 	if b == nil {
 		return
@@ -198,6 +365,8 @@ func collectTypedLocalsInStmt(s parser.Stmt, out map[*parser.LetDecl]string) {
 		collectTypedLocalsInStmt(x.Then, out)
 		collectTypedLocalsInStmt(x.Else, out)
 	case *parser.WhileStmt:
+		collectTypedLocalsInStmt(x.Body, out)
+	case *parser.LoopStmt:
 		collectTypedLocalsInStmt(x.Body, out)
 	case *parser.DoWhileStmt:
 		collectTypedLocalsInStmt(x.Body, out)

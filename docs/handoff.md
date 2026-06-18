@@ -1,10 +1,9 @@
 # Koda implementation handoff
 
-**Audience:** Engineers working on the **native LLVM** compiler (lexer → parser → sema → LLVM IR → clang → static binary).  
-**Architecture overview:** [architecture.md](architecture.md).  
-**Language surface:** [language.md](../language.md) (root) or [docs/language.md](language.md), [README.md](../README.md).  
-**Shipped changes:** [CHANGELOG.md](../CHANGELOG.md).  
-**Long-term roadmap (maintainers):** [MASTER_PLAN.md](MASTER_PLAN.md).
+**Audience:** Engineers working on the **native LLVM** compiler (lexer → parser → sema → LLVM IR → clang → static binary).
+
+> **Language, examples, and product handoff:** see **[KODA_HANDOFF.md](KODA_HANDOFF.md)** — identity, example catalog, patterns, verification, next phases.  
+> This file focuses on **compiler/runtime invariants** and the engineering session checklist.
 
 **Stack:** Go **1.22+**, module **`koda`** ([go.mod](../go.mod)), LLVM IR via [llir/llvm](https://github.com/llir/llvm) v0.3.6, C11 runtime under **`runtime/src/`** (linked as **`runtime/libkoda_runtime.a`**).
 

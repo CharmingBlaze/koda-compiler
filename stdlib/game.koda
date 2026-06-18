@@ -1,125 +1,183 @@
-// @game — beginner-friendly game loop API over the Raylib shim.
-// Include the Raylib shim first, then this module:
-//   #include "wrappers/raylib_shim/raylib.koda"
-//   #include "@game"
+// @game — beginner-friendly game loop API over the full Raylib wrapper.
+// Load Raylib first:
+//   use raylib;
+//   use koda.game;
 //
 // Graphics projects: set "graphics": true in koda.json (auto link flags).
+//
+// Performance: use game.begin() / game.end() each frame. Both spread incremental GC
+// (~1 ms) so heap allocations in update/draw are less likely to cause random hitches.
+// Draw helpers pass packed colors.* straight through (zero alloc); codegen fuses
+// DrawRectangle/DrawCircle/DrawCircleLines/DrawLine/DrawRectangleLines/DrawText/ClearBackground to native fast paths.
+// For 50+ draws/frame, prefer colors.* or hoisted asRaylib() colors over gameColor copies.
+// Per-frame scratch: let scratch = arena(65536); call arenaReset(scratch) in game.begin().
+
+use koda.util;
+
+// Pass colors to Draw* without heap allocation when possible (see native_fusion.go fast paths).
+func gameColor(c) {
+    if (type(c) == "number") {
+        return c;
+    }
+    if (type(c.r) == "number" && type(c.g) == "number" && type(c.b) == "number") {
+        if (c.a == null) {
+            return { r: c.r, g: c.g, b: c.b, a: 255 };
+        }
+        return c;
+    }
+    return { r: 0, g: 0, b: 0, a: 255 };
+}
+
+// Fusion-friendly 3D camera — pass to BeginMode3D(camera3d(...)) for zero heap alloc (see native_fusion.go).
+func camera3d(px, py, pz, tx, ty, tz, fovy) {
+    return {
+        position: { x: px, y: py, z: pz },
+        target: { x: tx, y: ty, z: tz },
+        up: { x: 0, y: 1, z: 0 },
+        fovy: fovy,
+        projection: CAMERA_PERSPECTIVE
+    };
+}
 
 let game = {
     open: func(w, h, title) {
-        initwindow(w, h, title);
+        InitWindow(w, h, title);
     },
     close: func() {
-        closewindow();
+        CloseWindow();
     },
     running: func() {
-        return !windowshouldclose();
+        return !WindowShouldClose();
     },
     delta: func() {
-        return deltatime();
+        return clampDelta(GetFrameTime());
     },
     fps: func(n) {
-        settargetfps(n);
+        SetTargetFPS(n);
     },
     begin: func() {
-        begindrawing();
+        gcframestep(1.0);
+        BeginDrawing();
     },
     end: func() {
-        enddrawing();
+        EndDrawing();
+        gcframestep(1.0);
     },
     clear: func(color) {
-        clearbackground(color);
+        ClearBackground(gameColor(color));
     },
     text: func(msg, x, y, size, color) {
-        drawtext(msg, x, y, size, color);
+        DrawText(msg, x, y, size, gameColor(color));
     },
     rect: func(x, y, w, h, color) {
-        drawrectangle(x, y, w, h, color);
+        DrawRectangle(x, y, w, h, gameColor(color));
     },
     circle: func(x, y, r, color) {
-        drawcircle(x, y, r, color);
+        DrawCircle(x, y, r, gameColor(color));
     },
     line: func(x1, y1, x2, y2, color) {
-        drawline(x1, y1, x2, y2, color);
+        DrawLine(x1, y1, x2, y2, gameColor(color));
     },
     circleLines: func(x, y, r, color) {
-        drawcirclelines(x, y, r, color);
+        DrawCircleLines(x, y, r, gameColor(color));
     },
     rectLines: func(x, y, w, h, color) {
-        drawrectanglelines(x, y, w, h, color);
+        DrawRectangleLines(x, y, w, h, gameColor(color));
     },
     loadImage: func(path) {
-        return loadtexture(path);
+        return LoadTexture(path);
     },
     drawImage: func(tex, x, y, color) {
-        drawtexture(tex, x, y, color);
+        DrawTexture(tex, x, y, gameColor(color));
     },
     unloadImage: func(tex) {
-        unloadtexture(tex);
+        UnloadTexture(tex);
     },
     keyDown: func(key) {
-        return iskeydown(key);
+        return IsKeyDown(key);
     },
     keyPressed: func(key) {
-        return iskeypressed(key);
+        return IsKeyPressed(key);
     },
     mouseX: func() {
-        return getmousex();
+        return GetMousePosition().x;
     },
     mouseY: func() {
-        return getmousey();
+        return GetMousePosition().y;
     },
     mouseDown: func(btn) {
-        return ismousebuttondown(btn);
+        return IsMouseButtonDown(btn);
     },
     mousePressed: func(btn) {
-        return ismousebuttonpressed(btn);
+        return IsMouseButtonPressed(btn);
     },
     mouseWheel: func() {
-        return getmousewheelmove();
+        return GetMouseWheelMove();
     },
     width: func() {
-        return getscreenwidth();
+        return GetScreenWidth();
     },
     height: func() {
-        return getscreenheight();
+        return GetScreenHeight();
     },
     setTitle: func(title) {
-        setwindowtitle(title);
+        SetWindowTitle(title);
     },
     fpsCounter: func() {
-        return getfps();
+        return GetFPS();
     },
     setGcBudget: func(ms) {
         gcframestep(ms);
+    },
+    begin3d: func(px, py, pz, tx, ty, tz, fovy) {
+        BeginMode3D(camera3d(px, py, pz, tx, ty, tz, fovy));
+    },
+    end3d: func() {
+        EndMode3D();
+    },
+    // One hidden 3D frame so shaders compile before the main loop (avoids startup stutter).
+    warmup3d: func() {
+        let origin = { x: 0.0, y: 0.0, z: 0.0 };
+        BeginDrawing();
+        ClearBackground(gameColor({ r: 0, g: 0, b: 0, a: 255 }));
+        BeginMode3D(camera3d(5.0, 5.0, 5.0, 0.0, 0.0, 0.0, 45.0));
+        DrawCube(origin, 1.0, 1.0, 1.0, gameColor({ r: 255, g: 255, b: 255, a: 255 }));
+        EndMode3D();
+        EndDrawing();
+        gcframestep(2.0);
     }
 };
 
 let draw = {
     text: func(msg, x, y, size, color) {
-        drawtext(msg, x, y, size, color);
+        DrawText(msg, x, y, size, gameColor(color));
     },
     rect: func(x, y, w, h, color) {
-        drawrectangle(x, y, w, h, color);
+        DrawRectangle(x, y, w, h, gameColor(color));
     },
     line: func(x1, y1, x2, y2, color) {
-        drawline(x1, y1, x2, y2, color);
+        DrawLine(x1, y1, x2, y2, gameColor(color));
     }
 };
 
 let Key = {
-    Left: 263,
-    Right: 262,
-    Up: 265,
-    Down: 264,
-    Space: 32,
-    Escape: 256
+    W: KEY_W,
+    A: KEY_A,
+    S: KEY_S,
+    D: KEY_D,
+    R: KEY_R,
+    Left: KEY_LEFT,
+    Right: KEY_RIGHT,
+    Up: KEY_UP,
+    Down: KEY_DOWN,
+    Space: KEY_SPACE,
+    Escape: KEY_ESCAPE
 };
 
 let Mouse = {
-    Left: 0,
-    Right: 1,
-    Middle: 2
+    Left: MOUSE_BUTTON_LEFT,
+    Right: MOUSE_BUTTON_RIGHT,
+    Middle: MOUSE_BUTTON_MIDDLE
 };
 
 let Color = {

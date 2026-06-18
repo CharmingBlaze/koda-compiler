@@ -36,8 +36,8 @@ func TestInferNumericKindsLiterals(t *testing.T) {
 	if kinds[aDecl] != KindInt {
 		t.Fatalf("a want KindInt got %v", kinds[aDecl])
 	}
-	if kinds[bDecl] != KindInt {
-		t.Fatalf("b want KindInt got %v", kinds[bDecl])
+	if kinds[bDecl] != KindFloat {
+		t.Fatalf("b want KindFloat got %v", kinds[bDecl])
 	}
 	if kinds[cDecl] != KindFloat {
 		t.Fatalf("c want KindFloat got %v", kinds[cDecl])
@@ -64,6 +64,42 @@ func TestInferNumericKindsDivision(t *testing.T) {
 	}
 	if kinds[zDecl] != KindFloat {
 		t.Fatalf("z want KindFloat got %v", kinds[zDecl])
+	}
+}
+
+func TestInferNumericKindsFloatTypeAnnot(t *testing.T) {
+	src := `func main() {
+		let x: float = 1.0;
+		let y: float = 2.0;
+		let n: i32 = 42;
+	}`
+	prog := parseForTest(t, src)
+	kinds := InferNumericKinds(prog, nil)
+	var xDecl, yDecl, nDecl *parser.LetDecl
+	for _, d := range prog.Declarations {
+		if fd, ok := d.(*parser.FuncDecl); ok {
+			for _, inner := range fd.Body.Declarations {
+				if ld, ok := inner.(*parser.LetDecl); ok {
+					switch ld.Name.Lexeme {
+					case "x":
+						xDecl = ld
+					case "y":
+						yDecl = ld
+					case "n":
+						nDecl = ld
+					}
+				}
+			}
+		}
+	}
+	if kinds[xDecl] != KindFloat {
+		t.Fatalf("x want KindFloat got %v", kinds[xDecl])
+	}
+	if kinds[yDecl] != KindFloat {
+		t.Fatalf("y want KindFloat got %v", kinds[yDecl])
+	}
+	if kinds[nDecl] != KindInt {
+		t.Fatalf("n want KindInt got %v", kinds[nDecl])
 	}
 }
 
@@ -144,14 +180,43 @@ func TestSemaIntegerTypeAnnot(t *testing.T) {
 	}
 }
 
+func TestSemaStructFieldDefaultTypeMismatch(t *testing.T) {
+	src := `struct Bad { score: string = true; }
+func main() { let x = Bad {}; }`
+	prog := parseForTest(t, src)
+	err := NewAnalyzer().Analyze(prog)
+	if err == nil {
+		t.Fatal("expected type mismatch on struct field default")
+	}
+	if !strings.Contains(err.Error(), "expected type 'string'") {
+		t.Fatalf("error = %q", err.Error())
+	}
+}
+
+func TestSemaSelfOutsideMethod(t *testing.T) {
+	src := `func main() { let x = self; }`
+	prog := parseForTest(t, src)
+	err := NewAnalyzer().Analyze(prog)
+	if err == nil {
+		t.Fatal("expected self outside method error")
+	}
+	if !strings.Contains(err.Error(), "'self' can only be used inside struct methods") {
+		t.Fatalf("error = %q", err.Error())
+	}
+}
+
 func TestSemaConstReassignment(t *testing.T) {
 	src := `const gravity = 900;
 func main() {
     gravity = 1;
 }`
 	prog := parseForTest(t, src)
-	if err := NewAnalyzer().Analyze(prog); err == nil {
+	err := NewAnalyzer().Analyze(prog)
+	if err == nil {
 		t.Fatal("expected const reassignment error")
+	}
+	if !strings.Contains(err.Error(), "Cannot assign to constant 'gravity'") {
+		t.Fatalf("error = %q, want Cannot assign to constant", err.Error())
 	}
 }
 
@@ -187,5 +252,66 @@ func TestSemaUnknownTypeAnnot(t *testing.T) {
 	prog := parseForTest(t, src)
 	if err := NewAnalyzer().Analyze(prog); err == nil {
 		t.Fatal("expected unknown type error")
+	}
+}
+
+func TestInferNumericKindsGameDelta(t *testing.T) {
+	src := `
+		func main() {
+			while true {
+				let dt = game.delta();
+				let x = dt * 2.0;
+			}
+		}
+	`
+	prog := parseForTest(t, src)
+	kinds := InferNumericKinds(prog, nil)
+	mainFn := prog.Declarations[0].(*parser.FuncDecl)
+	var dtDecl, xDecl *parser.LetDecl
+	var findLets func(parser.Decl)
+	findLets = func(d parser.Decl) {
+		switch x := d.(type) {
+		case *parser.LetDecl:
+			switch x.Name.Lexeme {
+			case "dt":
+				dtDecl = x
+			case "x":
+				xDecl = x
+			}
+		case *parser.BlockStmt:
+			for _, inner := range x.Declarations {
+				findLets(inner)
+			}
+		case parser.Stmt:
+			if bs, ok := x.(*parser.WhileStmt); ok {
+				findLets(bs.Body)
+			}
+		}
+	}
+	findLets(mainFn.Body)
+	if dtDecl == nil || xDecl == nil {
+		t.Fatal("missing dt or x let decl")
+	}
+	if kinds[dtDecl] != KindFloat {
+		t.Fatalf("dt want KindFloat got %v", kinds[dtDecl])
+	}
+	if kinds[xDecl] != KindFloat {
+		t.Fatalf("x want KindFloat got %v", kinds[xDecl])
+	}
+}
+
+func TestInferNumericKindsSkipsArrayInit(t *testing.T) {
+	src := `
+		func main() {
+			let a = [10, 20, 30];
+			print(a[0]);
+		}
+	`
+	prog := parseForTest(t, src)
+	kinds := InferNumericKinds(prog, nil)
+	for ld := range kinds {
+		if ld.Name.Lexeme == "a" {
+			t.Fatalf("array let a should not get numeric kind, got %v", kinds[ld])
+		}
 	}
 }

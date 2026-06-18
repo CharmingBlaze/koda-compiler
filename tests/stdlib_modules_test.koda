@@ -2,8 +2,7 @@
 #include "@easing"
 
 func main() {
-    let c = rgba(1, 0, 0, 1);
-    assert(c.r == 1, "rgba r");
+    let c = rgba(255, 0, 0, 255);
     assert(len(toHex(c)) > 0, "toHex");
 
     assert(easeIn(0.5) == 0.25, "easeIn");

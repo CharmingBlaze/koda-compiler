@@ -1,0 +1,17 @@
+{
+  "native": {
+    "sources": [
+      "wrappers/raylib/wrapper.c"
+    ],
+    "graphics": true
+  },
+  "entry": "src/main.koda",
+  "lint": "beginner",
+  "version": "0.1.0",
+  "name": "demo-3d",
+  "studio": {
+    "category": "graphics",
+    "blurb": "Grid, cube, and WASD camera.",
+    "title": "3D Demo"
+  }
+}

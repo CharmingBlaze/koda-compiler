@@ -35,10 +35,7 @@ wails build -s -m -nopackage -tags native_webview2loader
 
 $Exe = Join-Path $Root "build\bin\Koda Studio.exe"
 if (-not (Test-Path $Exe)) {
-$Exe = Join-Path $Root "build\bin\Koda Studio.exe"
-if (-not (Test-Path $Exe)) {
   $Exe = Join-Path $Root "build\bin\koda-ide.exe"
-}
 }
 if (-not (Test-Path $Exe)) {
   Write-Host "Build finished, but the app executable was not found at:"

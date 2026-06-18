@@ -13,9 +13,9 @@ var commandHelp = map[string]string{
 Templates:
   hello     Minimal print program (default)
   game      Text lunar lander
-  graphics  Raylib bouncing ball (@game + shim)
-  raylib    Full Raylib API (548 functions, #include "@raylib")
-  pong      Two-player Pong with @game
+  graphics  Full Raylib wrapper + optional koda.game (bouncing ball demo)
+  raylib    Full Raylib API sample (raw InitWindow / DrawText)
+  pong      Two-player Pong with koda.game
 `,
 	"init": `Alias for koda new.
 
@@ -23,7 +23,7 @@ Templates:
 `,
 	"run": `Compile to a native binary and run it (temporary executable).
 
-  koda run [--no-opt] [--debug] [<file.koda>] [-- <program args...>]
+  koda run [--no-opt] [--release] [--debug] [<file.koda>] [-- <program args...>]
 
 Uses koda.json entry when no file is given. Arguments after -- are passed to your program.
 `,
@@ -31,7 +31,7 @@ Uses koda.json entry when no file is given. Arguments after -- are passed to you
 `,
 	"watch": `Rebuild and rerun when .koda files change under the entry directory.
 
-  koda watch [--no-opt] [--debug] [<file.koda>] [-- <program args...>]
+  koda watch [--no-opt] [--release] [--debug] [<file.koda>] [-- <program args...>]
 `,
 	"check": `Parse and type-check without codegen.
 
@@ -48,7 +48,9 @@ Uses koda.json entry when no file is given. Arguments after -- are passed to you
 `,
 	"build": `Build a native executable.
 
-  koda build [--no-opt] [--debug] [<file.koda>] [-o <exe>]
+  koda build [--release] [--no-opt] [--debug] [<file.koda>] [-o <exe>]
+
+Defaults to -O3 optimization unless --no-opt or --debug is set.
 `,
 	"bundle": `Build and package executable + assets for distribution.
 
@@ -88,19 +90,19 @@ Uses the native compile-and-run pipeline (same as koda run).
 
 Removes dist/, .koda_build/, and default executables. --cache also clears temp toolchain dirs when possible.
 `,
-	"doctor": `Human-readable SDK health check (stdlib, clang, writable install, raylib shim drift).
+	"doctor": `Human-readable SDK health check (stdlib, clang, writable install, Raylib wrapper).
 
   koda doctor [--fix]
 
-  --fix   Refresh an outdated project raylib_shim from the SDK (when safe).
+  --fix   Refresh an outdated project raylib_shim from the SDK (legacy --shim projects only).
 `,
 	"setup": `Configure optional project integrations.
 
-  koda setup raylib [--full] [project-dir]
+  koda setup raylib [--shim] [project-dir]
 
 Writes koda.json native.graphics + native.sources.
-  Default: copies raylib_shim into the project (@game / beginner API).
-  --full:  links the full SDK wrapper (548 functions, #include "@raylib").
+  Default: full SDK Raylib wrapper (548 functions, use raylib).
+  --shim:  legacy ~33-function shim copied into the project.
 `,
 	"paths": `Machine-readable toolchain paths for scripts/CI.
 `,

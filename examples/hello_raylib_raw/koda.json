@@ -1,0 +1,17 @@
+{
+  "name": "hello-raylib-raw",
+  "version": "0.1.0",
+  "entry": "src/main.koda",
+  "lint": "beginner",
+  "native": {
+    "sources": [
+      "wrappers/raylib/wrapper.c"
+    ],
+    "graphics": true
+  },
+  "studio": {
+    "category": "graphics",
+    "blurb": "Minimal window — use raylib + asRaylib colors.",
+    "title": "Hello Raylib"
+  }
+}

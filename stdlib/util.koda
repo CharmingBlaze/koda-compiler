@@ -1,5 +1,13 @@
 // Small game/app helpers — import "@util" or #include "stdlib/util.koda"
 
+// Stable frame delta: Raylib returns 0 on the first frame and spikes during GPU warmup.
+func clampDelta(dt) {
+    if dt == null or dt <= 0 or dt > 0.05 {
+        return 0.016;
+    }
+    return dt;
+}
+
 func clamp01(x) {
     return clamp(x, 0.0, 1.0);
 }

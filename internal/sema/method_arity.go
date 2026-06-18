@@ -38,6 +38,32 @@ func argvMethodArityBounds(lowerName string) (min, max int, known bool) {
 	}
 }
 
+// maybeCheckStructMethodCallArity validates user-defined struct method calls (r.area(), …).
+func (a *Analyzer) maybeCheckStructMethodCallArity(call *parser.CallExpr, idx *parser.IndexExpr) {
+	lit, ok := idx.Index.(*parser.LiteralExpr)
+	if !ok {
+		return
+	}
+	mname, ok := lit.Value.(string)
+	if !ok {
+		return
+	}
+	stName, ok := a.structTypeNameForObject(idx.Object)
+	if !ok {
+		return
+	}
+	methods, ok := a.structMethods[stName]
+	if !ok {
+		return
+	}
+	fd, ok := methods[mname]
+	if !ok {
+		return
+	}
+	params := methodParamsForCall(fd.Params)
+	a.checkCallArity(call, stName+"."+mname, 0, false, params)
+}
+
 func formatArgvMethodArityExpect(min, max int) string {
 	if min == max {
 		return fmt.Sprintf("%d", min)
@@ -62,6 +88,10 @@ func (a *Analyzer) maybeCheckArgvMethodCallArity(call *parser.CallExpr, idx *par
 		return
 	}
 	got := len(call.Arguments)
+	// Array/string .clear() takes no args; game.clear(color) and other helpers pass 1+.
+	if name == "clear" && got > 0 {
+		return
+	}
 	if got < min || got > max {
 		a.record(&diagnostic.DiagnosticError{
 			File:    call.Token.File,

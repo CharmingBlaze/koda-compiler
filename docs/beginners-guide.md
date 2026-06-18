@@ -99,7 +99,7 @@ This creates `koda.json`, `src/main.koda`, and `assets/`.
 |----------|---------|--------------|
 | Hello | `koda new myapp` | Minimal print program |
 | Text game | `koda new lander --template game` | Lunar lander in the terminal |
-| Graphics | `koda new bounce --template graphics` | Bouncing ball with `@game` API |
+| Graphics | `koda new bounce --template graphics` | Full Raylib + optional `koda.game` helpers |
 
 ---
 
@@ -355,11 +355,11 @@ let io = import "@io";
 let json = import "@json";
 ```
 
-Graphics projects use the `@game` wrapper:
+Graphics projects load the **full Raylib wrapper** with `use raylib;` — all **548** C API functions (`InitWindow`, `DrawCube`, `LoadTexture`, `PlaySound`, …) are available by name. **`koda.game`** is an optional beginner layer on top; you can mix raw Raylib and `game.*` in the same file.
 
 ```koda
-#include "wrappers/raylib_shim/raylib.koda"
-#include "@game"
+use raylib;
+use koda.game;   // optional — skip this and call InitWindow, DrawText, … directly
 
 func main() {
     game.open(800, 600, "My Game");
@@ -376,7 +376,8 @@ func main() {
 
 | Import | Provides |
 |--------|----------|
-| `@game` | `open`, `running`, `delta`, `begin`, `end`, `clear`, `text`, `draw.text`, `rect`, … |
+| `use raylib` | **Full Raylib API** — every function from the C library (548 bindings) |
+| `koda.game` | Optional shortcuts: `open`, `running`, `delta`, `begin`, `end`, `clear`, `text`, `rect`, … |
 | `@math` | `sin`, `lerp`, `random`, `pi`, … |
 | `@json` | `parse`, `stringify`, `try_parse` |
 | `@io` | `read`, `write`, `exists`, `list`, … |
@@ -458,7 +459,7 @@ koda clean                    # remove build artifacts
   "lint": "beginner",
   "bundle": { "assets": ["assets"] },
   "native": {
-    "sources": ["wrappers/raylib_shim/wrapper.c"],
+    "sources": ["wrappers/raylib/wrapper.c"],
     "graphics": true
   }
 }
@@ -480,7 +481,7 @@ cd lander
 koda run
 ```
 
-**Graphics** — `@game` wrapper over Raylib:
+**Graphics** — full Raylib via `use raylib;`, with optional `koda.game` helpers:
 
 ```bash
 koda new bounce --template graphics
@@ -489,11 +490,13 @@ koda doctor    # check toolchain + raylib
 koda run
 ```
 
+For **3D or advanced graphics**, skip `koda.game` and call Raylib directly — see `examples/cube3d` and `examples/spinning-cube` (`InitWindow`, `DrawCube`, `BeginMode3D`, …).
+
 Gold-standard game loop:
 
 ```koda
-#include "wrappers/raylib_shim/raylib.koda"
-#include "@game"
+use raylib;
+use koda.game;
 
 struct Mario {
     x, y, speed, health
@@ -521,12 +524,11 @@ func main() {
         game.clear(colors.dark);
         game.rect(player.x, player.y, 32, 32, colors.white);
         game.end();
-        game.setGcBudget(0.5);
     }
 }
 ```
 
-Cheatsheet: [Game development](guides/game-dev.md) · [Raylib guide](guides/raylib.md).
+Cheatsheet: [Game development](guides/game-dev.md) · [Raylib guide](guides/raylib.md) (complete function list).
 
 ---
 
@@ -537,8 +539,11 @@ Cheatsheet: [Game development](guides/game-dev.md) · [Raylib guide](guides/rayl
 | `koda` not found | Add SDK folder to PATH |
 | `stdlib` missing | Keep `stdlib/` next to `koda.exe` |
 | Link errors on graphics | Run `koda doctor` — follow FAIL lines |
-| `@game` undefined shim symbols | `koda setup raylib` then `koda run` |
+| Undefined Raylib / `InitWindow` | Add `use raylib;`, run `koda setup raylib`, then `koda doctor` |
+| Legacy shim errors (`drawline`, lowercase names) | `koda setup raylib` (full wrapper) or `koda doctor --fix` on old `--shim` projects |
 | Duplicate binding `player` | Struct type name clashes with variable (case-insensitive) — use `struct Mario` + `let player` |
+| Field `x` / `y` acts like a string or wrong value | Short field names clash with locals (`ballx`, `bally`, …) — use parallel arrays or longer names |
+| Game stutters every few seconds | Per-frame allocations in draw/update — use `colors.*`, cache HUD strings, `let dt: float = game.delta()` |
 | Parse error | `koda check file.koda` |
 | Weird runtime behavior | Small repro + [FAQ](faq.md) |
 

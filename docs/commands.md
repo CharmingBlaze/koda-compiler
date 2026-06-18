@@ -20,8 +20,8 @@ koda new <name> [--template hello|game|graphics|raylib]
 |----------|----------------|
 | **hello** (default) | Minimal print program — runs immediately |
 | **game** | Text-based lunar lander — no native libraries |
-| **graphics** | Bouncing-ball window via `@game` + bundled Raylib shim |
-| **raylib** | Full Raylib wrapper (548 functions) for advanced graphics |
+| **graphics** | Bouncing-ball window — **full Raylib** (`use raylib;`, 548 functions) + optional `koda.game` |
+| **raylib** | Same full wrapper; sample uses raw `InitWindow` / `DrawText` (no `koda.game`) |
 
 **Examples**
 
@@ -34,7 +34,7 @@ koda doctor
 koda run
 ```
 
-The **graphics** template sets `"graphics": true` in `koda.json` — platform Raylib link flags are applied automatically. Run `koda doctor` if the first build fails.
+The **graphics** template sets `"graphics": true` and links the SDK's full `wrappers/raylib/wrapper.c` — all Raylib commands are available via `use raylib;`. `koda.game` is optional sugar for 2D loops.
 
 ---
 
@@ -53,7 +53,7 @@ When `koda.json` sits in the project root (or a parent directory), you can omit 
     "extra": ["LICENSE"]
   },
   "native": {
-    "sources": ["wrappers/raylib_shim/wrapper.c"],
+    "sources": ["wrappers/raylib/wrapper.c"],
     "graphics": true
   }
 }
@@ -89,10 +89,11 @@ koda bundle -o dist/mygame
 Compile the entry **`.koda`** file to a native executable (temporary), run it, then delete the temp binary.
 
 ```bash
-koda run [--no-opt] [--debug] [<file.koda>] [-- <program args...>]
-koda native [--no-opt] [<file.koda>]   # same as run
+koda run [--release] [--no-opt] [--debug] [<file.koda>] [-- <program args...>]
+koda native [--release] [--no-opt] [<file.koda>]   # same as run
 ```
 
+- **`--release`** — optimised build (`-O3`); same as default `koda build` (explicit flag for profiling gameplay).
 - **`--no-opt`** — skips LLVM IR optimisation and uses a less aggressive native compile.
 - **`--debug`** — debug symbols, unoptimised build.
 - Omit the file when `koda.json` defines `entry`.
@@ -113,7 +114,7 @@ koda run -- --level 3
 Rebuild and rerun whenever **`.koda`** files under the entry file’s directory change.
 
 ```bash
-koda watch [--no-opt] [<file.koda>] [-- <program args...>]
+koda watch [--release] [--no-opt] [<file.koda>] [-- <program args...>]
 ```
 
 ---
@@ -234,6 +235,8 @@ Produce a **native executable** you keep.
 koda build [--no-opt] [--debug] <file.koda> [-o <exe>]
 ```
 
+By default, **`koda build`** uses **`-O3`** (release optimisations). Pass **`--no-opt`** or **`--debug`** for faster compile / debug symbols.
+
 ---
 
 ## `koda bundle`
@@ -253,15 +256,13 @@ Copy extra files with **`KODA_BUNDLE_FILES`**. Use `assetPath("file.png")` in co
 Configure optional project integrations.
 
 ```bash
-koda setup raylib [--full] [project-dir]
+koda setup raylib [--shim] [project-dir]
 ```
 
 | Mode | What it does |
 |------|----------------|
-| Default | Copies/refreshes **`wrappers/raylib_shim/`** from the SDK (overwrites stale files), sets `"graphics": true` and shim `native.sources` |
-| **`--full`** | Points at the full **`wrappers/raylib/`** wrapper (548 functions); use `#include "@raylib"` |
-
-Run this when `@game` errors mention undefined shim symbols like `drawline` or `getmousex` — your project shim is out of date.
+| **Default** | Full `wrappers/raylib/wrapper.c` from SDK, sets `"graphics": true` |
+| `--shim` | Legacy ~33-function shim copied into project |
 
 ```bash
 cd my-koda-project
@@ -313,7 +314,7 @@ koda doctor
 koda doctor --fix    # refresh outdated raylib_shim from SDK
 ```
 
-Fix every **FAIL** line before graphics projects. Wrapper drift → `koda wrap upgrade <dir>`. Stale raylib shim → `koda setup raylib` or `koda doctor --fix`.
+Fix every **FAIL** line before graphics projects. Wrapper drift → `koda wrap upgrade <dir>`. Legacy shim projects → `koda doctor --fix` or `koda setup raylib --shim`.
 
 ---
 

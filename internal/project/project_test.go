@@ -3,6 +3,7 @@ package project
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -94,15 +95,8 @@ func TestApplyNativeEnvClearsStaleNativeSources(t *testing.T) {
 	}
 }
 
-func TestApplyNativeEnvGraphicsDefaultsShim(t *testing.T) {
+func TestApplyNativeEnvGraphicsDefaultsFullRaylib(t *testing.T) {
 	tmp := t.TempDir()
-	shim := filepath.Join(tmp, "wrappers", "raylib_shim")
-	if err := os.MkdirAll(shim, 0755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(shim, "wrapper.c"), []byte("int x;"), 0644); err != nil {
-		t.Fatal(err)
-	}
 	cfg := `{"name":"x","version":"0.1.0","entry":"src/main.koda","native":{"graphics":true}}`
 	if err := os.WriteFile(filepath.Join(tmp, FileName), []byte(cfg), 0644); err != nil {
 		t.Fatal(err)
@@ -116,8 +110,14 @@ func TestApplyNativeEnvGraphicsDefaultsShim(t *testing.T) {
 	if err := ctx.ApplyNativeEnv(); err != nil {
 		t.Fatal(err)
 	}
-	want := filepath.Join(tmp, "wrappers", "raylib_shim", "wrapper.c")
-	if os.Getenv("KODA_NATIVE_SOURCES") != want {
-		t.Fatalf("sources = %q, want %q", os.Getenv("KODA_NATIVE_SOURCES"), want)
+	got := os.Getenv("KODA_NATIVE_SOURCES")
+	if !strings.Contains(got, filepath.Join("wrappers", "raylib", "wrapper.c")) {
+		t.Fatalf("sources = %q, want full raylib wrapper.c path", got)
+	}
+	if !strings.Contains(got, filepath.Join("wrappers", "raylib", "fast_paths.c")) {
+		t.Fatalf("sources = %q, want fast_paths.c", got)
+	}
+	if os.Getenv("KODA_LINKFLAGS") == "" {
+		t.Fatal("expected graphics link flags")
 	}
 }

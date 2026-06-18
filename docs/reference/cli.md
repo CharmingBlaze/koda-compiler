@@ -22,7 +22,7 @@ Every `koda` subcommand. Run `koda help` or `koda <command> --help` for inline h
 | `koda eval` | One-line snippet |
 | `koda repl` | Interactive REPL |
 | `koda clean` | Remove build artifacts (`--cache`) |
-| `koda doctor` | SDK health check (`--fix` refreshes stale raylib shim) |
+| `koda doctor` | SDK health check (`--fix` refreshes legacy project `raylib_shim` only) |
 | `koda paths` | Machine-readable paths |
 | `koda env` | Print `KODA_*` (`--export`) |
 | `koda completions` | Shell completion scripts |
@@ -31,7 +31,7 @@ Every `koda` subcommand. Run `koda help` or `koda <command> --help` for inline h
 | `koda lsp` | Language server (stdio) |
 | `koda disasm` | Print LLVM IR |
 | `koda wrap` | Forward to `kodawrap` (generate, upgrade, install wrappers) |
-| `koda setup` | Configure Raylib shim or full wrapper in a project |
+| `koda setup` | Configure Raylib wrapper in a project (full API by default) |
 | `koda version` | Version string |
 | `koda help` | Help (`help <command>`) |
 
@@ -203,23 +203,23 @@ koda init <name>   # alias
 |----------|----------|
 | **hello** | Console print demo |
 | **game** | Text lunar lander |
-| **graphics** | `@game` bouncing ball + Raylib shim |
-| **raylib** | Full Raylib wrapper project |
+| **graphics** | `koda.game` bouncing ball + **full Raylib wrapper** (`use raylib;`, 548 fn) |
+| **raylib** | Full wrapper sample with raw `InitWindow` / `DrawText` |
 
 ---
 
 ## `koda setup raylib`
 
 ```bash
-koda setup raylib [--full] [project-dir]
+koda setup raylib [--shim] [project-dir]
 ```
 
-Refreshes `wrappers/raylib_shim/` (overwrites stale files), sets `"graphics": true` in `koda.json`. Use when `@game` reports undefined shim symbols.
+Sets `"graphics": true` and `native.sources` to the **full** `wrappers/raylib/wrapper.c` from the SDK.
 
 | Flag | Result |
 |------|--------|
-| (default) | Beginner shim (~33 functions) + `@game` |
-| `--full` | Full wrapper (548 functions) + `#include "@raylib"` |
+| (default) | Full wrapper (548 functions) + `use raylib;` |
+| `--shim` | Legacy ~33-function shim copied into the project |
 
 ---
 
@@ -244,7 +244,7 @@ koda doctor
 koda doctor --fix
 ```
 
-Checks SDK toolchain, raylib, wrapper header drift, and **project raylib_shim** drift (missing `@game` symbols). `--fix` copies the canonical shim from the SDK into the current project.
+Checks SDK toolchain, raylib, and wrapper header drift. `--fix` refreshes a **legacy** project `raylib_shim` when present.
 
 ---
 

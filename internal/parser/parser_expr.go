@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"koda/internal/colorhex"
 	"koda/internal/lexer"
 	"strconv"
 	"strings"
@@ -103,7 +104,7 @@ func (p *Parser) parseExpression(precedence int) (Expr, error) {
 		token = p.peek()
 		// `TypeName { … }` only — `{` after other expressions starts a block elsewhere.
 		if token.Type == lexer.TokenLBrace {
-			if p.inForIterableExpr || p.inMatchExpr {
+			if p.inForIterableExpr || p.inMatchExpr || p.inControlCondition {
 				break
 			}
 			if _, ok := leftExpr.(*IdentifierExpr); !ok {
@@ -140,6 +141,8 @@ func (p *Parser) getPrefixFn(typ lexer.TokenType) prefixParseFn {
 		return p.parseIdentifier
 	case lexer.TokenNumber:
 		return p.parseNumberLiteral
+	case lexer.TokenColorHex:
+		return p.parseHexColorLiteral
 	case lexer.TokenString:
 		return p.parseStringLiteral
 	case lexer.TokenImport:
@@ -148,7 +151,7 @@ func (p *Parser) getPrefixFn(typ lexer.TokenType) prefixParseFn {
 		return p.parseBooleanLiteral
 	case lexer.TokenNull:
 		return p.parseNullLiteral
-	case lexer.TokenBang, lexer.TokenPlus, lexer.TokenMinus:
+	case lexer.TokenBang, lexer.TokenKwNot, lexer.TokenPlus, lexer.TokenMinus:
 		return p.parsePrefixExpression
 	case lexer.TokenPlusPlus, lexer.TokenMinusMinus:
 		return p.parseUpdatePrefixExpression
@@ -164,7 +167,7 @@ func (p *Parser) getPrefixFn(typ lexer.TokenType) prefixParseFn {
 		return p.parseArrayLiteral
 	case lexer.TokenFunc:
 		return p.parseFuncExpression
-	case lexer.TokenThis:
+	case lexer.TokenThis, lexer.TokenSelf:
 		return p.parseThisExpression
 	case lexer.TokenVar:
 		return p.parseReservedVar
@@ -263,6 +266,15 @@ func (p *Parser) parseNumberLiteral() (Expr, error) {
 		value = float64(i)
 	}
 	return &LiteralExpr{Token: token, Value: value}, nil
+}
+
+func (p *Parser) parseHexColorLiteral() (Expr, error) {
+	token := p.advance()
+	packed, err := colorhex.Parse(token.Lexeme)
+	if err != nil {
+		return nil, p.error(token, err.Error())
+	}
+	return &LiteralExpr{Token: token, Value: packed}, nil
 }
 
 func unescapeString(s string) string {
@@ -683,7 +695,7 @@ func (p *Parser) parseFuncExpression() (Expr, error) {
 	params := []Param{}
 	if !p.check(lexer.TokenRParen) {
 		for {
-			name, err := p.consume(lexer.TokenIdentifier, "expected parameter name")
+			name, err := p.consumeParamName()
 			if err != nil {
 				return nil, err
 			}
@@ -694,6 +706,13 @@ func (p *Parser) parseFuncExpression() (Expr, error) {
 				}
 			}
 			params = append(params, Param{Name: name.Lexeme})
+			if p.match(lexer.TokenColon) {
+				typeTok, err := p.consume(lexer.TokenIdentifier, "expected type name after ':'")
+				if err != nil {
+					return nil, err
+				}
+				params[len(params)-1].TypeAnnot = typeTok.Lexeme
+			}
 
 			if !p.match(lexer.TokenComma) {
 				break

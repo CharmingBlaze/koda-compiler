@@ -30,7 +30,7 @@ Koda is **not** a replacement for C++ in AAA engine internals or zero-overhead s
 | Ship one binary | `gcc` + link flags + maybe CMake | `koda build` or `koda bundle` |
 | Structs and enums | `struct`, `enum` | `struct`, `enum` — same idea |
 | Fast game loop | `while` + manual timing | `while` + `deltatime()` |
-| Call Raylib / SDL / your C lib | Headers + link + ABI glue | `kodawrap` or bundled shim + `koda.json` |
+| Call Raylib / SDL / your C lib | Headers + link + ABI glue | `use raylib;` (548 fn) or `kodawrap` + `koda.json` |
 | Strings and dynamic data | `char*`, malloc, pain | Built-in strings, arrays, objects |
 | Memory safety for gameplay code | You manage everything | GC for Koda values; C only at FFI boundary |
 | Iteration speed | Edit, compile, link, run | `koda run`, `koda watch` |
@@ -152,7 +152,7 @@ You do not abandon C — you **stop writing all your game in C**.
 3. `#include` the generated module and call functions like normal Koda code.
 
 ```koda
-#include "wrappers/raylib_shim/raylib.koda"
+use raylib;
 
 func main() {
     initwindow(800, 600, "My Game");

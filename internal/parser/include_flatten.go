@@ -42,13 +42,22 @@ func expandIncludes(modulePath string, bundle *ProgramBundle, stack map[string]b
 
 	var out []Decl
 	for _, d := range prog.Declarations {
-		inc, ok := d.(*IncludeDecl)
-		if !ok {
+		var rel string
+		switch decl := d.(type) {
+		case *IncludeDecl:
+			rel = strings.Trim(decl.Path.Lexeme, `"'`)
+		case *UseDecl:
+			expanded, err := expandUseDecl(modulePath, decl, bundle, stack)
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, expanded...)
+			continue
+		default:
 			out = append(out, d)
 			continue
 		}
-		rel := strings.Trim(inc.Path.Lexeme, `"'`)
-		abs, err := ResolveImportPath(modulePath, rel)
+		abs, err := resolveModuleRef(modulePath, rel)
 		if err != nil {
 			return nil, fmt.Errorf("%s: include %q: %w", modulePath, rel, err)
 		}

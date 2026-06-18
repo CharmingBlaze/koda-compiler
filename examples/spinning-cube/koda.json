@@ -1,0 +1,15 @@
+{
+  "name": "spinning-cube",
+  "version": "0.1.0",
+  "entry": "src/main.koda",
+  "lint": "beginner",
+  "native": {
+    "graphics": true,
+    "sources": ["wrappers/raylib/wrapper.c"]
+  },
+  "studio": {
+    "category": "graphics",
+    "title": "Spinning Cube",
+    "blurb": "3D cube with orbiting camera."
+  }
+}

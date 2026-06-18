@@ -8,9 +8,44 @@ How Koda organizes code across files.
 
 | Mechanism | Syntax | Effect |
 |-----------|--------|--------|
-| **Include** | `#include "path.koda"` | Paste file at compile time |
+| **Use** | `use raylib;` / `use koda.math;` | Official module import (expanded at compile time) |
+| **Include** | `#include "path.koda"` | Paste file at compile time (legacy / shims) |
 | **Import** | `let m = import "path.koda"` | Load module; get export object |
-| **Stdlib import** | `import "@math"` | Load `stdlib/math.koda` or builtin object |
+| **Stdlib import** | `import "@math"` or `use koda.math` | Load `stdlib/math.koda` or builtin object |
+
+---
+
+## Use (recommended)
+
+Official style for wrappers and stdlib:
+
+```koda
+use koda.math;
+use koda.input;
+
+func main() {
+    let a = abs(-3);
+    print(a);
+}
+```
+
+```koda
+use raylib;   // full wrapper when installed under wrappers/raylib/
+
+func main() {
+    InitWindow(800, 600, "Hello");
+    defer CloseWindow();
+    …
+}
+```
+
+Resolution order for `use name`:
+
+1. `koda.*` → stdlib (`use koda.math` → `@math`)
+2. `wrappers/` (e.g. `raylib` → `wrappers/raylib/raylib.koda`)
+3. Stdlib shorthand (`use math` → `@math`)
+
+Unknown modules report searched paths. Legacy `#include` and `import "koda.game"` still work.
 
 ---
 

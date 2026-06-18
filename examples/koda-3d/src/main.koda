@@ -1,0 +1,33 @@
+// North-star identity demo — Camera3D { … }, vec3(), RAYWHITE, colors.rebeccaPurple.
+use raylib;
+
+func main() {
+    InitWindow(800, 600, "Koda 3D");
+    defer CloseWindow();
+    SetTargetFPS(60);
+
+    let camera = Camera3D {
+        position: vec3(4.0, 4.0, 4.0),
+        target: vec3(0.0, 0.0, 0.0),
+        up: vec3(0.0, 1.0, 0.0),
+        fovy: 45.0,
+        projection: CAMERA_PERSPECTIVE
+    };
+
+    loop {
+        if WindowShouldClose() {
+            break;
+        }
+
+        BeginDrawing();
+        ClearBackground(#101018);
+
+        BeginMode3D(camera);
+        DrawGrid(10, 1.0);
+        DrawCube(vec3(0.0, 1.0, 0.0), 2.0, 2.0, 2.0, colors.rebeccaPurple);
+        EndMode3D();
+
+        DrawText("Koda 3D - raylib", 10, 10, 20, RAYWHITE);
+        EndDrawing();
+    }
+}

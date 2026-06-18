@@ -81,12 +81,11 @@ $env:KODA_LINKFLAGS = '-I..\native -L..\native\build -lmylib'
 .\koda.exe build .\app.koda -o .\app.exe
 ```
 
-For Raylib on Windows with the current local source tree:
+For Raylib graphics projects, use a `koda.json` with `"graphics": true` (see `examples/games/brick-breaker/`):
 
 ```powershell
-$env:KODA_NATIVE_SOURCES = '..\wrappers\raylib_shim\wrapper.c'
-$env:KODA_LINKFLAGS = '-I..\temp_raylib\src -L..\temp_raylib\src -lraylib -lopengl32 -lgdi32 -lwinmm'
-.\koda.exe build .\raylib_brick_breaker.koda -o .\raylib_brick_breaker.exe
+cd examples\games\brick-breaker
+..\..\..\koda.exe build src\main.koda -o brick-breaker.exe
 ```
 
 ## 5. Bundle an application or game for distribution

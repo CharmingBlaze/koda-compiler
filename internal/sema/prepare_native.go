@@ -125,6 +125,8 @@ func walkStmt(s parser.Stmt, ctx *NativeEmitContext, walkBlock func(*parser.Bloc
 	case *parser.WhileStmt:
 		walkExpr(st.Condition, nil, ctx, nil)
 		walkStmt(st.Body, ctx, walkBlock, walkDecl)
+	case *parser.LoopStmt:
+		walkStmt(st.Body, ctx, walkBlock, walkDecl)
 	case *parser.DoWhileStmt:
 		walkStmt(st.Body, ctx, walkBlock, walkDecl)
 		walkExpr(st.Condition, nil, ctx, nil)
@@ -210,6 +212,8 @@ func walkStmtFull(s parser.Stmt, env *envFrame, ctx *NativeEmitContext, curFunc 
 		}
 	case *parser.WhileStmt:
 		walkExpr(st.Condition, env, ctx, curFunc)
+		walkStmtFull(st.Body, env, ctx, curFunc)
+	case *parser.LoopStmt:
 		walkStmtFull(st.Body, env, ctx, curFunc)
 	case *parser.DoWhileStmt:
 		walkStmtFull(st.Body, env, ctx, curFunc)

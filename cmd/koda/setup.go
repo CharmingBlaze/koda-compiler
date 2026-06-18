@@ -14,7 +14,7 @@ import (
 
 func runSetup(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: koda setup <target>\n\nTargets:\n  raylib [--full]   Configure graphics linking (shim or full Raylib wrapper)")
+		return fmt.Errorf("usage: koda setup <target>\n\nTargets:\n  raylib [--shim]   Configure graphics linking (full Raylib wrapper by default)")
 	}
 	switch strings.ToLower(args[0]) {
 	case "raylib":
@@ -25,12 +25,14 @@ func runSetup(args []string) error {
 }
 
 func setupRaylib(args []string) error {
-	full := false
+	shim := false
 	var positional []string
 	for _, a := range args {
 		switch strings.ToLower(a) {
+		case "--shim":
+			shim = true
 		case "--full", "-full":
-			full = true
+			// Legacy alias; full wrapper is the default.
 		default:
 			positional = append(positional, a)
 		}
@@ -55,7 +57,7 @@ func setupRaylib(args []string) error {
 		projectRoot = cfgRoot
 	}
 
-	if !full {
+	if shim {
 		if err := ensureRaylibShim(projectRoot); err != nil {
 			return err
 		}
@@ -76,10 +78,10 @@ func setupRaylib(args []string) error {
 	if strings.TrimSpace(cfg.Lint) == "" {
 		cfg.Lint = "beginner"
 	}
-	if full {
-		cfg.Native.Sources = []string{"wrappers/raylib/wrapper.c"}
-	} else {
+	if shim {
 		cfg.Native.Sources = mergeUnique(stripRaylibFullSources(cfg.Native.Sources), "wrappers/raylib_shim/wrapper.c")
+	} else {
+		cfg.Native.Sources = []string{"wrappers/raylib/wrapper.c"}
 	}
 	cfg.Native.Graphics = true
 
@@ -87,27 +89,25 @@ func setupRaylib(args []string) error {
 		return err
 	}
 
-	if full {
-		fmt.Println("Full Raylib setup complete.")
-		fmt.Printf("  project: %s\n", filepath.Join(cfgRoot, project.FileName))
-		fmt.Println()
-		fmt.Println("Graphics linking is enabled via koda.json (\"graphics\": true).")
-		fmt.Println("Include the full wrapper in your .koda file:")
-		fmt.Println(`  #include "@raylib"`)
-		fmt.Println()
-		fmt.Println("548 functions — see: koda doc wrapper @raylib")
-	} else {
-		fmt.Println("Raylib setup complete.")
+	if shim {
+		fmt.Println("Raylib shim setup complete.")
 		fmt.Printf("  project: %s\n", filepath.Join(cfgRoot, project.FileName))
 		fmt.Printf("  shim:    %s\n", filepath.Join(projectRoot, "wrappers", "raylib_shim"))
 		fmt.Println()
 		fmt.Println("Graphics linking is enabled via koda.json (\"graphics\": true).")
-		fmt.Println("Shim files were refreshed from the SDK (overwrites stale copies).")
 		fmt.Println("Include the shim in your .koda file:")
 		fmt.Println(`  #include "wrappers/raylib_shim/raylib.koda"`)
-		fmt.Println("Or use @game from stdlib after importing graphics helpers.")
 		fmt.Println()
-		fmt.Println("For all Raylib functions: koda setup raylib --full")
+		fmt.Println("For the full Raylib API (default): koda setup raylib")
+	} else {
+		fmt.Println("Full Raylib setup complete.")
+		fmt.Printf("  project: %s\n", filepath.Join(cfgRoot, project.FileName))
+		fmt.Println()
+		fmt.Println("Graphics linking is enabled via koda.json (\"graphics\": true).")
+		fmt.Println("Import the full wrapper in your .koda file:")
+		fmt.Println(`  use raylib;`)
+		fmt.Println()
+		fmt.Println("548 functions — see: koda doc wrapper @raylib")
 	}
 	fmt.Println()
 

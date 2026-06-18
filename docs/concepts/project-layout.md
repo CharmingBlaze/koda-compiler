@@ -46,34 +46,29 @@ myapp/
 
 ## Graphics projects
 
-```text
-wrappers/
-  raylib_shim/
-    raylib.koda    # koda:extern declarations
-    wrapper.c      # C glue
-```
+Full Raylib resolves from the **SDK** — no project-local copy required:
 
 ```json
 "native": {
-  "sources": ["wrappers/raylib_shim/wrapper.c"],
+  "sources": ["wrappers/raylib/wrapper.c"],
   "graphics": true
 }
 ```
 
 Set `"graphics": true` — Koda adds platform Raylib link flags. No manual `KODA_LINKFLAGS` for standard SDK installs.
 
-**Setup / refresh:**
+**Setup:**
 
 ```bash
-koda setup raylib          # beginner shim + @game
-koda setup raylib --full   # 548-function wrapper + @raylib
+koda setup raylib          # full wrapper (default)
+koda setup raylib --shim   # legacy ~33-function shim only
 ```
 
 Source pattern:
 
 ```koda
-#include "wrappers/raylib_shim/raylib.koda"
-#include "@game"
+use raylib;
+use koda.game;   // optional helpers
 ```
 
 ---

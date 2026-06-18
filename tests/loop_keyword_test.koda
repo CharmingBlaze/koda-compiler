@@ -1,0 +1,28 @@
+// loop { } — explicit infinite loop (break to exit)
+
+test "loop runs until break" {
+    let n = 0;
+    loop {
+        if (n >= 3) {
+            break;
+        }
+        n = n + 1;
+    }
+    expect(n == 3);
+}
+
+test "loop continue" {
+    let sum = 0;
+    let i = 0;
+    loop {
+        if (i >= 5) {
+            break;
+        }
+        i = i + 1;
+        if (i == 3) {
+            continue;
+        }
+        sum = sum + i;
+    }
+    expect(sum == 1 + 2 + 4 + 5);
+}

@@ -218,8 +218,8 @@ player.hp = 75;
 
 ```koda
 #include "math.koda"
-#include "wrappers/raylib_shim/raylib.koda"
-#include "@game"
+use raylib;
+use koda.game;
 
 let math = import "@math";
 ```

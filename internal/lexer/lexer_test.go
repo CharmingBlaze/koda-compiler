@@ -137,6 +137,34 @@ func TestLexerDeferKeyword(t *testing.T) {
 	})
 }
 
+func TestLexerLoopKeyword(t *testing.T) {
+	assertTokenTypes(t, `loop { break; }`, []TokenType{
+		TokenLoop, TokenLBrace, TokenBreak, TokenSemicolon, TokenRBrace, TokenEOF,
+	})
+}
+
+func TestLexerHexColor(t *testing.T) {
+	assertTokenTypes(t, `ClearBackground(#101018);`, []TokenType{
+		TokenIdentifier, TokenLParen, TokenColorHex, TokenRParen, TokenSemicolon, TokenEOF,
+	})
+	tokens, err := NewLexer(`#F00 #FF0000FF`, "t.koda").Tokenize()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tokens[0].Type != TokenColorHex || tokens[0].Lexeme != "F00" {
+		t.Fatalf("first token: %+v", tokens[0])
+	}
+	if tokens[1].Type != TokenColorHex || tokens[1].Lexeme != "FF0000FF" {
+		t.Fatalf("second token: %+v", tokens[1])
+	}
+}
+
+func TestLexerIncludeStillWorks(t *testing.T) {
+	assertTokenTypes(t, `#include "x.koda"`, []TokenType{
+		TokenInclude, TokenString, TokenEOF,
+	})
+}
+
 func TestLexerNullishAssign(t *testing.T) {
 	assertTokenTypes(t, `a ??= b; x ?? y;`, []TokenType{
 		TokenIdentifier, TokenQuestionQuestionEqual, TokenIdentifier, TokenSemicolon,

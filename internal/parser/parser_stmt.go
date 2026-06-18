@@ -34,6 +34,13 @@ func (p *Parser) parseDeclaration() ([]Decl, error) {
 		}
 		return []Decl{d}, nil
 	}
+	if p.match(lexer.TokenUse) {
+		d, err := p.parseUseDeclaration()
+		if err != nil {
+			return nil, err
+		}
+		return []Decl{d}, nil
+	}
 	if p.match(lexer.TokenVar) {
 		tok := p.previous()
 		return nil, fmt.Errorf("%d:%d: 'var' is reserved; use 'let' to declare a variable", tok.Line, tok.Col)
@@ -110,6 +117,57 @@ func (p *Parser) parseIncludeDeclaration() (Decl, error) {
 		return nil, err
 	}
 	return &IncludeDecl{Token: token, Path: path}, nil
+}
+
+func (p *Parser) parseUseDeclaration() (Decl, error) {
+	token := p.previous()
+	first, err := p.consume(lexer.TokenIdentifier, "expected module name after 'use'")
+	if err != nil {
+		return nil, err
+	}
+	first = normalizeIdentLexeme(first)
+	parts := []string{first.Lexeme}
+	for p.match(lexer.TokenDot) {
+		part, err := p.consume(lexer.TokenIdentifier, "expected identifier after '.' in module path")
+		if err != nil {
+			return nil, err
+		}
+		part = normalizeIdentLexeme(part)
+		parts = append(parts, part.Lexeme)
+	}
+	var selective []string
+	if p.match(lexer.TokenLBrace) {
+		if !p.check(lexer.TokenRBrace) {
+			for {
+				nameTok, err := p.consume(lexer.TokenIdentifier, "expected import name in use { ... } list")
+				if err != nil {
+					return nil, err
+				}
+				nameTok = normalizeIdentLexeme(nameTok)
+				selective = append(selective, nameTok.Lexeme)
+				if !p.match(lexer.TokenComma) {
+					break
+				}
+			}
+		}
+		if _, err := p.consume(lexer.TokenRBrace, "expected '}' after use import list"); err != nil {
+			return nil, err
+		}
+	}
+	var alias string
+	if p.check(lexer.TokenIdentifier) && strings.EqualFold(p.peek().Lexeme, "as") {
+		p.advance()
+		aliasTok, err := p.consume(lexer.TokenIdentifier, "expected alias name after 'as'")
+		if err != nil {
+			return nil, err
+		}
+		aliasTok = normalizeIdentLexeme(aliasTok)
+		alias = aliasTok.Lexeme
+	}
+	if _, err := p.consume(lexer.TokenSemicolon, "expected ';' after use declaration"); err != nil {
+		return nil, err
+	}
+	return &UseDecl{Token: token, ModulePath: strings.Join(parts, "."), Alias: alias, Selective: selective}, nil
 }
 
 func (p *Parser) parseLetDeclarations(isConst bool) ([]Decl, error) {
@@ -223,7 +281,7 @@ func (p *Parser) parseFuncDeclaration() (Decl, error) {
 	if !p.check(lexer.TokenRParen) {
 		for {
 			isRest := p.match(lexer.TokenTripleDot)
-			paramName, err := p.consume(lexer.TokenIdentifier, "expected parameter name")
+			paramName, err := p.consumeParamName()
 			if err != nil {
 				if p.check(lexer.TokenVar) {
 					tok := p.peek()
@@ -239,6 +297,13 @@ func (p *Parser) parseFuncDeclaration() (Decl, error) {
 				}
 			}
 			param := Param{Name: paramName.Lexeme, IsRest: isRest}
+			if p.match(lexer.TokenColon) {
+				typeTok, err := p.consume(lexer.TokenIdentifier, "expected type name after ':'")
+				if err != nil {
+					return nil, err
+				}
+				param.TypeAnnot = typeTok.Lexeme
+			}
 			if p.match(lexer.TokenEqual) {
 				if isRest {
 					return nil, p.error(paramName, "rest parameter cannot have a default")
@@ -308,6 +373,9 @@ func (p *Parser) parseStatement() (Stmt, error) {
 	}
 	if p.match(lexer.TokenWhile) {
 		return p.parseWhileStatement()
+	}
+	if p.match(lexer.TokenLoop) {
+		return p.parseLoopStatement()
 	}
 	if p.match(lexer.TokenDo) {
 		return p.parseDoWhileStatement()
@@ -381,18 +449,27 @@ func (p *Parser) parseBlockStatement() (*BlockStmt, error) {
 	return &BlockStmt{Token: token, Declarations: declarations}, nil
 }
 
+func (p *Parser) parseControlCondition() (Expr, error) {
+	if p.match(lexer.TokenLParen) {
+		condition, err := p.parseExpression(PrecedenceLowest)
+		if err != nil {
+			return nil, err
+		}
+		if _, err := p.consume(lexer.TokenRParen, "expected ')' after condition"); err != nil {
+			return nil, err
+		}
+		return condition, nil
+	}
+	p.inControlCondition = true
+	defer func() { p.inControlCondition = false }()
+	return p.parseExpression(PrecedenceLowest)
+}
+
 func (p *Parser) parseIfStatement() (Stmt, error) {
 	token := p.previous()
-	if _, err := p.consume(lexer.TokenLParen, "expected '(' after 'if'"); err != nil {
-		return nil, err
-	}
 
-	condition, err := p.parseExpression(PrecedenceLowest)
+	condition, err := p.parseControlCondition()
 	if err != nil {
-		return nil, err
-	}
-
-	if _, err := p.consume(lexer.TokenRParen, "expected ')' after condition"); err != nil {
 		return nil, err
 	}
 
@@ -414,16 +491,9 @@ func (p *Parser) parseIfStatement() (Stmt, error) {
 
 func (p *Parser) parseWhileStatement() (Stmt, error) {
 	token := p.previous()
-	if _, err := p.consume(lexer.TokenLParen, "expected '(' after 'while'"); err != nil {
-		return nil, err
-	}
 
-	condition, err := p.parseExpression(PrecedenceLowest)
+	condition, err := p.parseControlCondition()
 	if err != nil {
-		return nil, err
-	}
-
-	if _, err := p.consume(lexer.TokenRParen, "expected ')' after condition"); err != nil {
 		return nil, err
 	}
 
@@ -433,6 +503,16 @@ func (p *Parser) parseWhileStatement() (Stmt, error) {
 	}
 
 	return &WhileStmt{Token: token, Condition: condition, Body: body}, nil
+}
+
+// parseLoopStatement parses `loop { ... }` — explicit infinite loop.
+func (p *Parser) parseLoopStatement() (Stmt, error) {
+	token := p.previous()
+	body, err := p.parseStatement()
+	if err != nil {
+		return nil, err
+	}
+	return &LoopStmt{Token: token, Body: body}, nil
 }
 
 func (p *Parser) parseDoWhileStatement() (Stmt, error) {
@@ -586,6 +666,22 @@ func (p *Parser) parseMatchCaseBody() ([]Decl, error) {
 	return body, nil
 }
 
+// finishForIterable parses optional `step expr` after a range iterable in `for x in lo..hi`.
+func (p *Parser) finishForIterable(iter Expr) (Expr, error) {
+	r, ok := iter.(*RangeExpr)
+	if !ok || !p.match(lexer.TokenStep) {
+		return iter, nil
+	}
+	p.inForIterableExpr = true
+	step, err := p.parseExpression(PrecedenceLowest)
+	p.inForIterableExpr = false
+	if err != nil {
+		return nil, err
+	}
+	r.Step = step
+	return r, nil
+}
+
 func (p *Parser) parseForStatement() (Stmt, error) {
 	token := p.previous()
 	// Brace-style: for name in iterable { … }  (values or half-open range a..b)
@@ -597,6 +693,10 @@ func (p *Parser) parseForStatement() (Stmt, error) {
 		name = normalizeIdentLexeme(name)
 		if p.match(lexer.TokenIn) {
 			iter, err := p.parseForIterable()
+			if err != nil {
+				return nil, err
+			}
+			iter, err = p.finishForIterable(iter)
 			if err != nil {
 				return nil, err
 			}
@@ -654,6 +754,10 @@ func (p *Parser) parseForStatement() (Stmt, error) {
 		name = normalizeIdentLexeme(name)
 		if p.match(lexer.TokenIn) {
 			iter, err := p.parseExpression(PrecedenceLowest)
+			if err != nil {
+				return nil, err
+			}
+			iter, err = p.finishForIterable(iter)
 			if err != nil {
 				return nil, err
 			}
@@ -855,6 +959,14 @@ func (p *Parser) parseStructDeclaration() (Decl, error) {
 			return nil, err
 		}
 		f = normalizeIdentLexeme(f)
+		var typeAnnot string
+		if p.match(lexer.TokenColon) {
+			typeTok, err := p.consume(lexer.TokenIdentifier, "expected type name after ':' in struct field")
+			if err != nil {
+				return nil, err
+			}
+			typeAnnot = normalizeIdentLexeme(typeTok).Lexeme
+		}
 		optional := false
 		if p.match(lexer.TokenQuestion) {
 			optional = true
@@ -866,7 +978,7 @@ func (p *Parser) parseStructDeclaration() (Decl, error) {
 				return nil, err
 			}
 		}
-		fields = append(fields, StructField{Name: f, Default: defaultExpr, Optional: optional})
+		fields = append(fields, StructField{Name: f, TypeAnnot: typeAnnot, Default: defaultExpr, Optional: optional})
 		if p.check(lexer.TokenRBrace) {
 			break
 		}

@@ -99,6 +99,7 @@ func (a *Analyzer) maybeCheckCallArity(call *parser.CallExpr) {
 		a.checkCallArity(call, "<function>", 0, false, f.Params)
 	case *parser.IndexExpr:
 		a.maybeCheckArgvMethodCallArity(call, f)
+		a.maybeCheckStructMethodCallArity(call, f)
 	default:
 		return
 	}

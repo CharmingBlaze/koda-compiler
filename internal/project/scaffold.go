@@ -83,11 +83,7 @@ func Scaffold(parentDir, name, template string) (string, error) {
 		return "", err
 	}
 	if template == "graphics" || template == "pong" {
-		shimDest := filepath.Join(dest, "wrappers", "raylib_shim")
-		if err := SyncRaylibShim(shimDest); err != nil {
-			_ = os.RemoveAll(dest)
-			return "", err
-		}
+		// Full Raylib wrapper resolves from the SDK via koda.json native.sources.
 	}
 	if err := os.MkdirAll(filepath.Join(dest, "assets"), 0755); err != nil {
 		_ = os.RemoveAll(dest)

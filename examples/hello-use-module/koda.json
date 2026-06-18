@@ -1,0 +1,11 @@
+{
+  "entry": "src/main.koda",
+  "lint": "beginner",
+  "version": "0.1.0",
+  "name": "hello-use-module",
+  "studio": {
+    "category": "console",
+    "blurb": "use koda.easing — console only.",
+    "title": "Hello Modules"
+  }
+}

@@ -1,0 +1,106 @@
+// Neon plaza — WASD fly-through, floating crystal ring, raw Raylib 3D.
+use raylib;
+use koda.util;
+
+const SCREEN_W = 960;
+const SCREEN_H = 540;
+
+let voidColor = #0A051E;
+let barColor = #000000B4;
+let hudWhite = #FFFFFF;
+let hudCyan = #00FFFF;
+let hudLime = #00FF78;
+let wireWhite = #FFFFFF;
+let colCyan = #00FFFF;
+let colMagenta = #FF00FF;
+let colGold = #FFD700;
+let colLime = #00FF64;
+let colPink = #FF64C8;
+let colDim = #505078C8;
+
+func camera3d(px, py, pz, tx, ty, tz, fovy) {
+    return {
+        position: { x: px, y: py, z: pz },
+        target: { x: tx, y: ty, z: tz },
+        up: { x: 0, y: 1, z: 0 },
+        fovy: fovy,
+        projection: CAMERA_PERSPECTIVE
+    };
+}
+
+func drawSpireStack(lift) {
+    DrawCube({ x: 0, y: 0.15, z: 0 }, 1.2, 0.35, 1.2, colCyan);
+    DrawCubeWires({ x: 0, y: 0.15, z: 0 }, 1.2, 0.35, 1.2, wireWhite);
+    DrawCube({ x: 0, y: 0.65, z: 0 }, 1.0, 0.35, 1.0, colMagenta);
+    DrawCubeWires({ x: 0, y: 0.65, z: 0 }, 1.0, 0.35, 1.0, wireWhite);
+    DrawCube({ x: 0, y: 1.15, z: 0 }, 0.78, 0.35, 0.78, colGold);
+    DrawCubeWires({ x: 0, y: 1.15, z: 0 }, 0.78, 0.35, 0.78, wireWhite);
+    DrawCube({ x: 0, y: 1.65, z: 0 }, 0.55, 0.4, 0.55, colLime);
+    DrawCubeWires({ x: 0, y: 1.65, z: 0 }, 0.55, 0.4, 0.55, wireWhite);
+
+    let ringY = 1.0 + lift;
+    let ring = [
+        { x: 5.0, z: 0.0, c: colPink },
+        { x: 2.5, z: 4.33, c: colCyan },
+        { x: -2.5, z: 4.33, c: colMagenta },
+        { x: -5.0, z: 0.0, c: colGold },
+        { x: -2.5, z: -4.33, c: colLime },
+        { x: 2.5, z: -4.33, c: colPink }
+    ];
+    for (let node of ring) {
+        DrawCube({ x: node.x, y: ringY, z: node.z }, 0.85, 0.85, 0.85, node.c);
+        DrawCubeWires({ x: node.x, y: ringY, z: node.z }, 0.85, 0.85, 0.85, wireWhite);
+        DrawLine3D({ x: 0, y: 2.0, z: 0 }, { x: node.x, y: ringY, z: node.z }, colDim);
+    }
+}
+
+func main() {
+    InitWindow(SCREEN_W, SCREEN_H, "Koda - Crystal Plaza");
+    defer CloseWindow();
+    SetTargetFPS(60);
+
+    BeginDrawing();
+    ClearBackground(voidColor);
+    BeginMode3D(camera3d(12, 9, 12, 0, 2, 0, 55));
+    DrawCube({ x: 0, y: 1, z: 0 }, 1, 1, 1, colCyan);
+    EndMode3D();
+    EndDrawing();
+    gcframestep(2.0);
+
+    let camX = 12.0;
+    let camY = 9.0;
+    let camZ = 12.0;
+    let frame = 0;
+    let fovy = 55.0;
+
+    loop {
+        if WindowShouldClose() {
+            break;
+        }
+        gcframestep(1.0);
+        let dt = clampDelta(GetFrameTime());
+        frame += 1;
+
+        if IsKeyDown(KEY_W) { camZ -= 14.0 * dt; }
+        if IsKeyDown(KEY_S) { camZ += 14.0 * dt; }
+        if IsKeyDown(KEY_A) { camX -= 14.0 * dt; }
+        if IsKeyDown(KEY_D) { camX += 14.0 * dt; }
+        if IsKeyPressed(KEY_SPACE) { camY += 1.5; }
+
+        let lift = 0.18 * (frame % 240 / 240.0);
+
+        BeginDrawing();
+        ClearBackground(voidColor);
+        DrawRectangle(0, 0, SCREEN_W, 72, barColor);
+        DrawRectangle(0, SCREEN_H - 56, SCREEN_W, 56, barColor);
+        BeginMode3D(camera3d(camX, camY, camZ, 0, 2, 0, fovy));
+        DrawGrid(48, 0.5);
+        drawSpireStack(lift);
+        EndMode3D();
+        DrawText("Crystal Plaza", 18, 14, 26, hudWhite);
+        DrawText("WASD fly   SPACE bob up   ESC close", 18, 46, 18, hudCyan);
+        DrawText("Neon ring + spire (native LLVM)", 18, SCREEN_H - 42, 16, hudLime);
+        EndDrawing();
+        gcframestep(1.0);
+    }
+}

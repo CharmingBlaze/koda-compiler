@@ -4,7 +4,14 @@
   "entry": "src/main.koda",
   "lint": "beginner",
   "native": {
-    "sources": ["wrappers/raylib_shim/wrapper.c"],
+    "sources": [
+      "wrappers/raylib/wrapper.c"
+    ],
     "graphics": true
+  },
+  "studio": {
+    "category": "game",
+    "blurb": "Peach's Castle grounds — collect coins, grab the star.",
+    "title": "Mario 64"
   }
 }

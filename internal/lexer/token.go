@@ -70,6 +70,7 @@ const (
 	TokenIdentifier
 	TokenString
 	TokenNumber
+	TokenColorHex // #RRGGBB / #RGB / #RRGGBBAA CSS-style color
 
 	// Keywords
 	TokenBreak
@@ -98,12 +99,17 @@ const (
 	TokenTest
 	TokenEnum
 	TokenThis
+	TokenSelf
 	TokenTrue
+	TokenUse
 	TokenWhile
+	TokenLoop // infinite loop: loop { ... }
 	TokenVar // reserved keyword; use 'let' for variable declarations
 	TokenTypeof
+	TokenKwNot // not (logical negation keyword)
+	TokenStep  // step in for x in lo..hi step n
 
-	// Template literals (` ... ${ expr } ... `)
+	// Template literals (` ... { expr } ... ` or ${ expr })
 	TokenTemplateStart
 	TokenTemplateString
 	TokenTemplateInterp
@@ -228,6 +234,8 @@ func (t TokenType) String() string {
 		return "STRING"
 	case TokenNumber:
 		return "NUMBER"
+	case TokenColorHex:
+		return "COLOR_HEX"
 	case TokenBreak:
 		return "break"
 	case TokenCase:
@@ -280,10 +288,16 @@ func (t TokenType) String() string {
 		return "enum"
 	case TokenThis:
 		return "this"
+	case TokenSelf:
+		return "self"
 	case TokenTrue:
 		return "true"
+	case TokenUse:
+		return "use"
 	case TokenWhile:
 		return "while"
+	case TokenLoop:
+		return "loop"
 	case TokenTypeof:
 		return "typeof"
 	case TokenVar:

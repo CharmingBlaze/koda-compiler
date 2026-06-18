@@ -1,5 +1,5 @@
-#include "../wrappers/raylib_shim/raylib.koda"
-#include "@game"
+use raylib;
+use koda.game;
 
 struct Ball {
     x, y,
@@ -9,6 +9,7 @@ struct Ball {
 
 func main() {
     game.open(640, 480, "{{name}}");
+    defer game.close();
     game.fps(60);
 
     let ball = Ball {
@@ -19,25 +20,28 @@ func main() {
         radius: 20.0
     };
 
-    while (game.running()) {
-        let dt = game.delta();
+    loop {
+        if not game.running() {
+            break;
+        }
+        let dt = game.delta() or 0.016;
 
-        ball.x = ball.x + ball.velx * dt;
-        ball.y = ball.y + ball.vely * dt;
+        ball.x += ball.velx * dt;
+        ball.y += ball.vely * dt;
 
-        if (ball.x < ball.radius) {
+        if ball.x < ball.radius {
             ball.x = ball.radius;
             ball.velx = -ball.velx;
         }
-        if (ball.x > 640 - ball.radius) {
+        if ball.x > 640 - ball.radius {
             ball.x = 640 - ball.radius;
             ball.velx = -ball.velx;
         }
-        if (ball.y < ball.radius) {
+        if ball.y < ball.radius {
             ball.y = ball.radius;
             ball.vely = -ball.vely;
         }
-        if (ball.y > 480 - ball.radius) {
+        if ball.y > 480 - ball.radius {
             ball.y = 480 - ball.radius;
             ball.vely = -ball.vely;
         }
@@ -46,10 +50,7 @@ func main() {
         game.clear(colors.dark);
         game.rect(0, 480 - 40, 640, 40, colors.green);
         game.circle(ball.x, ball.y, ball.radius, colors.white);
-        game.text("{{name}} — bouncing ball", 12, 12, 20, colors.white);
+        game.text("{{name}} - bouncing ball", 12, 12, 20, colors.white);
         game.end();
-        game.setGcBudget(0.5);
     }
-
-    game.close();
 }

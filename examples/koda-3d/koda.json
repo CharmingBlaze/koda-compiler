@@ -1,0 +1,15 @@
+{
+  "name": "koda-3d",
+  "version": "0.1.0",
+  "entry": "src/main.koda",
+  "lint": "beginner",
+  "native": {
+    "graphics": true,
+    "sources": ["wrappers/raylib/wrapper.c"]
+  },
+  "studio": {
+    "category": "graphics",
+    "title": "Koda 3D",
+    "blurb": "Canonical raw raylib 3D intro — the language identity demo."
+  }
+}

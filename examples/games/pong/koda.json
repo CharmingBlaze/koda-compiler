@@ -4,7 +4,14 @@
   "entry": "src/main.koda",
   "lint": "beginner",
   "native": {
-    "sources": ["wrappers/raylib_shim/wrapper.c"],
+    "sources": [
+      "wrappers/raylib/wrapper.c"
+    ],
     "graphics": true
+  },
+  "studio": {
+    "category": "game",
+    "blurb": "Classic paddle game — W/S vs arrow keys.",
+    "title": "Pong"
   }
 }

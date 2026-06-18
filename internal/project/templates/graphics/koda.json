@@ -7,7 +7,7 @@
     "assets": ["assets"]
   },
   "native": {
-    "sources": ["wrappers/raylib_shim/wrapper.c"],
+    "sources": ["wrappers/raylib/wrapper.c"],
     "graphics": true
   }
 }

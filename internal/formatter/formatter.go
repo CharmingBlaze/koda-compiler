@@ -87,6 +87,13 @@ func (e *emitter) emitDeclCore(d parser.Decl) error {
 		for _, f := range n.Fields {
 			e.write("    ")
 			e.write(f.Name.Lexeme)
+			if f.TypeAnnot != "" {
+				e.write(": ")
+				e.write(f.TypeAnnot)
+			}
+			if f.Optional {
+				e.write("?")
+			}
 			if f.Default != nil {
 				e.write(" = ")
 				if err := e.emitExpr(f.Default, precLowest); err != nil {
@@ -118,6 +125,25 @@ func (e *emitter) emitDeclCore(d parser.Decl) error {
 		e.write("#include ")
 		e.write(n.Path.Lexeme)
 		e.write("\n")
+		return nil
+	case *parser.UseDecl:
+		e.write("use ")
+		e.write(n.ModulePath)
+		if len(n.Selective) > 0 {
+			e.write(" { ")
+			for i, name := range n.Selective {
+				if i > 0 {
+					e.write(", ")
+				}
+				e.write(name)
+			}
+			e.write(" }")
+		}
+		if n.Alias != "" {
+			e.write(" as ")
+			e.write(n.Alias)
+		}
+		e.write(";\n")
 		return nil
 	case *parser.LetDecl:
 		if n.Native != nil {
@@ -268,6 +294,9 @@ func (e *emitter) emitStmt(s parser.Stmt) error {
 			return err
 		}
 		e.write(") ")
+		return e.emitStmtAsChild(n.Body)
+	case *parser.LoopStmt:
+		e.write("loop ")
 		return e.emitStmtAsChild(n.Body)
 	case *parser.DoWhileStmt:
 		e.write("do ")
@@ -465,7 +494,11 @@ func (e *emitter) emitExpr(ex parser.Expr, minPrec int) error {
 		e.write(v.Name.Lexeme)
 		return nil
 	case *parser.ThisExpr:
-		e.write("this")
+		if v.Token.Lexeme != "" {
+			e.write(v.Token.Lexeme)
+		} else {
+			e.write("this")
+		}
 		return nil
 	case *parser.GroupingExpr:
 		e.write("(")
@@ -703,6 +736,8 @@ func literalText(e *parser.LiteralExpr) string {
 		if e.Token.Lexeme != "" {
 			return e.Token.Lexeme
 		}
+	case lexer.TokenColorHex:
+		return "#" + e.Token.Lexeme
 	case lexer.TokenTrue:
 		return "true"
 	case lexer.TokenFalse:

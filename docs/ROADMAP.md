@@ -2,7 +2,7 @@
 
 Prioritized engineering queue for the Koda compiler and runtime. This replaces the historical week-by-week bootstrap plan with **current** ordering based on product fit, beginner impact, and runtime risk.
 
-> **Execution model:** one pipeline — LLVM IR (`internal/codegen`) + C runtime (`runtime/src`). No bytecode VM.  
+> **Language vision & phased features:** [KODA_LANGUAGE_ROADMAP.md](KODA_LANGUAGE_ROADMAP.md) (`use`, typed structs, wrapper registry, …)  
 > **Positioning context:** [positioning.md](positioning.md) · **Status today:** [status.md](status.md) · **Detailed matrix:** [tests/MASTER_PLAN.md](../tests/MASTER_PLAN.md)
 
 ---
@@ -180,7 +180,7 @@ bash scripts/ci-native-smoke.sh              # full native matrix (CI)
 
 | Audience | Ready when |
 |----------|------------|
-| **Game-making beginners** | v0.4.0 SDK zip + `@game` + `koda doctor` OK |
+| **Game-making beginners** | v0.4.0 SDK zip + `koda.game` + `koda doctor` OK |
 | **General app beginners** | struct methods + warn-unused + docs hub |
 | **C / systems learners** | integer types + FFI via wrapgen + ASAN CI green |
 | **Contributors** | `go test` green, tests/MASTER_PLAN updated on merge |

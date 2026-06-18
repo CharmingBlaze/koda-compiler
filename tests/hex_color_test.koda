@@ -1,0 +1,15 @@
+use koda.color;
+
+test "hex color matches rgb" {
+    expect(#FF0000 == rgb(255, 0, 0));
+    expect(#101018 == rgb(16, 16, 24));
+}
+
+test "hex color shorthand" {
+    expect(#F00 == rgb(255, 0, 0));
+    expect(#F008 == rgba(255, 0, 0, 136));
+}
+
+test "hex color full alpha" {
+    expect(#FF000080 == rgba(255, 0, 0, 128));
+}

@@ -237,7 +237,13 @@ func (l *Lexer) scanToken() error {
 		l.line++
 		l.lineStart = l.current
 	case '#':
-		return l.directive()
+		if l.peekIncludeDirective() {
+			return l.directive()
+		}
+		if isHexDigit(l.peek()) {
+			return l.hexColor()
+		}
+		return fmt.Errorf("unexpected '#' at %d:%d", l.line, l.start-l.lineStart+1)
 	default:
 		if isDigit(c) {
 			return l.number()
@@ -359,6 +365,33 @@ func (l *Lexer) directive() error {
 	return nil
 }
 
+func (l *Lexer) peekIncludeDirective() bool {
+	if l.current+7 > len(l.source) {
+		return false
+	}
+	rest := string(l.source[l.current:])
+	if !strings.EqualFold(rest[:7], "include") {
+		return false
+	}
+	if len(rest) == 7 {
+		return true
+	}
+	return !isAlphaNumeric(rest[7])
+}
+
+func (l *Lexer) hexColor() error {
+	start := l.current
+	for isHexDigit(l.peek()) {
+		l.advance()
+	}
+	digits := string(l.source[start:l.current])
+	if digits == "" {
+		return fmt.Errorf("invalid hex color at %d:%d: expected digits after '#'", l.line, l.start-l.lineStart+1)
+	}
+	l.addTokenWithLexeme(TokenColorHex, digits)
+	return nil
+}
+
 func (l *Lexer) lookupKeyword(text string) TokenType {
 	switch text {
 	case "break":
@@ -393,12 +426,18 @@ func (l *Lexer) lookupKeyword(text string) TokenType {
 		return TokenIn
 	case "let":
 		return TokenLet
+	case "loop":
+		return TokenLoop
 	case "const":
 		return TokenConst
 	case "var":
 		return TokenVar
 	case "null":
 		return TokenNull
+	case "and":
+		return TokenAndAnd
+	case "or":
+		return TokenOrOr
 	case "of":
 		return TokenOf
 	case "return":
@@ -415,12 +454,20 @@ func (l *Lexer) lookupKeyword(text string) TokenType {
 		return TokenEnum
 	case "this":
 		return TokenThis
+	case "self":
+		return TokenSelf
 	case "true":
 		return TokenTrue
+	case "use":
+		return TokenUse
 	case "while":
 		return TokenWhile
 	case "typeof":
 		return TokenTypeof
+	case "not":
+		return TokenKwNot
+	case "step":
+		return TokenStep
 	default:
 		return TokenIdentifier
 	}
@@ -474,42 +521,21 @@ func (l *Lexer) scanTemplateTail() error {
 		if l.peek() == '$' && l.peekNext() == '{' {
 			l.advance()
 			l.advance()
-			exprStart := l.current
-			depth := 1
-			for depth > 0 && !l.isAtEnd() {
-				c := l.peek()
-				if c == '{' {
-					depth++
-					l.advance()
-					continue
-				}
-				if c == '}' {
-					depth--
-					l.advance()
-					continue
-				}
-				if c == '\n' {
-					l.line++
-					l.lineStart = l.current + 1
-				}
-				l.advance()
+			if err := l.appendTemplateInterpToken(); err != nil {
+				return err
 			}
-			if depth != 0 {
-				return fmt.Errorf("unterminated '${}' in template literal at %d:%d", l.line, l.current-l.lineStart+1)
+			continue
+		}
+		if l.peek() == '{' {
+			l.advance()
+			if err := l.appendTemplateInterpToken(); err != nil {
+				return err
 			}
-			body := string(l.source[exprStart : l.current-1])
-			l.tokens = append(l.tokens, Token{
-				Type:   TokenTemplateInterp,
-				Lexeme: body,
-				Line:   l.line,
-				Col:    exprStart - l.lineStart + 1,
-				File:   l.file,
-			})
 			continue
 		}
 
 		textStart := l.current
-		for l.peek() != '`' && !(l.peek() == '$' && l.peekNext() == '{') && !l.isAtEnd() {
+		for l.peek() != '`' && l.peek() != '{' && !(l.peek() == '$' && l.peekNext() == '{') && !l.isAtEnd() {
 			if l.peek() == '\\' {
 				l.advance()
 				if !l.isAtEnd() {
@@ -534,6 +560,41 @@ func (l *Lexer) scanTemplateTail() error {
 			})
 		}
 	}
+}
+
+func (l *Lexer) appendTemplateInterpToken() error {
+	exprStart := l.current
+	depth := 1
+	for depth > 0 && !l.isAtEnd() {
+		c := l.peek()
+		if c == '{' {
+			depth++
+			l.advance()
+			continue
+		}
+		if c == '}' {
+			depth--
+			l.advance()
+			continue
+		}
+		if c == '\n' {
+			l.line++
+			l.lineStart = l.current + 1
+		}
+		l.advance()
+	}
+	if depth != 0 {
+		return fmt.Errorf("unterminated '}' in template literal at %d:%d", l.line, l.current-l.lineStart+1)
+	}
+	body := string(l.source[exprStart : l.current-1])
+	l.tokens = append(l.tokens, Token{
+		Type:   TokenTemplateInterp,
+		Lexeme: body,
+		Line:   l.line,
+		Col:    exprStart - l.lineStart + 1,
+		File:   l.file,
+	})
+	return nil
 }
 
 func (l *Lexer) advance() byte {

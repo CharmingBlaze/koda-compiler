@@ -1,0 +1,32 @@
+struct Counter {
+    n;
+    func bump(self) {
+        self.n = self.n + 1;
+    }
+    func value(self) {
+        return self.n;
+    }
+};
+
+struct Box {
+    w, h;
+    func area() {
+        return self.w * self.h;
+    }
+    func scale(self, f) {
+        self.w = self.w * f;
+        self.h = self.h * f;
+    }
+};
+
+func main() {
+    let c = Counter { n: 10 };
+    c.bump();
+    assert(c.value() == 11, "explicit self param");
+
+    let b = Box { w: 3, h: 4 };
+    assert(b.area() == 12, "self keyword field access");
+    b.scale(2);
+    assert(b.area() == 48, "self param with extra arg");
+    print("PASS struct_self");
+}

@@ -1,0 +1,6 @@
+use koda.easing as ease;
+
+func main() {
+    assert(ease.easeIn(0.5) == 0.25, "easeIn via alias");
+    print("PASS use_alias_test");
+}

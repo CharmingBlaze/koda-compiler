@@ -91,6 +91,18 @@ func (a *App) OpenWorkspace(root string) error {
 	return nil
 }
 
+// ListExamples returns runnable SDK samples for the welcome screen.
+func (a *App) ListExamples() ([]api.ExampleEntry, error) {
+	a.bootstrapSDK()
+	return api.ListExamples()
+}
+
+// ExampleGamePath returns the absolute path to examples/<id> under KODA_HOME.
+func (a *App) ExampleGamePath(name string) (string, error) {
+	a.bootstrapSDK()
+	return api.ExampleGamePath(name)
+}
+
 // GetWorkspaceRoot returns the current workspace or empty string.
 func (a *App) GetWorkspaceRoot() string {
 	a.mu.RLock()

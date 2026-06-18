@@ -53,24 +53,34 @@ func RunWithWritersOptsProgram(path, overlay string, stdout, stderr io.Writer, o
 		if overlay != "" {
 			overlays[absEntry] = overlay
 		}
-		tmp, err := tempExecutablePath()
+		out, err := projectRunExecutable(path)
 		if err != nil {
 			return err
 		}
-		defer func() { _ = os.Remove(tmp) }()
 
 		log := func(s string) {
 			_, _ = io.WriteString(stdout, s)
 		}
-		if err := nativebuild.BuildWithOverlaysOpts(path, overlays, tmp, log, opts); err != nil {
+		if err := nativebuild.BuildWithOverlaysOpts(path, overlays, out, log, opts); err != nil {
 			return err
 		}
-		cmd := exec.Command(tmp, programArgs...)
+		cmd := exec.Command(out, programArgs...)
 		cmd.Stdout = stdout
 		cmd.Stderr = stderr
 		cmd.Stdin = os.Stdin
 		return cmd.Run()
 	})
+}
+
+func projectRunExecutable(entryPath string) (string, error) {
+	if err := os.MkdirAll(".KODA_build", 0755); err != nil {
+		return "", err
+	}
+	name := "dev"
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
+	return filepath.Join(".KODA_build", name), nil
 }
 
 func tempExecutablePath() (string, error) {

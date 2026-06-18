@@ -1,10 +1,17 @@
 {
-  "name": "mario64",
+  "name": "mario64-studio",
   "version": "0.1.0",
   "entry": "src/main.koda",
   "lint": "beginner",
   "native": {
-    "sources": ["wrappers/raylib_shim/wrapper.c"],
+    "sources": [
+      "wrappers/raylib/wrapper.c"
+    ],
     "graphics": true
+  },
+  "studio": {
+    "category": "game",
+    "blurb": "Studio demo — structs, enum, match, koda.ui HUD.",
+    "title": "Mario 64 Studio"
   }
 }

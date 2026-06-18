@@ -40,6 +40,24 @@ export namespace api {
 	        this.beginner = source["beginner"];
 	    }
 	}
+	export class ExampleEntry {
+	    id: string;
+	    title: string;
+	    blurb: string;
+	    category: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ExampleEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.title = source["title"];
+	        this.blurb = source["blurb"];
+	        this.category = source["category"];
+	    }
+	}
 	export class SDKLine {
 	    ok: boolean;
 	    label: string;

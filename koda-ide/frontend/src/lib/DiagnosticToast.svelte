@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from 'svelte'
   import { fly } from 'svelte/transition'
   import { EventsOn } from '../../wailsjs/runtime/runtime.js'
+  import CopyButton from './CopyButton.svelte'
 
   let {
     activeAbsPath = '',
@@ -75,14 +76,37 @@
   aria-live="polite"
 >
   {#each queue as entry (entry.id)}
-    <button
-      type="button"
-      class="pointer-events-auto glass max-h-24 w-full overflow-hidden rounded-lg border border-[var(--color-surface0)] px-3 py-2 text-left text-xs text-[var(--color-subtext)] shadow-xl transition hover:border-[var(--color-accent)]/50"
+    <div
+      class="pointer-events-auto glass w-full overflow-hidden rounded-lg border border-[var(--color-surface0)] px-3 py-2 text-xs text-[var(--color-subtext)] shadow-xl transition hover:border-[var(--color-accent)]/50"
       in:fly={{ x: 28, duration: 200 }}
-      onclick={() => void clickEntry(entry)}
     >
       <div class="mb-0.5 font-mono text-[10px] text-[var(--color-diag-error)]">L{entry.line}:{entry.col}</div>
       <div class="line-clamp-3 text-[var(--color-text)]">{entry.message}</div>
-    </button>
+      <div class="mt-2 flex items-center justify-end gap-1.5">
+        <CopyButton text={`${entry.path}:${entry.line}:${entry.col}\n${entry.message}`} label="Copy" copiedLabel="Copied" title="Copy diagnostic" compact />
+        <button
+          type="button"
+          class="diag-jump-button"
+          onclick={() => void clickEntry(entry)}
+        >Jump</button>
+      </div>
+    </div>
   {/each}
 </div>
+
+<style>
+  .diag-jump-button {
+    border: 1px solid var(--color-surface1);
+    border-radius: 0.35rem;
+    background: var(--color-surface0);
+    color: var(--color-text);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.45rem;
+  }
+
+  .diag-jump-button:hover {
+    border-color: var(--color-accent);
+  }
+</style>

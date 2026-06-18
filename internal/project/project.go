@@ -149,8 +149,9 @@ func (c *Context) ApplyNativeEnv() error {
 	}
 	sources := c.Cfg.Native.Sources
 	if len(sources) == 0 && c.Cfg.Native.Graphics {
-		sources = []string{"wrappers/raylib_shim/wrapper.c"}
+		sources = []string{"wrappers/raylib/wrapper.c", "wrappers/raylib/fast_paths.c"}
 	}
+	sources = appendFastRaylibPaths(sources)
 	if len(sources) > 0 {
 		var abs []string
 		for _, src := range sources {
@@ -180,6 +181,27 @@ func (c *Context) ApplyNativeEnv() error {
 		}
 	}
 	return nil
+}
+
+// appendFastRaylibPaths adds wrappers/raylib/fast_paths.c when the full raylib wrapper is linked.
+func appendFastRaylibPaths(sources []string) []string {
+	hasWrapper := false
+	hasFast := false
+	for _, src := range sources {
+		slash := filepath.ToSlash(strings.TrimSpace(src))
+		if strings.HasSuffix(slash, "wrappers/raylib/wrapper.c") {
+			hasWrapper = true
+		}
+		if strings.HasSuffix(slash, "wrappers/raylib/fast_paths.c") {
+			hasFast = true
+		}
+	}
+	if !hasWrapper || hasFast {
+		return sources
+	}
+	out := append([]string(nil), sources...)
+	out = append(out, "wrappers/raylib/fast_paths.c")
+	return out
 }
 
 func sdkNativeSourceFallback(rel string) (string, bool) {

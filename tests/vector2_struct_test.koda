@@ -1,0 +1,15 @@
+#include "../stdlib/vec2.koda"
+
+func main() {
+    let z = zero();
+    assert(z.x == 0.0, "zero x");
+    assert(z.y == 0.0, "zero y");
+
+    let v = Vector2 { x: 3.0, y: 4.0 };
+    assert(dot(v, v) == 25.0, "dot typed Vector2");
+    assert(length(v) == 5.0, "length typed Vector2 through nested dot");
+
+    let legacy = vec2(1.0, 2.0);
+    assert(legacy.x == 1.0 && legacy.y == 2.0, "vec2() alias");
+    print("PASS vector2_struct");
+}

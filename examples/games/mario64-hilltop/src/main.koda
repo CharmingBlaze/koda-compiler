@@ -1,0 +1,384 @@
+// Bob-omb Hilltop — rolling meadow course with orbiting Bob-ombs.
+// Full Raylib via `use raylib`; packed #hex colors + fusion-friendly camera3d().
+use raylib;
+use koda.camera;
+use koda.input;
+use koda.ui;
+use koda.util;
+
+const sw = 1280;
+const sh = 720;
+const move_speed = 7.5;
+const gravity = -24.0;
+const jump_v = 10.0;
+const coin_goal = 8;
+const pick_r2 = 1.6;
+const NO_FLOOR = -999.0;
+
+enum GameState {
+    Playing,
+    Won,
+    GameOver
+}
+
+struct Coin {
+    x = 0.0;
+    z = 0.0;
+    on = true;
+
+    func show() {
+        if (on) {
+            DrawCube({ x: x, y: 1.4, z: z }, 0.5, 0.5, 0.1, col_red);
+            DrawCubeWires({ x: x, y: 1.4, z: z }, 0.55, 0.55, 0.12, col_gold);
+        }
+    }
+
+    func pickup(mario) {
+        if (!on) {
+            return false;
+        }
+        let dx = mario.x - x;
+        let dz = mario.z - z;
+        if (dx * dx + dz * dz < pick_r2) {
+            on = false;
+            return true;
+        }
+        return false;
+    }
+}
+
+struct Mario {
+    x = 0.0;
+    y = 1.0;
+    z = 10.0;
+    h = 1.2;
+    r = 0.42;
+    vel_y = 0.0;
+    grounded = true;
+}
+
+struct Bobomb {
+    x = 0.0;
+    z = 0.0;
+    home_x = 0.0;
+    home_z = 0.0;
+    radius = 3.5;
+    angle = 0.0;
+
+    func place(hx, hz, rad) {
+        home_x = hx;
+        home_z = hz;
+        radius = rad;
+        angle = 0.0;
+        x = hx;
+        z = hz;
+    }
+
+    func tick(dt) {
+        angle = angle + dt * 1.4;
+        x = home_x + sin(angle) * radius;
+        z = home_z + cos(angle) * radius;
+    }
+
+    func draw() {
+        DrawCube({ x: x, y: 0.65, z: z }, 0.85, 0.85, 0.85, col_black);
+        DrawCube({ x: x, y: 1.05, z: z }, 0.55, 0.35, 0.55, col_red);
+        DrawCubeWires({ x: x, y: 0.8, z: z }, 0.95, 0.95, 0.95, col_white);
+    }
+
+    func hits(mario) {
+        let dx = mario.x - x;
+        let dz = mario.z - z;
+        return dx * dx + dz * dz < 1.1 && mario.y < 2.6;
+    }
+}
+
+let player = Mario {};
+let bob1 = Bobomb { x: -7.0, z: 2.0, home_x: -7.0, home_z: 2.0, radius: 3.5, angle: 0.0 };
+let bob2 = Bobomb { x: 8.0, z: -4.0, home_x: 8.0, home_z: -4.0, radius: 4.0, angle: 0.0 };
+let cam = OrbitCamera { target: player, distance: 14.0, pitch: 0.38, yaw: -0.7 };
+
+let score = 0;
+let lives = 3;
+let state = GameState.Playing;
+let star_spin = 0.0;
+
+let hud_white = { r: 255, g: 255, b: 255, a: 255 };
+let hud_yellow = { r: 255, g: 255, b: 0, a: 255 };
+let hud_red = { r: 255, g: 0, b: 0, a: 255 };
+let hud_sky = #FFD8A8;
+
+let col_grass = #228B22;
+let col_dirt = #8B4513;
+let col_gray = #808080;
+let col_red = #FF0000;
+let col_blue = #0000FF;
+let col_cyan = #00FFFF;
+let col_gold = #FFD700;
+let col_yellow = #FFFF00;
+let col_black = #000000;
+let col_white = #FFFFFF;
+
+func cam_begin_fast() {
+    let px = player.x;
+    let py = player.y;
+    let pz = player.z;
+    let ty = py + cam.look_offset;
+    let cp = cos(cam.pitch);
+    let sp = sin(cam.pitch);
+    let sy = sin(cam.yaw);
+    let ccy = cos(cam.yaw);
+    let ex = px + cam.distance * cp * sy;
+    let ey = ty + cam.distance * sp;
+    let ez = pz + cam.distance * cp * ccy;
+    BeginMode3D(camera3d(ex, ey, ez, px, ty, pz, cam.fovy));
+}
+
+func on_rect(px, pz, cx, cz, hw, hd) {
+    return px >= cx - hw && px <= cx + hw && pz >= cz - hd && pz <= cz + hd;
+}
+
+func ground_height(px, pz) {
+    let y = NO_FLOOR;
+    if (on_rect(px, pz, 0.0, 0.0, 16.0, 16.0)) { y = 1.0; }
+    if (on_rect(px, pz, -9.0, 6.0, 4.0, 3.0) && y < 2.5) { y = 2.5; }
+    if (on_rect(px, pz, 9.0, 5.0, 3.5, 3.0) && y < 2.8) { y = 2.8; }
+    if (on_rect(px, pz, 0.0, -8.0, 5.0, 2.5) && y < 2.2) { y = 2.2; }
+    if (on_rect(px, pz, -4.0, -3.0, 2.0, 8.0) && y < 1.6) { y = 1.6; }
+    if (on_rect(px, pz, 4.0, -3.0, 2.0, 8.0) && y < 1.6) { y = 1.6; }
+    if (on_rect(px, pz, 0.0, 0.0, 4.0, 4.0) && y < 4.2) { y = 4.2; }
+    if (on_rect(px, pz, 0.0, 0.0, 2.2, 2.2) && y < 6.0) { y = 6.0; }
+    if (on_rect(px, pz, 12.0, 0.0, 2.5, 10.0) && y < 2.0) { y = 2.0; }
+    return y;
+}
+
+func clamp(v, lo, hi) {
+    if (v < lo) { return lo; }
+    if (v > hi) { return hi; }
+    return v;
+}
+
+func respawn_player() {
+    player.x = 0.0;
+    player.z = 10.0;
+    player.y = 1.0;
+    player.vel_y = 0.0;
+    player.grounded = true;
+}
+
+func reset_game(coins) {
+    respawn_player();
+    score = 0;
+    lives = 3;
+    state = GameState.Playing;
+    bob1.place(-7.0, 2.0, 3.5);
+    bob2.place(8.0, -4.0, 4.0);
+    cam.reset();
+    for (let coin of coins) {
+        coin.on = true;
+    }
+}
+
+func hurt_player() {
+    lives -= 1;
+    respawn_player();
+    if (lives <= 0) {
+        state = GameState.GameOver;
+    }
+}
+
+func move_player(dt, yaw) {
+    let move_x = 0.0;
+    let move_z = 0.0;
+    if (IsKeyDown(KEY_W)) { move_z -= 1.0; }
+    if (IsKeyDown(KEY_S)) { move_z += 1.0; }
+    if (IsKeyDown(KEY_A)) { move_x -= 1.0; }
+    if (IsKeyDown(KEY_D)) { move_x += 1.0; }
+
+    if (move_x == 0.0 && move_z == 0.0) {
+        return;
+    }
+
+    let fwd_x = sin(yaw);
+    let fwd_z = cos(yaw);
+    let right_x = cos(yaw);
+    let right_z = -sin(yaw);
+    player.x += (move_z * fwd_x + move_x * right_x) * move_speed * dt;
+    player.z += (move_z * fwd_z + move_x * right_z) * move_speed * dt;
+    player.x = clamp(player.x, -15.5, 15.5);
+    player.z = clamp(player.z, -15.5, 15.5);
+}
+
+func apply_physics(dt) {
+    if (player.grounded && IsKeyPressed(KEY_SPACE)) {
+        player.vel_y = jump_v;
+        player.grounded = false;
+    }
+    player.vel_y += gravity * dt;
+    player.y += player.vel_y * dt;
+    let floor = ground_height(player.x, player.z);
+    if (floor != NO_FLOOR && player.y <= floor) {
+        player.y = floor;
+        player.vel_y = 0.0;
+        player.grounded = true;
+    }
+}
+
+func draw_windmill(wx, wz) {
+    DrawCube({ x: wx, y: 2.0, z: wz }, 1.2, 4.0, 1.2, col_dirt);
+    DrawCube({ x: wx, y: 5.0, z: wz }, 0.25, 3.5, 0.25, col_gray);
+    DrawCube({ x: wx + 2.0, y: 5.2, z: wz }, 3.5, 0.2, 0.35, col_white);
+    DrawCube({ x: wx, y: 5.2, z: wz + 2.0 }, 0.35, 0.2, 3.5, col_white);
+}
+
+func draw_mario() {
+    let pr = player.r * 2.0;
+    let ph = player.h;
+    DrawCube({ x: player.x, y: player.y, z: player.z }, pr, ph, pr, col_red);
+    DrawCube({ x: player.x, y: player.y + 0.55, z: player.z }, player.r * 1.3, 0.35, player.r * 1.3, col_blue);
+    DrawCubeWires({ x: player.x, y: player.y, z: player.z }, pr, ph, pr, col_black);
+}
+
+func draw_world(coins, star_y) {
+    DrawCube({ x: 0.0, y: -1.2, z: 0.0 }, 34.0, 1.0, 34.0, col_grass);
+    DrawGrid(32, 1.0);
+
+    DrawCube({ x: -9.0, y: 1.8, z: 6.0 }, 8.0, 1.0, 6.0, col_dirt);
+    DrawCube({ x: 9.0, y: 2.0, z: 5.0 }, 7.0, 1.0, 6.0, col_dirt);
+    DrawCube({ x: 0.0, y: 1.4, z: -8.0 }, 10.0, 1.0, 5.0, col_dirt);
+    DrawCube({ x: -4.0, y: 0.6, z: -3.0 }, 2.0, 1.0, 16.0, col_cyan);
+    DrawCube({ x: 4.0, y: 0.6, z: -3.0 }, 2.0, 1.0, 16.0, col_cyan);
+    DrawCube({ x: 12.0, y: 1.2, z: 0.0 }, 5.0, 1.0, 20.0, col_dirt);
+
+    DrawCube({ x: 0.0, y: 3.0, z: 0.0 }, 8.0, 2.0, 8.0, col_dirt);
+    DrawCube({ x: 0.0, y: 5.5, z: 0.0 }, 4.4, 3.0, 4.4, col_dirt);
+
+    draw_windmill(-12.0, -10.0);
+
+    for (let coin of coins) {
+        coin.show();
+    }
+
+    bob1.draw();
+    bob2.draw();
+
+    if (score >= coin_goal) {
+        DrawCube({ x: 0.0, y: star_y, z: 0.0 }, 1.3, 1.3, 1.3, col_yellow);
+        DrawCubeWires({ x: 0.0, y: star_y, z: 0.0 }, 1.5, 1.5, 1.5, col_white);
+    }
+
+    draw_mario();
+}
+
+func draw_hud() {
+    DrawText("BOB-OMB HILLTOP", 20, 14, 34, hud_white);
+    DrawText("WASD move  SPACE jump  R restart", 20, 50, 18, hud_white);
+    DrawText("Collect 8 red coins, then touch the star on the hill!", 20, 74, 18, hud_white);
+    DrawText("Score:", 20, 100, 22, hud_white);
+    draw_pips(90, 98, score, coin_goal, 18, 22, col_red, col_black);
+    DrawText("Lives:", 20, 130, 22, hud_white);
+    draw_pips(90, 128, lives, 3, 18, 22, col_red, col_black);
+}
+
+func draw_overlay() {
+    match state {
+        GameState.Won {
+            DrawText("COURSE CLEAR!", 460, 330, 44, hud_yellow);
+        }
+        GameState.GameOver {
+            DrawText("GAME OVER - press R", 430, 330, 36, hud_red);
+        }
+        default {
+            if (score >= coin_goal) {
+                DrawText("Climb the hill - touch the star!", 400, 330, 28, col_gold);
+            }
+        }
+    }
+}
+
+func update_playing(dt, coins) {
+    move_player(dt, cam.yaw);
+    apply_physics(dt);
+
+    if (ground_height(player.x, player.z) == NO_FLOOR || player.y < -6.0) {
+        hurt_player();
+    }
+
+    for (let coin of coins) {
+        if (coin.pickup(player)) {
+            score += 1;
+        }
+    }
+
+    bob1.tick(dt);
+    bob2.tick(dt);
+    if (bob1.hits(player) || bob2.hits(player)) {
+        hurt_player();
+    }
+
+    if (score >= coin_goal) {
+        let dx = player.x;
+        let dz = player.z;
+        if (dx * dx + dz * dz < 3.5 && player.y > 5.5) {
+            state = GameState.Won;
+        }
+    }
+}
+
+func main() {
+    let coins = [
+        Coin { x: -9.0, z: 6.0, on: true },
+        Coin { x: 9.0, z: 5.0, on: true },
+        Coin { x: 0.0, z: -8.0, on: true },
+        Coin { x: 12.0, z: 4.0, on: true },
+        Coin { x: -6.0, z: -5.0, on: true },
+        Coin { x: 6.0, z: -6.0, on: true },
+        Coin { x: -3.0, z: 2.0, on: true },
+        Coin { x: 3.0, z: 1.0, on: true }
+    ];
+
+    InitWindow(sw, sh, "Bob-omb Hilltop - Mario 64 Demo");
+    defer CloseWindow();
+    SetTargetFPS(60);
+
+    BeginDrawing();
+    ClearBackground(hud_sky);
+    cam_begin_fast();
+    DrawCube({ x: 0.0, y: 1.0, z: 0.0 }, 1.0, 1.0, 1.0, col_white);
+    EndMode3D();
+    EndDrawing();
+    gcframestep(2.0);
+
+    loop {
+        if WindowShouldClose() {
+            break;
+        }
+        gcframestep(1.0);
+        let dt = clampDelta(GetFrameTime());
+
+        if IsKeyPressed(KEY_R) {
+            reset_game(coins);
+        }
+
+        if state == GameState.Playing {
+            update_playing(dt, coins);
+        }
+
+        star_spin += dt * 3.0;
+        cam.update();
+
+        let star_y = 7.2 + sin(star_spin) * 0.25;
+
+        BeginDrawing();
+        ClearBackground(hud_sky);
+
+        cam_begin_fast();
+        draw_world(coins, star_y);
+        EndMode3D();
+
+        draw_hud();
+        draw_overlay();
+        EndDrawing();
+        gcframestep(1.0);
+    }
+}

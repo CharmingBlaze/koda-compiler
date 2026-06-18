@@ -291,6 +291,17 @@ func TestSemaArgvMethodArityTrimOk(t *testing.T) {
 	}
 }
 
+func TestSemaArgvMethodArityClearWithArgSkipped(t *testing.T) {
+	src := `func main() {
+		let game = { clear: func(c) { } };
+		game.clear(1);
+	}`
+	program := parseForTest(t, src)
+	if err := NewAnalyzer().Analyze(program); err != nil {
+		t.Fatalf("game.clear(color) must not use argv .clear() arity: %v", err)
+	}
+}
+
 func TestSemaArgvMethodArityComputedIndexSkipped(t *testing.T) {
 	src := `func main() {
 		let m = "split";
@@ -332,9 +343,62 @@ func TestSemaStructParamFieldAccess(t *testing.T) {
 	if err := a.Analyze(program); err != nil {
 		t.Fatalf("sema: %v", err)
 	}
-	_, _, _, _, indexStruct, _, _, _ := a.ExportForCodegen()
+	_, _, _, _, indexStruct, _, _, _, _ := a.ExportForCodegen()
 	if len(indexStruct) < 2 {
 		t.Fatalf("expected struct field slots for param p.x/p.y, got %d", len(indexStruct))
+	}
+}
+
+func TestSemaAmbiguousStructParamTypes(t *testing.T) {
+	src := `struct Vector2 { x, y }
+	func dot(a, b) {
+		return a.x * b.x + a.y * b.y;
+	}
+	func main() {
+		let v = Vector2 { x: 1, y: 2 };
+		dot(v, v);
+		let plain = { x: 3, y: 4 };
+		dot(plain, plain);
+	}`
+	program := parseForTest(t, src)
+	a := NewAnalyzer()
+	if err := a.Analyze(program); err != nil {
+		t.Fatalf("sema: %v", err)
+	}
+	params := a.structParamsForFunc("dot")
+	if params != nil {
+		if _, ok := params["a"]; ok {
+			t.Fatal("expected ambiguous dot param 'a' to fall back to dynamic field access")
+		}
+	}
+	if a.funcParamPlain["dot"] == nil || !a.funcParamPlain["dot"]["a"] {
+		t.Fatal("expected plain call site to mark dot param 'a'")
+	}
+}
+
+func TestSemaNestedStructParamPropagation(t *testing.T) {
+	src := `struct Vec3 { x, y, z }
+	func dot(a, b) {
+		return a.x * b.x + a.y * b.y + a.z * b.z;
+	}
+	func lengthsq(v) {
+		return dot(v, v);
+	}
+	func length(v) {
+		return lengthsq(v);
+	}
+	func main() {
+		let v = Vec3 { x: 3, y: 0, z: 4 };
+		length(v);
+	}`
+	program := parseForTest(t, src)
+	a := NewAnalyzer()
+	if err := a.Analyze(program); err != nil {
+		t.Fatalf("sema: %v", err)
+	}
+	_, _, _, _, indexStruct, _, _, _, _ := a.ExportForCodegen()
+	if len(indexStruct) < 3 {
+		t.Fatalf("expected struct field slots inside dot() from nested call, got %d", len(indexStruct))
 	}
 }
 
@@ -353,8 +417,32 @@ func TestSemaStructParamMutateInHelper(t *testing.T) {
 	if err := a.Analyze(program); err != nil {
 		t.Fatalf("sema: %v", err)
 	}
-	_, _, _, _, indexStruct, _, _, _ := a.ExportForCodegen()
+	_, _, _, _, indexStruct, _, _, _, _ := a.ExportForCodegen()
 	if len(indexStruct) < 2 {
 		t.Fatalf("expected struct field slots inside serve(), got %d", len(indexStruct))
+	}
+}
+
+func TestSemaForwardReferences(t *testing.T) {
+	src := `
+		func early() {
+			late_helper();
+			let x = player.x;
+		}
+		struct Mario { x = 0.0; }
+		struct Coin {
+			on = true;
+			func show() {
+				if (on) { dc(0.0, 0.0, 0.0, 1.0, 1.0, 1.0, col_gold); }
+			}
+		}
+		let player = Mario { x: 0.0 };
+		let col_gold = { r: 255, g: 215, b: 0, a: 255 };
+		func late_helper() { return; }
+		func dc(a, b, c, d, e, f, g) { return; }
+	`
+	program := parseForTest(t, src)
+	if err := NewAnalyzer().Analyze(program); err != nil {
+		t.Fatalf("expected forward refs to resolve: %v", err)
 	}
 }

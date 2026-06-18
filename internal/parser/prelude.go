@@ -1,10 +1,14 @@
 package parser
 
 import (
+	_ "embed"
 	"strings"
 
 	"koda/internal/lexer"
 )
+
+//go:embed raylib_types.koda
+var raylibTypesPrelude string
 
 // InjectNativeMathPrelude prepends `let math = { … };` so members like `math.floor` resolve.
 // Koda folds identifiers to lowercase (see normalizeIdentLexeme), so the binding is `math`, not `Math`.
@@ -34,17 +38,7 @@ random: random, randomint: randomint, randomchoice: randomchoice, randomseed: ra
 pi: pi, e: e, lerp: lerp, clamp: clamp,
 hypot: hypot, fmod: fmod, degrees: degrees, radians: radians, wrap: wrap, approach: approach, smoothdamp: smoothdamp
 };`
-	l := lexer.NewLexer(src, "<builtin:math-prelude>")
-	toks, err := l.Tokenize()
-	if err != nil || len(toks) == 0 {
-		return
-	}
-	p := NewParser(toks)
-	prog, err := p.Parse()
-	if err != nil || prog == nil || len(prog.Declarations) == 0 {
-		return
-	}
-	bundle.Entry.Declarations = append(prog.Declarations, bundle.Entry.Declarations...)
+	prependParsedPrelude(bundle, "<builtin:math-prelude>", src)
 }
 
 // InjectColorPrelude prepends `let colors = { … };` with Raylib-ready named colors.
@@ -77,17 +71,82 @@ grass: rgb(34, 139, 34),
 forest: rgb(0, 100, 0),
 dirt: rgb(139, 69, 19),
 gold: rgb(255, 215, 0),
-brown: rgb(85, 68, 34)
+brown: rgb(85, 68, 34),
+rebeccaPurple: rgb(102, 51, 153)
 };`
-	l := lexer.NewLexer(src, "<builtin:color-prelude>")
+	prependParsedPrelude(bundle, "<builtin:color-prelude>", src)
+}
+
+// InjectRaylibPrelude prepends Raylib struct types and color constants when the bundle uses raylib.
+func InjectRaylibPrelude(bundle *ProgramBundle) {
+	usesRaylib := bundleUsesRaylib(bundle) || bundleImportsRaylib(bundle)
+	if !usesRaylib || bundleHasName(bundle, "camera3d") {
+		return
+	}
+	prependParsedPrelude(bundle, "<builtin:raylib-types>", raylibTypesPrelude)
+}
+
+func bundleImportsRaylib(bundle *ProgramBundle) bool {
+	if bundle == nil {
+		return false
+	}
+	return bundle.RaylibImported || bundle.RaylibAlias != ""
+}
+
+func prependParsedPrelude(bundle *ProgramBundle, fileLabel, src string) bool {
+	if bundle == nil || bundle.Entry == nil || strings.TrimSpace(src) == "" {
+		return false
+	}
+	l := lexer.NewLexer(src, fileLabel)
 	toks, err := l.Tokenize()
 	if err != nil || len(toks) == 0 {
-		return
+		return false
 	}
 	p := NewParser(toks)
 	prog, err := p.Parse()
 	if err != nil || prog == nil || len(prog.Declarations) == 0 {
-		return
+		return false
 	}
 	bundle.Entry.Declarations = append(prog.Declarations, bundle.Entry.Declarations...)
+	return true
+}
+
+func bundleHasName(bundle *ProgramBundle, name string) bool {
+	if bundle == nil || bundle.Entry == nil {
+		return false
+	}
+	for _, d := range bundle.Entry.Declarations {
+		switch x := d.(type) {
+		case *LetDecl:
+			if strings.EqualFold(x.Name.Lexeme, name) {
+				return true
+			}
+		case *StructDecl:
+			if strings.EqualFold(x.Name.Lexeme, name) {
+				return true
+			}
+		case *FuncDecl:
+			if strings.EqualFold(x.Name.Lexeme, name) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func bundleUsesRaylib(bundle *ProgramBundle) bool {
+	if bundle == nil || bundle.Entry == nil {
+		return false
+	}
+	for _, d := range bundle.Entry.Declarations {
+		let, ok := d.(*LetDecl)
+		if !ok {
+			continue
+		}
+		switch strings.ToLower(let.Name.Lexeme) {
+		case "initwindow", "beginmode3d", "drawcube", "clearbackground":
+			return true
+		}
+	}
+	return false
 }
