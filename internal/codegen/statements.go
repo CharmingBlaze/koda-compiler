@@ -9,6 +9,7 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
+	"koda/internal/lexer"
 	"koda/internal/parser"
 )
 
@@ -26,6 +27,8 @@ func (g *Generator) emitStmt(stmt parser.Stmt) error {
 		return g.emitIfStmt(s)
 	case *parser.WhileStmt:
 		return g.emitWhileStmt(s)
+	case *parser.LoopStmt:
+		return g.emitLoopStmt(s)
 	case *parser.DoWhileStmt:
 		return g.emitDoWhileStmt(s)
 	case *parser.ForOfStmt:
@@ -202,6 +205,17 @@ func (g *Generator) emitWhileStmt(s *parser.WhileStmt) error {
 	return nil
 }
 
+// emitLoopStmt emits LLVM IR for `loop { ... }` (while true).
+func (g *Generator) emitLoopStmt(s *parser.LoopStmt) error {
+	return g.emitWhileStmt(&parser.WhileStmt{
+		Condition: &parser.LiteralExpr{
+			Token: lexer.Token{Type: lexer.TokenTrue, Lexeme: "true", Line: s.Token.Line, Col: s.Token.Col},
+			Value: true,
+		},
+		Body: s.Body,
+	})
+}
+
 // emitDoWhileStmt emits LLVM IR for do-while loops.
 func (g *Generator) emitDoWhileStmt(s *parser.DoWhileStmt) error {
 	g.tempN++
@@ -247,7 +261,10 @@ func (g *Generator) emitForOfStmt(s *parser.ForOfStmt) error {
 	if s.ValueVar == nil {
 		if r, ok := s.Iterable.(*parser.RangeExpr); ok {
 			if from, to, ok := rangeConstBounds(r); ok {
-				return g.emitForOfConstRange(s, from, to)
+				step, stepOk := rangeStepLiteral(r)
+				if stepOk {
+					return g.emitForOfConstRange(s, from, to, step)
+				}
 			}
 			return g.emitForOfDynamicRange(s, r)
 		}
@@ -353,7 +370,31 @@ func rangeConstBounds(r *parser.RangeExpr) (int64, int64, bool) {
 	return from, to, true
 }
 
-func (g *Generator) emitForOfConstRange(s *parser.ForOfStmt, from int64, to int64) error {
+func rangeStepLiteral(r *parser.RangeExpr) (int64, bool) {
+	if r.Step == nil {
+		return 1, true
+	}
+	lit, ok := r.Step.(*parser.LiteralExpr)
+	if !ok {
+		return 0, false
+	}
+	switch v := lit.Value.(type) {
+	case int:
+		if v <= 0 {
+			return 0, false
+		}
+		return int64(v), true
+	case float64:
+		if v != float64(int64(v)) || v <= 0 {
+			return 0, false
+		}
+		return int64(v), true
+	default:
+		return 0, false
+	}
+}
+
+func (g *Generator) emitForOfConstRange(s *parser.ForOfStmt, from int64, to int64, step int64) error {
 	idxSlot := g.entryAlloca(types.I64)
 	valSlot := g.entryAlloca(types.I64)
 	g.locals[s.VarName.Lexeme] = valSlot
@@ -384,7 +425,7 @@ func (g *Generator) emitForOfConstRange(s *parser.ForOfStmt, from int64, to int6
 	g.block.NewBr(incBlock)
 
 	g.block = incBlock
-	next := g.block.NewAdd(g.block.NewLoad(types.I64, idxSlot), constant.NewInt(types.I64, 1))
+	next := g.block.NewAdd(g.block.NewLoad(types.I64, idxSlot), constant.NewInt(types.I64, step))
 	g.block.NewStore(next, idxSlot)
 	g.block.NewBr(condBlock)
 
@@ -412,8 +453,20 @@ func (g *Generator) emitForOfDynamicRange(s *parser.ForOfStmt, r *parser.RangeEx
 
 	fromSlot := g.entryAlloca(types.I64)
 	toSlot := g.entryAlloca(types.I64)
+	stepSlot := g.entryAlloca(types.I64)
 	g.block.NewStore(fromInt, fromSlot)
 	g.block.NewStore(toInt, toSlot)
+	if r.Step == nil {
+		g.block.NewStore(constant.NewInt(types.I64, 1), stepSlot)
+	} else {
+		stepVal, err := g.emitExpr(r.Step)
+		if err != nil {
+			return err
+		}
+		stepBoxed := g.emitAsKodaI64(stepVal)
+		stepInt := g.block.NewFPToSI(g.block.NewCall(g.runtimeUnboxNumber, stepBoxed), types.I64)
+		g.block.NewStore(stepInt, stepSlot)
+	}
 
 	idxSlot := g.entryAlloca(types.I64)
 	valSlot := g.entryAlloca(types.I64)
@@ -447,7 +500,8 @@ func (g *Generator) emitForOfDynamicRange(s *parser.ForOfStmt, r *parser.RangeEx
 	g.block.NewBr(incBlock)
 
 	g.block = incBlock
-	next := g.block.NewAdd(g.block.NewLoad(types.I64, idxSlot), constant.NewInt(types.I64, 1))
+	stepV := g.block.NewLoad(types.I64, stepSlot)
+	next := g.block.NewAdd(g.block.NewLoad(types.I64, idxSlot), stepV)
 	g.block.NewStore(next, idxSlot)
 	g.block.NewBr(condBlock)
 

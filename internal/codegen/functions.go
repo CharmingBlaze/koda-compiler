@@ -13,8 +13,51 @@ import (
 	"koda/internal/sema"
 )
 
+func (g *Generator) bindFunctionParam(key sema.ParamCellKey, paramName string, paramBoxed value.Value) {
+	if annot, typed := g.ctx.TypedParams[key]; typed && isFloatTypeAnnot(annot) {
+		slot := g.entryAlloca(types.Double)
+		g.storeFloatLocal(slot, paramBoxed)
+		g.locals[paramName] = slot
+		g.localIsCell[paramName] = false
+		return
+	}
+	if g.ctx.ParamNumericKinds != nil && g.ctx.ParamNumericKinds[key] == sema.KindFloat && !g.ctx.ParamIsCell[key] {
+		slot := g.entryAlloca(types.Double)
+		g.storeFloatLocal(slot, paramBoxed)
+		g.locals[paramName] = slot
+		g.localIsCell[paramName] = false
+		return
+	}
+	if annot, typed := g.ctx.TypedParams[key]; typed && !isFloatTypeAnnot(annot) {
+		slot := g.entryAlloca(llvmIntTypeForAnnot(annot))
+		unboxed := g.block.NewCall(g.runtimeUnboxNumber, paramBoxed)
+		asInt := g.block.NewFPToSI(unboxed, types.I64)
+		g.storeIntLocal(slot, annot, asInt)
+		g.locals[paramName] = slot
+		g.localIsCell[paramName] = false
+		return
+	}
+	if g.ctx.ParamIsCell[key] {
+		cell := g.block.NewCall(g.runtimeAllocCell)
+		g.block.NewCall(g.runtimeCellWrite, cell, paramBoxed)
+		g.locals[paramName] = cell
+		g.localIsCell[paramName] = true
+		return
+	}
+	slot := g.entryAlloca(types.I64)
+	g.block.NewStore(paramBoxed, slot)
+	g.locals[paramName] = slot
+	g.localIsCell[paramName] = false
+}
+
 // emitFuncDecl emits LLVM IR for function declarations.
 func (g *Generator) emitFuncDecl(d *parser.FuncDecl) error {
+	return g.emitFuncDeclLLVM(d, "")
+}
+
+// emitFuncDeclLLVM emits a function declaration. When llvmName is non-empty it is used as the
+// LLVM symbol instead of d.Name (struct methods need stable AST pointers for sema keys).
+func (g *Generator) emitFuncDeclLLVM(d *parser.FuncDecl, llvmName string) error {
 	name := d.Name.Lexeme
 
 	// Handle native function declarations from // koda:extern (legacy extern directive)
@@ -26,21 +69,45 @@ func (g *Generator) emitFuncDecl(d *parser.FuncDecl) error {
 		return nil
 	}
 
-	llvmName := name
-	if g.moduleEmitPath != "" && !strings.EqualFold(name, "main") {
-		llvmName = moduleFuncLLVMName(g.moduleEmitPath, name)
-	} else if strings.EqualFold(name, "main") {
-		llvmName = "koda_user_main"
+	if llvmName == "" {
+		llvmName = name
+		if g.moduleEmitPath != "" && !strings.EqualFold(name, "main") {
+			llvmName = moduleFuncLLVMName(g.moduleEmitPath, name)
+		} else if strings.EqualFold(name, "main") {
+			llvmName = "koda_user_main"
+		}
 	}
 
 	// Create function parameters, always starting with 'this'
+	skipSelf := structMethodSkipsSelfParam(g, d)
 	params := []*ir.Param{ir.NewParam("this", types.I64)}
-	for _, param := range d.Params {
+	for i, param := range d.Params {
+		if skipSelf && i == 0 {
+			continue
+		}
 		params = append(params, ir.NewParam(param.Name, types.I64))
 	}
 
-	fn := g.mod.NewFunc(llvmName, types.I64, params...)
-	g.funcs[name] = fn
+	var fn *ir.Func
+	if existing, ok := g.funcs[llvmName]; ok && g.funcStubs[llvmName] {
+		if len(existing.Blocks) > 0 {
+			return nil
+		}
+		fn = existing
+	} else if existing, ok := g.funcs[name]; ok && g.funcStubs[name] {
+		if len(existing.Blocks) > 0 {
+			return nil
+		}
+		fn = existing
+	} else {
+		fn = g.mod.NewFunc(llvmName, types.I64, params...)
+	}
+	g.funcs[llvmName] = fn
+	if strings.EqualFold(name, "main") {
+		g.funcs[name] = fn
+	} else if llvmName == name || llvmName == moduleFuncLLVMName(g.moduleEmitPath, name) {
+		g.funcs[name] = fn
+	}
 
 	prevFn := g.currentFn
 	prevBlock := g.block
@@ -51,6 +118,13 @@ func (g *Generator) emitFuncDecl(d *parser.FuncDecl) error {
 	prevShadowFrameArrTy := g.shadowFrameArrTy
 	prevShadowPushed := g.shadowPushed
 	prevShadowTempNext := g.shadowTempNext
+
+	prevEmitFunc := g.currentEmitFuncName
+	prevEmitFuncDecl := g.currentEmitFuncDecl
+	prevEmitFuncExpr := g.currentEmitFuncExpr
+	g.currentEmitFuncName = name
+	g.currentEmitFuncDecl = d
+	g.currentEmitFuncExpr = nil
 
 	g.currentFn = fn
 	entry := fn.NewBlock("entry")
@@ -73,26 +147,28 @@ func (g *Generator) emitFuncDecl(d *parser.FuncDecl) error {
 	g.locals["this"] = thisSlot
 	g.localIsCell["this"] = false
 	g.block.NewStore(fn.Params[0], thisSlot)
+	if skipSelf {
+		g.locals["self"] = thisSlot
+		g.localIsCell["self"] = false
+	}
 
+	llvmParam := 1
 	for i, param := range d.Params {
-		key := sema.NewParamCellKey(d, i)
-		if g.ctx.ParamIsCell[key] {
-			cell := g.block.NewCall(g.runtimeAllocCell)
-			g.block.NewCall(g.runtimeCellWrite, cell, g.emitAsKodaI64(fn.Params[i+1]))
-			g.locals[param.Name] = cell
-			g.localIsCell[param.Name] = true
-		} else {
-			slot := g.entryAlloca(types.I64)
-			g.block.NewStore(fn.Params[i+1], slot)
-			g.locals[param.Name] = slot
-			g.localIsCell[param.Name] = false
+		if skipSelf && i == 0 {
+			continue
 		}
+		key := sema.NewParamCellKey(d, i)
+		g.bindFunctionParam(key, param.Name, g.emitAsKodaI64(fn.Params[llvmParam]))
+		llvmParam++
 	}
 
 	g.shadowLayout = g.ctx.ShadowFuncDecl[d]
-	paramNames := make([]string, len(d.Params))
-	for i := range d.Params {
-		paramNames[i] = d.Params[i].Name
+	paramNames := make([]string, 0, len(d.Params))
+	for i, p := range d.Params {
+		if skipSelf && i == 0 {
+			continue
+		}
+		paramNames = append(paramNames, p.Name)
 	}
 	g.beginShadowFrame(g.shadowLayout, thisSlot, paramNames)
 	g.emitCallTracePush(llvmName, g.sourcePath, d.Name.Line)
@@ -118,6 +194,9 @@ func (g *Generator) emitFuncDecl(d *parser.FuncDecl) error {
 	g.shadowFrameArrTy = prevShadowFrameArrTy
 	g.shadowPushed = prevShadowPushed
 	g.shadowTempNext = prevShadowTempNext
+	g.currentEmitFuncName = prevEmitFunc
+	g.currentEmitFuncDecl = prevEmitFuncDecl
+	g.currentEmitFuncExpr = prevEmitFuncExpr
 	g.currentFn = prevFn
 	g.block = prevBlock
 	g.locals = prevLocals
@@ -145,7 +224,6 @@ func (g *Generator) emitFuncExpr(e *parser.FuncExpr) (value.Value, error) {
 	fn := g.mod.NewFunc(name, types.I64, params...)
 	g.funcs[name] = fn
 
-	// Save current function state
 	prevFn := g.currentFn
 	prevBlock := g.block
 	prevLocals := g.locals
@@ -155,8 +233,14 @@ func (g *Generator) emitFuncExpr(e *parser.FuncExpr) (value.Value, error) {
 	prevShadowFrameArrTy := g.shadowFrameArrTy
 	prevShadowPushed := g.shadowPushed
 	prevShadowTempNext := g.shadowTempNext
+	prevEmitFunc := g.currentEmitFuncName
+	prevEmitFuncDecl := g.currentEmitFuncDecl
+	prevEmitFuncExpr := g.currentEmitFuncExpr
 
 	g.currentFn = fn
+	g.currentEmitFuncName = name
+	g.currentEmitFuncDecl = nil
+	g.currentEmitFuncExpr = e
 	entry := fn.NewBlock("entry")
 	g.block = entry
 	g.locals = make(map[string]value.Value)
@@ -177,17 +261,7 @@ func (g *Generator) emitFuncExpr(e *parser.FuncExpr) (value.Value, error) {
 
 	for i, param := range e.Params {
 		key := sema.NewParamCellKey(e, i)
-		if g.ctx.ParamIsCell[key] {
-			cell := g.block.NewCall(g.runtimeAllocCell)
-			g.block.NewCall(g.runtimeCellWrite, cell, g.emitAsKodaI64(fn.Params[paramOffset+i]))
-			g.locals[param.Name] = cell
-			g.localIsCell[param.Name] = true
-		} else {
-			slot := g.entryAlloca(types.I64)
-			g.block.NewStore(fn.Params[paramOffset+i], slot)
-			g.locals[param.Name] = slot
-			g.localIsCell[param.Name] = false
-		}
+		g.bindFunctionParam(key, param.Name, g.emitAsKodaI64(fn.Params[paramOffset+i]))
 	}
 
 	layout := g.ctx.ShadowFuncExpr[e]
@@ -236,6 +310,9 @@ func (g *Generator) emitFuncExpr(e *parser.FuncExpr) (value.Value, error) {
 	g.block = prevBlock
 	g.locals = prevLocals
 	g.localIsCell = prevLocalIsCell
+	g.currentEmitFuncName = prevEmitFunc
+	g.currentEmitFuncDecl = prevEmitFuncDecl
+	g.currentEmitFuncExpr = prevEmitFuncExpr
 
 	nFV := len(freeVars)
 	if nFV == 0 {

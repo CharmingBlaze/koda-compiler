@@ -18,6 +18,9 @@ func (g *Generator) cStringPtr(s string) value.Value {
 }
 
 func (g *Generator) emitCallTracePush(fnName, fileName string, line int) {
+	if g.ctx == nil || !g.ctx.EmitDebug {
+		return
+	}
 	if g.runtimePushCall == nil || g.block == nil {
 		return
 	}
@@ -27,6 +30,9 @@ func (g *Generator) emitCallTracePush(fnName, fileName string, line int) {
 }
 
 func (g *Generator) emitCallTracePop() {
+	if g.ctx == nil || !g.ctx.EmitDebug {
+		return
+	}
 	if g.runtimePopCall == nil || g.block == nil {
 		return
 	}

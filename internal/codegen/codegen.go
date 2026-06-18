@@ -63,7 +63,12 @@ type Generator struct {
 	block                   *ir.Block
 	ctx                     *sema.NativeEmitContext
 	currentStructMethodType string // struct type while emitting a struct method body
+	currentEmitFuncName     string // Koda function name while emitting a function body
+	currentEmitFuncDecl     *parser.FuncDecl
+	currentEmitFuncExpr     *parser.FuncExpr
 	funcs                   map[string]*ir.Func    // Function name → LLVM function
+	funcStubs               map[string]bool        // Names pre-declared for struct-method forward refs
+	fastNativeFuncs         map[string]*ir.Func    // Lazily declared fusion fast-path natives
 	locals                  map[string]value.Value // Variable name → stack slot
 	globals                 map[string]*ir.Global  // Global variables
 	currentFn               *ir.Func
@@ -268,6 +273,16 @@ type Generator struct {
 	importSlots    map[string]value.Value
 
 	testFuncs []testEntry
+
+	// Compile-time string literals cached in module globals (initialized once at startup).
+	stringLiteralSlots map[string]*ir.Global
+	stringLiteralData  []stringLiteralEntry
+	stringLiteralInit  *ir.Func
+}
+
+type stringLiteralEntry struct {
+	text string
+	slot *ir.Global
 }
 
 type testEntry struct {
@@ -294,6 +309,7 @@ func NewGenerator(ctx *sema.NativeEmitContext) *Generator {
 		mod:                     mod,
 		ctx:                     ctx,
 		funcs:                   make(map[string]*ir.Func),
+		funcStubs:               make(map[string]bool),
 		locals:                  make(map[string]value.Value),
 		moduleGlobals:           make(map[string]value.Value),
 		moduleGlobalIsCell:      make(map[string]bool),
@@ -569,6 +585,8 @@ func (g *Generator) Generate(bundle *parser.ProgramBundle) (*ir.Module, error) {
 	g.shadowTempNext = prevShadowTempNext
 	g.currentFn = nil
 
+	g.emitStringLiteralsInit()
+
 	// Create main function that calls the entry point
 	mainFn := g.mod.NewFunc("main", types.I32,
 		ir.NewParam("argc", types.I32),
@@ -582,6 +600,9 @@ func (g *Generator) Generate(bundle *parser.ProgramBundle) (*ir.Module, error) {
 	stackBase := g.block.NewBitCast(stackBaseSlot, types.NewPointer(types.I8))
 	g.block.NewCall(g.runtimeInitEx, stackBase)
 	g.block.NewCall(g.runtimeSetArgv, mainFn.Params[0], mainFn.Params[1])
+	if g.stringLiteralInit != nil {
+		g.block.NewCall(g.stringLiteralInit, constant.NewInt(types.I64, 0))
+	}
 
 	// Call the user's main function if it exists
 	if um := g.funcs["user_main"]; um != nil {
@@ -605,6 +626,8 @@ func (g *Generator) emitDecl(decl parser.Decl) error {
 		return g.emitLetDecl(d)
 	case *parser.IncludeDecl:
 		return g.emitIncludeDecl(d)
+	case *parser.UseDecl:
+		return nil
 	case parser.Stmt:
 		return g.emitStmt(d)
 	}
@@ -675,6 +698,25 @@ func (g *Generator) prepareBundleBindings(bundle *parser.ProgramBundle) error {
 			return err
 		}
 	}
+	structMethodDecls := g.structMethodDeclSet()
+	registerFuncDecls := func(decls []parser.Decl, modulePath string) {
+		for _, decl := range decls {
+			fd, ok := decl.(*parser.FuncDecl)
+			if !ok || fd.Native != nil || structMethodDecls[fd] {
+				continue
+			}
+			g.declareFuncStub(fd, modulePath)
+		}
+	}
+	if bundle.Entry != nil {
+		registerFuncDecls(bundle.Entry.Declarations, "")
+	}
+	for modulePath, prog := range bundle.Modules {
+		if prog == nil {
+			continue
+		}
+		registerFuncDecls(prog.Declarations, modulePath)
+	}
 	for _, prog := range bundle.Modules {
 		if prog == nil {
 			continue
@@ -684,6 +726,46 @@ func (g *Generator) prepareBundleBindings(bundle *parser.ProgramBundle) error {
 		}
 	}
 	return nil
+}
+
+func (g *Generator) structMethodDeclSet() map[*parser.FuncDecl]bool {
+	set := make(map[*parser.FuncDecl]bool)
+	if g.ctx == nil {
+		return set
+	}
+	for _, methods := range g.ctx.StructMethods {
+		for _, fd := range methods {
+			set[fd] = true
+		}
+	}
+	return set
+}
+
+func (g *Generator) declareFuncStub(d *parser.FuncDecl, modulePath string) {
+	name := d.Name.Lexeme
+	if _, exists := g.funcs[name]; exists {
+		return
+	}
+	llvmName := name
+	if modulePath != "" && !strings.EqualFold(name, "main") {
+		llvmName = moduleFuncLLVMName(modulePath, name)
+	} else if strings.EqualFold(name, "main") {
+		llvmName = "koda_user_main"
+	}
+	skipSelf := structMethodSkipsSelfParam(g, d)
+	params := []*ir.Param{ir.NewParam("this", types.I64)}
+	for i, param := range d.Params {
+		if skipSelf && i == 0 {
+			continue
+		}
+		params = append(params, ir.NewParam(param.Name, types.I64))
+	}
+	fn := g.mod.NewFunc(llvmName, types.I64, params...)
+	g.funcs[llvmName] = fn
+	g.funcs[name] = fn
+	g.funcs[strings.ToLower(name)] = fn
+	g.funcStubs[llvmName] = true
+	g.funcStubs[name] = true
 }
 
 func (g *Generator) emitLetDecl(d *parser.LetDecl) error {
@@ -759,25 +841,44 @@ func (g *Generator) emitLetDecl(d *parser.LetDecl) error {
 		if annot, ok := g.ctx.TypedLocals[d]; ok {
 			typedAnnot = annot
 			useStack = true
-			storageSlot = g.entryAlloca(llvmIntTypeForAnnot(annot))
+			if isFloatTypeAnnot(annot) {
+				storageSlot = g.entryAlloca(types.Double)
+			} else {
+				storageSlot = g.entryAlloca(llvmIntTypeForAnnot(annot))
+			}
 			g.localIsCell[name] = false
 		}
 	}
 	if typedAnnot == "" {
-		switch {
-		case g.ctx.StackDecls[d]:
-			useStack = true
-			storageSlot = g.entryAlloca(types.I64)
-			g.localIsCell[name] = false
-		case g.ctx.EscapingDecls[d]:
-			useStack = false
-			storageSlot = g.block.NewCall(g.runtimeAllocCell)
-			g.localIsCell[name] = true
-		default:
-			/* Conservative: heap cell if escape status unknown (must not keep stack slot past return). */
-			useStack = false
-			storageSlot = g.block.NewCall(g.runtimeAllocCell)
-			g.localIsCell[name] = true
+		if k, ok := g.ctx.NumericKinds[d]; ok && g.ctx.StackDecls[d] {
+			switch k {
+			case sema.KindFloat:
+				typedAnnot = "float"
+				useStack = true
+				storageSlot = g.entryAlloca(types.Double)
+				g.localIsCell[name] = false
+			case sema.KindInt:
+				useStack = true
+				storageSlot = g.entryAlloca(types.I64)
+				g.localIsCell[name] = false
+			}
+		}
+		if !useStack {
+			switch {
+			case g.ctx.StackDecls[d]:
+				useStack = true
+				storageSlot = g.entryAlloca(types.I64)
+				g.localIsCell[name] = false
+			case g.ctx.EscapingDecls[d]:
+				useStack = false
+				storageSlot = g.block.NewCall(g.runtimeAllocCell)
+				g.localIsCell[name] = true
+			default:
+				/* Conservative: heap cell if escape status unknown (must not keep stack slot past return). */
+				useStack = false
+				storageSlot = g.block.NewCall(g.runtimeAllocCell)
+				g.localIsCell[name] = true
+			}
 		}
 	}
 	g.locals[name] = storageSlot
@@ -794,7 +895,11 @@ func (g *Generator) emitLetDecl(d *parser.LetDecl) error {
 
 	if useStack {
 		if typedAnnot != "" {
-			g.storeIntLocal(storageSlot, typedAnnot, constant.NewInt(types.I64, 0))
+			if isFloatTypeAnnot(typedAnnot) {
+				g.block.NewStore(constant.NewFloat(types.Double, 0.0), storageSlot)
+			} else {
+				g.storeIntLocal(storageSlot, typedAnnot, constant.NewInt(types.I64, 0))
+			}
 		} else {
 			g.block.NewStore(constant.NewInt(types.I64, llvmNilTagged), storageSlot)
 		}
@@ -808,6 +913,20 @@ func (g *Generator) emitLetDecl(d *parser.LetDecl) error {
 			return err
 		}
 		if typedAnnot != "" {
+			if isFloatTypeAnnot(typedAnnot) {
+				if lit, ok := d.Init.(*parser.LiteralExpr); ok {
+					if fv, ok2 := lit.Value.(float64); ok2 {
+						g.block.NewStore(g.floatLiteralForInit(fv), storageSlot)
+						return nil
+					}
+					if iv, ok2 := lit.Value.(int); ok2 {
+						g.block.NewStore(g.floatLiteralForInit(float64(iv)), storageSlot)
+						return nil
+					}
+				}
+				g.storeFloatLocal(storageSlot, initVal)
+				return nil
+			}
 			if lit, ok := d.Init.(*parser.LiteralExpr); ok {
 				if iv, ok2 := literalInt64(lit); ok2 {
 					g.storeIntLocal(storageSlot, typedAnnot, g.intLiteralForAnnot(iv, typedAnnot))
@@ -912,7 +1031,7 @@ func (g *Generator) emitPrefix(e *parser.PrefixExpr) (value.Value, error) {
 			return nil, err
 		}
 		return g.block.NewCall(g.runtimeType, g.emitAsKodaI64(rv)), nil
-	case "!":
+	case "!", "not":
 		right, err := g.emitExpr(e.Right)
 		if err != nil {
 			return nil, err
@@ -1110,6 +1229,102 @@ func (g *Generator) emitIndirectI64Callee(fnVal, thisVal value.Value, args []val
 	return g.block.NewPhi(incomings...), nil
 }
 
+func (g *Generator) loadBindingI64(name string) (value.Value, bool) {
+	if slot, ok := g.locals[name]; ok {
+		if g.localIsCell != nil && g.localIsCell[name] {
+			return g.block.NewCall(g.runtimeCellRead, slot), true
+		}
+		return g.block.NewLoad(types.I64, slot), true
+	}
+	if slot, ok := g.moduleGlobals[name]; ok {
+		if g.moduleGlobalIsCell != nil && g.moduleGlobalIsCell[name] {
+			return g.block.NewCall(g.runtimeCellRead, slot), true
+		}
+		return g.block.NewLoad(types.I64, slot), true
+	}
+	if global, ok := g.globals[name]; ok {
+		return g.block.NewLoad(types.I64, global), true
+	}
+	return nil, false
+}
+
+// tryEmitStaticCall emits a direct call when the callee is a known *ir.Func (native extern or user fn).
+func (g *Generator) tryEmitStaticCall(fn *ir.Func, thisVal value.Value, args []value.Value, e *parser.CallExpr) (value.Value, bool, error) {
+	if fn == nil {
+		return nil, false, nil
+	}
+	zero := constant.NewInt(types.I64, 0)
+
+	if fn == g.runtimePrint {
+		if len(args) == 0 {
+			g.block.NewCall(g.runtimePrintNewline)
+			return zero, true, nil
+		}
+		if len(args) == 1 {
+			return g.block.NewCall(g.runtimePrint, g.emitAsKodaI64(args[0])), true, nil
+		}
+		return g.emitArgvRuntime(g.runtimePrintArgv, args), true, nil
+	}
+
+	if fn == g.runtimeWarn {
+		if len(args) == 0 {
+			return zero, true, nil
+		}
+		return g.emitArgvRuntime(g.runtimeWarn, args), true, nil
+	}
+
+	if fn == g.runtimeGcFrameStep {
+		var budget value.Value
+		if len(args) == 0 {
+			budget = constant.NewFloat(types.Double, 0)
+		} else {
+			budget = g.block.NewCall(g.runtimeUnboxNumber, g.emitAsKodaI64(args[0]))
+		}
+		g.block.NewCall(g.runtimeGcFrameStep, budget)
+		return zero, true, nil
+	}
+
+	if isNativeArgvCallee(fn) {
+		argCount := len(args)
+		zero32 := constant.NewInt(types.I32, 0)
+		var argvPtr value.Value
+		if argCount == 0 {
+			argvPtr = constant.NewNull(types.NewPointer(types.I64))
+		} else {
+			arrTy := types.NewArray(uint64(argCount), types.I64)
+			slot := g.entryAlloca(arrTy)
+			for i, arg := range args {
+				argI64 := g.emitAsKodaI64(arg)
+				elemPtr := g.block.NewGetElementPtr(arrTy, slot, zero32, constant.NewInt(types.I32, int64(i)))
+				g.block.NewStore(argI64, elemPtr)
+			}
+			argvPtr = g.block.NewGetElementPtr(arrTy, slot, zero32, zero32)
+		}
+		call := g.block.NewCall(fn, constant.NewInt(types.I32, int64(argCount)), argvPtr)
+		if g.dbg != nil && e != nil {
+			attachDbg(call, g.dbg.loc(e.Token.File, e.Token.Line))
+		}
+		if types.Equal(fn.Sig.RetType, types.Void) {
+			_ = call
+			return zero, true, nil
+		}
+		return call, true, nil
+	}
+
+	if len(fn.Params) == len(args)+1 {
+		finalArgs := []value.Value{thisVal}
+		finalArgs = append(finalArgs, args...)
+		call := g.block.NewCall(fn, finalArgs...)
+		if types.Equal(fn.Sig.RetType, types.Void) {
+			_ = call
+			return zero, true, nil
+		}
+		return call, true, nil
+	}
+
+	return nil, false, nil
+}
+
 func (g *Generator) emitCall(e *parser.CallExpr) (value.Value, error) {
 	if v, handled, err := g.tryEmitStructConstructor(e); handled {
 		return v, err
@@ -1136,11 +1351,48 @@ func (g *Generator) emitCall(e *parser.CallExpr) (value.Value, error) {
 		}
 	}
 
-	// Emit the function
+	var staticFn *ir.Func
+	var calleeName string
+	if id, ok := e.Function.(*parser.IdentifierExpr); ok {
+		calleeName = id.Name.Lexeme
+		staticFn = g.funcs[id.Name.Lexeme]
+	}
+
+	if calleeName != "" {
+		if v, handled, err := g.tryEmitFusedNativeCall(calleeName, e.Arguments); handled {
+			return v, err
+		}
+	}
+
+	var args []value.Value
+	for _, arg := range e.Arguments {
+		val, err := g.emitExpr(arg)
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, val)
+	}
+
+	if staticFn != nil && memberExpr == nil {
+		thisVal := constant.NewInt(types.I64, 0)
+		if v, handled, err := g.tryEmitStaticCall(staticFn, thisVal, args, e); handled {
+			return v, err
+		}
+	}
+
+	// Emit the function (dynamic callee or method value)
 	fnVal, err := g.emitExpr(e.Function)
 	if err != nil {
 		return nil, err
 	}
+
+	if fn, ok := fnVal.(*ir.Func); ok && memberExpr == nil {
+		thisVal := constant.NewInt(types.I64, 0)
+		if v, handled, err := g.tryEmitStaticCall(fn, thisVal, args, e); handled {
+			return v, err
+		}
+	}
+
 	fnSlot := g.entryAlloca(types.I64)
 	g.shadowStoreTemp(fnSlot)
 	g.block.NewStore(g.emitAsKodaI64(fnVal), fnSlot)
@@ -1157,73 +1409,8 @@ func (g *Generator) emitCall(e *parser.CallExpr) (value.Value, error) {
 	g.shadowStoreTemp(thisSlot)
 	g.block.NewStore(g.emitAsKodaI64(thisVal), thisSlot)
 
-	var args []value.Value
-	for _, arg := range e.Arguments {
-		val, err := g.emitExpr(arg)
-		if err != nil {
-			return nil, err
-		}
-		args = append(args, val)
-	}
 	fnLive := g.block.NewLoad(types.I64, fnSlot)
 	thisLive := g.block.NewLoad(types.I64, thisSlot)
-
-	if fn, ok := fnVal.(*ir.Func); ok && fn == g.runtimePrint {
-		zero := constant.NewInt(types.I64, 0)
-		if len(args) == 0 {
-			g.block.NewCall(g.runtimePrintNewline)
-			return zero, nil
-		}
-		if len(args) == 1 {
-			return g.block.NewCall(g.runtimePrint, g.emitAsKodaI64(args[0])), nil
-		}
-		return g.emitArgvRuntime(g.runtimePrintArgv, args), nil
-	}
-
-	if fn, ok := fnVal.(*ir.Func); ok && fn == g.runtimeWarn {
-		if len(args) == 0 {
-			return constant.NewInt(types.I64, 0), nil
-		}
-		return g.emitArgvRuntime(g.runtimeWarn, args), nil
-	}
-
-	if fn, ok := fnVal.(*ir.Func); ok && fn == g.runtimeGcFrameStep {
-		var budget value.Value
-		if len(args) == 0 {
-			budget = constant.NewFloat(types.Double, 0)
-		} else {
-			budget = g.block.NewCall(g.runtimeUnboxNumber, g.emitAsKodaI64(args[0]))
-		}
-		g.block.NewCall(g.runtimeGcFrameStep, budget)
-		return constant.NewInt(types.I64, 0), nil
-	}
-
-	if fn, ok := fnVal.(*ir.Func); ok && isNativeArgvCallee(fn) {
-		argCount := len(args)
-		zero := constant.NewInt(types.I32, 0)
-		var argvPtr value.Value
-		if argCount == 0 {
-			argvPtr = constant.NewNull(types.NewPointer(types.I64))
-		} else {
-			arrTy := types.NewArray(uint64(argCount), types.I64)
-			slot := g.entryAlloca(arrTy)
-			for i, arg := range args {
-				argI64 := g.emitAsKodaI64(arg)
-				elemPtr := g.block.NewGetElementPtr(arrTy, slot, zero, constant.NewInt(types.I32, int64(i)))
-				g.block.NewStore(argI64, elemPtr)
-			}
-			argvPtr = g.block.NewGetElementPtr(arrTy, slot, zero, zero)
-		}
-		call := g.block.NewCall(fn, constant.NewInt(types.I32, int64(argCount)), argvPtr)
-		if g.dbg != nil {
-			attachDbg(call, g.dbg.loc(e.Token.File, e.Token.Line))
-		}
-		if types.Equal(fn.Sig.RetType, types.Void) {
-			_ = call
-			return constant.NewInt(types.I64, 0), nil
-		}
-		return call, nil
-	}
 
 	if fn, ok := fnVal.(*ir.Func); ok && len(fn.Params) == len(args)+1 {
 		finalArgs := []value.Value{thisLive}

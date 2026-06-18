@@ -18,6 +18,8 @@ func llvmIntTypeForAnnot(name string) types.Type {
 		return types.I16
 	case "i32", "u32":
 		return types.I32
+	case "float", "float32", "float64":
+		return types.Double
 	default:
 		return types.I64
 	}
@@ -50,7 +52,10 @@ func (g *Generator) typedIntLocalName(name string) bool {
 	}
 	for ld, k := range g.ctx.NumericKinds {
 		if ld.Name.Lexeme == name && k == sema.KindInt {
-			if _, typed := g.ctx.TypedLocals[ld]; typed {
+			if annot, typed := g.ctx.TypedLocals[ld]; typed {
+				if isFloatTypeAnnot(annot) {
+					continue
+				}
 				return true
 			}
 		}
@@ -248,6 +253,9 @@ func (g *Generator) intLiteralForAnnot(v int64, annot string) value.Value {
 }
 
 func (g *Generator) emitAsKodaI64FromTyped(slot value.Value, annot string) value.Value {
+	if isFloatTypeAnnot(annot) {
+		return g.emitAsKodaI64FromFloatSlot(slot)
+	}
 	v := g.loadIntLocal(slot, annot)
 	return g.block.NewCall(g.runtimeBoxNumber, g.block.NewSIToFP(v, types.Double))
 }

@@ -58,7 +58,8 @@ func (g *Generator) beginShadowFrame(layout *sema.ShadowLayout, thisSlot value.V
 			continue
 		}
 		pe := g.block.NewGetElementPtr(arrTy, frame, zero, constant.NewInt(types.I32, int64(1+i)))
-		g.block.NewStore(pSlot, pe)
+		slotForFrame := g.shadowFrameSlot(pSlot, nilSlot)
+		g.block.NewStore(slotForFrame, pe)
 	}
 
 	row0 := g.block.NewGetElementPtr(arrTy, frame, zero, zero)
@@ -67,13 +68,42 @@ func (g *Generator) beginShadowFrame(layout *sema.ShadowLayout, thisSlot value.V
 	g.shadowTempNext = layout.TempBase
 }
 
+// shadowFrameSlot returns an i64* slot pointer safe for the GC shadow table.
+// Unboxed numeric locals (double*, i32*, …) are not GC roots — register nil instead.
+func (g *Generator) shadowFrameSlot(slot, nilSlot value.Value) value.Value {
+	if pt, ok := slot.Type().(*types.PointerType); ok && pt.ElemType.Equal(types.I64) {
+		return slot
+	}
+	if annot, typed := g.typedAnnotForNameFromSlot(slot); typed && isUnboxedNumericAnnot(annot) {
+		return nilSlot
+	}
+	if pt, ok := slot.Type().(*types.PointerType); ok {
+		switch pt.ElemType.(type) {
+		case *types.FloatType, *types.IntType:
+			return nilSlot
+		}
+	}
+	return slot
+}
+
+func (g *Generator) typedAnnotForNameFromSlot(slot value.Value) (string, bool) {
+	for name, local := range g.locals {
+		if local == slot {
+			return g.typedAnnotForName(name)
+		}
+	}
+	return "", false
+}
+
 func (g *Generator) shadowStoreIndex(idx int, slotPtr value.Value) {
 	if g.shadowFramePtr == nil || g.shadowFrameArrTy == nil {
 		return
 	}
 	zero := constant.NewInt(types.I32, 0)
 	ep := g.block.NewGetElementPtr(g.shadowFrameArrTy, g.shadowFramePtr, zero, constant.NewInt(types.I32, int64(idx)))
-	g.block.NewStore(slotPtr, ep)
+	nilSlot := g.entryAlloca(types.I64)
+	g.block.NewStore(constant.NewInt(types.I64, llvmNilTagged), nilSlot)
+	g.block.NewStore(g.shadowFrameSlot(slotPtr, nilSlot), ep)
 }
 
 func (g *Generator) shadowStoreLet(d *parser.LetDecl, slotPtr value.Value) {

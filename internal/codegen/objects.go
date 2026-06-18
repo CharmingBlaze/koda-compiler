@@ -19,6 +19,24 @@ func (g *Generator) emitStoreArrayIndex(obj, key, boxed value.Value) {
 	g.block.NewCall(g.runtimeArraySet, g.emitAsKodaI64(obj), idxI, g.emitAsKodaI64(boxed))
 }
 
+func (g *Generator) storeBoxedToNamedLocal(name string, slot value.Value, boxed value.Value) {
+	if annot, typed := g.typedAnnotForName(name); typed {
+		if isFloatTypeAnnot(annot) {
+			g.storeFloatLocal(slot, boxed)
+		} else {
+			unboxed := g.block.NewCall(g.runtimeUnboxNumber, boxed)
+			asInt := g.block.NewFPToSI(unboxed, types.I64)
+			g.storeIntLocal(slot, annot, asInt)
+		}
+		return
+	}
+	if g.localIsCell != nil && g.localIsCell[name] {
+		g.block.NewCall(g.runtimeCellWrite, slot, boxed)
+	} else {
+		g.block.NewStore(boxed, slot)
+	}
+}
+
 // storeBoxedToAssignTarget writes a NaN-boxed value to an assign target (identifier or index).
 func (g *Generator) storeBoxedToAssignTarget(left parser.Expr, boxed value.Value) error {
 	switch l := left.(type) {
@@ -37,11 +55,7 @@ func (g *Generator) storeBoxedToAssignTarget(left parser.Expr, boxed value.Value
 			}
 		}
 		if slot, ok := g.locals[name]; ok {
-			if g.localIsCell != nil && g.localIsCell[name] {
-				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
-			} else {
-				g.block.NewStore(boxed, slot)
-			}
+			g.storeBoxedToNamedLocal(name, slot, boxed)
 			return nil
 		}
 		if slot, ok := g.moduleGlobals[name]; ok {
@@ -60,6 +74,14 @@ func (g *Generator) storeBoxedToAssignTarget(left parser.Expr, boxed value.Value
 	case *parser.IndexExpr:
 		if g.ctx != nil {
 			if slot, ok := g.ctx.IndexExprStructSlot[l]; ok {
+				obj, err := g.emitExpr(l.Object)
+				if err != nil {
+					return err
+				}
+				g.block.NewCall(g.runtimeStructSet, g.emitAsKodaI64(obj), constant.NewInt(types.I64, int64(slot)), boxed)
+				return nil
+			}
+			if slot, ok := g.structFieldSlotForIndex(l); ok {
 				obj, err := g.emitExpr(l.Object)
 				if err != nil {
 					return err
@@ -101,11 +123,7 @@ func (g *Generator) storeNaNBoxedToAssignTarget(left parser.Expr, boxed value.Va
 			}
 		}
 		if slot, ok := g.locals[name]; ok {
-			if g.localIsCell != nil && g.localIsCell[name] {
-				g.block.NewCall(g.runtimeCellWrite, slot, boxed)
-			} else {
-				g.block.NewStore(boxed, slot)
-			}
+			g.storeBoxedToNamedLocal(name, slot, boxed)
 			return nil
 		}
 		if slot, ok := g.moduleGlobals[name]; ok {
@@ -124,6 +142,14 @@ func (g *Generator) storeNaNBoxedToAssignTarget(left parser.Expr, boxed value.Va
 	case *parser.IndexExpr:
 		if g.ctx != nil {
 			if slot, ok := g.ctx.IndexExprStructSlot[l]; ok {
+				obj, err := g.emitExpr(l.Object)
+				if err != nil {
+					return err
+				}
+				g.block.NewCall(g.runtimeStructSet, g.emitAsKodaI64(obj), constant.NewInt(types.I64, int64(slot)), boxed)
+				return nil
+			}
+			if slot, ok := g.structFieldSlotForIndex(l); ok {
 				obj, err := g.emitExpr(l.Object)
 				if err != nil {
 					return err
@@ -297,6 +323,32 @@ func (g *Generator) emitIndex(e *parser.IndexExpr) (value.Value, error) {
 			return g.block.NewCall(g.runtimeBoxNumber, constant.NewFloat(types.Double, float64(ord))), nil
 		}
 		if slot, ok := g.ctx.IndexExprStructSlot[e]; ok {
+			idx := constant.NewInt(types.I64, int64(slot))
+			if id, ok := e.Object.(*parser.IdentifierExpr); ok {
+				if objI, ok := g.loadBindingI64(id.Name.Lexeme); ok {
+					if !e.Optional {
+						return g.block.NewCall(g.runtimeStructGet, objI, idx), nil
+					}
+					nilTag := constant.NewInt(types.I64, llvmNilTagged)
+					isNil := g.block.NewICmp(enum.IPredEQ, objI, nilTag)
+					g.tempN++
+					suf := fmt.Sprintf(".stopt%d", g.tempN)
+					skip := g.currentFn.NewBlock("stnil" + suf)
+					cont := g.currentFn.NewBlock("stget" + suf)
+					merge := g.currentFn.NewBlock("stmg" + suf)
+					g.block.NewCondBr(isNil, skip, cont)
+					g.block = skip
+					skip.NewBr(merge)
+					g.block = cont
+					got := g.block.NewCall(g.runtimeStructGet, objI, idx)
+					cont.NewBr(merge)
+					g.block = merge
+					return merge.NewPhi(
+						ir.NewIncoming(nilTag, skip),
+						ir.NewIncoming(got, cont),
+					), nil
+				}
+			}
 			obj, err := g.emitExpr(e.Object)
 			if err != nil {
 				return nil, err
@@ -304,7 +356,6 @@ func (g *Generator) emitIndex(e *parser.IndexExpr) (value.Value, error) {
 			objSlot := g.entryAlloca(types.I64)
 			g.shadowStoreTemp(objSlot)
 			g.block.NewStore(g.emitAsKodaI64(obj), objSlot)
-			idx := constant.NewInt(types.I64, int64(slot))
 			if !e.Optional {
 				objLive := g.block.NewLoad(types.I64, objSlot)
 				return g.block.NewCall(g.runtimeStructGet, objLive, idx), nil
@@ -328,6 +379,13 @@ func (g *Generator) emitIndex(e *parser.IndexExpr) (value.Value, error) {
 				ir.NewIncoming(nilTag, skip),
 				ir.NewIncoming(got, cont),
 			), nil
+		}
+		if slot, ok := g.structFieldSlotForIndex(e); ok {
+			obj, err := g.emitExpr(e.Object)
+			if err != nil {
+				return nil, err
+			}
+			return g.block.NewCall(g.runtimeStructGet, g.emitAsKodaI64(obj), constant.NewInt(types.I64, int64(slot))), nil
 		}
 	}
 
@@ -400,6 +458,13 @@ func (g *Generator) emitAssign(e *parser.AssignExpr) (value.Value, error) {
 
 // emitCompoundAssign emits LLVM IR for compound assignment expressions (+=, -=, *=, /=).
 func (g *Generator) emitCompoundAssign(e *parser.AssignExpr, op string) (value.Value, error) {
+	if v, ok := g.tryEmitFloatFastCompoundAssign(e, op); ok {
+		if err := g.storeBoxedToAssignTarget(e.Left, v); err != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+
 	// Get current value
 	current, err := g.emitExpr(e.Left)
 	if err != nil {

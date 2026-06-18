@@ -73,7 +73,6 @@ func (g *Generator) registerBuiltinFuncs() {
 		{"isNumber", g.runtimeIsNumber},
 		{"isString", g.runtimeIsString},
 		{"isBool", g.runtimeIsBool},
-		{"isNull", g.runtimeIsNull},
 		{"isArray", g.runtimeIsArray},
 		{"isObject", g.runtimeIsObject},
 		{"isFunction", g.runtimeIsFunction},

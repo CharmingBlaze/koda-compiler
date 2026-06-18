@@ -5,6 +5,7 @@ import (
 	"math"
 	"strings"
 
+	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/enum"
 	"github.com/llir/llvm/ir/types"
@@ -57,11 +58,18 @@ func (g *Generator) emitIdentifier(e *parser.IdentifierExpr) (value.Value, error
 		if g.localIsCell != nil && g.localIsCell[name] {
 			return g.block.NewCall(g.runtimeCellRead, slot), nil
 		}
-		if _, annot, ok2 := g.typedLocalDecl(name); ok2 {
+		if annot, ok2 := g.typedAnnotForName(name); ok2 {
 			return g.emitAsKodaI64FromTyped(slot, annot), nil
 		}
 		return g.block.NewLoad(types.I64, slot), nil
 	}
+
+	// Native externs and user functions resolve before module import slots (avoids
+	// boxed i64 indirection for names like DrawCube that also exist as g.funcs).
+	if fn, ok := g.funcs[name]; ok {
+		return fn, nil
+	}
+
 	if slot, ok := g.moduleGlobals[name]; ok {
 		if g.moduleGlobalIsCell != nil && g.moduleGlobalIsCell[name] {
 			return g.block.NewCall(g.runtimeCellRead, slot), nil
@@ -74,31 +82,50 @@ func (g *Generator) emitIdentifier(e *parser.IdentifierExpr) (value.Value, error
 		return g.block.NewLoad(types.I64, global), nil
 	}
 
-	// Check if it's a function
-	if fn, ok := g.funcs[name]; ok {
-		return fn, nil
-	}
-
 	return nil, g.undefinedVarError(name, e.Name.File, e.Name.Line, e.Name.Col)
 }
 
-// emitStringLiteral creates a string object using the runtime.
+// emitStringLiteral returns a cached runtime string object (allocated once at startup).
 func (g *Generator) emitStringLiteral(s string) value.Value {
-	// Create a string literal as a global constant
-	arr := constant.NewCharArrayFromString(s)
-	global := g.mod.NewGlobalDef("", arr)
-	global.Immutable = true
-	global.Linkage = enum.LinkagePrivate
+	if g.stringLiteralSlots == nil {
+		g.stringLiteralSlots = make(map[string]*ir.Global)
+	}
+	slot, ok := g.stringLiteralSlots[s]
+	if !ok {
+		idx := len(g.stringLiteralData)
+		slot = g.mod.NewGlobalDef(fmt.Sprintf("koda.literal.str.%d", idx), constant.NewInt(types.I64, llvmNilTagged))
+		g.stringLiteralSlots[s] = slot
+		g.stringLiteralData = append(g.stringLiteralData, stringLiteralEntry{text: s, slot: slot})
+	}
+	return g.block.NewLoad(types.I64, slot)
+}
 
-	// Get pointer to the string data
-	zero := constant.NewInt(types.I32, 0)
-	ptr := g.block.NewGetElementPtr(arr.Type(), global, zero, zero)
-
-	// Call runtime to create string object
-	length := constant.NewInt(types.I32, int64(len(s)))
-	strObj := g.block.NewCall(g.runtimeAllocStr, length, ptr)
-
-	return strObj
+// emitStringLiteralsInit defines koda_init_string_literals, called once from main() before user code.
+func (g *Generator) emitStringLiteralsInit() {
+	if len(g.stringLiteralData) == 0 {
+		return
+	}
+	fn := g.mod.NewFunc("koda_init_string_literals", types.I64)
+	g.stringLiteralInit = fn
+	entry := fn.NewBlock("entry")
+	prevBlock := g.block
+	prevFn := g.currentFn
+	g.block = entry
+	g.currentFn = fn
+	for i, lit := range g.stringLiteralData {
+		arr := constant.NewCharArrayFromString(lit.text)
+		data := g.mod.NewGlobalDef(fmt.Sprintf("koda.literal.data.%d", i), arr)
+		data.Immutable = true
+		data.Linkage = enum.LinkagePrivate
+		zero := constant.NewInt(types.I32, 0)
+		ptr := g.block.NewGetElementPtr(arr.Type(), data, zero, zero)
+		length := constant.NewInt(types.I32, int64(len(lit.text)))
+		strObj := g.block.NewCall(g.runtimeAllocStr, length, ptr)
+		g.block.NewStore(strObj, lit.slot)
+	}
+	g.block.NewRet(constant.NewInt(types.I64, 0))
+	g.block = prevBlock
+	g.currentFn = prevFn
 }
 
 // literalInt64 returns true when e is a numeric literal exactly representable as int64 (Tier 9D fast-path helper).
@@ -203,9 +230,9 @@ func compileTimeInt64(e parser.Expr) (int64, bool) {
 // emitInfix emits LLVM IR for infix expressions.
 func (g *Generator) emitInfix(e *parser.InfixExpr) (value.Value, error) {
 	switch e.Operator {
-	case "&&":
+	case "&&", "and":
 		return g.emitLogicalAnd(e)
-	case "||":
+	case "||", "or":
 		return g.emitLogicalOr(e)
 	case "??":
 		return g.emitNullishCoalesce(e)
@@ -216,6 +243,10 @@ func (g *Generator) emitInfix(e *parser.InfixExpr) (value.Value, error) {
 		if res, ok := compileTimeInt64(e); ok {
 			return g.block.NewCall(g.runtimeBoxNumber, constant.NewFloat(types.Double, float64(res))), nil
 		}
+	}
+
+	if v, ok := g.tryEmitFloatFastInfix(e); ok {
+		return v, nil
 	}
 
 	if v, ok := g.tryEmitIntKindInfix(e); ok {

@@ -46,6 +46,9 @@ func (g *Generator) tryEmitMethodCall(member *parser.IndexExpr, recvVal value.Va
 		return v, true, err
 
 	case "join", "reverse", "push", "pop", "add", "remove_at", "clear", "flat":
+		if !g.receiverIsKnownArray(member) {
+			return nil, false, nil
+		}
 		v, err := g.emitArrayOnlyMethod(name, recvVal, call.Arguments)
 		return v, true, err
 
@@ -80,6 +83,28 @@ func (g *Generator) tryEmitMethodCall(member *parser.IndexExpr, recvVal value.Va
 	}
 
 	return nil, false, nil
+}
+
+// receiverIsKnownArray is true when sema or syntax proves the receiver is an array literal/binding.
+func (g *Generator) receiverIsKnownArray(member *parser.IndexExpr) bool {
+	switch obj := member.Object.(type) {
+	case *parser.ArrayExpr:
+		return true
+	case *parser.IdentifierExpr:
+		name := obj.Name.Lexeme
+		if g.ctx != nil {
+			if g.ctx.PlainObjectVars != nil && g.ctx.PlainObjectVars[name] {
+				return false
+			}
+			if g.ctx.VarIsArray != nil && g.ctx.VarIsArray[name] {
+				return true
+			}
+		}
+		if _, ok := g.moduleGlobals[name]; ok {
+			return false
+		}
+	}
+	return false
 }
 
 // tryEmitNativeNamespaceCall handles calls like math.lerp(...), where method dispatch

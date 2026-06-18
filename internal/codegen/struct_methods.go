@@ -13,12 +13,10 @@ func structMethodLLVMName(stName, methodName string) string {
 	return fmt.Sprintf("koda_method_%s_%s", stName, methodName)
 }
 
-func cloneFuncDeclName(fd *parser.FuncDecl, llvmName string) *parser.FuncDecl {
-	cp := *fd
-	tok := cp.Name
-	tok.Lexeme = llvmName
-	cp.Name = tok
-	return &cp
+func structMethodSkipsSelfParam(g *Generator, d *parser.FuncDecl) bool {
+	return g.currentStructMethodType != "" &&
+		len(d.Params) > 0 &&
+		strings.EqualFold(d.Params[0].Name, "self")
 }
 
 func (g *Generator) emitStructMethods() error {
@@ -28,10 +26,9 @@ func (g *Generator) emitStructMethods() error {
 	for stName, methods := range g.ctx.StructMethods {
 		for mname, fd := range methods {
 			llvmName := structMethodLLVMName(stName, mname)
-			clone := cloneFuncDeclName(fd, llvmName)
 			prev := g.currentStructMethodType
 			g.currentStructMethodType = stName
-			if err := g.emitFuncDecl(clone); err != nil {
+			if err := g.emitFuncDeclLLVM(fd, llvmName); err != nil {
 				g.currentStructMethodType = prev
 				return err
 			}
@@ -46,15 +43,68 @@ func (g *Generator) emitStructMethods() error {
 	return nil
 }
 
-func (g *Generator) structTypeForMethodReceiver(member *parser.IndexExpr) (string, bool) {
-	switch obj := member.Object.(type) {
-	case *parser.IdentifierExpr:
-		if g.ctx == nil {
-			return "", false
+func (g *Generator) structTypeNameForExpr(expr parser.Expr) string {
+	if g.ctx == nil {
+		return ""
+	}
+	id, ok := expr.(*parser.IdentifierExpr)
+	if !ok {
+		return ""
+	}
+	name := id.Name.Lexeme
+	if st, ok := g.ctx.VarStruct[name]; ok {
+		return st
+	}
+	if g.currentEmitFuncName != "" && g.ctx.FuncForOfVarStruct != nil {
+		if vars, ok := g.ctx.FuncForOfVarStruct[g.currentEmitFuncName]; ok {
+			if st, ok := vars[name]; ok {
+				return st
+			}
 		}
-		stName, ok := g.ctx.VarStruct[obj.Name.Lexeme]
-		return stName, ok
-	case *parser.ThisExpr:
+	}
+	return ""
+}
+
+func (g *Generator) structFieldSlotOf(stName, field string) (int, bool) {
+	if g.ctx == nil {
+		return 0, false
+	}
+	layout, ok := g.ctx.StructFields[stName]
+	if !ok {
+		return 0, false
+	}
+	for i, f := range layout {
+		if f == field {
+			return i, true
+		}
+	}
+	return 0, false
+}
+
+// structFieldSlotForIndex resolves a string field index on a struct-typed receiver,
+// including for-of loop variables (e.g. coin.on, p.x).
+func (g *Generator) structFieldSlotForIndex(ix *parser.IndexExpr) (int, bool) {
+	lit, ok := ix.Index.(*parser.LiteralExpr)
+	if !ok {
+		return 0, false
+	}
+	field, ok := lit.Value.(string)
+	if !ok {
+		return 0, false
+	}
+	stName := g.structTypeNameForExpr(ix.Object)
+	if stName == "" {
+		return 0, false
+	}
+	return g.structFieldSlotOf(stName, field)
+}
+
+func (g *Generator) structTypeForMethodReceiver(member *parser.IndexExpr) (string, bool) {
+	stName := g.structTypeNameForExpr(member.Object)
+	if stName != "" {
+		return stName, true
+	}
+	if _, ok := member.Object.(*parser.ThisExpr); ok {
 		if g.currentStructMethodType != "" {
 			return g.currentStructMethodType, true
 		}
